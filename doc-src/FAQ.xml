@@ -542,6 +542,19 @@
         </para>
       </answer>
     </qandaentry>
+
+    <qandaentry>
+      <question>
+        <para>My test fails with a non-standard exception being thrown.
+        How can I obtain information from it?</para>
+      </question>
+      <answer>
+        <para>Write a custom exception describer for your exception type
+        using the
+        <xref linkend="CRPCUT_DESCRIBE_EXCEPTION" xrefstyle="select:title"/>
+        macro.</para>
+      </answer>
+    </qandaentry>
   </qandaset>
 </chapter>
 <chapter id="google-mock">

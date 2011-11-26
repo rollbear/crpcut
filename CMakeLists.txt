@@ -695,6 +695,26 @@ if (WITH_HTML_DOCS)
       VERBATIM)
 
     #
+    # describe_exception
+    #
+    file(GLOB DESCRIBE_EXCEPTION "${DOC_SRC_LIB}/samples/describe_exception.cpp")
+    add_custom_target(
+      describe_exception.cpp
+      ${STRIP_SOURCES} < ${DESCRIBE_EXCEPTION} > describe_exception.cpp
+      DEPENDS stripped-src ${DESCRIBE_EXCEPTION}
+      WORKING_DIRECTORY stripped-src
+      VERBATIM)
+    add_executable(describe_exception EXCLUDE_FROM_ALL ${DESCRIBE_EXCEPTION})
+    target_link_libraries(describe_exception crpcut)
+    add_custom_target(
+      describe_exception.out
+      describe_exception | sed "s/\\(.*\\)/     \\1/g" > describe_exception.out
+      DEPENDS describe_exception sample-output
+      WORKING_DIRECTORY sample-output
+      VERBATIM)
+
+
+    #
     # verify_true_fails
     #
     file(GLOB VERIFY_TRUE_FAILS "${DOC_SRC_LIB}/samples/verify_true_fails.cpp")
@@ -1934,6 +1954,7 @@ if (WITH_HTML_DOCS)
       stripped-src/assert_false_fails.cpp sample-output/assert_false_fails.out
       stripped-src/verify_false_fails.cpp sample-output/verify_false_fails.out
       stripped-src/assert_true_fails.cpp sample-output/assert_true_fails.out
+      stripped-src/describe_exception.cpp sample-output/describe_exception.out
       stripped-src/verify_true_fails.cpp sample-output/verify_true_fails.out
       stripped-src/assert_no_throw_fails.cpp sample-output/assert_no_throw_fails.out
       stripped-src/verify_no_throw_fails.cpp sample-output/verify_no_throw_fails.out

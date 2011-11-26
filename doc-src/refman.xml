@@ -670,6 +670,52 @@
       </para>
 
   </section>
+  <section id="CRPCUT_DESCRIBE_EXCEPTION">
+    <title><function>CRPCUT_DESCRIBE_EXCEPTION(signature)</function></title>
+    <para>Describe an exception type instance with a human readable string
+    representation</para>
+    <formalpara><title>Used in:</title>
+    <para>Global scope, preferably in the translation unit containing the
+    <function>main</function>() function</para>
+    </formalpara>
+    <formalpara><title>Requirement:</title>
+    <para><parameter>signature</parameter> is a function parameter list with
+    one parameter being the type of the exception to describe</para>
+    </formalpara>
+    <formalpara><title>Requirement:</title>
+    <para>A code block follows immediately after.</para>
+    </formalpara>
+    <para>
+      The code block returns a <type>std::string</type> that describes,
+      in a human readable form, the exception object in the parameter list.
+    </para>
+    <para>
+      The macro
+      <function>CRPCUT_DESCRIBE_EXCEPTION</function>(<type>signature</type>)
+      may be invoked any number of times, even using the same signature.
+      When an unexpected exception is encountered, the describers will be
+      tried, one by one, in the order they are defined, until one matches.
+    <note>The order that exception describers from different translation units
+    are tried is undefined. It is thus a bad idea to add them in more than
+    one file.
+    </note>
+    </para>
+    <para>Example: The test program
+      <programlisting language="c++">
+<xi:include href="../stripped-src/describe_exception.cpp" parse="text"/>
+      </programlisting>
+      reports two failed tests:
+      <screen>
+
+<xi:include href="../sample-output/describe_exception.out" parse="text"/>
+      </screen>
+      The first exception type does not have a custom describer, but since it
+      inherits from <type>std::exception</type>, sime information is shown
+      anyway.
+      The second exception matches the signature used for the custom
+      describer, and thus the message looks as expected.
+    </para>
+  </section>
   <section id="CRPCUT_WRAP_FUNC">
     <title><function>CRPCUT_WRAP_FUNC(lib, func, rv, param_list, param_call)</function></title>
     <para>Define a wrapper around a global function</para>

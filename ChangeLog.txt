@@ -1,3 +1,8 @@
+         * Added possibility to register custom exception type describers;
+           function bodies that accepts an exception and returns a textual
+           representation of the content of the exception. See the macro
+           CRPCUT_DESCRIBE_EXCEPTION in the reference manual.
+
          * For performance reasons, the display of stack backtraces
            when reporting heap errors, is disabled by default, even when
            support for it is enabled in the build. The display of
