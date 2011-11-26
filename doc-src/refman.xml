@@ -2424,7 +2424,7 @@
               provided name.</para>
           </listitem>
         </varlistentry>
-        <varlistentry><term><symbol>template &lt;typename T&gt;</symbol> <type>void</type> <type>crpcut::</type><function>get_param</function>(<type>const char *</type><parameter>name</parameter>, <type>T&amp;</type> <parameter>t</parameter>)</term>
+        <varlistentry><term><symbol>template &lt;typename T&gt;</symbol> <type>void</type> <type>crpcut::</type><function>get_parameter</function>(<type>const char *</type><parameter>name</parameter>, <type>T&amp;</type> <parameter>t</parameter>)</term>
           <listitem>
             <para>Convert the raw value to type <type>T</type> by means of
               <function>operator&gt;&gt;</function>(<type>std::istream&amp;</type>, <type>T&amp;</type>). If no parameter was defined with the provided name,
@@ -2432,7 +2432,7 @@
           </listitem>
         </varlistentry>
 
-        <varlistentry><term><symbol>template &lt;typename T&gt;</symbol> <type>T</type> <type>crpcut::</type><function>get_param</function>(<type>const char *</type><parameter>name</parameter>)</term>
+        <varlistentry><term><symbol>template &lt;typename T&gt;</symbol> <type>T</type> <type>crpcut::</type><function>get_parameter</function>(<type>const char *</type><parameter>name</parameter>)</term>
           <listitem>
             <para>Convert the raw value to type <type>T</type> by means of
               <function>operator&gt;&gt;</function>(<type>std::istream&amp;</type>, <type>T&amp;</type>). If no parameter was defined with the provided name,
