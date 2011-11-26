@@ -62,6 +62,17 @@ TESTSUITE(verify)
     INFO << "after i=" << i;
   }
 
+  TEST(should_fail_verify_throw_with_unexpected_c_string)
+  {
+    VERIFY_THROW(throw "apa", std::exception);
+    INFO << "after";
+  }
+
+  TEST(should_fail_verify_throw_with_translated_invalid_argument)
+  {
+    VERIFY_THROW(throw std::invalid_argument("apa"), std::domain_error);
+    INFO << "after";
+  }
   TEST(should_succeed_verify_no_throw)
   {
     int i;
@@ -90,6 +101,18 @@ TESTSUITE(verify)
   TEST(should_fail_verify_no_throw_with_std_exception_string_apa)
   {
     VERIFY_NO_THROW(throw std::range_error("apa"));
+    INFO << "after";
+  }
+
+  TEST(should_fail_verify_no_throw_with_unexpected_c_string)
+  {
+    VERIFY_NO_THROW(throw "apa");
+    INFO << "after";
+  }
+
+  TEST(should_fail_verify_no_throw_with_translated_exception)
+  {
+    VERIFY_NO_THROW(throw std::invalid_argument("apa"));
     INFO << "after";
   }
   #endif

@@ -225,24 +225,18 @@ namespace crpcut {
     ::crpcut_run_test_case()
     {
 
-      const char *msg = 0;
-      const char *type = 0;
       try {
         crpcut_do_run_test_case();
       }
-      CATCH_BLOCK(std::exception &e,{ type = "std::exception"; msg = e.what();})
-      CATCH_BLOCK(..., { type = "..."; } )
-      if (type)
-        {
-          heap::set_limit(heap::system);
-          std::ostringstream out;
-          out << "Unexpected exception " << type;
-          if (msg)
-            {
-              out << "\n  what()=" << msg;
-            }
-          comm::report(comm::exit_fail, out);
-        }
+      catch (...)
+      {
+        heap::set_limit(heap::system);
+        std::ostringstream out;
+        out << "Unexpectedly caught "
+            << policies::crpcut_exception_translator::try_all();
+
+        comm::report(comm::exit_fail, out);
+      }
     }
 
     crpcut_test_case_registrator
@@ -560,25 +554,14 @@ namespace crpcut {
       try {
         p->run();
       }
-      catch (std::exception &e)
-        {
-          heap::set_limit(heap::system);
-          const size_t len = wrapped::strlen(e.what());
-          static const char head[] =
-            "Unexpectedly caught std::exception\n"
-            " what()=";
-          static const size_t head_size = sizeof(head) - 1;
-          char *msg = static_cast<char *>(alloca(head_size + len + 1));
-          lib::strcpy(lib::strcpy(msg, head), e.what());
-          comm::report(comm::exit_fail, msg, head_size + len);
-        }
       catch (...)
         {
-          static const char msg[] = "Unexpectedly caught ...";
-          comm::report(comm::exit_fail, msg);
+          heap::set_limit(heap::system);
+          std::ostringstream out;
+          out << "Unexpectedly caught "
+              << policies::crpcut_exception_translator::try_all();
+          comm::report(comm::exit_fail, out);
         }
-
-
       if (!test_case_factory::tests_as_child_procs())
         {
           crpcut_register_success();
@@ -816,11 +799,13 @@ namespace crpcut {
         return;
       }
       catch (...) {
-        comm::report(comm::exit_fail,
-                     "Unexpectedly caught ...");
+          heap::set_limit(heap::system);
+          std::ostringstream out;
+          out << "Unexpectedly caught "
+              << policies::crpcut_exception_translator::try_all();
+          comm::report(comm::exit_fail, out);
       }
-      comm::report(comm::exit_fail,
-                   "Unexpectedly did not throw");
+      comm::report(comm::exit_fail, "Unexpectedly did not throw");
     }
 
     void

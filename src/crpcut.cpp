@@ -37,6 +37,17 @@ extern "C" {
 #include "posix_encapsulation.hpp"
 namespace crpcut {
 
+  CRPCUT_DEFINE_EXCEPTION_TRANSLATOR_CLASS(std_exception_translator,
+                                           std::exception &e)
+  {
+    return std::string("std::exception\n\twhat()=") + e.what();
+  }
+
+  CRPCUT_DEFINE_EXCEPTION_TRANSLATOR_CLASS(c_string_translator,
+                                           const char *p)
+  {
+    return "\"" + std::string(p) + "\"";
+  }
 
   test_case_factory::test_case_factory()
     : pending_children(0),
@@ -941,6 +952,7 @@ namespace crpcut {
     char         process_limit_set = 0;
     const char  *identity          = 0;
     const char **p                 = argv+1;
+
     while (const char *param = *p)
       {
         if (param[0] != '-') break;
@@ -1296,7 +1308,12 @@ namespace crpcut {
           i = i->crpcut_get_next();
         }
     }
+
+    std_exception_translator std_except_obj;
+    c_string_translator c_string_obj;
+
     output::formatter &fmt = output_formatter(xml, identity, argc, argv);
+
     try {
       if (tests_as_child_procs())
         {

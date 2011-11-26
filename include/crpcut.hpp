@@ -874,6 +874,26 @@ namespace crpcut {
   typedef enum { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) } test_phase;
 
   namespace policies {
+
+    class crpcut_exception_translator
+    {
+    public:
+      static std::string try_all();
+    protected:
+      crpcut_exception_translator();
+      ~crpcut_exception_translator();
+    private:
+      crpcut_exception_translator(int);
+      static crpcut_exception_translator& root_object();
+      crpcut_exception_translator(const crpcut_exception_translator&);
+      crpcut_exception_translator& operator=(const crpcut_exception_translator&);
+      virtual std::string crpcut_translate() const;
+
+      crpcut_exception_translator *next;
+      crpcut_exception_translator *prev;
+    };
+
+
     namespace deaths {
       class crpcut_none;
     }
@@ -1753,25 +1773,16 @@ namespace crpcut {
       catch (exc&) {
         return;
       }
-      catch (std::exception &e)
-        {
-          typedef  std::ostringstream oss;
-          oss os;
-          os << "Unexpectedly caught std::exception\n"
-             << "what() returns: " << e.what();
-          std::string s(os.str());
-          size_t length = s.length();
-          char *buff = static_cast<char*>(alloca(length));
-          s.copy(buff, length);
-          std::string().swap(s);
-          os.~oss();
-          new (&os) oss;
-          comm::report(comm::exit_fail,
-                       buff, length);
-        }
-      catch (...) {
+      catch (...)
+      {
+        std::string s = "Unexpectedly caught "
+          + policies::crpcut_exception_translator::try_all();
+        size_t length = s.length();
+        char *buff = static_cast<char*>(alloca(length));
+        s.copy(buff, length);
+        std::string().swap(s);
         comm::report(comm::exit_fail,
-                     "Unexpectedly caught ...");
+                     buff, length);
       }
       comm::report(comm::exit_fail,
                    "Unexpectedly did not throw");
@@ -3955,6 +3966,38 @@ namespace crpcut {
 #ifndef CRPCUT_NO_EXCEPTION_SUPPORT
 #define EXPECT_EXCEPTION(type) \
   protected virtual crpcut::policies::exception_specifier<void (type)>
+#define CRPCUT_DECLARE_EXCEPTION_TRANSLATOR(class_name, t)              \
+  class class_name : public crpcut::policies::crpcut_exception_translator \
+  {                                                                     \
+    std::string crpcut_translate() const                                \
+    {                                                                   \
+      return crpcut_catcher(crpcut_do_translate);                       \
+    }                                                                   \
+    static std::string crpcut_do_translate(t);                          \
+    template <typename U>                                               \
+      static std::string crpcut_catcher(std::string (U))                \
+    {                                                                   \
+      try {                                                             \
+        throw;                                                          \
+      }                                                                 \
+      catch(U u)                                                        \
+        {                                                               \
+          return crpcut_do_translate(u);                                \
+        }                                                               \
+    }                                                                   \
+  }
+
+#define CRPCUT_DESCRIBE_EXCEPTION(t)                                    \
+  CRPCUT_DECLARE_EXCEPTION_TRANSLATOR(CRPCUT_LOCAL_NAME(specific_exception_translator), t); \
+  namespace {                                                           \
+    CRPCUT_LOCAL_NAME(specific_exception_translator) CRPCUT_LOCAL_NAME(exception_translator_obj); \
+  }                                                                     \
+  std::string CRPCUT_LOCAL_NAME(specific_exception_translator)::crpcut_do_translate(t)
+
+#define CRPCUT_DEFINE_EXCEPTION_TRANSLATOR_CLASS(class_name, t) \
+  CRPCUT_DECLARE_EXCEPTION_TRANSLATOR(class_name, t);           \
+  std::string class_name::crpcut_do_translate(t)
+
 #endif
 
 #define DEPENDS_ON(...) \
@@ -4006,17 +4049,14 @@ namespace crpcut {
         (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__), #name)               \
         .name(lh, #lh, rh, #rh);                                        \
     }                                                                   \
-    CATCH_BLOCK(std::exception &CRPCUT_LOCAL_NAME(e), {                 \
+    CATCH_BLOCK(..., {                                                  \
+        std::string CRPCUT_LOCAL_NAME(s)                                \
+          = crpcut::policies::crpcut_exception_translator::try_all();   \
         CRPCUT_CHECK_REPORT_HEAD(action) <<                             \
           "_" #name "(" #lh ", " #rh ")\n"                              \
-          "  caught std::exception\n"                                   \
-          "  what()=" << CRPCUT_LOCAL_NAME(e).what();                   \
-      })                                                                \
-      CATCH_BLOCK(..., {                                                \
-          CRPCUT_CHECK_REPORT_HEAD(action) <<                           \
-            "_" #name "(" #lh ", " #rh ")\n"                            \
-            "  caught ...";                                             \
-        })                                                              \
+          "  caught "                                                 \
+                                         << CRPCUT_LOCAL_NAME(s);       \
+    })                                                                \
   } while(0)
 
 
@@ -4028,17 +4068,13 @@ namespace crpcut {
         (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
         .check_true((crpcut::expr::hook()->*a), #a);                    \
     }                                                                   \
-    CATCH_BLOCK(std::exception &CRPCUT_LOCAL_NAME(e),                   \
-                {                                                       \
-                  CRPCUT_CHECK_REPORT_HEAD(action) <<                   \
-                    "_TRUE(" #a ")\n"                                   \
-                    "  caught std::exception\n"                         \
-                    "  what()=" << CRPCUT_LOCAL_NAME(e).what();         \
-                })                                                      \
     CATCH_BLOCK(..., {                                                  \
-        CRPCUT_CHECK_REPORT_HEAD(action) <<                             \
-          "_TRUE(" #a ")\n"                                             \
-          "  caught ...";                                               \
+        std::string CRPCUT_LOCAL_NAME(s)                                \
+          = crpcut::policies::crpcut_exception_translator::try_all();   \
+        CRPCUT_CHECK_REPORT_HEAD(action) << "_TRUE"                     \
+          "(" #a ")\n"                                                  \
+          "  caught "                                                 \
+                                         << CRPCUT_LOCAL_NAME(s);       \
       })                                                                \
   } while(0)
 
@@ -4052,17 +4088,13 @@ namespace crpcut {
         (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
         .assert_false((crpcut::expr::hook()->*a), #a);                  \
     }                                                                   \
-    CATCH_BLOCK(std::exception &CRPCUT_LOCAL_NAME(e),                   \
-                {                                                       \
-                  CRPCUT_CHECK_REPORT_HEAD(action) <<                   \
-                    "_FALSE(" #a ")\n"                                  \
-                    "  caught std::exception\n"                         \
-                    "  what()=" << CRPCUT_LOCAL_NAME(e).what();         \
-                })                                                      \
     CATCH_BLOCK(..., {                                                  \
-        CRPCUT_CHECK_REPORT_HEAD(action) <<                             \
-          "_FALSE(" #a ")\n"                                            \
-          "  caught ...";                                               \
+        std::string CRPCUT_LOCAL_NAME(s)                                \
+          = crpcut::policies::crpcut_exception_translator::try_all();   \
+        CRPCUT_CHECK_REPORT_HEAD(action) << "_FALSE"                    \
+          "(" #a ")\n"                                                  \
+          "  caught "                                                 \
+                                         << CRPCUT_LOCAL_NAME(s);       \
       })                                                                \
   } while(0)
 
@@ -4107,17 +4139,14 @@ namespace crpcut {
         break;                                                          \
       }                                                                 \
     }                                                                   \
-    catch (std::exception &CRPCUT_LOCAL_NAME(e)) {                      \
-      CRPCUT_CHECK_REPORT_HEAD(action) <<                               \
-        "_THROW(" #expr ", " #exc ")\n"                                 \
-        "  caught std::exception\n"                                     \
-        "  what()=" << CRPCUT_LOCAL_NAME(e).what();                     \
-    }                                                                   \
-    catch (...) {                                                       \
-      CRPCUT_CHECK_REPORT_HEAD(action) <<                               \
-        "_THROW(" #expr ", " #exc ")\n"                                 \
-        "  caught ...";                                                 \
-    }                                                                   \
+    CATCH_BLOCK(..., {                                                  \
+        std::string CRPCUT_LOCAL_NAME(s)                                \
+          = crpcut::policies::crpcut_exception_translator::try_all();   \
+        CRPCUT_CHECK_REPORT_HEAD(action) << "_THROW"                    \
+          "(" #expr ", " #exc  ")\n"                                    \
+          "  caught "                                                 \
+                                         << CRPCUT_LOCAL_NAME(s);       \
+      })                                                                \
   } while (0)
 
 #define ASSERT_THROW(expr, exc)                                         \
@@ -4133,17 +4162,14 @@ namespace crpcut {
     try {                                                               \
       expr;                                                             \
     }                                                                   \
-    catch(std::exception &CRPCUT_LOCAL_NAME(e)) {                       \
-      CRPCUT_CHECK_REPORT_HEAD(action) <<                               \
-        "_NO_THROW(" #expr ")\n"                                        \
-        "  caught std::exception\n"                                     \
-        "  what()=" << CRPCUT_LOCAL_NAME(e).what();                     \
-    }                                                                   \
-    catch (...) {                                                       \
-      CRPCUT_CHECK_REPORT_HEAD(action) <<                               \
-        "_NO_THROW(" #expr ")\n"                                        \
-        "  caught ...";                                                 \
-    }                                                                   \
+    CATCH_BLOCK(..., {                                                  \
+        std::string CRPCUT_LOCAL_NAME(s)                                \
+          = crpcut::policies::crpcut_exception_translator::try_all();   \
+        CRPCUT_CHECK_REPORT_HEAD(action) << "_NO_THROW"                 \
+          "(" #expr ")\n"                                               \
+          "  caught "                                                   \
+                                         << CRPCUT_LOCAL_NAME(s);       \
+      })                                                                \
   } while (0)
 
 #define ASSERT_NO_THROW(expr)                                           \
@@ -4183,20 +4209,15 @@ namespace crpcut {
             << CRPCUT_LOCAL_NAME(p);                                    \
         }                                                               \
     }                                                                   \
-    CATCH_BLOCK(std::exception &CRPCUT_LOCAL_NAME(e),                   \
-                {                                                       \
-                  CRPCUT_CHECK_REPORT_HEAD(action) << "PRED(" #pred     \
-                       << CRPCUT_LOCAL_NAME(sep)[!*#__VA_ARGS__]        \
-                       << #__VA_ARGS__ ")\n"                            \
-                       << "  caught std::exception\n"                   \
-                    "  what()=" << CRPCUT_LOCAL_NAME(e).what();         \
-                }                                                       \
-                )                                                       \
     CATCH_BLOCK(..., {                                                  \
-        CRPCUT_CHECK_REPORT_HEAD(action) <<"_PRED(" #pred               \
-             << CRPCUT_LOCAL_NAME(sep)[!*#__VA_ARGS__]                  \
-             << #__VA_ARGS__ ")\n"                                      \
-             << "  caught ...";                                         \
+        std::string CRPCUT_LOCAL_NAME(s)                                \
+          = crpcut::policies::crpcut_exception_translator::try_all();   \
+        CRPCUT_CHECK_REPORT_HEAD(action) << "PRED("                     \
+          "(" #pred                                                     \
+        << CRPCUT_LOCAL_NAME(sep)[!*#__VA_ARGS__]                       \
+        << #__VA_ARGS__ ")\n"                                           \
+          "  caught "                                                 \
+                                         << CRPCUT_LOCAL_NAME(s);       \
       })                                                                \
   } while (0)
 

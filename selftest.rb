@@ -326,6 +326,20 @@ TESTS = {
   log('info', /after/).
   log('violation', //),
 
+  'verify::should_fail_verify_throw_with_unexpected_c_string' =>
+  Test.new('FAILED').
+  log('fail',
+      /VERIFY_THROW\([^\)]*\)\n\s+caught\s+\"apa\"/me).
+  log('info', /after/).
+  log('violation', //),
+
+  'verify::should_fail_verify_throw_with_translated_invalid_argument' =>
+  Test.new('FAILED').
+  log('fail',
+      /VERIFY_THROW\(.*\"apa\"\).*\)\s+caught invalid_argument\s+what\(\)=apa/me).
+  log('info', /after/).
+  log('violation', //),
+
   'verify::should_succeed_verify_no_throw' =>
   Test.new('PASSED').
   log('info', /after/),
@@ -345,6 +359,20 @@ TESTS = {
   Test.new('FAILED').
   log('fail',
       /VERIFY_NO_THROW.*caught\s+\.\.\./me).
+  log('info', /after/).
+  log('violation', //),
+
+  'verify::should_fail_verify_no_throw_with_unexpected_c_string' =>
+  Test.new('FAILED').
+  log('fail',
+      /VERIFY_NO_THROW.*caught \"apa\"/me).
+  log('info', /after/).
+  log('violation', //),
+
+  'verify::should_fail_verify_no_throw_with_translated_exception' =>
+  Test.new('FAILED').
+  log('fail',
+      /VERIFY_NO_THROW\(.*\"apa\"\).*\).*caught invalid_argument\n\s+what\(\)=apa/me).
   log('info', /after/).
   log('violation', //),
 
@@ -603,6 +631,11 @@ TESTS = {
   log('violation',
       /Unexpectedly caught \.\.\./),
 
+  'death::by_exception::should_fail_due_to_c_string_exception' =>
+  Test.new('FAILED').
+  log('violation',
+      /Unexpectedly caught \"apa\"/),
+
   'death::by_exception::should_fail_with_no_exception' =>
   Test.new('FAILED').
   log('violation',
@@ -612,6 +645,17 @@ TESTS = {
   Test.new('FAILED').
   log('violation',
       /Unexpectedly caught std::exception\n.*/),
+
+  'death::by_exception::should_fail_with_c_string_exception' =>
+  Test.new('FAILED').
+  log('violation',
+      /Unexpectedly caught \"apa\"/),
+
+  'death::by_exception::should_fail_with_translated_exception' =>
+  Test.new('FAILED').
+  log('violation',
+      /Unexpectedly caught invalid_argument\n\s+what\(\)=apa/),
+
 
   'death::by_exception::should_succed_with_any_exception' =>
   Test.new('PASSED'),
@@ -1037,7 +1081,7 @@ TESTS = {
   'collate::should_fail_with_nonexisting_locale' =>
   Test.new('FAILED').
   log('violation',
-      /ASSERT_.*caught std::exception/me),
+      /ASSERT_.*caught\s+std::exception/me),
 
   'regex::should_succeed_simple_re' =>
   Test.new('PASSED'),
@@ -1243,17 +1287,17 @@ TESTS = {
   Test.new('FAILED').
   log('violation',
       /Timed out - killed/),
-  
+
   'timeouts::should_fail_slow_save_from_stuck_destructor' =>
   Test.new('FAILED').
   log('violation',
       /Timed out - killed/),
-  
+
   'timeouts::should_fail_quick_save_from_stuck_destructor' =>
   Test.new('FAILED').
   log('violation',
       /Timed out - killed/),
-  
+
   'timeouts::expected::should_succeed_sleep' =>
   Test.new('PASSED'),
 
@@ -1615,28 +1659,28 @@ RUNS={
   [ /^asserts::/,         /.*/,     47, 30, 17, [] ],
 
   "            asserts death" =>
-  [ /^(asserts|death)::/, /FAILED/, 69, 46,  0, BLOCKED_TESTS ],
+  [ /^(asserts|death)::/, /FAILED/, 72, 49,  0, BLOCKED_TESTS ],
 
   " -v         asserts death" =>
-  [ /^(asserts|death)::/, /.*/,     69, 46, 23, BLOCKED_TESTS ],
+  [ /^(asserts|death)::/, /.*/,     72, 49, 23, BLOCKED_TESTS ],
 
   " -c 8       asserts death" =>
-  [ /^(asserts|death)::/, /FAILED/, 69, 46,  0, BLOCKED_TESTS ],
+  [ /^(asserts|death)::/, /FAILED/, 72, 49,  0, BLOCKED_TESTS ],
 
   " -c 8 -v    asserts death" =>
-  [ /^(asserts|death)::/, /.*/,     69, 46, 23, BLOCKED_TESTS ],
+  [ /^(asserts|death)::/, /.*/,     72, 49, 23, BLOCKED_TESTS ],
 
   " -n         asserts death" =>
-  [ /^(asserts|death)::/, /FAILED/, 69, 46,  0, [] ],
+  [ /^(asserts|death)::/, /FAILED/, 72, 49,  0, [] ],
 
   " -n -v      asserts death" =>
-  [ /^(asserts|death)::/, /.*/,     69, 46, 23, [] ],
+  [ /^(asserts|death)::/, /.*/,     72, 49, 23, [] ],
 
   " -n -c 8    asserts death" =>
-  [ /^(asserts|death)::/, /FAILED/, 69, 46,  0, [] ],
+  [ /^(asserts|death)::/, /FAILED/, 72, 49,  0, [] ],
 
   " -n -c 8 -v asserts death" =>
-  [ /^(asserts|death)::/, /.*/,     69, 46, 23, [] ],
+  [ /^(asserts|death)::/, /.*/,     72, 49, 23, [] ],
 
   ""         =>
   [ /.*/,                 /FAILED/, tests.size - BLOCKED_TESTS.size, fails,  0, BLOCKED_TESTS ],

@@ -26,6 +26,11 @@
 
 
 #include <crpcut.hpp>
+#include <stdexcept>
+CRPCUT_DESCRIBE_EXCEPTION(std::invalid_argument &e)
+{
+  return std::string("invalid_argument\n\twhat()=") + e.what();
+}
 
 int main(int argc, char *argv[])
 {

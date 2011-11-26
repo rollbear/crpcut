@@ -36,6 +36,11 @@ TESTSUITE(death)
       throw 1;
     }
 
+    TEST(should_fail_due_to_c_string_exception)
+    {
+      throw "apa";
+    }
+
     TEST(should_fail_due_to_std_exception_with_string_apa)
     {
       throw std::range_error("apa");
@@ -50,6 +55,17 @@ TESTSUITE(death)
     TEST(should_fail_with_wrong_exception, EXPECT_EXCEPTION(std::range_error))
     {
       throw std::bad_alloc();
+    }
+
+    TEST(should_fail_with_c_string_exception, EXPECT_EXCEPTION(std::exception))
+    {
+      throw "apa";
+    }
+
+    TEST(should_fail_with_translated_exception,
+         EXPECT_EXCEPTION(std::range_error))
+    {
+      throw std::invalid_argument("apa");
     }
 
     TEST(should_succed_with_any_exception, EXPECT_EXCEPTION(...))
