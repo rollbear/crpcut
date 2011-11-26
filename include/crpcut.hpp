@@ -1576,6 +1576,7 @@ namespace crpcut {
                         size_t len, const char *buff);
     static bool tests_as_child_procs();
     static bool timeouts_enabled();
+    static bool is_backtrace_enabled();
     static void set_deadline(implementation::crpcut_test_case_registrator *i);
     static void clear_deadline(implementation::crpcut_test_case_registrator *i);
     static void return_dir(unsigned num);
@@ -1659,6 +1660,7 @@ namespace crpcut {
     bool             nodeps;
     unsigned         num_parallel;
     bool             single_process;
+    bool             backtrace_enabled;
     unsigned         num_registered_tests;
     unsigned         num_selected_tests;
     unsigned         num_tests_run;

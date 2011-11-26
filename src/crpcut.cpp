@@ -44,6 +44,7 @@ namespace crpcut {
       enable_timeouts(true),
       nodeps(false),
       num_parallel(1),
+      backtrace_enabled(false),
       num_registered_tests(0),
       num_selected_tests(0),
       num_tests_run(0),
@@ -1010,6 +1011,12 @@ namespace crpcut {
               {
                 cmd = 'p';
               }
+#ifdef USE_BACKTRACE
+            else if (wrapped::strncmp("backtrace-heap", param, len) == 0)
+              {
+                cmd = 'b';
+              }
+#endif // USE_BACKTRACE
           }
         switch (cmd) {
         case 'q':
@@ -1165,10 +1172,23 @@ namespace crpcut {
               }
             break;
           }
+#ifdef USE_BACKTRACE
+        case 'b':
+          {
+            backtrace_enabled = true;
+            pcount = 1;
+            break;
+          }
+#endif // USE_BACKTRACE
         default:
           err_os <<
             "Usage: " << argv[0] << " [flags] {testcases}\n"
             "  where flags can be:\n"
+#ifdef USE_BACKTRACE
+            "   -b, --backtrace-heap\n"
+            "        store stack backtrace for all heap objects for\n"
+            "        better error pinpointing of heap violations (slow)\n\n"
+#endif // USE_BACKTRACE
             "   -c number, --children=number\n"
             "        control number of concurrently running test processes\n"
             "        number must be >= 1 and <= "
@@ -1486,6 +1506,12 @@ namespace crpcut {
   test_case_factory::timeouts_enabled()
   {
     return obj().enable_timeouts;
+  }
+
+  bool
+  test_case_factory::is_backtrace_enabled()
+  {
+    return obj().backtrace_enabled;
   }
 
   void
