@@ -731,7 +731,13 @@ macro.
       <xref linkend="ASSERT_SCOPE_HEAP_LEAK_FREE" xrefstyle="select:title"/> or
       <xref linkend="VERIFY_SCOPE_HEAP_LEAK_FREE" xrefstyle="select:title"/>.
       With it, you check that any heap object allocated inside the code block
-      is also deallocated when code block ends. A simple example. The test
+      is also deallocated when code block ends.
+
+      <tip>Use the command line flag
+      <xref linkend="backtrace-heap" xrefstyle="select:title"/> to display the
+      full stack backtrace for allocation of each object.</tip>
+
+      A simple example. The test
       program:
     <programlisting language="c++">
 <xi:include href="../stripped-src/assert_scope_leak_free.cpp" parse="text"/>

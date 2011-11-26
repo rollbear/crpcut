@@ -434,7 +434,9 @@
     <para>On failure, the test is terminated with an error report. The report
     includes all heap objects allocated in the block of code that still exists
     after the destructors for the block of code have finished.</para>
-
+    <tip>Use the command line flag
+    <xref linkend="backtrace-heap" xrefstyle="select:title"/> to display the
+    full stack backtrace for allocation of each object.</tip>
     <para>See also:
     <xref linkend="VERIFY_SCOPE_HEAP_LEAK_FREE" xrefstyle="select:title"/>.
     </para>
@@ -2015,6 +2017,10 @@
       includes all heap objects allocated in the block of code that still exists
       after the destructors for the block of code have finished.</para>
 
+      <tip>Use the command line flag
+      <xref linkend="backtrace-heap" xrefstyle="select:title"/> to display the
+      full stack backtrace for allocation of each object.</tip>
+
       <para>See also:
       <xref linkend="ASSERT_SCOPE_HEAP_LEAK_FREE"
       xrefstyle="select:title"/>.</para>
@@ -2811,6 +2817,19 @@ int main(int argc, char *argv[])
     <para>
       <parameter>{flags}</parameter> are zero or more of:
       <variablelist><title>flag</title>
+        <varlistentry id="backtrace-heap">
+          <term><parameter>-b</parameter> /
+          <parameter>--backtrace-heap</parameter></term>
+          <listitem>
+            <para>Show the full stack backtrace when heap violations are
+            discovered. This is normally off since it slows down execution
+            considerably for heap intensive tests.
+            <note>This option is only available if &crpcut; is compiled with
+            support for backtrace. See
+            <xref linkend="backtrace-support" xrefstyle="select:title"/></note>
+            </para>
+          </listitem>
+        </varlistentry>
         <varlistentry id="child-processes"><term><parameter>-c</parameter>
             <constant>number</constant> / <parameter>--children</parameter>=<constant>number</constant></term>
           <listitem>

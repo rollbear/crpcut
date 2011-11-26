@@ -219,10 +219,10 @@
     </para>
   </simplesect>
   <simplesect>
-    <title>Stack backtraces</title>
+    <title id="backtrace-support">Stack backtraces</title>
     <para>For environments in which the
     <ulink url="http://www.kernel.org/doc/man-pages/online/pages/man3/backtrace.3.html"><function>backtrace</function></ulink>() function is available,
-    &crpcut; now displays a stack backtrace when heap violations are discovered
+    &crpcut; can display a stack backtrace when heap violations are discovered
     (where the heap objects was allocated and, when applicable, where it was
     last  changed.) Should you not want this, add the command line parameter
     <constant>-DUSE_BACKTRACE=no</constant> to the CMake line.

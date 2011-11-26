@@ -965,7 +965,7 @@ if (WITH_HTML_DOCS)
     target_link_libraries(assert_scope_leak_free crpcut)
     add_custom_target(
       assert_scope_leak_free.out
-      assert_scope_leak_free | c++filt | sed "s/\\(.*\\)/     \\1/g"  > assert_scope_leak_free.out
+      assert_scope_leak_free -b | c++filt | sed "s/\\(.*\\)/     \\1/g"  > assert_scope_leak_free.out
       DEPENDS assert_scope_leak_free sample-output
       WORKING_DIRECTORY sample-output
       VERBATIM)
@@ -984,7 +984,7 @@ if (WITH_HTML_DOCS)
     target_link_libraries(verify_scope_leak_free crpcut)
     add_custom_target(
       verify_scope_leak_free.out
-      verify_scope_leak_free | c++filt | sed "s/\\(.*\\)/     \\1/g" > verify_scope_leak_free.out
+      verify_scope_leak_free -b | c++filt | sed "s/\\(.*\\)/     \\1/g" > verify_scope_leak_free.out
       DEPENDS verify_scope_leak_free sample-output
       WORKING_DIRECTORY sample-output
       VERBATIM)
@@ -1761,7 +1761,7 @@ if (WITH_HTML_DOCS)
     target_link_libraries(heap-check crpcut)
     add_custom_target(
       heap-check.out
-      heap-check  | c++filt | sed "s/\\(.*\\)/     \\1/g" > heap-check.out
+      heap-check -b | c++filt | sed "s/\\(.*\\)/     \\1/g" > heap-check.out
       DEPENDS heap-check sample-output
       WORKING_DIRECTORY sample-output
       VERBATIM)
