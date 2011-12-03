@@ -1200,6 +1200,10 @@ TESTS = {
   log('info',
       /byte object <(\n[ a-fA-F0-9]+){2}\s*\n\s+>/me),
 
+  'output::string_with_illegal_chars_should_succeed' =>
+  Test.new('PASSED').
+  log('info', /.*/me),
+
   'suite_deps::simple_all_ok::should_succeed' =>
   Test.new('PASSED'),
 

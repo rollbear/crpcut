@@ -85,4 +85,14 @@ TESTSUITE(output)
     S s = { { 1.3, 3.14 }, 1.1f };
     INFO << s;
   }
+
+  TEST(string_with_illegal_chars_should_succeed)
+  {
+    std::string s;
+    for (int i = 0; i < 256; ++i)
+      {
+        s+=(char(i));
+      }
+    INFO << s;
+  }
 }
