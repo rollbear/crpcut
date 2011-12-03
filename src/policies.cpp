@@ -83,7 +83,7 @@ namespace crpcut {
     crpcut_exception_translator::~crpcut_exception_translator()
     {
       crpcut_exception_translator *p = prev;
-      prev = next->prev;
+      p->next = next;
       next->prev = p;
     }
 
