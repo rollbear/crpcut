@@ -268,8 +268,11 @@
           <itemizedlist>
             <listitem><para>
                 <ulink url="http://gcc.gnu.org">gcc</ulink> versions
-                4.2.4, 4.3.4, 4.4.4, 4.4.5, 4.5.1, 4.5.2, 4.6.0 and 4.6.1.
+                4.2.4, 4.3.4, 4.4.4, 4.4.5, 4.5.1, 4.5.2, 4.6.0, 4.6.1. and 4.6.2.
             </para></listitem>
+            <listitem>
+              <para><ulink url="http://clang.llvm.org">clang</ulink> version
+            3.0</para></listitem>
             <listitem><para>
                 <ulink url="http://www.intel.com">Intel</ulink>
                 <ulink url="http://software.intel.com/en-us/intel-compilers">ICC</ulink>
@@ -553,6 +556,26 @@
         using the
         <xref linkend="CRPCUT_DESCRIBE_EXCEPTION" xrefstyle="select:title"/>
         macro.</para>
+      </answer>
+    </qandaentry>
+
+    <qandaentry>
+      <question>
+        <para>Why is the output garbled? My strings don't look like that.</para>
+      </question>
+      <answer>
+        <para>This is probably a character set issue. By default, &crpcut;
+        assumes that all output is in the <constant>UTF-8</constant> character
+        set.
+        If the code you're testing is using another character set, you
+        may want to call <xref linkend="set_charset" xrefstyle="select:title"/>
+        before <function>main</function>().
+        If you run &crpcut; with text output instead of XML output,
+        it may be that your terminal is using another character set than
+        <constant>UTF-8</constant>. In that case, add the command line
+        flag <xref linkend="output-charset" xrefstyle="select:title"/> to
+        define the character set used by your terminal when starting your
+        test program.</para>
       </answer>
     </qandaentry>
   </qandaset>

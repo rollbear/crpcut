@@ -1560,6 +1560,46 @@ if (WITH_HTML_DOCS)
       VERBATIM)
 
     #
+    # iso8859-1
+    #
+    file(GLOB ISO8859_1_CODE "${DOC_SRC_LIB}/samples/iso8859_1_code.cpp")
+    add_custom_target(
+      iso8859_1_code.cpp
+      ${STRIP_SOURCES} < ${ISO8859_1_CODE} > iso8859_1_code.cpp
+      DEPENDS stripped-src ${ISO8859_1_CODE}
+      WORKING_DIRECTORY stripped-src
+      VERBATIM)
+    add_executable(iso8859_1_code EXCLUDE_FROM_ALL ${ISO8859_1_CODE})
+    target_link_libraries(iso8859_1_code crpcut)
+    add_custom_target(
+      iso8859_1_code.out
+      iso8859_1_code -v --output-charset=UTF8 | sed "s/\\(.*\\)/     \\1/g" > iso8859_1_code.out
+      DEPENDS iso8859_1_code sample-output
+      WORKING_DIRECTORY sample-output
+      VERBATIM)
+
+    #
+    # utf8
+    #
+    file(GLOB UTF8_CODE "${DOC_SRC_LIB}/samples/utf8_code.cpp")
+    add_custom_target(
+      utf8_code.cpp
+      ${STRIP_SOURCES} < ${UTF8_CODE} > utf8_code.cpp
+      DEPENDS stripped-src ${UTF8_CODE}
+      WORKING_DIRECTORY stripped-src
+      VERBATIM)
+    add_executable(utf8_code EXCLUDE_FROM_ALL ${UTF8_CODE})
+    target_link_libraries(utf8_code crpcut)
+    add_custom_target(
+      utf8_code.out
+      utf8_code  -v --output-charset=UTF8 | sed "s/\\(.*\\)/     \\1/g" > utf8_code.out
+      DEPENDS utf8_code sample-output
+      WORKING_DIRECTORY sample-output
+      VERBATIM)
+
+
+
+    #
     # simple_testsuite
     #
     file(GLOB SIMPLE_TESTSUITE "${DOC_SRC_LIB}/samples/simple_testsuite.cpp")
@@ -1995,6 +2035,8 @@ if (WITH_HTML_DOCS)
       stripped-src/bare-minimum.cpp sample-output/bare-minimum.out
       sample-output/bare-minimum-list.out
       sample-output/bare-minimum-verbose.out
+      stripped-src/utf8_code.cpp sample-output/utf8_code.out
+      stripped-src/iso8859_1_code.cpp sample-output/iso8859_1_code.out
       stripped-src/simple_testsuite.cpp sample-output/simple_testsuite.out
       stripped-src/report_example.cpp sample-output/report_example_human.out
       sample-output/report_example_xml.out

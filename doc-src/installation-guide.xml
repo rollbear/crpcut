@@ -33,7 +33,7 @@
           <listitem>
             <para>
               Variadic macros are required by C99, and are available on
-              most C++ compilers. They will be required by C++ compilers
+              most C++ compilers. They are required by C++-2011 compilers
               soon.
             </para>
           </listitem>
@@ -43,7 +43,7 @@
           <term><symbol>decltype</symbol> or <symbol>typeof</symbol></term>
           <listitem>
             <para>
-              decltype is a new keyword coming to C++ that gives the type of an
+              decltype is a new keyword in C++-2011 that gives the type of an
               expression, similarly to how sizeof gives the size of the type
               of an expression. GCC has since long had another extension,
               typeof, which doesn't quite do the same thing,
@@ -56,7 +56,7 @@
           <term><function>_Exit()</function></term>
           <listitem>
             <para>
-              A function standardized for C99, and coming to C++. It is
+              A function standardized for C99, and C++-2011. It is
               similar to <function>exit()</function> except that it
               exits immediately, without running any at-exit handlers
               or static destructors.
@@ -67,15 +67,18 @@
         <varlistentry>
           <term><type>uint64_t and uint32_t</type></term>
           <listitem>
-            typedef's mandated by C99 and coming to C++.
+            typedef's mandated by C99 and coming to C++-2011 compliant
+            compilers.
           </listitem>
         </varlistentry>
       </variablelist>
     </para>
     <para><ulink url="http://gcc.gnu.org">GCC</ulink> supports these
       since long, and &crpcut; has been verified to work with versions
-      4.3.4, 4.4.4 and 4.5.1.
+      4.3.4, 4.4.4, 4.5.3. and 4.6.2
     </para>
+    <para><ulink url="http:clang.llvm.org">Clang</ulink> works
+    since version 3.0</para>
     <para><ulink url="http://www.intel.com">Intel</ulink>
       <ulink url="http://software.intel.com/en-us/intel-compilers">ICC</ulink>
       version 1.11 is also verified to work, but requires the
@@ -129,6 +132,9 @@
         <listitem><function>gethostname</function>()</listitem>
         <listitem><function>getpgid</function>()</listitem>
         <listitem><function>getrusage</function>()</listitem>
+        <listitem><function>iconv</function>()</listitem>
+        <listitem><function>iconv_close</function>()</listitem>
+        <listitem><function>iconv_open</function>()</listitem>
         <listitem><function>killpg</function>()</listitem>
         <listitem><function>mkdir</function>()</listitem>
         <listitem><function>open</function>()</listitem>

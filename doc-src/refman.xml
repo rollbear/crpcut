@@ -2742,10 +2742,46 @@
       and <xref linkend="ulps_diff" xrefstyle="select:title"/>
       for alternative floating point number matching methods.
       </para>
-
   </section>
+
+  <section id="set_charset">
+    <title><type>crpcut::</type><function>set_charset</function>()</title>
+    <para>Define the character set for strings produced from test cases.</para>
+    <formalpara><title>Used in:</title>
+    <para>Before calling <xref linkend="run" xrefstyle="select:title"/>.
+    Typically in <function>main</function>().</para></formalpara>
+    <para>The prototype is:</para>
+    <type>void </type><type>crpcut::</type><function>set_charset</function>(<type>const char*</type><parameter>charset</parameter>)
+    <para>The parameter <parameter>charset</parameter> must be a character set name
+    recognised by the <function>iconv_open</function>() function. All output
+    from the test program will be converted from this character set to the
+    defined output character set. See also
+    <xref linkend="output-charset" xrefstyle="select:title"/>.</para>
+    <para>Example: the test program
+      <programlisting language="c++">
+<xi:include href="../stripped-src/utf8_code.cpp" parse="text"/>
+      </programlisting>
+      uses the default <constant>UTF8</constant> encoding for its strings:
+      <screen>
+
+<xi:include href="../sample-output/utf8_code.out" parse="text"/>
+      </screen>
+      While the test program
+      <programlisting language="c++">
+<xi:include href="../stripped-src/iso8859_1_code.cpp" parse="text"/>
+      </programlisting>
+      defines the character set to <constant>ISO8859-1</constant> when
+      outputting the exact same character sequence:
+      <screen>
+
+<xi:include href="../sample-output/iso8859_1_code.out" parse="text"/>
+      </screen>
+      which gives the character sequence a different appearence.
+    </para>
+  </section>
+
   <section id="run">
-    <title><type>crpcut::</type><function>run()</function></title>
+    <title><type>crpcut::</type><function>run</function>()</title>
     <para>The main function of &crpcut; which runs all selected tests</para>
     <formalpara><title>Used in:</title>
       <para>Typically the main function of the test program.</para>
@@ -2876,6 +2912,34 @@ int main(int argc, char *argv[])
             </para>
           </listitem>
         </varlistentry>
+
+        <varlistentry id="output-charset"><term><parameter>-C</parameter>
+        <constant>name</constant>
+        /
+        <parameter>--output-charset</parameter>=<constant>name</constant></term>
+        <listitem>
+          <para>Define the character set used for non-XML output. The
+          <constant>name</constant> of the character set must be legal
+          as the <parameter>tocode</parameter> parameter to
+          <function>iconv_open</function>()</para>
+          <note>XML output is always using UTF-8</note>
+          <para>If no output character set is defined, all textual information
+          is presented raw without conversion.</para>
+          <para>With a defined output character set, the output is converted
+          from the character set defined for the test program.</para>
+          <note>The default character set defined for the test program is
+          UTF-8. See <xref linkend="set_charset" xrefstyle="select:title"/>
+          </note>
+          <para>Characters that cannot be converted from the default character
+          set for the test program, to the output character set, are by default
+          represented by <constant>'.'</constant>
+          See <xref linkend="illegal-char" xrefstyle="select:title"/> for
+          changing the representation of characters that cannot be
+          converted.
+          </para>
+        </listitem>
+        </varlistentry>
+
         <varlistentry id="child-processes"><term><parameter>-c</parameter>
             <constant>number</constant> / <parameter>--children</parameter>=<constant>number</constant></term>
           <listitem>
@@ -2905,6 +2969,19 @@ int main(int argc, char *argv[])
               &crpcut;
             </para>
           </listitem>
+        </varlistentry>
+        <varlistentry id="illegal-char"><term><parameter>-I</parameter>
+        <constant>string</constant> /
+        <parameter>--illegal-char</parameter>=<constant>string</constant></term>
+        <listitem>
+          <para>
+            Define how to represent output characters that cannot be converted
+          to the output character set.</para>
+          <note>For XML-output, this defaults to
+          <constant>&amp;#xfffd;</constant>
+          For text output, this defaults to <constant>'.'</constant>
+          </note>
+        </listitem>
         </varlistentry>
         <varlistentry id="identity"><term><parameter>-i</parameter> <constant>"a string"</constant> /
         <parameter>--identity</parameter>=<constant>"a string"</constant></term>

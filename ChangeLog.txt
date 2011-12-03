@@ -1,10 +1,29 @@
+         * Added character set conversion from test program to output.
+           By default the test program is assumed to produce strings in
+           UTF-8. The new command line option -C / --output-charset
+           is used to specify the character set to use in the presentation
+           (only available it text representation, since the XML format
+           always uses UTF-8.) The new command line option -I / --illegal-char
+           is used to specify how characters that are illegal in the chosen
+           output character set are to be presented.
+
+           XML output defaults to representing illegal characters with
+           &#xfffd; and text output defaults to using '.' for representation
+           of illegal characters.
+
+           Should the test program produce strings in another character set
+           than UTF-8, the function crpcut::set_charset(const char* set_name)
+           is called before running the tests.
+
+           Character sets are named as required by iconv.
+
          * Added possibility to register custom exception type describers;
            function bodies that accepts an exception and returns a textual
            representation of the content of the exception. See the macro
            CRPCUT_DESCRIBE_EXCEPTION in the reference manual.
 
          * For performance reasons, the display of stack backtraces
-           when reporting heap errors, is disabled by default, even when
+           when reporting heap errors is disabled by default, even when
            support for it is enabled in the build. The display of
            stack backtraces in the heap error reports can be turned on
            with the new -b / --backtrace-heap command line flag.
