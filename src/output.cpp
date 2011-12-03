@@ -113,8 +113,8 @@ namespace crpcut
       for (size_t n = 0; n < len; ++n)
         {
           const char *esc;
-          size_t esc_len;
-          unsigned char ch = str[n];
+          size_t      esc_len;
+          char        ch = str[n];
           switch (ch)
             {
             case '\t' : continue;
@@ -138,7 +138,7 @@ namespace crpcut
               stream::oastream out(buff);
               out << "&#x" << std::hex << unsigned(ch) << ';';
               esc = out.begin();
-              esc_len = out.end() - out.begin();
+              esc_len = size_t(out.end() - out.begin());
             }
           do_write(str + prev_n, n - prev_n);
           do_write(esc, esc_len);

@@ -32,9 +32,7 @@ namespace {
   inline void valgrind_create_mempool(void *a,size_t b,bool c) { VALGRIND_CREATE_MEMPOOL(a,b,c); }
   inline void valgrind_make_mem_noaccess(void *a, size_t  b) { VALGRIND_MAKE_MEM_NOACCESS(a, b);}
   inline void valgrind_make_mem_undefined(void *a, size_t b) { VALGRIND_MAKE_MEM_UNDEFINED(a, b);}
-  inline void valgrind_malloclike_block(void *a, size_t b, size_t c, bool d) { VALGRIND_MALLOCLIKE_BLOCK(a, b, c, d);}
   inline void valgrind_make_mem_defined(void *a, size_t b) { VALGRIND_MAKE_MEM_DEFINED(a, b);}
-  inline void valgrind_freelike_block(void *a, size_t b) { VALGRIND_FREELIKE_BLOCK(a, b);}
   inline void valgrind_mempool_free(void *a, void  *b) { VALGRIND_MEMPOOL_FREE(a, b);}
   inline void valgrind_mempool_alloc(void *a, void *b, size_t c) { VALGRIND_MEMPOOL_ALLOC(a, b, c);}
 }
@@ -159,7 +157,7 @@ namespace crpcut
       void show_stack(std::ostringstream &msg,
                       const char         *header,
                       mem_list_element   *stack,
-                      int                 size)
+                      size_t              size)
       {
 #ifdef USE_BACKTRACE
         if (!test_case_factory::is_backtrace_enabled()) return;
@@ -169,14 +167,14 @@ namespace crpcut
         if (size == 0)
           {
             void *buffer[50];
-            size = backtrace.call<int>(buffer, 50);
+            size = size_t(backtrace.call<int>(buffer, 50));
             stack_addr = buffer;
           }
         if (stack_addr && size)
           {
             void **bt = static_cast<void**>(stack_addr);
             char **alloc_stack = backtrace_symbols.call<char**>(bt, size);
-            for (int i = 1; i < size; ++i)
+            for (size_t i = 1; i < size; ++i)
               {
                 msg << '\n' << alloc_stack[i];
               }
@@ -199,7 +197,7 @@ namespace crpcut
             if (test_case_factory::is_backtrace_enabled() && backtrace)
               {
                 static void* buffer[50];
-                int    const elems  = backtrace.call<int>(buffer, 50);
+                size_t const elems  = size_t(backtrace.call<int>(buffer, 50));
                 size_t const ebytes = elems*sizeof(void*);
                 if (mem_list_element *sr = raw_alloc_mem(ebytes))
                   {

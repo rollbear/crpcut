@@ -88,7 +88,7 @@ namespace crpcut {
     tcr **found = std::find(deadlines.begin(), deadlines.end(), i);
     assert(found != deadlines.end() && "clear deadline when none was ordered");
 
-    size_t n = found - deadlines.begin();
+    size_t n = size_t(found - deadlines.begin());
 
     for (;;)
       {

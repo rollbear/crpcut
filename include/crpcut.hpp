@@ -1320,7 +1320,7 @@ namespace crpcut {
       mem_list_element        *next;
       mem_list_element        *prev;
       mem_list_element        *stack;
-      int                      stack_size;
+      size_t                   stack_size;
       size_t                   mem;
       int                      type;
     };
