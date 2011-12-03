@@ -1585,6 +1585,10 @@ namespace crpcut {
   class test_case_factory
   {
   public:
+    static void set_charset(const char *set_name);
+    static const char *get_charset();
+    static const char *get_output_charset();
+    static const char *get_illegal_rep();
     static const unsigned max_parallel = 8;
 
     static int run_test(int argc, char *argv[],
@@ -1657,6 +1661,10 @@ namespace crpcut {
     const char *do_get_working_dir() const;
     const char *do_get_start_dir() const;
     const char *do_get_parameter(const char *name) const;
+    void do_set_charset(const char *set_name);
+    const char *do_get_charset() const;
+    const char *do_get_output_charset() const;
+    const char *do_get_illegal_rep() const;
     unsigned long do_calc_cputime(const struct timeval&);
     friend class implementation::crpcut_test_case_registrator;
 
@@ -1691,6 +1699,9 @@ namespace crpcut {
     unsigned         first_free_working_dir;
     char             dirbase[PATH_MAX];
     char             homedir[PATH_MAX];
+    const char *     charset;
+    const char *     output_charset;
+    const char *     illegal_rep;
     const char **    argv;
   };
 
@@ -3828,6 +3839,7 @@ namespace crpcut {
       unsigned long mutable limit_;
     };
   }
+  void set_charset(const char *set_name);
   const char *get_start_dir();
   const char *get_parameter(const char *name);
   int  run(int argc, char *argv[], std::ostream &os = std::cerr);

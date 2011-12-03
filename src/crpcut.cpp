@@ -49,6 +49,7 @@ namespace crpcut {
     return "\"" + std::string(p) + "\"";
   }
 
+
   test_case_factory::test_case_factory()
     : pending_children(0),
       verbose_mode(false),
@@ -60,7 +61,10 @@ namespace crpcut {
       num_selected_tests(0),
       num_tests_run(0),
       num_successful_tests(0),
-      first_free_working_dir(0)
+      first_free_working_dir(0),
+      charset("UTF-8"),
+      output_charset(0),
+      illegal_rep(0)
   {
     lib::strcpy(dirbase, "/tmp/crpcutXXXXXX");
     for (unsigned n = 0; n < max_parallel; ++n)
@@ -122,6 +126,26 @@ namespace crpcut {
   {
     working_dirs[num] = first_free_working_dir;
     first_free_working_dir = num;
+  }
+
+  void test_case_factory::set_charset(const char *set_name)
+  {
+    obj().do_set_charset(set_name);
+  }
+
+  const char *test_case_factory::get_charset()
+  {
+    return obj().do_get_charset();
+  }
+
+  const char *test_case_factory::get_output_charset()
+  {
+    return obj().do_get_output_charset();
+  }
+
+  const char *test_case_factory::get_illegal_rep()
+  {
+    return obj().do_get_illegal_rep();
   }
 
   bool test_case_factory::is_naughty_child()
@@ -901,6 +925,26 @@ namespace crpcut {
     }
   }
 
+  void test_case_factory::do_set_charset(const char *set_name)
+  {
+    charset = set_name;
+  }
+
+  const char *test_case_factory::do_get_charset() const
+  {
+    return charset;
+  }
+
+  const char *test_case_factory::do_get_output_charset() const
+  {
+    return output_charset;
+  }
+
+  const char *test_case_factory::do_get_illegal_rep() const
+  {
+    return illegal_rep;
+  }
+
   const char *test_case_factory::do_get_parameter(const char *name) const
   {
     for (const char** p = argv; *p; ++p)
@@ -975,7 +1019,15 @@ namespace crpcut {
               {
                 value = 0;
               }
-            if (wrapped::strncmp("identity", param, len) == 0)
+            if (wrapped::strncmp("output-charset", param, len) == 0)
+              {
+                cmd = 'C';
+              }
+            else if (wrapped::strncmp("illegal-char", param, len) == 0)
+              {
+                cmd = 'I';
+              }
+            else if (wrapped::strncmp("identity", param, len) == 0)
               {
                 cmd = 'i';
               }
@@ -1192,6 +1244,16 @@ namespace crpcut {
             break;
           }
 #endif // USE_BACKTRACE
+        case 'C':
+          {
+            output_charset = value;
+            break;
+          }
+        case 'I':
+          {
+            illegal_rep = value;
+            break;
+          }
         default:
           err_os <<
             "Usage: " << argv[0] << " [flags] {testcases}\n"
@@ -1205,10 +1267,16 @@ namespace crpcut {
             "        control number of concurrently running test processes\n"
             "        number must be >= 1 and <= "
                       << max_parallel << "\n\n"
+            "   -C charset, --output-charset=charset\n"
+            "        specify the output character set to convert text-output\n"
+            "        to. Does not apply for XML-output\n\n"
             "   -d dir, --working-dir=dir\n"
             "        specify working directory (must exist)\n\n"
             "   -i \"id string\", --identity=\"id string\"\n"
             "        specify an identity string for the XML-header\n\n"
+            "   -I string, --illegal-char=string\n"
+            "        specify how characters that are illegal for the chosen\n"
+            "        output character set are to be represented\n\n"
             "   -l, --list\n"
             "        list test cases\n\n"
             "   -n, --nodeps\n"
@@ -1232,6 +1300,14 @@ namespace crpcut {
           return -1;
         }
         p += pcount;
+      }
+
+    if (output_charset && xml)
+      {
+        err_os <<
+          "-C / --output-charset cannot be used with XML output, since the\n"
+          "output charset is always UTF-8 in crpcut XML reports.\n";
+        return -1;
       }
     wrapped::getcwd(homedir, sizeof(homedir));
     registrator_list tentative;
@@ -1312,9 +1388,9 @@ namespace crpcut {
     std_exception_translator std_except_obj;
     c_string_translator c_string_obj;
 
-    output::formatter &fmt = output_formatter(xml, identity, argc, argv);
-
     try {
+      output::formatter &fmt = output_formatter(xml, identity, argc, argv);
+
       if (tests_as_child_procs())
         {
           if (!working_dir && !wrapped::mkdtemp(dirbase))
@@ -1454,6 +1530,10 @@ namespace crpcut {
         }
       return int(num_tests_run - num_successful_tests);
     }
+    catch (std::runtime_error &e)
+      {
+        err_os << "Error: " << e.what() << "\nCan't continue\n";
+      }
     catch (datatypes::posix_error &e)
       {
         err_os << "Fatal error:"
@@ -1615,6 +1695,10 @@ namespace crpcut {
     return test_case_factory::get_start_dir();
   }
 
+  void set_charset(const char *charset)
+  {
+    return test_case_factory::set_charset(charset);
+  }
 } // namespace crpcut
 
 crpcut::implementation::namespace_info current_namespace(0,0);

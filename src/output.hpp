@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2010 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,10 +27,27 @@
 #ifndef OUTPUT_HPP
 #define OUTPUT_HPP
 
+extern "C" {
+  #include <iconv.h>
+}
+
 namespace crpcut
 {
   namespace output
   {
+    struct fixed_string
+    {
+      const char *str;
+      size_t      len;
+    private:
+      struct secret_bool;
+    public:
+      operator const secret_bool* () const
+      {
+        return len ? reinterpret_cast<const secret_bool*>(this) : 0;
+      }
+    };
+
     class buffer
     {
     public:
@@ -111,7 +128,7 @@ namespace crpcut
 
     public:
       typedef implementation::crpcut_test_case_registrator test_case_reg;
-      typedef enum { escaped, verbatim } type;
+      typedef enum { translated, verbatim } type;
       virtual void begin_case(const char *name, size_t name_len, bool result) = 0;
       virtual void end_case()  = 0;
       virtual void terminate(test_phase phase,
@@ -126,8 +143,9 @@ namespace crpcut
                               unsigned num_failed) = 0;
       virtual void nonempty_dir(const  char*)  = 0;
       virtual void blocked_test(const test_case_reg *)  = 0;
-      virtual ~formatter() {} // keeps compilers happy. Not needed for this use.
+      virtual ~formatter();
     protected:
+      formatter(const char *to_charset, const char *subst);
       size_t write(const char *s, type t = verbatim) const
       {
         return write(s, wrapped::strlen(s), t);
@@ -151,7 +169,13 @@ namespace crpcut
         return write(o.begin(), o.size());
       }
     private:
+      virtual fixed_string escape(char c) const;
       size_t do_write(const char *p, size_t len) const;
+      size_t do_write_converted(const char *buff, size_t len) const;
+
+      iconv_t iconv_handle;
+      const char *illegal_substitute;
+      size_t illegal_substitute_len;
     };
 
 
@@ -175,6 +199,7 @@ namespace crpcut
       virtual void nonempty_dir(const char *s);
       virtual void blocked_test(const test_case_reg*);
     private:
+      virtual fixed_string escape(char c) const;
       void make_closed();
 
       bool                      last_closed;
@@ -187,7 +212,7 @@ namespace crpcut
     class text_formatter : public formatter
     {
     public:
-      text_formatter(const char *, int, const char**)  {}
+      text_formatter(const char *, int, const char**);
       virtual void begin_case(const char *name, size_t name_len, bool result);
       virtual void end_case();
       virtual void terminate(test_phase phase,
@@ -205,6 +230,7 @@ namespace crpcut
     private:
       bool did_output;
       bool blocked_tests;
+      formatter::type conversion_type;
     };
 
   }
