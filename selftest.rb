@@ -317,28 +317,28 @@ TESTS = {
   log('fail',
       /VERIFY_THROW.*caught std::exception\s+what\(\)=/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_verify_throw_with_no_exception' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_THROW.*Did not throw/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_verify_throw_with_unexpected_c_string' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_THROW\([^\)]*\)\n\s+caught\s+\"apa\"/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_verify_throw_with_translated_invalid_argument' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_THROW\(.*\"apa\"\).*\)\s+caught invalid_argument\s+what\(\)=apa/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_verify_no_throw' =>
   Test.new('PASSED').
@@ -349,7 +349,7 @@ TESTS = {
   log('fail',
       /VERIFY_THROW.*Did not throw/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_throw_any_with_int_exception' =>
   Test.new('PASSED').
@@ -360,40 +360,40 @@ TESTS = {
   log('fail',
       /VERIFY_NO_THROW.*caught\s+\.\.\./me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_verify_no_throw_with_unexpected_c_string' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_NO_THROW.*caught \"apa\"/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_verify_no_throw_with_translated_exception' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_NO_THROW\(.*\"apa\"\).*\).*caught invalid_argument\n\s+what\(\)=apa/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_verify_no_throw_with_std_exception_string_apa' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_NO_THROW.*caught\s+#{S_E}=apa/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_on_verify_eq_with_fixture' =>
   Test.new('PASSED').
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_on_verify_eq_with_fixture' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_EQ\(num, 3\)\s+where\s+num\s*=\s*4/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_on_verify_ne_with_fixture' =>
   Test.new('PASSED').
@@ -404,7 +404,7 @@ TESTS = {
   log('fail',
       /VERIFY_NE\(num, 3\)\s+where\s+num\s*=\s*3/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_on_verify_gt_with_fixture' =>
   Test.new('PASSED').
@@ -415,7 +415,7 @@ TESTS = {
   log('fail',
       /VERIFY_GT\(num, 3\)\s+where\s+num\s*=\s+3/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_on_verify_ge_with_fixture' =>
   Test.new('PASSED').
@@ -426,7 +426,7 @@ TESTS = {
   log('fail',
       /VERIFY_GE\(num, 3\)\s+where\s+num\s*=\s*2/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_on_verify_lt_with_fixture' =>
   Test.new('PASSED').
@@ -437,7 +437,7 @@ TESTS = {
   log('fail',
       /VERIFY_LT\(num, 3\)\s+where\s+num\s*=\s*3/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_on_verify_le_with_fixture' =>
   Test.new('PASSED').
@@ -448,7 +448,7 @@ TESTS = {
   log('fail',
       /VERIFY_LE\(num, 3\)\s+where\s+num\s*=\s*4/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_on_verify_true_with_fixture' =>
   Test.new('PASSED').
@@ -459,7 +459,7 @@ TESTS = {
   log('fail',
       /VERIFY_TRUE\(num\)\n\s+is evaluated as:\s+0/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_on_verify_false_with_fixture' =>
   Test.new('PASSED').
@@ -470,28 +470,28 @@ TESTS = {
   log('fail',
       /VERIFY_FALSE\(num\)\n\s+is evaluated as:\n\s+3/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_on_verify_gt_with_unstreamable_param_i' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_GT\(i, num\)\s+where\s+i\s*=\s*\d+-byte object <[03 ]+>\s+num\s*=\s*3/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_on_verify_true_with_small_unstreamable_param' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_TRUE\(i\)\n\s+is evaluated as:\n\s+.*<[0 ]*>\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_on_verify_true_with_large_unstreamable_param' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_TRUE\(i\)\n\s+is evaluated as:\n\s+\?\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_pointer_eq_0' =>
   Test.new('PASSED').
@@ -514,63 +514,63 @@ TESTS = {
   log('fail',
       /VERIFY_EQ\(pi, 0\)\n\s+where pi = (0x)?[[:xdigit:]]+$/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_0_eq_pointer' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_EQ\(0, pi\)\n\s+where pi = (0x)?[[:xdigit:]]+$/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_void_ptr_eq_ptr' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_EQ\(pv, pi\)\n\s+where pv = (0|\(nil\))\n\s+pi = (0x)?[[:xdigit:]]+$/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_ptr_eq_void_ptr' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_EQ\(pi, pv\)\n\s+where pi = (0x)?[[:xdigit:]]+\n\s+pv = (0|\(nil\))\s*$/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_eq_volatile' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_EQ\(n, m\)\n\s+where n = 3\n\s+m = 4\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_false_volatile' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_FALSE\(n\)\n\s+is evaluated as:\n\s+3\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_false_const_volatile' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_FALSE\(n\)\n\s+is evaluated as:\n\s+3\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_true_volatile' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_TRUE\(n\)\n\s+is evaluated as:\n\s*0\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_fail_true_const_volatile' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_TRUE\(n\)\n\s+is evaluated as:\n\s*0\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_class_const_int_member' =>
   Test.new('PASSED').
@@ -585,35 +585,35 @@ TESTS = {
   log('fail',
       /VERIFY_TRUE\(i - 4 < unstreamable<int>\(0\)\)\n\s+is evaluated as:\n\s+.*<[04 ]*> - 4 < .*<[0 ]*>\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::expr::should_fail_on_verify_true_with_large_unstreamable_param' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_TRUE\(i - 4 < unstreamable<long double>\(0\)\)\n\s+is evaluated as:\n\s+ \? - 4 < \?\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::expr::should_fail_on_verify_true_with_lt' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_TRUE\(n < num\)\n\s+is evaluated as:\n\s+4 < 3\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::expr::should_fail_on_verify_true_with_add_lt' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_TRUE\(n \+ num < 5\)\n\s+is evaluated as:\n\s+4 \+ 3 < 5\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'verify::expr::should_fail_on_verify_true_with_sub_lt' =>
   Test.new('FAILED').
   log('fail',
       /VERIFY_TRUE\(n - num < 0\)\n\s+is evaluated as:\n\s+4 - 3 < 0\s*/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
 
   'death::by_exception::should_fail_any_exception' =>
@@ -987,7 +987,7 @@ TESTS = {
   log('fail',
        /#{PR_H}VERIFY_PRED\(is_positive, v\)\s+param1 = -1/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'predicates::should_succeed_verify_simple_func_with_param_side_effect' =>
   Test.new('PASSED').
@@ -998,7 +998,7 @@ TESTS = {
   log('fail',
        /#{PR_H}VERIFY_PRED\(is_positive, --v\)\s+param1 = -1/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 #
   'predicates::should_succeed_func_wrap_class' =>
   Test.new('PASSED'),
@@ -1018,7 +1018,7 @@ TESTS = {
   log('fail',
       /#{PR_H}VERIFY_PRED\(bifuncwrap.*less.*strcmp.*katt.*apa\"\)\s+param1 = katt\s+param2 = apa/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 #
   'predicates::should_succeed_streamable_pred' =>
   Test.new('PASSED'),
@@ -1046,7 +1046,7 @@ TESTS = {
   log('fail',
       /#{PR_H}VERIFY_PRED\(string_equal\(.*"katt"\)\s+param1 = katt\s+string_equal.*\) :\ncompare.*equal to "apa"/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'predicates::should_succeed_verify_ptr_deref_eq' =>
   Test.new('PASSED').
@@ -1057,7 +1057,7 @@ TESTS = {
   log('fail',
       /#{PR_H}VERIFY_PRED.*pointing to:\s+4.*pointing to:\s+3/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 #
   'collate::should_succeed_collation_string' =>
   Test.new('PASSED'),
@@ -1344,7 +1344,7 @@ TESTS = {
   log('fail',
       /VERIFY_SCOPE_MAX_REALTIME_MS.*Actual time used was 2[0-5]ms/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'timeouts::scoped::should_succeed_verify_oversleep' =>
   Test.new('PASSED').
@@ -1355,7 +1355,7 @@ TESTS = {
   log('fail',
       /VERIFY_SCOPE_MAX_CPUTIME_MS.*Actual time used was [1-5]\d\d\dms/me).
   log('info', /after/).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'very_slow_success' =>
   Test.new('PASSED'),
@@ -1394,7 +1394,7 @@ TESTS = {
   log('fail',
       /1 object\n.*100 bytes at (0x)?[0-9A-Fa-f]+ allocated with malloc/me).
   log('info', //).
-  log('violation', //),
+  log('violation', /Earlier VERIFY failed/),
 
   'heap::should_succeed_verify_scope_leak_free' =>
   Test.new('PASSED').
