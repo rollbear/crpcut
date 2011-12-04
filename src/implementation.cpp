@@ -334,7 +334,6 @@ namespace crpcut {
       if (t == comm::set_timeout && !kill_mask)
         {
           assert(len == sizeof(reg->crpcut_absolute_deadline_ms));
-	  //          assert(!reg->crpcut_deadline_is_set());
           clocks::monotonic::timestamp ts;
           char *p = static_cast<char*>(static_cast<void*>(&ts));
           while (bytes_read < len)
@@ -439,8 +438,19 @@ namespace crpcut {
           }
           return true;
         case comm::end_test:
-          reg->crpcut_phase = destroying;
-          return true;
+          if (!reg->crpcut_failed())
+            {
+              reg->crpcut_phase = destroying;
+              return true;
+            }
+          {
+            static char msg[] = "Earlier VERIFY failed";
+            buff = msg;
+            len = sizeof(msg) - 1;
+            t = comm::exit_fail;
+            wrapped::killpg(reg->crpcut_get_pid(), SIGKILL); // now
+            break;
+          }
         default:
           ; // silence warning
         }
@@ -457,7 +467,7 @@ namespace crpcut {
             }
           reg->crpcut_death_note = true;
         }
-    return !kill_mask;
+      return !kill_mask;
     }
 
 
@@ -687,7 +697,7 @@ namespace crpcut {
                       }
                     else
                       {
-                        crpcut_phase = post_mortem;
+                        crpcut_register_success(false);
                         out << "Exited with code "
                             << info.si_status << "\nExpected ";
                         crpcut_expected_death(out);
@@ -704,7 +714,7 @@ namespace crpcut {
                       {
                         if (crpcut_cputime_timeout(cputime_ms))
                           {
-                            crpcut_phase = running;
+                            crpcut_register_success(false);
                             out << "Test consumed "
                                 << cputime_ms << "ms CPU-time\nLimit was "
                                 << crpcut_cputime_limit_ms << "ms";
@@ -717,7 +727,7 @@ namespace crpcut {
                       }
                     else
                       {
-                        crpcut_phase = post_mortem;
+                        crpcut_register_success(false);
                         if (crpcut_killed)
                           {
                             out << "Timed out - killed";
@@ -737,15 +747,18 @@ namespace crpcut {
             case CLD_DUMPED:
               out << "Died with core dump";
               t = comm::exit_fail;
+              crpcut_register_success(false);
               break;
             default:
               out << "Died for unknown reason, code=" << info.si_code;
+              crpcut_register_success(false);
               t = comm::exit_fail;
             }
           crpcut_death_note = true;
         }
       if (!is_dir_empty(dirname.begin()))
         {
+          if (!crpcut_failed()) crpcut_phase = post_mortem;
           stream::toastream<1024> tcname;
           tcname << *this << '\0';
           tcf::present(crpcut_pid_, comm::dir, crpcut_phase, 0, 0);

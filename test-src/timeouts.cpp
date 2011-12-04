@@ -38,6 +38,7 @@ TESTSUITE(timeouts)
   {
     usleep(50000);
   }
+
   TEST(should_fail_slow_realtime_deadline,
        DEADLINE_REALTIME_MS(100),
        NO_CORE_FILE)
