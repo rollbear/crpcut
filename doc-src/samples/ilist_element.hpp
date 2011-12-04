@@ -51,7 +51,7 @@ public:
   void insert_before(T& e)
   {
     e.p_prev = p_prev;  e.p_next = this;
-    p_prev.p_next = &e; p_prev = &e;
+    p_prev->p_next = &e; p_prev = &e;
   }
   T *next() { return p_next; }
   T *prev() { return p_prev; }
