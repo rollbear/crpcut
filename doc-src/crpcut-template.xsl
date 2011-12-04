@@ -33,8 +33,12 @@
   </xsl:template>
   <xsl:template name="user.header.navigation">
     <table width="100%">
-      <tr><th class="slogan" width="50%" align="left">the <b>Compartmented Robust Posix C++ Unit Test</b> system</th><th></th>
-        <th class="sflogo" witdh="80" align="right">hosted by<br/><a href="http://sourceforge.net/projects/crpcut"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=251473&amp;type=10" width="80" height="15" alt="Get crpcut at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a></th></tr>
+      <tr><th class="slogan"  align="left">the <b>Compartmented Robust Posix C++ Unit Test</b> system</th><th></th>
+<th align="right"><table><tr>
+        <th class="sflogo" witdh="80" align="right">hosted by<br/><a href="http://sourceforge.net/projects/crpcut"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=251473&amp;type=10" width="80" height="15" alt="Get crpcut at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a></th>
+<th width="10"></th>
+<th class="sflogo" align="left">support on<br/><a href="https://plus.google.com/105064351736081696830?prsrc=3" style="text-decoration:none;"><img src="https://ssl.gstatic.com/images/icons/gplus-16.png" alt="" style="border:0;width:16px;height:16px;"/></a></th>
+</tr></table></th></tr>
     </table>
   </xsl:template>
 
