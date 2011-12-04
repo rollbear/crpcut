@@ -1,3 +1,18 @@
+         * Changed the 'phase' pinpointing in violation reports. It
+           now indicates what phase the test was in when the violation
+           occurred. So, a violation phase of 'creating' means that the
+           fixture constructors had not run to completion. A phase of
+           'running' means that the test body has begun execution, but has
+           not run to completion. The phase 'destroying' means that the
+           fixture destructors have begun execution, but have not run to
+           completion. If the phase is 'post_mortem' it means that the
+           destructors have completed without discovering any errors, but
+           on cleaning up after the end of life of the test process,
+           something unexpected turned up. The phase 'child' still means
+           that the test process has fork:ed and a child process has either
+           returned to crpcut, or has called crpcut code (e.g. ASSERT
+           macros.)
+
          * Added character set conversion from test program to output.
            By default the test program is assumed to produce strings in
            UTF-8. The new command line option -C / --output-charset

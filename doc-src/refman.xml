@@ -925,7 +925,7 @@
 
     <para>A test modifier to set the maximum real-time (in milliseconds) a test
       is allowed before it is considered failed. If the real-time consumed
-      is vastly more, the test process is killed.</para>
+      is vastly longer, the test process is killed.</para>
     <formalpara><title>Used in:</title>
       <para>The modifier list of a test definition. See
         <xref linkend="TEST" xrefstyle="select:title"/></para>
@@ -954,6 +954,10 @@
 
 <xi:include href="../sample-output/deadline_realtime.out" parse="text"/>
 </screen>
+      <note>When the time consumed is longer than allowed, but not long
+      long enough to get the test process killed, the reported phase is
+      <constant>destroying</constant>.
+      </note>
       <para>
         See also <xref linkend="DEADLINE_CPU_MS" xrefstyle="select:title"/>
         for a deadline in CPU-time rather than real-time. Both can be
