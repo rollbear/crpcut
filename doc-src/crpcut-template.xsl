@@ -19,6 +19,10 @@
   <xsl:param name="toc.max.depth"            select="2"/>
   <xsl:param name="callout.graphics"         select="0"/>
 
+  <xsl:template name="user.head.content">
+    <link href="https://plus.google.com/105064351736081696830" rel="publisher" />
+  </xsl:template>
+
   <xsl:template match="version">
     <span>VERSION</span>
   </xsl:template>
