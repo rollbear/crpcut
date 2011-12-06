@@ -2765,7 +2765,7 @@
       <programlisting language="c++">
 <xi:include href="../stripped-src/utf8_code.cpp" parse="text"/>
       </programlisting>
-      uses the default <constant>UTF8</constant> encoding for its strings:
+      uses the default <constant>UTF-8</constant> encoding for its strings:
       <screen>
 
 <xi:include href="../sample-output/utf8_code.out" parse="text"/>
@@ -2926,13 +2926,14 @@ int main(int argc, char *argv[])
           <constant>name</constant> of the character set must be legal
           as the <parameter>tocode</parameter> parameter to
           <function>iconv_open</function>()</para>
-          <note>XML output is always using UTF-8</note>
+          <note>XML output is always using <constant>UTF-8</constant></note>
           <para>If no output character set is defined, all textual information
           is presented raw without conversion.</para>
           <para>With a defined output character set, the output is converted
           from the character set defined for the test program.</para>
           <note>The default character set defined for the test program is
-          UTF-8. See <xref linkend="set_charset" xrefstyle="select:title"/>
+          <constant>UTF-8</constant>.
+          See <xref linkend="set_charset" xrefstyle="select:title"/>
           </note>
           <para>Characters that cannot be converted from the default character
           set for the test program, to the output character set, are by default

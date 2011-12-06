@@ -569,7 +569,7 @@
         set.
         If the code you're testing is using another character set, you
         may want to call <xref linkend="set_charset" xrefstyle="select:title"/>
-        before <function>main</function>().
+        before calling <xref linkend="run" xrefstyle="select:title"/>.
         If you run &crpcut; with text output instead of XML output,
         it may be that your terminal is using another character set than
         <constant>UTF-8</constant>. In that case, add the command line
