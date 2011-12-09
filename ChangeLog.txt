@@ -1,3 +1,5 @@
+2011-12-09 1.4.0
+
          * XML formatted output now refers to the XML-schema by versioned
            http-link instead of unversioned file name.
 
