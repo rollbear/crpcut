@@ -3842,6 +3842,7 @@ namespace crpcut {
   void set_charset(const char *set_name);
   const char *get_start_dir();
   const char *get_parameter(const char *name);
+
   int  run(int argc, char *argv[], std::ostream &os = std::cerr);
   int  run(int argc, const char *argv[], std::ostream &os = std::cerr);
 

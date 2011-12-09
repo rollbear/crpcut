@@ -220,7 +220,8 @@ namespace crpcut
     {
       write("<?xml version=\"1.0\"?>\n\n"
             "<crpcut xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-            " xsi:noNamespaceSchemaLocation=\"crpcut.xsd\""
+            " xsi:noNamespaceSchemaLocation="
+            "\"http://crpcut.sourceforge.net/crpcut-" CRPCUT_VERSION_STRING ".xsd\""
             " starttime=\"");
 
       char time_string[sizeof("2009-01-09T23:59:59Z")];

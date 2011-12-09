@@ -1,3 +1,6 @@
+         * XML formatted output now refers to the XML-schema by versioned
+           http-link instead of unversioned file name.
+
          * Changed the 'phase' pinpointing in violation reports. It
            now indicates what phase the test was in when the violation
            occurred. So, a violation phase of 'creating' means that the

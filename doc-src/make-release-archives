@@ -40,6 +40,7 @@ pushd "$tmpdir" || exit 1
 ln -s "${share_dir}/doc/html" "crpcut-doc-${version}" || exit 1
 tar cfjh "${bindir}/${doc_tar}" "crpcut-doc-${version}" || exit 1
 rm "crpcut-doc-${version}" || exit 1
+ln -s "${src_path}/crpcut.xsd" "crpcut-${version}.xsd" || exit 1
 ln -s "${share_dir}/doc/html" "${version}" || exit 1
 ln -s "${bindir}/homepage-${version}.html" .
 ln -s "${bindir}/homepage-${version}.css" .
@@ -48,6 +49,7 @@ tar cfjh "${bindir}/${sf_tar}" * || exit 1
 rm "./homepage-${version}.html"
 rm "./homepage-${version}.css"
 rm "./changelog-${version}.html"
+rm "./crpcut-${version}.xsd"
 rm "$version" || exit 1
 popd
 rmdir "$tmpdir" || exit 1

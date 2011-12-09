@@ -1254,6 +1254,12 @@ namespace crpcut {
             illegal_rep = value;
             break;
           }
+        case 'V':
+          {
+            err_os <<
+              "crpcut-" << CRPCUT_VERSION_STRING << "\n";
+            return -1;
+          }
         default:
           err_os <<
             "Usage: " << argv[0] << " [flags] {testcases}\n"
@@ -1294,6 +1300,8 @@ namespace crpcut {
             "        never fail a test due to time consumption\n\n"
             "   -v, --verbose\n"
             "        verbose mode, print result from passed tests\n\n"
+            "   -V, --version\n"
+            "        print version string and exit\n\n"
             "   -x, --xml\n"
             "        XML output on std-out or non-XML output on file\n";
 
