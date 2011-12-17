@@ -29,6 +29,9 @@
 #include "poll.hpp"
 #include "implementation.hpp"
 #include "output.hpp"
+#include <set>
+#include <string>
+#include <iomanip>
 extern "C" {
 #include <fcntl.h>
 #include <sys/time.h>
@@ -49,6 +52,75 @@ namespace crpcut {
     return "\"" + std::string(p) + "\"";
   }
 
+  tag::tag()
+    : next_(this),
+      prev_(this),
+      failed_(0),
+      passed_(0),
+      importance_(critical)
+  {
+  }
+
+  tag::tag(int len, tag *n)
+    : next_(n),
+      prev_(n->prev_),
+      failed_(0),
+      passed_(0),
+      importance_(critical)
+  {
+    n->prev_ = this;
+    prev_->next_ = this;
+    if (len > longest_name_len_) longest_name_len_ = len;
+  }
+
+  tag::~tag()
+  {
+    tag *p = prev_;
+    next_->prev_ = prev_;
+    p->next_ = next_;
+  }
+
+  void tag::fail()
+  {
+    ++failed_;
+  }
+
+  void tag::pass()
+  {
+    ++passed_;
+  }
+
+  size_t tag::num_failed() const
+  {
+    return failed_;
+  }
+
+  size_t tag::num_passed() const
+  {
+    return passed_;
+  }
+
+  tag *tag::get_next() const
+  {
+    return next_;
+  }
+
+  tag *tag::get_prev() const
+  {
+    return prev_;
+  }
+
+  void tag::set_importance(tag::importance i)
+  {
+    importance_ = i;
+  }
+
+  tag::importance tag::get_importance() const
+  {
+    return importance_;
+  }
+
+  int tag::longest_name_len_;
 
   test_case_factory::test_case_factory()
     : pending_children(0),
@@ -984,6 +1056,76 @@ namespace crpcut {
     return 0;
   }
 
+  namespace {
+    bool match_name(const char *name,
+                    const char *begin, const char *end)
+    {
+      const char *i = begin;
+      while (i != end)
+        {
+          int idx = 0;
+          while (i + idx != end && i[idx] != ',' && i[idx] == name[idx]) ++idx;
+          if (i + idx == end || i[idx] == ',') return true;
+          while (i != end && *i++ != ',')
+            ;
+        }
+      return false;
+    }
+
+    class tag_filter
+    {
+    public:
+      tag_filter(const char * p = 0)
+        : begin_select(0),
+          end_select(0),
+          begin_noncritical(0),
+          end_noncritical(0)
+      {
+        if (p == 0) return;
+
+        subtract_select = *p == '-';
+        if (subtract_select) ++p;
+        begin_select = p;
+        while (*p && *p != '/') ++p;
+        end_select = p;
+        if (*p++ == 0)
+          {
+            begin_noncritical = 0;
+            return;
+          }
+        subtract_noncritical = *p == '-';
+        if (subtract_noncritical) ++p;
+        begin_noncritical = p;
+        while (*p) ++p;
+        end_noncritical = p;
+      }
+      tag::importance lookup(const char *name) const
+      {
+        if (begin_select != end_select) {
+          if (match_name(name, begin_select, end_select) == subtract_select)
+            {
+              return tag::ignored;
+            }
+        }
+        if (*name && begin_noncritical != end_noncritical)
+          {
+            bool match = match_name(name, begin_noncritical, end_noncritical);
+            if (match != subtract_noncritical)
+              {
+                return tag::non_critical;
+              }
+          }
+        return tag::critical;
+      }
+    private:
+      const char *begin_select;
+      const char *end_select;
+      const char *begin_noncritical;
+      const char *end_noncritical;
+      bool subtract_select;
+      bool subtract_noncritical;
+    };
+  }
 
   int test_case_factory::do_run(int argc, const char *argv_[],
                                 std::ostream &err_os)
@@ -1022,6 +1164,18 @@ namespace crpcut {
             if (wrapped::strncmp("output-charset", param, len) == 0)
               {
                 cmd = 'C';
+              }
+            else if (wrapped::strncmp("list", param, len) == 0)
+              {
+                cmd = 'l';
+              }
+            else if (wrapped::strncmp("list-tags", param, len) == 0)
+              {
+                cmd = 'L';
+              }
+            else if (wrapped::strncmp("tags", param, len) == 0)
+              {
+                cmd = 'T';
               }
             else if (wrapped::strncmp("illegal-char", param, len) == 0)
               {
@@ -1062,10 +1216,6 @@ namespace crpcut {
             else if (wrapped::strncmp("single-shot", param, len) == 0)
               {
                 cmd = 's';
-              }
-            else if (wrapped::strncmp("list", param, len) == 0)
-              {
-                cmd = 'l';
               }
             else if (wrapped::strncmp("working-dir", param, len) == 0)
               {
@@ -1157,6 +1307,31 @@ namespace crpcut {
           enable_timeouts = false;
           process_limit_set = 's';
           break;
+        case 'L':
+          {
+            for (tag_list::iterator i = tag_list::begin();
+                 i != tag_list::end();
+                 ++i)
+              {
+                std::cout << i->get_name() << "\n";
+              }
+            return 0;
+          }
+        case 'T':
+          {
+            tag_filter filter(value);
+
+            // tag_list::end refers to the defaulted nameless tag which
+            // we want to include in this loop, hence the odd appearence
+            tag_list::iterator ti = tag_list::begin();
+            tag_list::iterator end = tag_list::end();
+            do
+              {
+                tag::importance i = filter.lookup(ti->get_name());
+                ti->set_importance(i);
+              } while(ti++ != end);
+            break;
+          }
         case 'l':
           {
             const char **names = ++p;
@@ -1166,17 +1341,40 @@ namespace crpcut {
                   "-l must be followed by a (possibly empty) test case list\n";
                 return -1;
               }
+            int longest_tag_len = tag_list::longest_name_len();
+            if (longest_tag_len > 0)
+              {
+                std::cout
+                  << ' ' << std::setw(longest_tag_len) << "tag"
+                  << " : test-name\n="
+                  << std::setfill('=') << std::setw(longest_tag_len) << "==="
+                  << "============\n" << std::setfill(' ');
+              }
             for (implementation::crpcut_test_case_registrator *i
                    = reg.crpcut_get_next();
                  i != &reg;
                  i = i->crpcut_get_next())
               {
+                tag &test_tag = i->crpcut_tag();
+                tag::importance importance = test_tag.get_importance();
+                if (importance == tag::ignored) continue;
+                const char prefix = importance == tag::critical ? '!' : '?';
                 bool matched = !*names;
                 for (const char **name = names; !matched && *name; ++name)
                   {
                     matched = i->crpcut_match_name(*name);
                   }
-                if (matched) std::cout << *i << '\n';
+                if (matched)
+                  {
+                    std::cout << prefix;
+                    if (longest_tag_len > 0)
+                      {
+                        std::cout
+                          << std::setw(longest_tag_len)
+                          << i->crpcut_tag().get_name() << " : ";
+                      }
+                    std::cout << *i << '\n';
+                  }
               }
             return 0;
           }
@@ -1285,6 +1483,8 @@ namespace crpcut {
             "        output character set are to be represented\n\n"
             "   -l, --list\n"
             "        list test cases\n\n"
+            "   -L, --list-tags\n"
+            "        list all tags used by tests in the test program\n\n"
             "   -n, --nodeps\n"
             "        ignore dependencies\n\n"
             "   -o file, --output=file\n"
@@ -1298,6 +1498,13 @@ namespace crpcut {
             "        run only one test case, and run it in the main process\n\n"
             "   -t, --disable-timeouts\n"
             "        never fail a test due to time consumption\n\n"
+            "   -T [select][/non-critical], --tags=[select][/non-critical]\n"
+            "        Select tests to run based on their tag, and which\n"
+            "        tags represent non-critical tests. Both \"select\"\n"
+            "        and \"non-critical\" are comma separated lists of tags.\n"
+            "        Both lists can be empty. If a list begin with \"-\",\n"
+            "        the list is subtractive from the full set.\n"
+            "        Untagged tests cannot be made non-critical.\n\n"
             "   -v, --verbose\n"
             "        verbose mode, print result from passed tests\n\n"
             "   -V, --version\n"
@@ -1324,8 +1531,14 @@ namespace crpcut {
       crpcut_test_case_registrator *i = reg.crpcut_get_next();
       while (i != &reg)
         {
-          ++num_registered_tests;
+          const tag& test_tag = i->crpcut_tag();
+          if (test_tag.get_importance() == tag::ignored)
+            {
+              i = i->crpcut_unlink();
+              continue;
+            }
           crpcut_test_case_registrator *next = i->crpcut_get_next();
+          ++num_registered_tests;
           if (*p)
             {
               i->crpcut_unlink();
@@ -1521,6 +1734,25 @@ namespace crpcut {
                     << "\nFAILED   : "
                     << num_tests_run - num_successful_tests;
           std::cout << std::endl;
+          const tag_list::iterator begin(tag_list::begin());
+          const tag_list::iterator end(tag_list::end());
+          if (begin != end)
+            {
+              std::cout
+                << "By tag\n"
+                << "tag\tPASSED\tFAILED\n";
+              for (tag_list::iterator i = begin; i != end; ++i)
+                {
+                  std::cout
+                    << i->get_name()
+                    << '\t' << i->num_failed()
+                    << '\t' << i->num_passed() << '\n';
+                }
+            }
+          else
+            {
+              std::cout << "no tags\n";
+            }
         }
       while (!output::buffer::is_empty())
         {

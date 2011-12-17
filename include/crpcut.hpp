@@ -1,7 +1,7 @@
 /*
  * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
-
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -873,6 +873,81 @@ namespace crpcut {
 
   typedef enum { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) } test_phase;
 
+  template <typename T>
+  struct crpcut_tag_info;
+  class tag
+  {
+    friend class crpcut_tag_info<crpcut_none>;
+    tag();
+  protected:
+    tag(int len, tag *n);
+    ~tag();
+  public:
+    typedef enum { ignored, critical, non_critical } importance;
+    void fail();
+    void pass();
+    size_t num_failed() const;
+    size_t num_passed() const;
+    virtual const char* get_name() const = 0;
+    tag *get_next() const;
+    tag *get_prev() const;
+    void set_importance(importance i);
+    importance get_importance() const;
+  private:
+    tag *next_;
+    tag *prev_;
+    size_t failed_;
+    size_t passed_;
+    importance importance_;
+    static int longest_name_len_;
+  };
+
+  template <>
+  class crpcut_tag_info<crpcut_none> : public crpcut::tag
+  {
+    crpcut_tag_info() : tag() {}
+    virtual const char* get_name() const { return ""; }
+  public:
+    static tag& obj()
+    {
+      static crpcut_tag_info<crpcut_none> t;
+      return t;
+    }
+    class iterator
+    {
+    public:
+      iterator(crpcut::tag *p_) : p(p_) {}
+      iterator& operator++() { p = p->get_next(); return *this; }
+      iterator operator++(int) { iterator rv(*this); ++(*this); return rv; }
+      crpcut::tag *operator->() { return p; }
+      crpcut::tag& operator&() { return *p; }
+      bool operator==(const iterator &i) const { return p == i.p; }
+      bool operator!=(const iterator &i) const { return p != i.p; }
+    private:
+      crpcut::tag *p;
+    };
+    static iterator begin() { return iterator(obj().get_next()); }
+    static iterator end() { return iterator(&obj()); }
+    static int longest_name_len() { return tag::longest_name_len_; }
+  };
+
+  typedef crpcut_tag_info<crpcut_none> tag_list;
+
+  template <typename T>
+  class crpcut_tag_info : public tag
+  {
+  public:
+    static tag& obj()
+    {
+      static crpcut_tag_info t;
+      return t;
+    }
+  private:
+    crpcut_tag_info() : tag(get_name_len(), &tag_list::obj()) {}
+    int get_name_len() const;
+    virtual const char *get_name() const;
+  };
+
   namespace policies {
 
     class crpcut_exception_translator
@@ -924,6 +999,7 @@ namespace crpcut {
     class default_policy
     {
     protected:
+      typedef crpcut_none crpcut_test_tag;
       typedef void crpcut_run_wrapper;
 
       typedef deaths::crpcut_none crpcut_expected_death_cause;
@@ -1549,6 +1625,7 @@ namespace crpcut {
       void crpcut_activate_reader();
       void crpcut_set_timeout(unsigned long);
       void crpcut_run_test_case();
+      virtual tag& crpcut_tag() const = 0;
     protected:
       virtual void crpcut_do_run_test_case() = 0;
       crpcut_test_case_registrator();
@@ -1581,6 +1658,7 @@ namespace crpcut {
     };
 
   } // namespace implementation
+
 
   class test_case_factory
   {
@@ -1673,6 +1751,7 @@ namespace crpcut {
       virtual bool match_name(const char *) const { return false; }
       virtual std::ostream& print_name(std::ostream &os) const { return os; }
       virtual void crpcut_do_run_test_case() {}
+      virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
     };
 
     typedef datatypes::array_v<implementation::crpcut_test_case_registrator*,
@@ -3897,6 +3976,7 @@ extern crpcut::implementation::namespace_info current_namespace;
                                    crpcut_cputime_timeout_ms)           \
          {                                                              \
            crpcut::implementation::test_suite<crpcut_testsuite_id>::crpcut_reg().add_case(this); \
+           crpcut::crpcut_tag_info<crpcut_test_tag>::obj();             \
          }                                                              \
        virtual void crpcut_do_run_test_case()                           \
        {                                                                \
@@ -3905,6 +3985,10 @@ extern crpcut::implementation::namespace_info current_namespace;
          test_case_name obj;                                            \
          crpcut_manage_test_case_execution(&obj);                       \
          crpcut_prepare_destruction(crpcut_destructor_timeout_ms);      \
+       }                                                                \
+       virtual crpcut::tag& crpcut_tag() const                          \
+       {                                                                \
+         return crpcut::crpcut_tag_info<crpcut_test_tag>::obj();        \
        }                                                                \
     };                                                                  \
     static crpcut_registrator &crpcut_reg()                             \
@@ -4319,6 +4403,42 @@ class crpcut_testsuite_dep
 #define FAIL crpcut::comm::direct_reporter<crpcut::comm::exit_fail>()   \
   << __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__)  "\n"
 
+
+namespace crpcut {
+
+  template <typename T>
+  struct tag_policy : public virtual policies::default_policy
+  {
+    typedef T crpcut_test_tag;
+  };
+
+}
+
+#define WITH_TEST_TAG(tag_name)                         \
+  crpcut::tag_policy<crpcut::crpcut_tags::tag_name>
+
+#define DEFINE_TEST_TAG(tag_name)                               \
+  namespace crpcut {                                            \
+    namespace crpcut_tags {                                     \
+      struct tag_name;                                          \
+    }                                                           \
+    template <>                                                 \
+    inline                                                      \
+    int                                                         \
+    crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
+    ::get_name_len() const                                      \
+    {                                                           \
+      return sizeof(#tag_name) - 1;                             \
+    }                                                           \
+    template <>                                                 \
+    inline                                                      \
+    const char *                                                \
+    crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
+    ::get_name() const                                          \
+    {                                                           \
+      return #tag_name;                                         \
+    }                                                           \
+  }
 
 #ifdef GMOCK_INCLUDE_GMOCK_GMOCK_H_
 

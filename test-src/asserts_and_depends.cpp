@@ -1,7 +1,7 @@
 /*
  * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
-
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -40,11 +40,14 @@ struct fixture
   int num ;
 };
 
-TEST(default_success)
+DEFINE_TEST_TAG(apa)
+DEFINE_TEST_TAG(katt)
+
+TEST(default_success, WITH_TEST_TAG(apa))
 {
 }
 
-TEST(very_slow_success)
+TEST(very_slow_success, WITH_TEST_TAG(katt))
 {
   sleep(1);
 }

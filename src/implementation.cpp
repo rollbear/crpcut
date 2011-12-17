@@ -773,7 +773,12 @@ namespace crpcut {
       assert(crpcut_succeeded() || crpcut_failed());
       if (crpcut_succeeded())
         {
+          crpcut_tag().pass();
           tcf::test_succeeded(this);
+        }
+      else
+        {
+          crpcut_tag().fail();
         }
     }
 
