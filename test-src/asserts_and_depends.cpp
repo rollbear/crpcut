@@ -47,7 +47,7 @@ TEST(default_success, WITH_TEST_TAG(apa))
 {
 }
 
-TEST(very_slow_success, WITH_TEST_TAG(katt))
+TEST(very_slow_success , WITH_TEST_TAG(katt))
 {
   sleep(1);
 }

@@ -30,7 +30,6 @@
 #include "posix_encapsulation.hpp"
 
 
-
 namespace {
 #define STR(s) { "\"" #s "\"", sizeof(#s) + 1 }
 
@@ -210,13 +209,12 @@ namespace crpcut
       }
     }
 
-    xml_formatter::xml_formatter(const char *id, int argc_, const char *argv_[])
+    xml_formatter::xml_formatter(const char *id, int argc, const char *argv[])
       : formatter("UTF-8",
                   xml_replacement(test_case_factory::get_illegal_rep())),
-        last_closed(false),
-        blocked_tests(false),
-        argc(argc_),
-        argv(argv_)
+        last_closed_(false),
+        blocked_tests_(false),
+        tag_summary_(false)
     {
       write("<?xml version=\"1.0\"?>\n\n"
             "<crpcut xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
@@ -299,19 +297,22 @@ namespace crpcut
     }
     void xml_formatter::begin_case(const char *name,
                                    size_t      name_len,
-                                   bool        result)
+                                   bool        result,
+                                   bool        critical)
     {
       write("  <test name=\"");
       write(name, name_len, translated);
+      write("\" critical=\"");
+      write(critical ? "true" : "false");
       write("\" result=");
       static const char *rstring[] = { "\"FAILED\"", "\"PASSED\"" };
       write(rstring[result]);
-      last_closed=false;
+      last_closed_ = false;
     }
 
     void xml_formatter::end_case()
     {
-      if (last_closed)
+      if (last_closed_)
         {
           write("    </log>\n  </test>\n");
         }
@@ -371,9 +372,9 @@ namespace crpcut
                                    unsigned num_run,
                                    unsigned num_failed)
     {
-      if (blocked_tests)
+      if (tag_summary_)
         {
-          write("  </blocked_tests>\n");
+          write("  </tag_summary>\n");
         }
 
       write("  <statistics>\n"
@@ -392,6 +393,9 @@ namespace crpcut
             "    <failed_test_cases>");
       write(num_failed);
       write("</failed_test_cases>\n"
+            "    <failed_non_critical_test_cases>");
+      write(non_critical_fail_sum);
+      write("</failed_non_critical_test_cases>\n"
             "  </statistics>\n"
             "</crpcut>\n");
     }
@@ -406,10 +410,10 @@ namespace crpcut
     void
     xml_formatter::blocked_test(const test_case_reg *i)
     {
-      if (!blocked_tests)
+      if (!blocked_tests_)
         {
           write("  <blocked_tests>\n");
-          blocked_tests = true;
+          blocked_tests_ = true;
         }
       const size_t len = i->crpcut_full_name_len() + 1;
       char *name = static_cast<char*>(alloca(len));
@@ -420,12 +424,40 @@ namespace crpcut
       write("\"/>\n");
     }
 
+    void xml_formatter::tag_summary(const char *tag_name,
+                                    size_t      num_passed,
+                                    size_t      num_failed,
+                                    bool        critical)
+    {
+      if (blocked_tests_)
+        {
+          write("  </blocked_tests>\n");
+          blocked_tests_ = false;
+        }
+      if (!critical) non_critical_fail_sum+= num_failed;
+      if (!*tag_name) return;
+      if (!tag_summary_)
+        {
+          write("  <tag_summary>\n");
+          tag_summary_ = true;
+        }
+      write("    <tag name=\"");
+      write(tag_name);
+      write("\" passed=\"");
+      write(num_passed);
+      write("\" failed=\"");
+      write(num_failed);
+      write("\" critical=\"");
+      write(critical ? "true" : "false");
+      write("\"/>\n");
+    }
+
     void xml_formatter::make_closed()
     {
-      if (!last_closed)
+      if (!last_closed_)
         {
           write(">\n    <log>\n");
-          last_closed = true;
+          last_closed_ = true;
         }
     }
   }
@@ -434,7 +466,7 @@ namespace crpcut
 namespace {
   static const char barrier[] =
     "===============================================================================\n";
-  static const char rlabel[2][9] = { "FAILED: ", "PASSED: " };
+  static const char rlabel[2][9] = { "FAILED", "PASSED" };
   static const char delim[]=
     "-------------------------------------------------------------------------------\n";
 
@@ -456,25 +488,28 @@ namespace crpcut {
     text_formatter::text_formatter(const char *, int, const char**)
       : formatter(output_charset(test_case_factory::get_output_charset()),
                   illegal_replacement(test_case_factory::get_illegal_rep())),
-        conversion_type(test_case_factory::get_output_charset()
-                        ? translated
-                        : verbatim)
+        conversion_type_(test_case_factory::get_output_charset()
+                         ? translated
+                         : verbatim)
     {
     }
 
     void text_formatter::begin_case(const char *name,
                                     size_t      name_len,
-                                    bool        result)
+                                    bool        result,
+                                    bool        critical)
     {
-      did_output = false;
-      write(rlabel[result], 8, conversion_type);
-      write(name, name_len, conversion_type);
-      write("\n", conversion_type);
+      did_output_ = false;
+      write(rlabel[result], 8, conversion_type_);
+      write(critical ? "!" : "?");
+      write(": ");
+      write(name, name_len, conversion_type_);
+      write("\n", conversion_type_);
     }
 
     void text_formatter::end_case()
     {
-      write(barrier, conversion_type);
+      write(barrier, conversion_type_);
     }
 
     void text_formatter::terminate(test_phase   phase,
@@ -483,27 +518,27 @@ namespace crpcut {
                                    const char  *dirname,
                                    size_t       dn_len)
     {
-      if (did_output)
+      if (did_output_)
         {
-          write(delim, conversion_type);
+          write(delim, conversion_type_);
         }
-      did_output = true;
+      did_output_ = true;
       if (dirname)
         {
-          write(dirname, dn_len, conversion_type);
-          write(" is not empty!!\n", conversion_type);
+          write(dirname, dn_len, conversion_type_);
+          write(" is not empty!!\n", conversion_type_);
         }
       if (msg_len)
         {
-          write("phase=", conversion_type);
-          write(phase_str[phase].str, phase_str[phase].len, conversion_type);
-          write("  ", conversion_type);
+          write("phase=", conversion_type_);
+          write(phase_str[phase].str, phase_str[phase].len, conversion_type_);
+          write("  ", conversion_type_);
           write(delim + 8 + phase_str[phase].len,
                 sizeof(delim) - 8 - phase_str[phase].len - 1,
-                conversion_type);
-          write(msg, msg_len, conversion_type);
-          write("\n", conversion_type);
-          write(delim, conversion_type);
+                conversion_type_);
+          write(msg, msg_len, conversion_type_);
+          write("\n", conversion_type_);
+          write(delim, conversion_type_);
         }
     }
 
@@ -512,18 +547,18 @@ namespace crpcut {
                                const char *data,
                                size_t      dlen)
     {
-      if (did_output)
+      if (did_output_)
         {
-          write(delim, conversion_type);
+          write(delim, conversion_type_);
         }
-      did_output = true;
-      const size_t len = write(tag, tlen, conversion_type);
+      did_output_ = true;
+      const size_t len = write(tag, tlen, conversion_type_);
       if (len < sizeof(delim))
         {
-          write(delim + len, sizeof(delim) - len - 1, conversion_type);
+          write(delim + len, sizeof(delim) - len - 1, conversion_type_);
         }
-      write(data, dlen, conversion_type);
-      write("\n", conversion_type);
+      write(data, dlen, conversion_type_);
+      write("\n", conversion_type_);
     }
 
     void text_formatter::statistics(unsigned /* num_registered */,
@@ -531,38 +566,100 @@ namespace crpcut {
                                     unsigned num_run,
                                     unsigned num_failed)
     {
-      write("Total ", conversion_type);
       write(num_selected);
-      write(" test cases selected", conversion_type);
-      write("\nUNTESTED : ", conversion_type);
-      write(num_selected - num_run);
-      write("\nPASSED   : ", conversion_type);
-      write(num_run - num_failed);
-      write("\nFAILED   : ", conversion_type);
-      write(num_failed);
-      write("\n", conversion_type);
+      write(" test cases selected\n", conversion_type_);
+      size_t sum_passed[] = { 0, 0 };
+      size_t sum_failed[] = { 0, 0 };
+      if (tag_results.size() > 1)
+        {
+          const size_t len = tag_list::longest_name_len() + 3*8 + 3;
+          char *buffer = static_cast<char*>(alloca(len));
+          {
+            stream::oastream os(buffer, buffer + len);
+            os << " " << std::setw(tag_list::longest_name_len()) << "tag"
+               << std::setw(8) << "total"
+               << std::setw(8) << "passed"
+               << std::setw(8) << "failed\n";
+              write(os, conversion_type_);
+          }
+          while (!tag_results.empty())
+            {
+              tag_result &t = tag_results.back();
+              if (!t.name.empty())
+                {
+                  stream::oastream os(buffer, buffer + len);
+                  os << (t.critical ? '!' : '?')
+                     << std::setw(tag_list::longest_name_len())
+                     << std::setiosflags(std::ios::left) << t.name
+                     << std::resetiosflags(std::ios::left)
+                     << std::setw(8) << t.passed + t.failed
+                     << std::setw(8) << t.passed
+                     << std::setw(8) << t.failed
+                     << '\n';
+                  write(os, conversion_type_);
+                }
+              sum_passed[t.critical] += t.passed;
+              sum_failed[t.critical] += t.failed;
+              tag_results.pop_back();
+            }
+
+        }
+      write("\nTotal    :     Sum   Critical   Non-critical");
+      char b[]="                                              ";
+      {
+        stream::oastream os(b);
+        os << "\nPASSED   :" << std::setw(8) << num_run - num_failed
+           << std::setw(11) << (num_run - num_failed - sum_passed[0])
+           << std::setw(15) << sum_passed[0];
+        write(os);
+      }
+      {
+        stream::oastream os(b);
+        os << "\nFAILED   :" << std::setw(8) << num_failed
+           << std::setw(11) << num_failed - sum_failed[0]
+           << std::setw(15) << sum_failed[0];
+        write(os);
+      }
+      if (num_selected != num_run)
+        {
+          stream::oastream os(b);
+          os << "\nUNTESTED :" << std::setw(8) << num_selected - num_run;
+          write(os);
+        }
+      write("\n", conversion_type_);
     }
 
     void text_formatter::nonempty_dir(const char *s)
     {
-      write("Files remain under ", conversion_type);
-      write(s, conversion_type);
-      write("\n", conversion_type);
+      write("Files remain under ", conversion_type_);
+      write(s, conversion_type_);
+      write("\n", conversion_type_);
     }
 
     void text_formatter::blocked_test(const test_case_reg *i)
     {
-      if (!blocked_tests)
+      if (!blocked_tests_)
         {
           write("The following tests were blocked from running:\n",
-                conversion_type);
-          blocked_tests = true;
+                conversion_type_);
+          blocked_tests_ = true;
         }
       const size_t len = i->crpcut_full_name_len() + 1;
       char * name = static_cast<char*>(alloca(len));
       stream::oastream os(name, name+len+2);
       os << "  " << *i << '\n';
-      write(os, conversion_type);
+      write(os, conversion_type_);
+    }
+
+    void text_formatter::tag_summary(const char *tag_name,
+                                     size_t      num_passed,
+                                     size_t      num_failed,
+                                     bool        critical)
+    {
+      tag_results.push_back(tag_result(tag_name,
+                                       num_passed,
+                                       num_failed,
+                                       critical));
     }
 
   }

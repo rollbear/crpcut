@@ -27,6 +27,8 @@
 #ifndef OUTPUT_HPP
 #define OUTPUT_HPP
 
+#include <vector>
+
 extern "C" {
   #include <iconv.h>
 }
@@ -129,7 +131,10 @@ namespace crpcut
     public:
       typedef implementation::crpcut_test_case_registrator test_case_reg;
       typedef enum { translated, verbatim } type;
-      virtual void begin_case(const char *name, size_t name_len, bool result) = 0;
+      virtual void begin_case(const char *name,
+                              size_t      name_len,
+                              bool        result,
+                              bool        critical) = 0;
       virtual void end_case()  = 0;
       virtual void terminate(test_phase phase,
                              const char *msg,
@@ -143,6 +148,10 @@ namespace crpcut
                               unsigned num_failed) = 0;
       virtual void nonempty_dir(const  char*)  = 0;
       virtual void blocked_test(const test_case_reg *)  = 0;
+      virtual void tag_summary(const char *tag_name,
+                               size_t      num_passed,
+                               size_t      num_failed,
+                               bool        critical) = 0;
       virtual ~formatter();
     protected:
       formatter(const char *to_charset, const char *subst);
@@ -182,9 +191,12 @@ namespace crpcut
     class xml_formatter : public formatter
     {
     public:
-      xml_formatter(const char *id, int argc_, const char *argv_[]);
+      xml_formatter(const char *id, int argc, const char *argv[]);
       virtual ~xml_formatter();
-      virtual void begin_case(const char *name, size_t name_len, bool result);
+      virtual void begin_case(const char *name,
+                              size_t      name_len,
+                              bool        result,
+                              bool        critical);
       virtual void end_case();
       virtual void terminate(test_phase phase,
                              const char *msg,
@@ -198,22 +210,39 @@ namespace crpcut
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);
       virtual void blocked_test(const test_case_reg*);
+      virtual void tag_summary(const char *tag_name,
+                               size_t      num_passed,
+                               size_t      num_failed,
+                               bool        critical);
     private:
       virtual fixed_string escape(char c) const;
       void make_closed();
 
-      bool                      last_closed;
-      bool                      blocked_tests;
-      int                       argc;
-      const char *const * const argv;
+      size_t                    non_critical_fail_sum;
+      bool                      last_closed_;
+      bool                      blocked_tests_;
+      bool                      tag_summary_;
     };
 
+    struct tag_result
+    {
+      tag_result(std::string n, size_t p, size_t f, bool c)
+        : name(n), passed(p), failed(f), critical(c) {}
+      std::string name;
+      size_t      passed;
+      size_t      failed;
+      bool        critical;
+    };
 
     class text_formatter : public formatter
     {
+      std::vector<tag_result> tag_results;
     public:
       text_formatter(const char *, int, const char**);
-      virtual void begin_case(const char *name, size_t name_len, bool result);
+      virtual void begin_case(const char *name,
+                              size_t      name_len,
+                              bool        result,
+                              bool        critical);
       virtual void end_case();
       virtual void terminate(test_phase phase,
                              const char *msg,
@@ -227,10 +256,14 @@ namespace crpcut
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);
       virtual void blocked_test(const test_case_reg *i);
+      virtual void tag_summary(const char *tag_name,
+                               size_t      num_passed,
+                               size_t      num_failed,
+                               bool        critical);
     private:
-      bool did_output;
-      bool blocked_tests;
-      formatter::type conversion_type;
+      bool did_output_;
+      bool blocked_tests_;
+      formatter::type conversion_type_;
     };
 
   }

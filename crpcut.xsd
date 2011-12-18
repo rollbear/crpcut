@@ -43,6 +43,7 @@
       <xs:element name="log"  type="log" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="name" type="identifier" use="required"/>
+    <xs:attribute name="critical" type="xs:boolean" use="required"/>
     <xs:attribute name="result" type="result" use="required"/>
   </xs:complexType>
 
@@ -56,6 +57,19 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="tag_result">
+    <xs:attribute name="name" type="identifier" use="required"/>
+    <xs:attribute name="passed" type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="failed" type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="critical" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="tag_summary">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element type="tag_result" name="tag"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="statistics">
     <xs:sequence>
       <xs:element name="registered_test_cases" type="xs:unsignedInt"/>
@@ -63,6 +77,7 @@
       <xs:element name="untested_test_cases" type="xs:unsignedInt"/>
       <xs:element name="run_test_cases" type="xs:unsignedInt"/>
       <xs:element name="failed_test_cases" type="xs:unsignedInt"/>
+      <xs:element name="failed_non_critical_test_cases" type="xs:unsignedInt"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -71,6 +86,7 @@
       <xs:element name="test" type="test" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="remaining_files" type="remaining_files" minOccurs="0"/>
       <xs:element name="blocked_tests" type="blocked_tests" minOccurs="0"/>
+      <xs:element name="tag_summary" type="tag_summary" minOccurs="0"/>
       <xs:element name="statistics" type="statistics"/>
     </xs:sequence>
     <xs:attribute name="id" type="xs:string" use="optional"/>

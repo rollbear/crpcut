@@ -497,10 +497,14 @@ namespace crpcut {
     class printer
     {
     public:
-      printer(output::formatter& o_, const char *name, size_t n_len, bool result)
+      printer(output::formatter& o_,
+              const char *name,
+              size_t      n_len,
+              bool        result,
+              bool        critical)
         : o(o_)
       {
-        o.begin_case(name, n_len, result);
+        o.begin_case(name, n_len, result, critical);
       }
       ~printer() { o.end_case(); }
     private:
@@ -739,11 +743,18 @@ namespace crpcut {
             size_t len;
             rv = wrapped::read(fd, &len, sizeof(len));
             assert(rv == sizeof(len));
-            assert(len == 0);
+            bool critical;
+            assert(len == sizeof(critical));
+            rv = wrapped::read(fd, &critical, len);
+            assert(rv == sizeof(critical));
 
             if (s->explicit_fail || !s->success || verbose)
               {
-                printer print(fmt, s->name, s->name_len, s->success && !s->explicit_fail);
+                printer print(fmt,
+                              s->name,
+                              s->name_len,
+                              s->success && !s->explicit_fail,
+                              critical);
 
                 for (event *i = s->history.next();
                      i != static_cast<event*>(&s->history);
@@ -1720,6 +1731,20 @@ namespace crpcut {
                 }
             }
         }
+      {
+        tag_list::iterator i = tag_list::begin();
+        tag_list::iterator end = tag_list::end();
+        do {
+          if (i->get_importance() != tag::ignored &&
+              i->num_passed() + i->num_failed() != 0)
+            {
+              fmt.tag_summary(i->get_name(),
+                              i->num_passed(),
+                              i->num_failed(),
+                              i->get_importance() == tag::critical);
+            }
+        } while (i++ != end);
+      }
       fmt.statistics(num_registered_tests,
                      num_selected_tests,
                      num_tests_run,

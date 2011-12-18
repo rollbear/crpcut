@@ -769,7 +769,8 @@ namespace crpcut {
       tcf::present(crpcut_pid_, t, crpcut_phase, out.size(), out.begin());
       crpcut_register_success(t == comm::exit_ok);
       tcf::return_dir(crpcut_dirnum);
-      tcf::present(crpcut_pid_, comm::end_test, crpcut_phase, 0, 0);
+      bool critical = crpcut_tag().get_importance() == tag::critical;
+      tcf::present(crpcut_pid_, comm::end_test, crpcut_phase, sizeof(critical), (const char*)&critical);
       assert(crpcut_succeeded() || crpcut_failed());
       if (crpcut_succeeded())
         {
