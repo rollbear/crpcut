@@ -29,10 +29,11 @@
 extern "C" {
 #include <unistd.h>
 }
+DEFINE_TEST_TAG(slow)
 
 TESTSUITE(bad_forks)
 {
-  TEST(fork_and_let_child_hang_should_fail, NO_CORE_FILE)
+  TEST(fork_and_let_child_hang_should_fail, NO_CORE_FILE, WITH_TEST_TAG(slow))
   {
     fork();
     for (;;) // don't care much, let crpcut kill it

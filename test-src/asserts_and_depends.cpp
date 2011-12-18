@@ -40,19 +40,19 @@ struct fixture
   int num ;
 };
 
-DEFINE_TEST_TAG(apa)
-DEFINE_TEST_TAG(katt)
+DEFINE_TEST_TAG(slow)
+DEFINE_TEST_TAG(filesystem)
 
-TEST(default_success, WITH_TEST_TAG(apa))
+TEST(default_success)
 {
 }
 
-TEST(very_slow_success , WITH_TEST_TAG(katt))
+TEST(very_slow_success, WITH_TEST_TAG(slow))
 {
   sleep(1);
 }
 
-TEST(should_fail_after_delay)
+TEST(should_fail_after_delay, WITH_TEST_TAG(slow))
 {
   sleep(1);
   exit(1);
@@ -377,13 +377,13 @@ TESTSUITE(depends)
 
 
 
-TEST(should_fail_due_to_left_behind_files)
+TEST(should_fail_due_to_left_behind_files, WITH_TEST_TAG(filesystem))
 {
   std::ofstream of("apa");
   of << "katt";
 }
 
-TEST(should_succeed_reading_file_in_start_dir)
+TEST(should_succeed_reading_file_in_start_dir, WITH_TEST_TAG(filesystem))
 {
   std::string s(crpcut::get_start_dir());
   s+= "/apafil";

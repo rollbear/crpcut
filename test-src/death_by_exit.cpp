@@ -33,6 +33,9 @@ extern "C"
 #include <sys/stat.h> // mkdir
 #include <sys/types.h>
 }
+
+DEFINE_TEST_TAG(filesystem)
+
 TESTSUITE(death)
 {
   TESTSUITE(by_exit)
@@ -57,7 +60,8 @@ TESTSUITE(death)
     }
 
     TEST(should_succeed_with_wiped_working_dir,
-         EXPECT_EXIT(3, WIPE_WORKING_DIR))
+         EXPECT_EXIT(3, WIPE_WORKING_DIR),
+         WITH_TEST_TAG(filesystem))
     {
       {
         mkdir("katt", 0777);
@@ -68,7 +72,8 @@ TESTSUITE(death)
     }
 
     TEST(should_fail_wipe_with_left_behind_files_due_to_wrong_exit_code,
-         EXPECT_EXIT(3, WIPE_WORKING_DIR))
+         EXPECT_EXIT(3, WIPE_WORKING_DIR),
+         WITH_TEST_TAG(filesystem))
     {
       {
         mkdir("katt", 0777);
@@ -79,7 +84,8 @@ TESTSUITE(death)
     }
 
     TEST(should_fail_wipe_with_left_behind_files_due_to_signal_death,
-         EXPECT_EXIT(3, WIPE_WORKING_DIR))
+         EXPECT_EXIT(3, WIPE_WORKING_DIR),
+         WITH_TEST_TAG(filesystem))
     {
       {
         mkdir("katt", 0777);

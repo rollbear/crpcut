@@ -36,9 +36,6 @@ struct fixture
   int num ;
 };
 
-DEFINE_TEST_TAG(katt)
-DEFINE_TEST_TAG(apa)
-
 
 TESTSUITE(verify)
 {
@@ -56,21 +53,20 @@ TESTSUITE(verify)
   }
 
 
-  TEST(should_fail_verify_throw_with_no_exception, WITH_TEST_TAG(apa))
+  TEST(should_fail_verify_throw_with_no_exception)
   {
     int i;
     VERIFY_THROW(i=1, std::exception);
     INFO << "after i=" << i;
   }
 
-  TEST(should_fail_verify_throw_with_unexpected_c_string, WITH_TEST_TAG(apa))
+  TEST(should_fail_verify_throw_with_unexpected_c_string)
   {
     VERIFY_THROW(throw "apa", std::exception);
     INFO << "after";
   }
 
-  TEST(should_fail_verify_throw_with_translated_invalid_argument,
-       WITH_TEST_TAG(katt))
+  TEST(should_fail_verify_throw_with_translated_invalid_argument)
   {
     VERIFY_THROW(throw std::invalid_argument("apa"), std::domain_error);
     INFO << "after";

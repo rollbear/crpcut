@@ -30,6 +30,9 @@ extern "C"
 {
 #include <signal.h>
 }
+
+DEFINE_TEST_TAG(filesystem)
+
 TESTSUITE(output)
 {
   TEST(should_succeed_with_stdout)
@@ -47,7 +50,9 @@ TESTSUITE(output)
     assert("apa" == 0);
   }
 
-  TEST(should_fail_with_death_and_left_behind_core_dump, EXPECT_SIGNAL_DEATH(SIGABRT))
+  TEST(should_fail_with_death_and_left_behind_core_dump,
+       EXPECT_SIGNAL_DEATH(SIGABRT),
+       WITH_TEST_TAG(filesystem))
   {
     assert("apa" == 0);
   }

@@ -33,11 +33,15 @@ extern "C" {
 #include <sys/stat.h> // mkdir
 #include <sys/types.h>
 }
+
+DEFINE_TEST_TAG(filesystem)
+
 TESTSUITE(death)
 {
   TESTSUITE(by_signal)
   {
-    TEST(should_fail_with_left_behind_core_dump_due_to_death_on_signal_11)
+    TEST(should_fail_with_left_behind_core_dump_due_to_death_on_signal_11,
+         WITH_TEST_TAG(filesystem))
     {
       raise(11);
     }
@@ -64,7 +68,7 @@ TESTSUITE(death)
     }
 
     TEST(should_succeed_with_wiped_working_dir,
-         EXPECT_SIGNAL_DEATH(9, WIPE_WORKING_DIR))
+         EXPECT_SIGNAL_DEATH(9, WIPE_WORKING_DIR), WITH_TEST_TAG(filesystem))
     {
       {
         mkdir("katt", 0777);
@@ -75,7 +79,8 @@ TESTSUITE(death)
     }
 
     TEST(should_fail_wipe_with_left_behind_files_due_to_wrong_signal,
-         EXPECT_SIGNAL_DEATH(SIGABRT, WIPE_WORKING_DIR))
+         EXPECT_SIGNAL_DEATH(SIGABRT, WIPE_WORKING_DIR),
+         WITH_TEST_TAG(filesystem))
     {
       {
         mkdir("katt", 0777);
@@ -86,7 +91,8 @@ TESTSUITE(death)
     }
 
     TEST(should_fail_wipe_with_left_behind_files_due_to_exit,
-         EXPECT_SIGNAL_DEATH(SIGABRT, WIPE_WORKING_DIR))
+         EXPECT_SIGNAL_DEATH(SIGABRT, WIPE_WORKING_DIR),
+         WITH_TEST_TAG(filesystem))
     {
       {
         mkdir("katt", 0777);

@@ -30,6 +30,8 @@ extern "C" {
 #include <sys/times.h>
 #include <unistd.h>
 }
+
+DEFINE_TEST_TAG(slow)
 TESTSUITE(timeouts)
 {
   TEST(should_succeed_slow_realtime_deadline,
@@ -41,7 +43,8 @@ TESTSUITE(timeouts)
 
   TEST(should_fail_slow_realtime_deadline,
        DEADLINE_REALTIME_MS(100),
-       NO_CORE_FILE)
+       NO_CORE_FILE,
+       WITH_TEST_TAG(slow))
   {
     usleep(200000);
   }
@@ -54,7 +57,8 @@ TESTSUITE(timeouts)
   TEST(should_fail_slow_cputime_deadline,
        DEADLINE_CPU_MS(100),
        DEADLINE_REALTIME_MS(8000),
-       NO_CORE_FILE)
+       NO_CORE_FILE,
+       WITH_TEST_TAG(slow))
   {
     const clock_t ticks_per_sec = sysconf(_SC_CLK_TCK);
     tms t;
@@ -72,7 +76,8 @@ TESTSUITE(timeouts)
   TEST(should_fail_slow_cputime_deadline_by_death,
        DEADLINE_CPU_MS(100),
        DEADLINE_REALTIME_MS(8000),
-       NO_CORE_FILE)
+       NO_CORE_FILE,
+       WITH_TEST_TAG(slow))
   {
     for (;;)
       {
@@ -81,7 +86,8 @@ TESTSUITE(timeouts)
 
   TEST(should_fail_slow_realtime_deadline_by_death,
        DEADLINE_REALTIME_MS(100),
-       NO_CORE_FILE)
+       NO_CORE_FILE,
+       WITH_TEST_TAG(slow))
   {
     sleep(2);
   }
@@ -95,23 +101,27 @@ TESTSUITE(timeouts)
   };
 
   TEST(should_fail_slow_save_from_stuck_constructor,
+       WITH_TEST_TAG(slow),
        stuck_fixture<true, false>)
   {
   }
 
   TEST(should_fail_quick_save_from_stuck_constructor,
        FIXTURE_CONSTRUCTION_DEADLINE_REALTIME_MS(10),
+       WITH_TEST_TAG(slow),
        stuck_fixture<true, false>)
   {
   }
 
   TEST(should_fail_slow_save_from_stuck_destructor,
+       WITH_TEST_TAG(slow),
        stuck_fixture<false, true>)
   {
   }
 
   TEST(should_fail_quick_save_from_stuck_destructor,
        FIXTURE_DESTRUCTION_DEADLINE_REALTIME_MS(10),
+       WITH_TEST_TAG(slow),
        stuck_fixture<false, true>)
   {
   }
@@ -119,7 +129,8 @@ TESTSUITE(timeouts)
   TESTSUITE(expected)
   {
     TEST(should_succeed_sleep,
-         EXPECT_REALTIME_TIMEOUT_MS(100))
+         EXPECT_REALTIME_TIMEOUT_MS(100),
+         WITH_TEST_TAG(slow))
       {
         sleep(2);
       }
@@ -131,7 +142,8 @@ TESTSUITE(timeouts)
 
     TEST(should_fail_cputime,
          EXPECT_REALTIME_TIMEOUT_MS(100),
-         DEADLINE_CPU_MS(3))
+         DEADLINE_CPU_MS(3),
+         WITH_TEST_TAG(slow))
     {
       for (;;)
         ;
@@ -139,7 +151,8 @@ TESTSUITE(timeouts)
 
     TEST(should_succeed_cputime,
          EXPECT_REALTIME_TIMEOUT_MS(100),
-         DEADLINE_CPU_MS(10))
+         DEADLINE_CPU_MS(10),
+         WITH_TEST_TAG(slow))
     {
       sleep(3);
     }
@@ -157,7 +170,7 @@ TESTSUITE(timeouts)
       }
     }
 
-    TEST(should_fail_realtime_short_sleep)
+    TEST(should_fail_realtime_short_sleep, WITH_TEST_TAG(slow))
     {
       ASSERT_SCOPE_MAX_REALTIME_MS(15)
       {
@@ -176,7 +189,9 @@ TESTSUITE(timeouts)
       }
     }
 
-    TEST(should_fail_cputime_long, DEADLINE_REALTIME_MS(2000))
+    TEST(should_fail_cputime_long,
+         DEADLINE_REALTIME_MS(2000),
+         WITH_TEST_TAG(slow))
     {
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
@@ -206,7 +221,7 @@ TESTSUITE(timeouts)
       INFO << "after";
     }
 
-    TEST(should_fail_verify_realtime_short_sleep)
+    TEST(should_fail_verify_realtime_short_sleep, WITH_TEST_TAG(slow))
     {
       VERIFY_SCOPE_MAX_REALTIME_MS(15)
       {
@@ -227,7 +242,7 @@ TESTSUITE(timeouts)
       INFO << "after";
     }
 
-    TEST(should_fail_verify_cputime_long)
+    TEST(should_fail_verify_cputime_long, WITH_TEST_TAG(slow))
     {
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
