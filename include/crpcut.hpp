@@ -874,7 +874,7 @@ namespace crpcut {
   typedef enum { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) } test_phase;
 
   template <typename T>
-  struct crpcut_tag_info;
+  class crpcut_tag_info;
   class tag
   {
     friend class crpcut_tag_info<crpcut_none>;
