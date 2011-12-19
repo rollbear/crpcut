@@ -1751,33 +1751,65 @@ namespace crpcut {
                      num_tests_run - num_successful_tests);
       if (output_fd != 1 && !quiet)
         {
-          std::cout << "Total " << num_selected_tests
-                    << " test cases selected"
-                    << "\nUNTESTED : "
-                    << num_selected_tests - num_tests_run
-                    << "\nPASSED   : " << num_successful_tests
-                    << "\nFAILED   : "
-                    << num_tests_run - num_successful_tests;
-          std::cout << std::endl;
-          const tag_list::iterator begin(tag_list::begin());
+	  size_t sum_crit_pass = 0;
+	  size_t sum_crit_fail = 0;
+          std::cout << num_selected_tests
+                    << " test cases selected\n";
+	  const tag_list::iterator begin(tag_list::begin());
           const tag_list::iterator end(tag_list::end());
           if (begin != end)
             {
-              std::cout
-                << "By tag\n"
-                << "tag\tPASSED\tFAILED\n";
+	      bool header_displayed = false;
               for (tag_list::iterator i = begin; i != end; ++i)
                 {
+		  if (*i->get_name() == 0) continue;
+		  if (i->num_passed() + i->num_failed() == 0) continue;
+		  if (!header_displayed)
+		    {
+		      std::cout
+			<< ' '
+			<< std::setw(tag_list::longest_name_len()) << "tag"
+			<< std::setw(8) << "total"
+			<< std::setw(8) << "passed"
+			<< std::setw(8) << "failed" << '\n';
+		      
+		      header_displayed = true;
+		    }
+		  if (i->get_importance() == tag::critical)
+		    {
+		      sum_crit_pass+= i->num_passed();
+		      sum_crit_fail+= i->num_failed();
+		    }
+		  char flag = i->get_importance() == tag::critical ? '!' : '?';
                   std::cout
-                    << i->get_name()
-                    << '\t' << i->num_failed()
-                    << '\t' << i->num_passed() << '\n';
+                    << flag
+		    << std::setw(tag_list::longest_name_len()) << i->get_name()
+		    << std::setw(8) << i->num_failed() + i->num_passed()
+                    << std::setw(8) << i->num_failed()
+                    << std::setw(8) << i->num_passed() << '\n';
                 }
             }
-          else
-            {
-              std::cout << "no tags\n";
-            }
+
+	  std::cout << "\n           "
+		    << std::setw(8) << "Sum"
+		    << std::setw(11) << "Critical"
+		    << std::setw(15) << "Non-critical";
+	  std::cout << "\nPASSED   : "
+		    << std::setw(8) << num_successful_tests
+		    << std::setw(11) << sum_crit_pass
+		    << std::setw(15) << num_successful_tests - sum_crit_pass
+		    << "\nFAILED   : "
+		    << std::setw(8) << num_tests_run - num_successful_tests
+		    << std::setw(11) << sum_crit_fail
+		    << std::setw(15)
+		    << num_tests_run - num_successful_tests - sum_crit_fail
+		    << '\n';
+	  if (num_selected_tests != num_tests_run)
+	    {
+	      std::cout << "UNTESTED : "
+			<< std::setw(8) << num_selected_tests - num_tests_run
+			<< '\n';
+	    }
         }
       while (!output::buffer::is_empty())
         {

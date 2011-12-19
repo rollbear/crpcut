@@ -567,7 +567,8 @@ namespace crpcut {
       os << " " << std::setw(tag_list::longest_name_len()) << "tag"
 	 << std::setw(8) << "total"
 	 << std::setw(8) << "passed"
-	 << std::setw(8) << "failed\n";
+	 << std::setw(8) << "failed"
+	 << '\n';
       write(os, conversion_type_);
     }
 
