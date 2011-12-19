@@ -561,6 +561,16 @@ namespace crpcut {
       write("\n", conversion_type_);
     }
 
+    void text_formatter::display_tag_list_header(char *buffer, int len)
+    {
+      stream::oastream os(buffer, buffer + len);
+      os << " " << std::setw(tag_list::longest_name_len()) << "tag"
+	 << std::setw(8) << "total"
+	 << std::setw(8) << "passed"
+	 << std::setw(8) << "failed\n";
+      write(os, conversion_type_);
+    }
+
     void text_formatter::statistics(unsigned /* num_registered */,
                                     unsigned num_selected,
                                     unsigned num_run,
@@ -570,23 +580,21 @@ namespace crpcut {
       write(" test cases selected\n", conversion_type_);
       size_t sum_passed[] = { 0, 0 };
       size_t sum_failed[] = { 0, 0 };
-      if (tag_results.size() > 1)
+      if (tag_results.size() > 0)
         {
-          const size_t len = tag_list::longest_name_len() + 3*8 + 3;
+	  bool header_displayed = false;
+          const int len = tag_list::longest_name_len() + 3*8 + 3;
           char *buffer = static_cast<char*>(alloca(len));
-          {
-            stream::oastream os(buffer, buffer + len);
-            os << " " << std::setw(tag_list::longest_name_len()) << "tag"
-               << std::setw(8) << "total"
-               << std::setw(8) << "passed"
-               << std::setw(8) << "failed\n";
-              write(os, conversion_type_);
-          }
           while (!tag_results.empty())
             {
               tag_result &t = tag_results.back();
               if (!t.name.empty())
                 {
+		  if (!header_displayed)
+		    {
+		      display_tag_list_header(buffer, len);
+		      header_displayed = true;
+		    }
                   stream::oastream os(buffer, buffer + len);
                   os << (t.critical ? '!' : '?')
                      << std::setw(tag_list::longest_name_len())

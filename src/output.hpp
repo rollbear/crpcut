@@ -261,6 +261,7 @@ namespace crpcut
                                size_t      num_failed,
                                bool        critical);
     private:
+      void display_tag_list_header(char *buffer, int len);
       bool did_output_;
       bool blocked_tests_;
       formatter::type conversion_type_;
