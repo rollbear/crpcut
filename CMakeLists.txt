@@ -34,7 +34,7 @@ include(CheckLibraryExists)
 
 set(CRPCUT_LIB_MAJOR_VERSION "1")
 set(CRPCUT_LIB_MINOR_VERSION "4")
-set(CRPCUT_LIB_PATCH_VERSION "0")
+set(CRPCUT_LIB_PATCH_VERSION "1")
 #set(CRPCUT_LIB_ALIAS_VERSION "")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "-O")
@@ -153,7 +153,7 @@ if(HAVE_CLOCK_GETTIME)
 else(HAVE_CLOCK_GETTIME)
   check_library_exists("rt" "clock_gettime" "" RT_HAS_CLOCK_GETTIME)
   if(RT_HAS_CLOCK_GETTIME)
-    set(EXTRA_LIBS "${EXTRA_LIBS} -lrt")
+    set(EXTRA_LIBS "-lrt ${EXTRA_LIBS}")
     set(HAVE_CLOCK_GETTIME 1)
     add_definitions(-DHAVE_CLOCK_GETTIME=librt)
   endif(RT_HAS_CLOCK_GETTIME)
@@ -246,8 +246,7 @@ include_directories(include)
 add_library(crpcut SHARED ${LIB_SRCS})
 set_target_properties(crpcut PROPERTIES
  VERSION ${CRPCUT_LIB_VERSION}
- SOVERSION ${CRPCUT_LIB_SOVERSION}
- LINK_FLAGS "${EXTRA_LIBS}")
+ SOVERSION ${CRPCUT_LIB_SOVERSION})
 
 if(GMOCK_LIBS)
   file(GLOB GMOCK_TEST_SRCS   test-src/gmock.cpp)
@@ -280,9 +279,9 @@ file(GLOB TEST_SRCS
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FEATURE_SELECTION}")
 add_executable(testprog EXCLUDE_FROM_ALL ${TEST_SRCS})
 if (GMOCK_LIBS)
-  target_link_libraries(testprog crpcut "${GMOCK_LIBS}")
+  target_link_libraries(testprog crpcut "${GMOCK_LIBS} ${EXTRA_LIBS}")
 else (GMOCK_LIBS)
-  target_link_libraries(testprog crpcut)
+  target_link_libraries(testprog crpcut ${EXTRA_LIBS})
 endif (GMOCK_LIBS)
 
 find_program(AWK "awk")
@@ -362,7 +361,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(all_tests EXCLUDE_FROM_ALL ${ALL_TESTS})
-    target_link_libraries(all_tests crpcut)
+    target_link_libraries(all_tests crpcut ${EXTRA_LIBS})
     add_custom_target(
       all_tests.out
       all_tests | sed "s/\\(.*\\)/     \\1/g" > all_tests.out
@@ -381,7 +380,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(exit_any_code EXCLUDE_FROM_ALL ${EXIT_ANY_CODE})
-    target_link_libraries(exit_any_code crpcut)
+    target_link_libraries(exit_any_code crpcut ${EXTRA_LIBS})
     add_custom_target(
       exit_any_code.out
       exit_any_code | sed "s/\\(.*\\)/     \\1/g" > exit_any_code.out
@@ -402,7 +401,7 @@ if (WITH_HTML_DOCS)
       VERBATIM)
     add_executable(assert_eq_fails EXCLUDE_FROM_ALL ${ASSERT_EQ_FAILS})
     set_target_properties(assert_eq_fails PROPERTIES COMPILE_FLAGS "-ggdb")
-    target_link_libraries(assert_eq_fails crpcut)
+    target_link_libraries(assert_eq_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_eq_fails.out
       assert_eq_fails | sed "s/\\(.*\\)/     \\1/g" > assert_eq_fails.out
@@ -429,7 +428,7 @@ if (WITH_HTML_DOCS)
       VERBATIM)
     add_executable(verify_eq_fails EXCLUDE_FROM_ALL ${VERIFY_EQ_FAILS})
     set_target_properties(verify_eq_fails PROPERTIES COMPILE_FLAGS "-ggdb")
-    target_link_libraries(verify_eq_fails crpcut)
+    target_link_libraries(verify_eq_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_eq_fails.out
       verify_eq_fails | sed "s/\\(.*\\)/     \\1/g" > verify_eq_fails.out
@@ -456,7 +455,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_ge_fails EXCLUDE_FROM_ALL ${ASSERT_GE_FAILS})
-    target_link_libraries(assert_ge_fails crpcut)
+    target_link_libraries(assert_ge_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_ge_fails.out
       assert_ge_fails | sed "s/\\(.*\\)/     \\1/g" > assert_ge_fails.out
@@ -475,7 +474,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_ge_fails EXCLUDE_FROM_ALL ${VERIFY_GE_FAILS})
-    target_link_libraries(verify_ge_fails crpcut)
+    target_link_libraries(verify_ge_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_ge_fails.out
       verify_ge_fails | sed "s/\\(.*\\)/     \\1/g" > verify_ge_fails.out
@@ -494,7 +493,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_le_fails EXCLUDE_FROM_ALL ${ASSERT_LE_FAILS})
-    target_link_libraries(assert_le_fails crpcut)
+    target_link_libraries(assert_le_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_le_fails.out
       assert_le_fails | sed "s/\\(.*\\)/     \\1/g" > assert_le_fails.out
@@ -513,7 +512,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_le_fails EXCLUDE_FROM_ALL ${VERIFY_LE_FAILS})
-    target_link_libraries(verify_le_fails crpcut)
+    target_link_libraries(verify_le_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_le_fails.out
       verify_le_fails | sed "s/\\(.*\\)/     \\1/g" > verify_le_fails.out
@@ -532,7 +531,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_lt_fails EXCLUDE_FROM_ALL ${ASSERT_LT_FAILS})
-    target_link_libraries(assert_lt_fails crpcut)
+    target_link_libraries(assert_lt_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_lt_fails.out
       assert_lt_fails | sed "s/\\(.*\\)/     \\1/g" > assert_lt_fails.out
@@ -551,7 +550,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_lt_fails EXCLUDE_FROM_ALL ${VERIFY_LT_FAILS})
-    target_link_libraries(verify_lt_fails crpcut)
+    target_link_libraries(verify_lt_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_lt_fails.out
       verify_lt_fails | sed "s/\\(.*\\)/     \\1/g" > verify_lt_fails.out
@@ -570,7 +569,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_gt_fails EXCLUDE_FROM_ALL ${ASSERT_GT_FAILS})
-    target_link_libraries(assert_gt_fails crpcut)
+    target_link_libraries(assert_gt_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_gt_fails.out
       assert_gt_fails | sed "s/\\(.*\\)/     \\1/g" > assert_gt_fails.out
@@ -589,7 +588,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_gt_fails EXCLUDE_FROM_ALL ${VERIFY_GT_FAILS})
-    target_link_libraries(verify_gt_fails crpcut)
+    target_link_libraries(verify_gt_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_gt_fails.out
       verify_gt_fails | sed "s/\\(.*\\)/     \\1/g" > verify_gt_fails.out
@@ -608,7 +607,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_ne_fails EXCLUDE_FROM_ALL ${ASSERT_NE_FAILS})
-    target_link_libraries(assert_ne_fails crpcut)
+    target_link_libraries(assert_ne_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_ne_fails.out
       assert_ne_fails | sed "s/\\(.*\\)/     \\1/g" > assert_ne_fails.out
@@ -627,7 +626,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_ne_fails EXCLUDE_FROM_ALL ${VERIFY_NE_FAILS})
-    target_link_libraries(verify_ne_fails crpcut)
+    target_link_libraries(verify_ne_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_ne_fails.out
       verify_ne_fails | sed "s/\\(.*\\)/     \\1/g" > verify_ne_fails.out
@@ -647,7 +646,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_false_fails EXCLUDE_FROM_ALL ${ASSERT_FALSE_FAILS})
-    target_link_libraries(assert_false_fails crpcut)
+    target_link_libraries(assert_false_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_false_fails.out
       assert_false_fails | sed "s/\\(.*\\)/     \\1/g" > assert_false_fails.out
@@ -668,7 +667,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_false_fails EXCLUDE_FROM_ALL ${VERIFY_FALSE_FAILS})
-    target_link_libraries(verify_false_fails crpcut)
+    target_link_libraries(verify_false_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_false_fails.out
       verify_false_fails | sed "s/\\(.*\\)/     \\1/g" > verify_false_fails.out
@@ -688,7 +687,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_true_fails EXCLUDE_FROM_ALL ${ASSERT_TRUE_FAILS})
-    target_link_libraries(assert_true_fails crpcut)
+    target_link_libraries(assert_true_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_true_fails.out
       assert_true_fails | sed "s/\\(.*\\)/     \\1/g" > assert_true_fails.out
@@ -707,7 +706,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(describe_exception EXCLUDE_FROM_ALL ${DESCRIBE_EXCEPTION})
-    target_link_libraries(describe_exception crpcut)
+    target_link_libraries(describe_exception crpcut ${EXTRA_LIBS})
     add_custom_target(
       describe_exception.out
       describe_exception | sed "s/\\(.*\\)/     \\1/g" > describe_exception.out
@@ -727,7 +726,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_true_fails EXCLUDE_FROM_ALL ${VERIFY_TRUE_FAILS})
-    target_link_libraries(verify_true_fails crpcut)
+    target_link_libraries(verify_true_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_true_fails.out
       verify_true_fails | sed "s/\\(.*\\)/     \\1/g" > verify_true_fails.out
@@ -748,7 +747,7 @@ if (WITH_HTML_DOCS)
       VERBATIM)
     add_executable(assert_no_throw_fails EXCLUDE_FROM_ALL
       ${ASSERT_NO_THROW_FAILS})
-    target_link_libraries(assert_no_throw_fails crpcut)
+    target_link_libraries(assert_no_throw_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_no_throw_fails.out
       assert_no_throw_fails | sed "s/\\(.*\\)/     \\1/g" > assert_no_throw_fails.out
@@ -769,7 +768,7 @@ if (WITH_HTML_DOCS)
       VERBATIM)
     add_executable(verify_no_throw_fails EXCLUDE_FROM_ALL
       ${VERIFY_NO_THROW_FAILS})
-    target_link_libraries(verify_no_throw_fails crpcut)
+    target_link_libraries(verify_no_throw_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_no_throw_fails.out
       verify_no_throw_fails | sed "s/\\(.*\\)/     \\1/g" > verify_no_throw_fails.out
@@ -789,7 +788,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_throw_fails EXCLUDE_FROM_ALL ${ASSERT_THROW_FAILS})
-    target_link_libraries(assert_throw_fails crpcut)
+    target_link_libraries(assert_throw_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_throw_fails.out
       assert_throw_fails | sed "s/\\(.*\\)/     \\1/g" > assert_throw_fails.out
@@ -809,7 +808,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_throw_fails EXCLUDE_FROM_ALL ${VERIFY_THROW_FAILS})
-    target_link_libraries(verify_throw_fails crpcut)
+    target_link_libraries(verify_throw_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_throw_fails.out
       verify_throw_fails | sed "s/\\(.*\\)/     \\1/g" > verify_throw_fails.out
@@ -829,7 +828,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_pred_fails EXCLUDE_FROM_ALL ${ASSERT_PRED_FAILS})
-    target_link_libraries(assert_pred_fails crpcut)
+    target_link_libraries(assert_pred_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_pred_fails.out
       assert_pred_fails | sed "s/\\(.*\\)/     \\1/g" > assert_pred_fails.out
@@ -848,7 +847,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_pred_fails EXCLUDE_FROM_ALL ${VERIFY_PRED_FAILS})
-    target_link_libraries(verify_pred_fails crpcut)
+    target_link_libraries(verify_pred_fails crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_pred_fails.out
       verify_pred_fails | sed "s/\\(.*\\)/     \\1/g" > verify_pred_fails.out
@@ -867,7 +866,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_scope_max_cpu EXCLUDE_FROM_ALL ${ASSERT_SCOPE_MAX_CPUTIME})
-    target_link_libraries(assert_scope_max_cpu crpcut)
+    target_link_libraries(assert_scope_max_cpu crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_scope_max_cpu.out
       assert_scope_max_cpu | sed "s/\\(.*\\)/     \\1/g" > assert_scope_max_cpu.out
@@ -886,7 +885,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_scope_max_cpu EXCLUDE_FROM_ALL ${VERIFY_SCOPE_MAX_CPUTIME})
-    target_link_libraries(verify_scope_max_cpu crpcut)
+    target_link_libraries(verify_scope_max_cpu crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_scope_max_cpu.out
       verify_scope_max_cpu | sed "s/\\(.*\\)/     \\1/g" > verify_scope_max_cpu.out
@@ -905,7 +904,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_scope_max_real EXCLUDE_FROM_ALL ${ASSERT_PRED_FAILS})
-    target_link_libraries(assert_scope_max_real crpcut)
+    target_link_libraries(assert_scope_max_real crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_scope_max_real.out
       assert_scope_max_real | sed "s/\\(.*\\)/     \\1/g" > assert_scope_max_real.out
@@ -924,7 +923,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_scope_max_real EXCLUDE_FROM_ALL ${VERIFY_SCOPE_MAX_REALTIME})
-    target_link_libraries(verify_scope_max_real crpcut)
+    target_link_libraries(verify_scope_max_real crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_scope_max_real.out
       verify_scope_max_real | sed "s/\\(.*\\)/     \\1/g" > verify_scope_max_real.out
@@ -944,7 +943,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_scope_min_real EXCLUDE_FROM_ALL ${ASSERT_SCOPE_MIN_REALTIME})
-    target_link_libraries(assert_scope_min_real crpcut)
+    target_link_libraries(assert_scope_min_real crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_scope_min_real.out
       assert_scope_min_real | sed "s/\\(.*\\)/     \\1/g" > assert_scope_min_real.out
@@ -964,7 +963,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_scope_min_real EXCLUDE_FROM_ALL ${VERIFY_SCOPE_MIN_REAL})
-    target_link_libraries(verify_scope_min_real crpcut)
+    target_link_libraries(verify_scope_min_real crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_scope_min_real.out
       verify_scope_min_real | sed "s/\\(.*\\)/     \\1/g" > verify_scope_min_real.out
@@ -984,7 +983,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(assert_scope_leak_free EXCLUDE_FROM_ALL ${ASSERT_SCOPE_LEAK_FREE})
-    target_link_libraries(assert_scope_leak_free crpcut)
+    target_link_libraries(assert_scope_leak_free crpcut ${EXTRA_LIBS})
     add_custom_target(
       assert_scope_leak_free.out
       assert_scope_leak_free -b | c++filt | sed "s/\\(.*\\)/     \\1/g"  > assert_scope_leak_free.out
@@ -1003,7 +1002,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(verify_scope_leak_free EXCLUDE_FROM_ALL ${VERIFY_SCOPE_LEAK_FREE})
-    target_link_libraries(verify_scope_leak_free crpcut)
+    target_link_libraries(verify_scope_leak_free crpcut ${EXTRA_LIBS})
     add_custom_target(
       verify_scope_leak_free.out
       verify_scope_leak_free -b | c++filt | sed "s/\\(.*\\)/     \\1/g" > verify_scope_leak_free.out
@@ -1023,7 +1022,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(usleep EXCLUDE_FROM_ALL ${ASSERT_PRED_FAILS})
-    target_link_libraries(usleep crpcut)
+    target_link_libraries(usleep crpcut ${EXTRA_LIBS})
     add_custom_target(
       usleep.out
       usleep "-v" | sed "s/\\(.*\\)/     \\1/g" > usleep.out
@@ -1043,7 +1042,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(wrap_func EXCLUDE_FROM_ALL ${WRAP_FUNC})
-    target_link_libraries(wrap_func crpcut)
+    target_link_libraries(wrap_func crpcut ${EXTRA_LIBS})
     add_custom_target(
       wrap_func.out
       wrap_func | sed "s/\\(.*\\)/     \\1/g" > wrap_func.out
@@ -1062,7 +1061,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(wrap_v_func EXCLUDE_FROM_ALL ${WRAP_V_FUNC})
-    target_link_libraries(wrap_v_func crpcut)
+    target_link_libraries(wrap_v_func crpcut ${EXTRA_LIBS})
     add_custom_target(
       wrap_v_func.out
       wrap_v_func | sed "s/\\(.*\\)/     \\1/g" > wrap_v_func.out
@@ -1081,7 +1080,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(wrapped EXCLUDE_FROM_ALL ${WRAPPED})
-    target_link_libraries(wrapped crpcut)
+    target_link_libraries(wrapped crpcut ${EXTRA_LIBS})
     add_custom_target(
       wrapped.out
       wrapped | sed "s/\\(.*\\)/     \\1/g" > wrapped.out
@@ -1100,7 +1099,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(collate EXCLUDE_FROM_ALL ${COLLATE})
-    target_link_libraries(collate crpcut)
+    target_link_libraries(collate crpcut ${EXTRA_LIBS})
     add_custom_target(
       collate.out
       collate | sed "s/\\(.*\\)/     \\1/g" > collate.out
@@ -1119,7 +1118,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(collate_case EXCLUDE_FROM_ALL ${COLLATE_CASE})
-    target_link_libraries(collate_case crpcut)
+    target_link_libraries(collate_case crpcut ${EXTRA_LIBS})
     add_custom_target(
       collate_case.out
       collate_case | sed "s/\\(.*\\)/     \\1/g" > collate_case.out
@@ -1138,7 +1137,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(deadline_cpu EXCLUDE_FROM_ALL ${DEADLINE_CPU})
-    target_link_libraries(deadline_cpu crpcut)
+    target_link_libraries(deadline_cpu crpcut ${EXTRA_LIBS})
     add_custom_target(
       deadline_cpu.out
       deadline_cpu | sed "s/\\(.*\\)/     \\1/g" > deadline_cpu.out
@@ -1157,7 +1156,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(deadline_realtime EXCLUDE_FROM_ALL ${DEADLINE_REALTIME})
-    target_link_libraries(deadline_realtime crpcut)
+    target_link_libraries(deadline_realtime crpcut ${EXTRA_LIBS})
     add_custom_target(
       deadline_realtime.out
       deadline_realtime | sed "s/\\(.*\\)/     \\1/g" > deadline_realtime.out
@@ -1176,7 +1175,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(depends_on EXCLUDE_FROM_ALL ${DEPENDS_ON})
-    target_link_libraries(depends_on crpcut)
+    target_link_libraries(depends_on crpcut ${EXTRA_LIBS})
     add_custom_target(
       depends_on.out
       depends_on | sed "s/\\(.*\\)/     \\1/g" > depends_on.out
@@ -1195,7 +1194,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(expect_exception EXCLUDE_FROM_ALL ${EXPECT_EXCEPTION})
-    target_link_libraries(expect_exception crpcut)
+    target_link_libraries(expect_exception crpcut ${EXTRA_LIBS})
     add_custom_target(
       expect_exception.out
       expect_exception | sed "s/\\(.*\\)/     \\1/g" > expect_exception.out
@@ -1214,7 +1213,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(expect_exit EXCLUDE_FROM_ALL ${EXPECT_EXIT})
-    target_link_libraries(expect_exit crpcut)
+    target_link_libraries(expect_exit crpcut ${EXTRA_LIBS})
     add_custom_target(
       expect_exit.out
       expect_exit | sed "s/\\(.*\\)/     \\1/g" > expect_exit.out
@@ -1233,7 +1232,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(expect_signal_death EXCLUDE_FROM_ALL ${EXPECT_SIGNAL_DEATH})
-    target_link_libraries(expect_signal_death crpcut)
+    target_link_libraries(expect_signal_death crpcut ${EXTRA_LIBS})
     add_custom_target(
       expect_signal_death.out
       expect_signal_death | sed "s/\\(.*\\)/     \\1/g" > expect_signal_death.out
@@ -1253,7 +1252,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(expect_realtime_timeout EXCLUDE_FROM_ALL ${EXPECT_EXCEPTION})
-    target_link_libraries(expect_realtime_timeout crpcut)
+    target_link_libraries(expect_realtime_timeout crpcut ${EXTRA_LIBS})
     add_custom_target(
       expect_realtime_timeout.out
       expect_realtime_timeout | sed "s/\\(.*\\)/     \\1/g" > expect_realtime_timeout.out
@@ -1272,7 +1271,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(fail EXCLUDE_FROM_ALL ${FAIL})
-    target_link_libraries(fail crpcut)
+    target_link_libraries(fail crpcut ${EXTRA_LIBS})
     add_custom_target(
       fail.out
       fail | sed "s/\\(.*\\)/     \\1/g" > fail.out
@@ -1292,7 +1291,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(fixture_construction_timeout EXCLUDE_FROM_ALL ${CONSTR_TIMEOUT})
-    target_link_libraries(fixture_construction_timeout crpcut)
+    target_link_libraries(fixture_construction_timeout crpcut ${EXTRA_LIBS})
     add_custom_target(
       fixture_construction_timeout.out
       fixture_construction_timeout | sed "s/\\(.*\\)/     \\1/g" > fixture_construction_timeout.out
@@ -1311,7 +1310,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(fixture_destruction_timeout EXCLUDE_FROM_ALL ${DESTR_TIMEOUT})
-    target_link_libraries(fixture_destruction_timeout crpcut)
+    target_link_libraries(fixture_destruction_timeout crpcut ${EXTRA_LIBS})
     add_custom_target(
       fixture_destruction_timeout.out
       fixture_destruction_timeout | sed "s/\\(.*\\)/     \\1/g" > fixture_destruction_timeout.out
@@ -1331,7 +1330,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(info EXCLUDE_FROM_ALL ${INFO})
-    target_link_libraries(info crpcut)
+    target_link_libraries(info crpcut ${EXTRA_LIBS})
     add_custom_target(
       info.out
       info | sed "s/\\(.*\\)/     \\1/g" > info.out
@@ -1350,7 +1349,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(no_core EXCLUDE_FROM_ALL ${NO_CORE})
-    target_link_libraries(no_core crpcut)
+    target_link_libraries(no_core crpcut ${EXTRA_LIBS})
     add_custom_target(
       no_core.out
       no_core | sed "s/\\(.*\\)/     \\1/g" > no_core.out
@@ -1369,7 +1368,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(infinite_loop EXCLUDE_FROM_ALL ${INFINITE_LOOP})
-    target_link_libraries(infinite_loop crpcut)
+    target_link_libraries(infinite_loop crpcut ${EXTRA_LIBS})
     add_custom_target(
       infinite_loop.out
       infinite_loop | sed "s/\\(.*\\)/     \\1/g" > infinite_loop.out
@@ -1388,7 +1387,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(file_fail EXCLUDE_FROM_ALL ${FILE_FAIL})
-    target_link_libraries(file_fail crpcut)
+    target_link_libraries(file_fail crpcut ${EXTRA_LIBS})
     add_custom_target(
       file_fail.out
       file_fail | sed "s/\\(.*\\)/     \\1/g" > file_fail.out
@@ -1407,7 +1406,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(ambiguous_fix EXCLUDE_FROM_ALL ${AMBIGUOUS_FIX})
-    target_link_libraries(ambiguous_fix crpcut)
+    target_link_libraries(ambiguous_fix crpcut ${EXTRA_LIBS})
     add_custom_target(
       ambiguous_fix.out
       ambiguous_fix | sed "s/\\(.*\\)/     \\1/g" > ambiguous_fix.out
@@ -1426,7 +1425,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(simple_fix EXCLUDE_FROM_ALL ${SIMPLE_FIX})
-    target_link_libraries(simple_fix crpcut)
+    target_link_libraries(simple_fix crpcut ${EXTRA_LIBS})
     add_custom_target(
       simple_fix.out
       simple_fix | sed "s/\\(.*\\)/     \\1/g" > simple_fix.out
@@ -1445,7 +1444,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(file_fix EXCLUDE_FROM_ALL ${FILE_FIX})
-    target_link_libraries(file_fix crpcut)
+    target_link_libraries(file_fix crpcut ${EXTRA_LIBS})
     add_custom_target(
       file_fix.out
       file_fix | sed "s/\\(.*\\)/     \\1/g" > file_fix.out
@@ -1464,7 +1463,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(abs_diff EXCLUDE_FROM_ALL ${ABS_DIFF})
-    target_link_libraries(abs_diff crpcut)
+    target_link_libraries(abs_diff crpcut ${EXTRA_LIBS})
     add_custom_target(
       abs_diff.out
       abs_diff | sed "s/\\(.*\\)/     \\1/g" > abs_diff.out
@@ -1484,7 +1483,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(relative_diff EXCLUDE_FROM_ALL ${RELATIVE_DIFF})
-    target_link_libraries(relative_diff crpcut)
+    target_link_libraries(relative_diff crpcut ${EXTRA_LIBS})
     add_custom_target(
       relative_diff.out
       relative_diff | sed "s/\\(.*\\)/     \\1/g" > relative_diff.out
@@ -1503,7 +1502,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(ulps_diff EXCLUDE_FROM_ALL ${ULPS_DIFF})
-    target_link_libraries(ulps_diff crpcut)
+    target_link_libraries(ulps_diff crpcut ${EXTRA_LIBS})
     add_custom_target(
       ulps_diff.out
       ulps_diff | sed "s/\\(.*\\)/     \\1/g" > ulps_diff.out
@@ -1522,7 +1521,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(regex EXCLUDE_FROM_ALL ${REGEX})
-    target_link_libraries(regex crpcut)
+    target_link_libraries(regex crpcut ${EXTRA_LIBS})
     add_custom_target(
       regex.out
       regex | sed "s/\\(.*\\)/     \\1/g" > regex.out
@@ -1541,7 +1540,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(bare-minimum EXCLUDE_FROM_ALL ${BARE_MINIMUM})
-    target_link_libraries(bare-minimum crpcut)
+    target_link_libraries(bare-minimum crpcut ${EXTRA_LIBS})
     add_custom_target(
       bare-minimum-list.out
       bare-minimum "-l"| sed "s/\\(.*\\)/     \\1/g" > bare-minimum-list.out
@@ -1572,7 +1571,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(iso8859_1_code EXCLUDE_FROM_ALL ${ISO8859_1_CODE})
-    target_link_libraries(iso8859_1_code crpcut)
+    target_link_libraries(iso8859_1_code crpcut ${EXTRA_LIBS})
     add_custom_target(
       iso8859_1_code.out
       iso8859_1_code -v --output-charset=UTF8 | sed "s/\\(.*\\)/     \\1/g" > iso8859_1_code.out
@@ -1591,7 +1590,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(utf8_code EXCLUDE_FROM_ALL ${UTF8_CODE})
-    target_link_libraries(utf8_code crpcut)
+    target_link_libraries(utf8_code crpcut ${EXTRA_LIBS})
     add_custom_target(
       utf8_code.out
       utf8_code  -v --output-charset=UTF8 | sed "s/\\(.*\\)/     \\1/g" > utf8_code.out
@@ -1612,7 +1611,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(simple_testsuite EXCLUDE_FROM_ALL ${SIMPLE_TESTSUITE})
-    target_link_libraries(simple_testsuite crpcut)
+    target_link_libraries(simple_testsuite crpcut ${EXTRA_LIBS})
     add_custom_target(
       simple_testsuite.out
       simple_testsuite | sed "s/\\(.*\\)/     \\1/g" > simple_testsuite.out
@@ -1631,7 +1630,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(report_example EXCLUDE_FROM_ALL ${REPORT_EXAMPLE})
-    target_link_libraries(report_example crpcut)
+    target_link_libraries(report_example crpcut ${EXTRA_LIBS})
     set_target_properties(report_example PROPERTIES COMPILE_FLAGS "-ggdb")
     add_custom_target(
       report_example_human.out
@@ -1664,7 +1663,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(itest EXCLUDE_FROM_ALL ${ITEST})
-    target_link_libraries(itest crpcut)
+    target_link_libraries(itest crpcut ${EXTRA_LIBS})
     set_target_properties(itest PROPERTIES COMPILE_FLAGS "-ggdb")
     add_custom_target(
       itest.out
@@ -1691,7 +1690,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(symtable-test EXCLUDE_FROM_ALL ${SYMTABLE-TEST})
-    target_link_libraries(symtable-test crpcut)
+    target_link_libraries(symtable-test crpcut ${EXTRA_LIBS})
     add_custom_target(
       symtable-test.out
       symtable-test "-v"  | sed "s/\\(.*\\)/     \\1/g" > symtable-test.out
@@ -1707,7 +1706,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(symtable-test2 EXCLUDE_FROM_ALL ${SYMTABLE-TEST2})
-    target_link_libraries(symtable-test2 crpcut)
+    target_link_libraries(symtable-test2 crpcut ${EXTRA_LIBS})
     add_custom_target(
       symtable-test2.out
       symtable-test2  | sed "s/\\(.*\\)/     \\1/g" > symtable-test2.out
@@ -1727,7 +1726,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(suite-example EXCLUDE_FROM_ALL ${SUITE-EXAMPLE})
-    target_link_libraries(suite-example crpcut)
+    target_link_libraries(suite-example crpcut ${EXTRA_LIBS})
     add_custom_target(
       suite-example.out
       suite-example "-v" "-n" "normal_access" | sed "s/\\(.*\\)/     \\1/g" > suite-example.out
@@ -1747,7 +1746,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(string-template-fix EXCLUDE_FROM_ALL ${STRING-TEMPLATE-FIX})
-    target_link_libraries(string-template-fix crpcut)
+    target_link_libraries(string-template-fix crpcut ${EXTRA_LIBS})
     add_custom_target(
       string-template-fix.out
       string-template-fix "-v" | sed "s/\\(.*\\)/     \\1/g" > string-template-fix.out
@@ -1766,7 +1765,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(regex-simple EXCLUDE_FROM_ALL ${REGEX-SIMPLE})
-    target_link_libraries(regex-simple crpcut)
+    target_link_libraries(regex-simple crpcut ${EXTRA_LIBS})
     add_custom_target(
       regex-simple.out
       regex-simple "-v" | sed "s/\\(.*\\)/     \\1/g" > regex-simple.out
@@ -1794,7 +1793,7 @@ if (WITH_HTML_DOCS)
       VERBATIM)
     add_executable(collate_example EXCLUDE_FROM_ALL
       ${COLLATE_EXAMPLE} ${SORTED_NAMES})
-    target_link_libraries(collate_example crpcut)
+    target_link_libraries(collate_example crpcut ${EXTRA_LIBS})
     add_custom_target(
       collate_example.out
       collate_example "-v" | sed "s/\\(.*\\)/     \\1/g" > collate_example.out
@@ -1820,7 +1819,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(heap-check EXCLUDE_FROM_ALL ${HEAP-CHECK})
-    target_link_libraries(heap-check crpcut)
+    target_link_libraries(heap-check crpcut ${EXTRA_LIBS})
     add_custom_target(
       heap-check.out
       heap-check -b | c++filt | sed "s/\\(.*\\)/     \\1/g" > heap-check.out
@@ -1847,7 +1846,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(process-test EXCLUDE_FROM_ALL ${PROCESS-TEST})
-    target_link_libraries(process-test crpcut)
+    target_link_libraries(process-test crpcut ${EXTRA_LIBS})
     add_custom_target(
       process-test.out
       process-test | sed "s/\\(.*\\)/     \\1/g" > process-test.out
@@ -1866,7 +1865,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(simple-pred EXCLUDE_FROM_ALL ${SIMPLE-PRED})
-    target_link_libraries(simple-pred crpcut)
+    target_link_libraries(simple-pred crpcut ${EXTRA_LIBS})
     add_custom_target(
       simple-pred.out
       simple-pred  | sed "s/\\(.*\\)/     \\1/g" > simple-pred.out
@@ -1885,7 +1884,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(template-pred EXCLUDE_FROM_ALL ${TEMPLATE-PRED})
-    target_link_libraries(template-pred crpcut)
+    target_link_libraries(template-pred crpcut ${EXTRA_LIBS})
     add_custom_target(
       template-pred.out
       template-pred  | sed "s/\\(.*\\)/     \\1/g" > template-pred.out
@@ -1904,7 +1903,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(gmock-example EXCLUDE_FROM_ALL ${GMOCK-EXAMPLE})
-    target_link_libraries(gmock-example crpcut ${GMOCK_LIBS})
+    target_link_libraries(gmock-example crpcut "${GMOCK_LIBS} ${EXTRA_LIBS}")
     add_custom_target(
       gmock-example.out
       gmock-example  | sed "s/\\(.*\\)/     \\1/g" > gmock-example.out
@@ -1923,7 +1922,7 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY stripped-src
       VERBATIM)
     add_executable(simple-depend EXCLUDE_FROM_ALL ${SIMPLE-DEPEND})
-    target_link_libraries(simple-depend crpcut)
+    target_link_libraries(simple-depend crpcut ${EXTRA_LIBS})
     add_custom_target(
       simple-depend.out
       simple-depend  | sed "s/\\(.*\\)/     \\1/g" > simple-depend.out
@@ -1950,7 +1949,7 @@ if (WITH_HTML_DOCS)
       VERBATIM)
     add_executable(suite_depend EXCLUDE_FROM_ALL
       ${SUITE_DEPEND} ${SUITE_DEFINE})
-    target_link_libraries(suite_depend crpcut)
+    target_link_libraries(suite_depend crpcut ${EXTRA_LIBS})
     add_custom_target(
       suite_depend.out
       suite_depend | sed "s/\\(.*\\)/     \\1/g" > suite_depend.out

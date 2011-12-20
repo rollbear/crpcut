@@ -88,6 +88,13 @@ namespace clocks {
 #endif
 
 #if defined(HAVE_CLOCK_GETTIME)&& defined(CLOCK_MONOTONIC)
+extern "C"
+{
+  typedef int (*crpcut_clock_gettime_t)(clockid_t, struct timespec*);
+}
+namespace crpcut {
+  crpcut_clock_gettime_t crpcut_clock_gettime_ref = &clock_gettime;
+}
 namespace {
 
   unsigned long get_clock_gettime_monotonic_timestamp()
