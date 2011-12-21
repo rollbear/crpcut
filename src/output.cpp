@@ -30,14 +30,15 @@
 #include "posix_encapsulation.hpp"
 
 
+#define MK_QFIXSTR(s) { "\"" #s "\"", sizeof(#s) + 1 }
+#define MK_FIXSTR(s) {  #s , sizeof(#s) - 1 } /* no need for '\0' in len */
+
 namespace {
-#define STR(s) { "\"" #s "\"", sizeof(#s) + 1 }
 
   crpcut::output::fixed_string phase_str[] = {
-    CRPCUT_TEST_PHASES(STR)
+    CRPCUT_TEST_PHASES(MK_QFIXSTR)
   };
 
-#undef STR
 
 }
 
@@ -466,7 +467,11 @@ namespace crpcut
 namespace {
   static const char barrier[] =
     "===============================================================================\n";
-  static const char rlabel[2][9] = { "FAILED", "PASSED" };
+  static const crpcut::output::fixed_string rlabel[] =
+    {
+      MK_FIXSTR(FAILED),
+      MK_FIXSTR(PASSED)
+    };
   static const char delim[]=
     "-------------------------------------------------------------------------------\n";
 
@@ -500,7 +505,7 @@ namespace crpcut {
                                     bool        critical)
     {
       did_output_ = false;
-      write(rlabel[result], 8, conversion_type_);
+      write(rlabel[result].str, rlabel[result].len, conversion_type_);
       write(critical ? "!" : "?");
       write(": ");
       write(name, name_len, conversion_type_);
