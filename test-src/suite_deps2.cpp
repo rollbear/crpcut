@@ -26,6 +26,8 @@
 
 #include <crpcut.hpp>
 
+DEFINE_TEST_TAG(blocked)
+
 TESTSUITE(suite_deps)
 {
   TESTSUITE(simple_all_ok)
@@ -37,7 +39,7 @@ TESTSUITE(suite_deps)
 
   TESTSUITE(blocked_remote_suite, DEPENDS_ON(ALL_TESTS(simple_all_fail)))
   {
-    TEST(should_not_run_success)
+    TEST(should_not_run_success, WITH_TEST_TAG(blocked))
     {
     }
   }

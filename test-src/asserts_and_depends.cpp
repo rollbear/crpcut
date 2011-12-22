@@ -42,6 +42,7 @@ struct fixture
 
 DEFINE_TEST_TAG(slow)
 DEFINE_TEST_TAG(filesystem)
+DEFINE_TEST_TAG(blocked)
 
 TEST(default_success)
 {
@@ -370,7 +371,8 @@ TESTSUITE(depends)
   TEST(should_not_run_due_to_one_failed_dependency_success_otherwise,
        DEPENDS_ON(default_success,
                   asserts::should_succeed_on_assert_eq_with_fixture,
-                  should_fail_after_delay))
+                  should_fail_after_delay),
+       WITH_TEST_TAG(blocked))
   {
   }
 }
@@ -395,7 +397,8 @@ TEST(should_succeed_reading_file_in_start_dir, WITH_TEST_TAG(filesystem))
 }
 
 TEST(should_not_run_due_to_failed_left_behind_files_success_otherwise,
-     DEPENDS_ON(should_fail_due_to_left_behind_files))
+     DEPENDS_ON(should_fail_due_to_left_behind_files),
+     WITH_TEST_TAG(blocked))
 {
 }
 
