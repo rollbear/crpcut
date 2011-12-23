@@ -1543,12 +1543,14 @@ namespace crpcut {
       while (i != &reg)
         {
           const tag& test_tag = i->crpcut_tag();
+          crpcut_test_case_registrator *next = i->crpcut_get_next();
           if (test_tag.get_importance() == tag::ignored)
             {
-              i = i->crpcut_unlink();
+              i->crpcut_uninhibit_dependants();
+              i->crpcut_unlink();
+              i = next;
               continue;
             }
-          crpcut_test_case_registrator *next = i->crpcut_get_next();
           ++num_registered_tests;
           if (*p)
             {
