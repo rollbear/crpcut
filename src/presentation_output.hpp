@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,29 @@
  * SUCH DAMAGE.
  */
 
+#ifndef PRESENTATION_OUTPUT_HPP
+#define PRESENTATION_OUTPUT_HPP
 
-#include <crpcut.hpp>
+#include "io.hpp"
+#include "poll.hpp"
 
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  class presentation_output : public io
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+  public:
+    presentation_output(poll<io, 2> &poller_, int fd_);
+    virtual ~presentation_output();
+    virtual bool read();
+    virtual bool write();
+    virtual void exception() { enable(false); }
+    virtual void enable(bool val);
+    bool         enabled() const;
+  private:
+    poll<io, 2> &poller;
+    int          fd;
+    size_t       pos;
+    bool         is_enabled;
+  };
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+}
+#endif // PRESENTATION_OUTPUT_HPP

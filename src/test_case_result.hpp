@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,32 @@
  * SUCH DAMAGE.
  */
 
+#ifndef TEST_CASE_RESULT_HPP
+#define TEST_CASE_RESULT_HPP
 
-#include <crpcut.hpp>
-
+#include "list_elem.hpp"
+#include "event.hpp"
 namespace crpcut {
 
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  struct test_case_result : public list_elem<test_case_result>
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+    test_case_result(pid_t pid);
+    ~test_case_result();
+    void *operator new(size_t);
+    void operator delete(void *p);
+    pid_t            id;
+    bool             explicit_fail;
+    bool             success;
+    bool             nonempty_dir;
+    const char      *name;
+    size_t           name_len;
+    const char      *termination;
+    size_t           term_len;
+    list_elem<event> history;
+  private:
+    test_case_result(const test_case_result& r);
+    test_case_result& operator=(const test_case_result&r);
+  };
+}
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // TEST_CASE_RESULT_HPP

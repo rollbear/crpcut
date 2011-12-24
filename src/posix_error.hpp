@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,24 @@
  * SUCH DAMAGE.
  */
 
+#ifndef POSIX_ERROR_HPP
+#define POSIX_ERROR_HPP
 
-#include <crpcut.hpp>
+#include <exception>
 
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  class posix_error : public std::exception
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+  public:
+    posix_error(int e, const char *msg);
+    posix_error(const posix_error &e);
+    ~posix_error() throw ();
+    virtual const char *what() const throw ();
+  private:
+    posix_error();
+    typedef const char *cstr;
+    mutable cstr msg_;
+  };
+}
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // POSIX_ERROR_HPP

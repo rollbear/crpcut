@@ -39,7 +39,8 @@ namespace crpcut {
 
 extern "C"
 {
-#include <sys/select.h>
+#  include <errno.h>
+#  include <sys/select.h>
 }
 
 namespace crpcut {
@@ -50,14 +51,7 @@ namespace crpcut {
   struct polldata
 
   {
-    polldata()
-      : num_subscribers(0U),
-        pending_fds(0U)
-    {
-      FD_ZERO(&rset);
-      FD_ZERO(&wset);
-      FD_ZERO(&xset);
-    }
+    polldata();
     struct fdinfo
     {
       struct has_fd
@@ -235,6 +229,16 @@ namespace crpcut {
       }
     assert("no matching fd" == 0);
     return descriptor(0, 0);
+  }
+
+  template <size_t N>
+  polldata<N>::polldata()
+    : num_subscribers(0U),
+      pending_fds(0U)
+  {
+    FD_ZERO(&rset);
+    FD_ZERO(&wset);
+    FD_ZERO(&xset);
   }
 
   template <typename T, size_t N>

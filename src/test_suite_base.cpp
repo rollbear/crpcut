@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,35 @@
  * SUCH DAMAGE.
  */
 
-
 #include <crpcut.hpp>
 
 namespace crpcut {
 
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  test_suite_base
+  ::test_suite_base()
+    : num_containing_cases(0),
+      list(0)
   {
-    return test_case_factory::run_test(argc, argv, os);
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  void
+  test_suite_base
+  ::add_case(crpcut_test_case_registrator* r)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    ++num_containing_cases;
+    r->crpcut_suite_list = list;
+    list = r;
+    r->crpcut_add(this);
   }
 
-  const char *
-  get_parameter(const char *name)
+  void
+  test_suite_base
+  ::report_success()
   {
-    return test_case_factory::get_parameter(name);
+    --num_containing_cases;
+    if (num_containing_cases == 0) // now everything that depends on this
+      {                            // case may run.
+        crpcut_register_success();
+      }
   }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+}

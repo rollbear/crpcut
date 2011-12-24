@@ -49,16 +49,43 @@ else (CRPCUT_LIB_ALIAS_VERSION)
 endif (CRPCUT_LIB_ALIAS_VERSION)
 set(SHAREDIR "share/crpcut-${CRPCUT_LIB_VERSION}")
 file(GLOB LIB_SRCS
+     src/check_name.cpp
      src/clocks.cpp
-     src/scope.cpp
-     src/implementation.cpp
-     src/comm.cpp
-     src/policies.cpp
+     src/collate_result.cpp
+     src/comm_reporter.cpp
+     src/convert_traits.cpp
      src/crpcut.cpp
-     src/xml.cpp
-     src/posix_encapsulation.cpp
-     src/output.cpp
+     src/event.cpp
+     src/fdreader.cpp
+     src/fsfuncs.cpp
      src/heap.cpp
+     src/namespace_info.cpp
+     src/output.cpp
+     src/output_buffer.cpp
+     src/output_formatter.cpp
+     src/pipe_pair.cpp
+     src/policies.cpp
+     src/poll_singleton.cpp
+     src/posix_encapsulation.cpp
+     src/posix_error.cpp
+     src/presentation.cpp
+     src/presentation_output.cpp
+     src/presentation_reader.cpp
+     src/printer.cpp
+     src/report_reader.cpp
+     src/scope.cpp
+     src/tag.cpp
+     src/tag_info.cpp
+     src/tag_filter.cpp
+     src/test_case_base.cpp
+     src/test_case_factory.cpp
+     src/test_case_registrator.cpp
+     src/test_case_result.cpp
+     src/test_suite_base.cpp
+     src/test_wrapper.cpp
+     src/text_formatter.cpp
+     src/xml.cpp
+     src/xml_formatter.cpp
 )
 include_directories(include)
 

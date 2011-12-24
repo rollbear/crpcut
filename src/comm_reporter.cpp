@@ -31,6 +31,7 @@
 namespace crpcut {
 
   namespace comm {
+    reporter report;
 
     void reporter::operator()(type t, const char *msg, size_t len) const
     {
@@ -84,8 +85,6 @@ namespace crpcut {
           wrapped::_Exit(0);
         }
     }
-
-    reporter report;
 
     reporter::reporter()
       : write_fd(0),

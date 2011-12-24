@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,68 @@
  * SUCH DAMAGE.
  */
 
+#ifndef FIX_ALLOCATOR_HPP
+#define FIX_ALLOCATOR_HPP
 
 #include <crpcut.hpp>
 
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  template <typename T, size_t N>
+  class fix_allocator
   {
-    return test_case_factory::run_test(argc, argv, os);
+    union elem {
+      char ballast[sizeof(T)];
+      elem *next;
+    };
+    static datatypes::array_v<elem, N> array;
+    static elem *first_free;
+  public:
+    static void *alloc();
+    static void release(void *p);
+  };
+
+  template <typename T, size_t N>
+  typename fix_allocator<T, N>::elem *fix_allocator<T, N>::first_free;
+
+  template <typename T, size_t N>
+  datatypes::array_v<typename fix_allocator<T, N>::elem, N>
+  fix_allocator<T, N>::array;
+
+  template <typename T, size_t N>
+  void *
+  fix_allocator<T, N>::alloc()
+  {
+    if (first_free)
+      {
+        elem *p = first_free;
+        first_free = p->next;
+        return p;
+      }
+    if (array.size() < N)
+      {
+        array.push_back(elem());
+        return &array.back();
+      }
+    return wrapped::malloc(sizeof(T));
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  template <typename T, size_t N>
+  void
+  fix_allocator<T, N>
+  ::release(void *p)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    if (p >= array.begin() && p < array.end())
+      {
+        elem *e = static_cast<elem*>(p);
+        e->next = first_free;
+        first_free = e;
+      }
+    else
+      {
+        wrapped::free(p);
+      }
   }
 
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
+}
 
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // FIX_ALLOCATOR_HPP

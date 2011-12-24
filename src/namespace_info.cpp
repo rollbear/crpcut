@@ -1,7 +1,7 @@
 /*
- * Copyright 2009 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
-
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -24,17 +24,56 @@
  * SUCH DAMAGE.
  */
 
-#ifndef IMPLEMENTATION_HPP
-#define IMPLEMENTATION_HPP
+#include <crpcut.hpp>
 
 namespace crpcut {
 
-  namespace implementation {
-    bool is_dir_empty(const char *name);
-    typedef poll<fdreader, test_case_factory::max_parallel*3> polltype;
-    extern polltype poller;
-
+  namespace_info
+  ::namespace_info(const char *n, namespace_info *p)
+    : name(n),
+      parent(p)
+  {
   }
+
+  const char *
+  namespace_info
+  ::match_name(const char *n) const
+  {
+    if (!parent) return n;
+
+    const char *match = parent->match_name(n);
+    if (!match) return match;
+    if (!*match) return match; // actually a perfect match
+    if (match != n && *match++ != ':') return 0;
+    if (match != n && *match++ != ':') return 0;
+
+    const char *p = name;
+    while (*p && *match && *p == *match)
+      {
+        ++p;
+        ++match;
+      }
+    return *p ? 0 : match;
+  }
+
+  std::size_t
+  namespace_info
+  ::full_name_len() const
+  {
+    return (name ? wrapped::strlen(name) : 0)
+      + (parent ? 2 + parent->full_name_len() : 0);
+  }
+
+  std::ostream &
+  operator<<(std::ostream &os, const namespace_info &ns)
+  {
+    if (!ns.parent) return os;
+    os << *ns.parent;
+    os << ns.name;
+    os << "::";
+    return os;
+  }
+
 }
 
-#endif // IMPLEMENTATION_HPP
+crpcut::namespace_info crpcut_current_namespace(0,0);

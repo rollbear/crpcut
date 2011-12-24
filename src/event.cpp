@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,40 @@
  * SUCH DAMAGE.
  */
 
-
-#include <crpcut.hpp>
+#include "event.hpp"
+#include "fix_allocator.hpp"
 
 namespace crpcut {
+  typedef fix_allocator<event,
+                        test_case_factory::max_parallel*3> allocator;
 
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  event
+  ::event(comm::type t, const char *b, size_t bl)
+    : list_elem<event>(this),
+      tag(t),
+      body(b),
+      body_len(bl)
   {
-    return test_case_factory::run_test(argc, argv, os);
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  event
+  ::~event()
   {
-    return test_case_factory::run_test(argc, argv, os);
+    wrapped::free(body);
   }
 
-  const char *
-  get_parameter(const char *name)
+  void *
+  event
+  ::operator new(size_t)
   {
-    return test_case_factory::get_parameter(name);
+    return allocator::alloc();
   }
 
-  const char *get_start_dir()
+  void
+  event
+  ::operator delete(void *p)
   {
-    return test_case_factory::get_start_dir();
+    allocator::release(p);
   }
 
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,47 @@
  * SUCH DAMAGE.
  */
 
-
-#include <crpcut.hpp>
+#include "presentation.hpp"
+#include "presentation_output.hpp"
+#include "presentation_reader.hpp"
+#include "pipe_pair.hpp"
+#include "posix_encapsulation.hpp"
+#include "posix_error.hpp"
+#include "io.hpp"
+#include "poll.hpp"
+#include "output_buffer.hpp"
 
 namespace crpcut {
 
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  int start_presenter_process(int fd, output::formatter& fmt, int verbose)
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+    pipe_pair p("communication pipe for presenter process");
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+    pid_t pid = wrapped::fork();
+    if (pid < 0)
+      {
+        throw posix_error(errno, "forking presenter process");
+      }
+    if (pid != 0)
+      {
+        return p.for_writing(pipe_pair::release_ownership);
+      }
+    int presenter_pipe = p.for_reading();
 
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
+    poll<io, 2> poller;
+    presentation_reader r(poller, presenter_pipe, fmt, verbose);
+    presentation_output o(poller, fd);
+    while (poller.num_fds() > 0)
+      {
+        poll<io, 2>::descriptor desc = poller.wait();
+        bool exc = false;
+        if (desc.read())  exc |= desc->read();
+        if (desc.write()) exc |= desc->write();
+        if (desc.hup() || exc)   desc->exception();
+        bool output_change = o.enabled() == output::buffer::is_empty();
+        if (output_change) o.enable(!o.enabled());
+      }
+    wrapped::exit(0);
+    return 0;
   }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+}

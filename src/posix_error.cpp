@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,50 @@
  * SUCH DAMAGE.
  */
 
-
-#include <crpcut.hpp>
+#include "posix_error.hpp"
+#include "posix_encapsulation.hpp"
 
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  posix_error
+  ::posix_error(int e, const char *msg)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    const size_t mlen = wrapped::strlen(msg);
+    const char *errstr = wrapped::strerror(e);
+    const size_t elen = wrapped::strlen(errstr);
+
+    char *str = static_cast<char*>(wrapped::malloc(elen + mlen + 6 + 1));
+    if (!str)
+      {
+        // better to bite the dust here, due to memory error, than to
+        // terminate in the what() member function
+        static std::bad_alloc exc;
+        throw exc;
+      }
+    lib::strcpy(lib::strcpy(lib::strcpy(str, errstr),
+                            " from "),
+                msg);
+    msg_ = str;
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  posix_error
+  ::posix_error(const posix_error &e) :
+    std::exception(*this),
+    msg_(e.msg_)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    e.msg_ = 0; // move
   }
 
   const char *
-  get_parameter(const char *name)
+  posix_error
+  ::what() const throw ()
   {
-    return test_case_factory::get_parameter(name);
+    return msg_;
   }
 
-  const char *get_start_dir()
+  posix_error
+  ::~posix_error() throw ()
   {
-    return test_case_factory::get_start_dir();
+    wrapped::free(msg_);
   }
 
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+}

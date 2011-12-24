@@ -1,7 +1,7 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
- *
+
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -24,38 +24,23 @@
  * SUCH DAMAGE.
  */
 
-
 #include <crpcut.hpp>
 
 namespace crpcut {
 
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
+  template <>
   const char *
-  get_parameter(const char *name)
+  convert_traits<uppercase>::do_convert(char *lo, const char *hi,
+                                        const std::locale &l)
   {
-    return test_case_factory::get_parameter(name);
+    return std::use_facet<std::ctype<char> >(l).toupper(lo, hi);
   }
 
-  const char *get_start_dir()
+  template <>
+  const char *convert_traits<lowercase>::do_convert(char *lo, const char *hi,
+                                                    const std::locale &l)
   {
-    return test_case_factory::get_start_dir();
+    return std::use_facet<std::ctype<char> >(l).tolower(lo, hi);
   }
 
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+}

@@ -1,7 +1,7 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
- *
+
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -24,38 +24,62 @@
  * SUCH DAMAGE.
  */
 
-
 #include <crpcut.hpp>
 
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  collate_result
+  ::collate_result(const char *refstr, std::string comp, const std::locale& l)
+    : r(refstr),
+      intl(comp),
+      locale(l),
+      side(right)
   {
-    return test_case_factory::run_test(argc, argv, os);
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  collate_result
+  ::collate_result(const collate_result& o)
+    : r(o.r),
+      intl(o.intl),
+      locale(o.locale),
+      side(o.side)
   {
-    return test_case_factory::run_test(argc, argv, os);
   }
 
-  const char *
-  get_parameter(const char *name)
+  collate_result
+  ::operator const collate_result::comparator*() const
   {
-    return test_case_factory::get_parameter(name);
+    return operator()();
   }
 
-  const char *get_start_dir()
+  const collate_result::comparator*
+  collate_result
+  ::operator()() const
   {
-    return test_case_factory::get_start_dir();
+    return reinterpret_cast<const comparator*>(r ? 0 : this);
   }
 
-  void set_charset(const char *charset)
+  collate_result&
+  collate_result
+  ::set_lh()
   {
-    return test_case_factory::set_charset(charset);
+    side = left;
+    return *this;
   }
-} // namespace crpcut
 
+  std::ostream &operator<<(std::ostream& os, const collate_result &obj)
+  {
+    static const char rs[] = "\"\n"
+      "  and right hand value = \"";
+    os << "Failed in locale \"" << obj.locale.name() << "\"\n"
+      "  with left hand value = \"";
+    if (obj.side == collate_result::right)
+      {
+        os << obj.intl << rs << obj.r << "\"";
+      }
+    else
+      {
+        os << obj.r << rs << obj.intl << "\"";
+      }
+    return os;
+  }
+}

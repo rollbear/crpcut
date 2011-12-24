@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,51 @@
  * SUCH DAMAGE.
  */
 
-
-#include <crpcut.hpp>
-
+#include "posix_encapsulation.hpp"
+#include "test_case_result.hpp"
+#include "fix_allocator.hpp"
 namespace crpcut {
+  typedef fix_allocator<test_case_result,
+                        test_case_factory::max_parallel*3> allocator;
 
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  test_case_result
+  ::test_case_result(pid_t pid)
+    :list_elem<test_case_result>(this),
+     id(pid),
+     explicit_fail(false),
+     success(false),
+     nonempty_dir(false),
+     name(0),
+     name_len(0),
+     termination(0),
+     term_len(0)
   {
-    return test_case_factory::run_test(argc, argv, os);
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  test_case_result
+  ::~test_case_result()
   {
-    return test_case_factory::run_test(argc, argv, os);
+    wrapped::free(termination);
+    wrapped::free(name);
+    while (!history.is_empty())
+      {
+        event *e = history.next();
+        delete e;
+      }
   }
 
-  const char *
-  get_parameter(const char *name)
+  void *
+  test_case_result
+  ::operator new(size_t)
   {
-    return test_case_factory::get_parameter(name);
+    return allocator::alloc();
   }
 
-  const char *get_start_dir()
+  void
+  test_case_result
+  ::operator delete(void *p)
   {
-    return test_case_factory::get_start_dir();
+    allocator::release(p);
   }
 
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+}

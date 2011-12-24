@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,58 @@
  * SUCH DAMAGE.
  */
 
-
 #include <crpcut.hpp>
-
+#include "poll_singleton.hpp"
 namespace crpcut {
 
 
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  bool
+  fdreader::
+  read(bool do_reply)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    return do_read(fd_, do_reply);
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  crpcut_test_case_registrator *
+  fdreader
+  ::get_registrator() const
   {
-    return test_case_factory::run_test(argc, argv, os);
+    return reg;
   }
 
-  const char *
-  get_parameter(const char *name)
+  void
+  fdreader
+  ::close()
   {
-    return test_case_factory::get_parameter(name);
+    if (fd_)
+      {
+        wrapped::close(fd_);
+      }
+    unregister();
   }
 
-  const char *get_start_dir()
+  fdreader
+  ::fdreader(crpcut_test_case_registrator *r, int fd)
+    : reg(r),
+      fd_(fd)
   {
-    return test_case_factory::get_start_dir();
   }
 
-  void set_charset(const char *charset)
+  void fdreader::set_fd(int fd)
   {
-    return test_case_factory::set_charset(charset);
+    assert(fd_ == 0);
+    assert(reg != 0);
+    fd_ = fd;
+    poller.add_fd(fd_, this);
+    reg->crpcut_activate_reader();
   }
-} // namespace crpcut
 
+  void fdreader::unregister()
+  {
+    assert(fd_ != 0);
+    assert(reg != 0);
+    reg->crpcut_deactivate_reader();
+    poller.del_fd(fd_);
+    fd_ = 0;
+  }
+}

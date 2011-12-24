@@ -30,7 +30,7 @@
 
 #include <crpcut.hpp>
 extern "C" {
-#include <stdarg.h>
+#  include <stdarg.h>
 }
 namespace crpcut {
   namespace wrapped {

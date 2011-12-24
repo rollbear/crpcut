@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,59 @@
  * SUCH DAMAGE.
  */
 
-
-#include <crpcut.hpp>
+#include "output_buffer.hpp"
+#include "posix_encapsulation.hpp"
 
 namespace crpcut {
+  namespace output {
 
+    ssize_t buffer::do_write(const char *buff, std::size_t len)
+    {
+      if (!*current)
+        {
+          *current = new block;
+        }
+      std::size_t size = len < block::size - (*current)->len
+        ? len
+        : block::size - (*current)->len;
+      wrapped::memcpy((*current)->mem + (*current)->len, buff, size);
+      (*current)->len += size;
+      if ((*current)->len == block::size)
+        {
+          current = &(*current)->next;
+        }
+      return ssize_t(size);
+    }
 
-  int
-  run(int argc, char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
+    buffer::~buffer()
+    {
+      while (head)
+        {
+          block *tmp = head;
+          head = head->next;
+          delete tmp;
+        }
+    }
+
+    std::pair<const char *, std::size_t> buffer::do_get_buffer() const
+    {
+      static const char *null = 0;
+      static const std::size_t zero = 0;
+
+      if (!head) return std::make_pair(null, zero);
+
+      return std::make_pair(head->mem, head->len);
+    }
+
+    void buffer::do_advance()
+    {
+      if (head)
+        {
+          block *tmp = head;
+          head = tmp->next;
+          delete tmp;
+        }
+      if (!head) current=&head;
+    }
   }
-
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+}

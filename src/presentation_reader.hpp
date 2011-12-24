@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,41 @@
  * SUCH DAMAGE.
  */
 
+#ifndef PRESENTATION_READER_HPP
+#define PRESENTATION_READER_HPP
 
-#include <crpcut.hpp>
-
+#include "list_elem.hpp"
+#include "test_case_result.hpp"
+#include "io.hpp"
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
+  namespace output {
+    class formatter;
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+  template <typename T, size_t> class poll;
 
-  const char *
-  get_parameter(const char *name)
+  class presentation_reader : public io
   {
-    return test_case_factory::get_parameter(name);
-  }
+  public:
+    presentation_reader(poll<io, 2>       &poller_,
+                        int                fd_,
+                        output::formatter &fmt_,
+                        bool               verbose_);
+    virtual ~presentation_reader();
+    virtual bool read();
+    virtual bool write();
+    virtual void exception();
+  private:
+    list_elem<test_case_result>  messages;
+    poll<io, 2>                 &poller;
+    int                          fd;
+    output::formatter           &fmt;
+    bool                         verbose;
 
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
+    presentation_reader();
+    presentation_reader(const presentation_reader&);
+    presentation_reader& operator=(const presentation_reader&);
+  };
+}
 
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // PRESENTATION_READER_HPP

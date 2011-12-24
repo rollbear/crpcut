@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,24 @@
  * SUCH DAMAGE.
  */
 
-
-#include <crpcut.hpp>
+#ifndef PIPE_PAIR_HPP
+#define PIPE_PAIR_HPP
 
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  class pipe_pair
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+  public:
+    typedef enum { release_ownership, keep_ownership } purpose;
+    pipe_pair(const char *purpose_msg);
+    ~pipe_pair();
+    void close();
+    int for_reading(purpose p = keep_ownership);
+    int for_writing(purpose p = keep_ownership);
+  private:
+    pipe_pair(const pipe_pair&);
+    pipe_pair& operator=(const pipe_pair&);
+    int fds[2];
+  };
+}
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // PIPE_PAIR_HPP

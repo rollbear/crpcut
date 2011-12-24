@@ -24,38 +24,24 @@
  * SUCH DAMAGE.
  */
 
+#ifndef FIXED_STRING_HPP
+#define FIXED_STRING_HPP
 
-#include <crpcut.hpp>
-
+#include <cstddef>
 namespace crpcut {
 
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  struct fixed_string
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+    const char  *str;
+    std::size_t  len;
+  private:
+    struct secret_bool;
+  public:
+    operator const secret_bool* () const
+    {
+      return len ? reinterpret_cast<const secret_bool*>(this) : 0;
+    }
+  };
+}
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // FIXED_STRING_HPP

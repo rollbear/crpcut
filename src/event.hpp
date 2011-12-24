@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,25 @@
  * SUCH DAMAGE.
  */
 
+#ifndef EVENT_HPP
+#define EVENT_HPP
 
+#include "list_elem.hpp"
 #include <crpcut.hpp>
-
 namespace crpcut {
 
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  struct event : public list_elem<event>
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+    event(comm::type t, const char *b, size_t bl);
+    ~event();
+    comm::type tag;
+    const char *body;
+    size_t body_len;
+    void *operator new(size_t);
+    void operator delete(void *p);
+  private:
+    event();
+  };
+}
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // EVENT_HPP

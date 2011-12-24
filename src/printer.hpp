@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,27 @@
  * SUCH DAMAGE.
  */
 
+#ifndef PRINTER_HPP
+#define PRINTER_HPP
 
-#include <crpcut.hpp>
-
+#include <memory>
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
+  namespace output {
+    class formatter;
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  class printer
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+  public:
+    printer(output::formatter& o_,
+            const char *name,
+            std::size_t n_len,
+            bool        result,
+            bool        critical);
+    ~printer();
+  private:
+    output::formatter &o;
+  };
+}
 
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // PRINTER_HPP

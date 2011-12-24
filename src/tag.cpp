@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,74 @@
 
 
 #include <crpcut.hpp>
-
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  tag::tag()
+    : next_(this),
+      prev_(this),
+      failed_(0),
+      passed_(0),
+      importance_(critical)
   {
-    return test_case_factory::run_test(argc, argv, os);
   }
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
+  tag::tag(int len, tag *n)
+    : next_(n),
+      prev_(n->prev_),
+      failed_(0),
+      passed_(0),
+      importance_(critical)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    n->prev_ = this;
+    prev_->next_ = this;
+    if (len > longest_name_len_) longest_name_len_ = len;
   }
 
-  const char *
-  get_parameter(const char *name)
+  tag::~tag()
   {
-    return test_case_factory::get_parameter(name);
+    tag *p = prev_;
+    next_->prev_ = prev_;
+    p->next_ = next_;
   }
 
-  const char *get_start_dir()
+  void tag::fail()
   {
-    return test_case_factory::get_start_dir();
+    ++failed_;
   }
 
-  void set_charset(const char *charset)
+  void tag::pass()
   {
-    return test_case_factory::set_charset(charset);
+    ++passed_;
   }
-} // namespace crpcut
 
+  size_t tag::num_failed() const
+  {
+    return failed_;
+  }
+
+  size_t tag::num_passed() const
+  {
+    return passed_;
+  }
+
+  tag *tag::get_next() const
+  {
+    return next_;
+  }
+
+  tag *tag::get_prev() const
+  {
+    return prev_;
+  }
+
+  void tag::set_importance(tag::importance i)
+  {
+    importance_ = i;
+  }
+
+  tag::importance tag::get_importance() const
+  {
+    return importance_;
+  }
+
+  int tag::longest_name_len_;
+}

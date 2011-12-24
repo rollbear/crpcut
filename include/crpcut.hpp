@@ -619,46 +619,6 @@ namespace crpcut {
 
   namespace datatypes {
 
-    class posix_error : public std::exception
-    {
-    public:
-      posix_error(int e, const char *msg)
-      {
-        const size_t mlen = wrapped::strlen(msg);
-        const char *errstr = wrapped::strerror(e);
-        const size_t elen = wrapped::strlen(errstr);
-
-        char *str = static_cast<char*>(wrapped::malloc(elen + mlen + 6 + 1));
-        if (!str)
-          {
-            // better to bite the dust here, due to memory error, than to
-            // terminate in the what() member function
-            static std::bad_alloc exc;
-            throw exc;
-          }
-        lib::strcpy(lib::strcpy(lib::strcpy(str, errstr),
-                                " from "),
-                    msg);
-        msg_ = str;
-      }
-      virtual const char *what() const throw ()
-      {
-        return msg_;
-      }
-      ~posix_error() throw () { wrapped::free(msg_);}
-      posix_error(const posix_error &e) :
-        std::exception(*this),
-        msg_(e.msg_)
-      {
-        e.msg_ = 0; // move
-      }
-    private:
-      posix_error();
-      typedef const char *cstr;
-      mutable cstr msg_;
-    };
-
-
 
     template <typename T, std::size_t N>
     class array_v : private std::array<T, N>
@@ -905,30 +865,26 @@ namespace crpcut {
   template <>
   class crpcut_tag_info<crpcut_none> : public crpcut::tag
   {
-    crpcut_tag_info() : tag() {}
-    virtual const char* get_name() const { return ""; }
+    crpcut_tag_info();
+    virtual const char* get_name() const;
   public:
-    static tag& obj()
-    {
-      static crpcut_tag_info<crpcut_none> t;
-      return t;
-    }
+    static tag& obj();
     class iterator
     {
     public:
-      iterator(crpcut::tag *p_) : p(p_) {}
-      iterator& operator++() { p = p->get_next(); return *this; }
-      iterator operator++(int) { iterator rv(*this); ++(*this); return rv; }
-      crpcut::tag *operator->() { return p; }
-      crpcut::tag& operator&() { return *p; }
-      bool operator==(const iterator &i) const { return p == i.p; }
-      bool operator!=(const iterator &i) const { return p != i.p; }
+      iterator(crpcut::tag *p_);
+      iterator& operator++();
+      iterator operator++(int);
+      crpcut::tag *operator->();
+      crpcut::tag& operator&();
+      bool operator==(const iterator &i) const;
+      bool operator!=(const iterator &i) const;
     private:
       crpcut::tag *p;
     };
-    static iterator begin() { return iterator(obj().get_next()); }
-    static iterator end() { return iterator(&obj()); }
-    static int longest_name_len() { return tag::longest_name_len_; }
+    static iterator begin();
+    static iterator end();
+    static int longest_name_len();
   };
 
   typedef crpcut_tag_info<crpcut_none> tag_list;
@@ -1244,17 +1200,21 @@ namespace crpcut {
     class timeout_policy;
 
     template <unsigned long timeout_ms>
-    class timeout_policy<timeout::realtime, timeout_ms> : protected virtual default_policy
+    class timeout_policy<timeout::realtime, timeout_ms>
+      : protected virtual default_policy
     {
     public:
-      typedef timeout::enforcer<timeout::realtime, timeout_ms> crpcut_realtime_enforcer;
+      typedef timeout::enforcer<timeout::realtime, timeout_ms>
+      crpcut_realtime_enforcer;
     };
 
     template <unsigned long timeout_ms>
-    class timeout_policy<timeout::cputime, timeout_ms> : protected virtual default_policy
+    class timeout_policy<timeout::cputime, timeout_ms>
+      : protected virtual default_policy
     {
     public:
-      typedef timeout::enforcer<timeout::cputime, timeout_ms> crpcut_cputime_enforcer;
+      typedef timeout::enforcer<timeout::cputime, timeout_ms>
+      crpcut_cputime_enforcer;
     };
 
 
@@ -1272,11 +1232,15 @@ namespace crpcut {
       crpcut_destructor_timeout_enforcer;
     };
 
+    template <typename T>
+    struct tag_policy : public virtual policies::default_policy
+    {
+      typedef T crpcut_test_tag;
+    };
   } // namespace policies
 
-  namespace implementation {
-    class crpcut_test_case_registrator;
-  }
+  class crpcut_test_case_registrator;
+
   class test_case_base : protected virtual policies::default_policy
   {
     virtual void crpcut_run_test() = 0;
@@ -1284,7 +1248,7 @@ namespace crpcut {
     test_case_base();
     ~test_case_base();
   public:
-    virtual implementation::crpcut_test_case_registrator& crpcut_get_reg() const = 0;
+    virtual crpcut_test_case_registrator& crpcut_get_reg() const = 0;
     virtual void test() = 0;
     void run();
     void crpcut_test_finished();
@@ -1428,19 +1392,12 @@ namespace crpcut {
 
   }
 
-  template <comm::type> struct crpcut_check_name;
-
-  template <>
-  struct crpcut_check_name<comm::exit_fail>
+  template <comm::type>
+  struct crpcut_check_name
   {
-    static const char *string() { return "ASSERT"; }
+    static const char *string();
   };
 
-  template <>
-  struct crpcut_check_name<comm::fail>
-  {
-    static const char *string() { return "VERIFY"; }
-  };
 
   namespace stream {
     template <typename charT, class traits = std::char_traits<charT> >
@@ -1528,137 +1485,130 @@ namespace crpcut {
 
   } // stream
 
+  struct namespace_info
+  {
+  public:
+    namespace_info(const char *n, namespace_info *p);
+    const char* match_name(const char *n) const;
+    // returns 0 on mismatch, otherwise a pointer into n where namespace name
+    // ended.
 
-  namespace implementation {
+    std::size_t full_name_len() const;
+    friend std::ostream &operator<<(std::ostream &, const namespace_info &);
+  private:
+    const char *name;
+    namespace_info *parent;
+  };
 
-    struct namespace_info
+  class fdreader
+  {
+  public:
+    bool read(bool do_reply);
+    crpcut_test_case_registrator *get_registrator() const;
+    virtual void close();
+    void unregister();
+    ~fdreader() { }
+  protected:
+    fdreader(crpcut_test_case_registrator *r, int fd = 0);
+    void set_fd(int fd);
+    crpcut_test_case_registrator *const reg;
+  private:
+    virtual bool do_read(int fd, bool do_reply) = 0;
+    int fd_;
+  };
+
+  template <comm::type t>
+  class reader : public fdreader
+  {
+  public:
+    reader(crpcut_test_case_registrator *r, int fd = 0);
+    void set_fd(int fd);
+  private:
+    virtual bool do_read(int fd, bool do_reply);
+  };
+
+  class report_reader : public fdreader
+  {
+  public:
+    report_reader(crpcut_test_case_registrator *r);
+    virtual void close();
+    void set_fds(int in_fd, int out_fd);
+  private:
+    virtual bool do_read(int fd, bool do_reply);
+    int response_fd;
+  };
+
+  class test_suite_base;
+  class crpcut_test_case_registrator
+    : public virtual policies::deaths::crpcut_none,
+      public virtual policies::dependencies::crpcut_base
+  {
+    friend class test_suite_base;
+  public:
+    crpcut_test_case_registrator(const char *name, const namespace_info &ns,
+                                 unsigned long cputime_limit_ms);
+    friend std::ostream &operator<<(std::ostream &os,
+                                    const crpcut_test_case_registrator &t)
     {
-    public:
-      namespace_info(const char *n, namespace_info *p);
-      const char* match_name(const char *n) const;
-      // returns 0 on mismatch, otherwise a pointer into n where namespace name
-      // ended.
+      return t.crpcut_print_name(os);
+    }
+    std::size_t crpcut_full_name_len() const;
+    bool crpcut_match_name(const char *name) const;
+    void crpcut_setup(pid_t pid,
+                      int in_fd, int out_fd,
+                      int stdout_fd,
+                      int stderr_fd);
+    void crpcut_manage_death();
+    crpcut_test_case_registrator *crpcut_unlink();
+    void crpcut_link_after(crpcut_test_case_registrator*);
+    void crpcut_kill();
+    unsigned long crpcut_ms_until_deadline() const;
+    void crpcut_clear_deadline();
+    bool crpcut_deadline_is_set() const;
+    static bool crpcut_timeout_compare(const crpcut_test_case_registrator *lh,
+                                       const crpcut_test_case_registrator *rh);
+    void crpcut_unregister_fds();
+    crpcut_test_case_registrator *crpcut_get_next() const;
+    void crpcut_set_wd(unsigned n);
+    void crpcut_goto_wd() const;
+    pid_t crpcut_get_pid() const;
+    test_phase crpcut_get_phase() const;
+    bool crpcut_has_active_readers() const;
+    void crpcut_deactivate_reader();
+    void crpcut_activate_reader();
+    void crpcut_set_timeout(unsigned long);
+    void crpcut_run_test_case();
+    virtual tag& crpcut_tag() const = 0;
+  protected:
+    virtual void crpcut_do_run_test_case() = 0;
+    crpcut_test_case_registrator();
+    void crpcut_manage_test_case_execution(test_case_base*);
+    void crpcut_prepare_destruction(unsigned long ms);
+    void crpcut_prepare_construction(unsigned long ms);
+  private:
+    bool crpcut_cputime_timeout(unsigned long ms) const;
+    std::ostream &crpcut_print_name(std::ostream &) const ;
 
-      std::size_t full_name_len() const;
-      friend std::ostream &operator<<(std::ostream &, const namespace_info &);
-    private:
-      const char *name;
-      namespace_info *parent;
-    };
-
-    class crpcut_test_case_registrator;
-    class fdreader
-    {
-    public:
-      bool read(bool do_reply);
-      crpcut_test_case_registrator *get_registrator() const;
-      virtual void close();
-      void unregister();
-      ~fdreader() { }
-    protected:
-      fdreader(crpcut_test_case_registrator *r, int fd = 0);
-      void set_fd(int fd);
-      crpcut_test_case_registrator *const reg;
-    private:
-      virtual bool do_read(int fd, bool do_reply) = 0;
-      int fd_;
-    };
-
-    template <comm::type t>
-    class reader : public fdreader
-    {
-    public:
-      reader(crpcut_test_case_registrator *r, int fd = 0);
-      void set_fd(int fd);
-    private:
-      virtual bool do_read(int fd, bool do_reply);
-    };
-
-    class report_reader : public fdreader
-    {
-    public:
-      report_reader(crpcut_test_case_registrator *r);
-      virtual void close();
-      void set_fds(int in_fd, int out_fd);
-    private:
-      virtual bool do_read(int fd, bool do_reply);
-      int response_fd;
-    };
-
-    class test_suite_base;
-    class crpcut_test_case_registrator
-      : public virtual policies::deaths::crpcut_none,
-        public virtual policies::dependencies::crpcut_base
-    {
-      friend class test_suite_base;
-    public:
-      crpcut_test_case_registrator(const char *name, const namespace_info &ns,
-                                   unsigned long cputime_limit_ms);
-      friend std::ostream &operator<<(std::ostream &os,
-                                      const crpcut_test_case_registrator &t)
-      {
-        return t.crpcut_print_name(os);
-      }
-      std::size_t crpcut_full_name_len() const;
-      bool crpcut_match_name(const char *name) const;
-      void crpcut_setup(pid_t pid,
-                        int in_fd, int out_fd,
-                        int stdout_fd,
-                        int stderr_fd);
-      void crpcut_manage_death();
-      crpcut_test_case_registrator *crpcut_unlink();
-      void crpcut_link_after(crpcut_test_case_registrator*);
-      void crpcut_kill();
-      unsigned long crpcut_ms_until_deadline() const;
-      void crpcut_clear_deadline();
-      bool crpcut_deadline_is_set() const;
-      static bool crpcut_timeout_compare(const crpcut_test_case_registrator *lh,
-                                         const crpcut_test_case_registrator *rh);
-      void crpcut_unregister_fds();
-      crpcut_test_case_registrator *crpcut_get_next() const;
-      void crpcut_set_wd(unsigned n);
-      void crpcut_goto_wd() const;
-      pid_t crpcut_get_pid() const;
-      test_phase crpcut_get_phase() const;
-      bool crpcut_has_active_readers() const;
-      void crpcut_deactivate_reader();
-      void crpcut_activate_reader();
-      void crpcut_set_timeout(unsigned long);
-      void crpcut_run_test_case();
-      virtual tag& crpcut_tag() const = 0;
-    protected:
-      virtual void crpcut_do_run_test_case() = 0;
-      crpcut_test_case_registrator();
-      void crpcut_manage_test_case_execution(test_case_base*);
-      void crpcut_prepare_destruction(unsigned long ms);
-      void crpcut_prepare_construction(unsigned long ms);
-    private:
-      bool crpcut_cputime_timeout(unsigned long ms) const;
-      std::ostream &crpcut_print_name(std::ostream &) const ;
-
-      const char                   *crpcut_name_;
-      const namespace_info         *crpcut_ns_info;
-      crpcut_test_case_registrator *crpcut_next;
-      crpcut_test_case_registrator *crpcut_prev;
-      crpcut_test_case_registrator *crpcut_suite_list;
-      unsigned                      crpcut_active_readers;
-      bool                          crpcut_killed;
-      bool                          crpcut_death_note;
-      bool                          crpcut_deadline_set;
-      pid_t                         crpcut_pid_;
-      unsigned long                 crpcut_absolute_deadline_ms;
-      struct timeval                crpcut_cpu_time_at_start;
-      unsigned                      crpcut_dirnum;
-      report_reader                 crpcut_rep_reader;
-      reader<comm::stdout>          crpcut_stdout_reader;
-      reader<comm::stderr>          crpcut_stderr_reader;
-      test_phase                    crpcut_phase;
-      const unsigned long           crpcut_cputime_limit_ms;
-      friend class report_reader;
-    };
-
-  } // namespace implementation
-
+    const char                   *crpcut_name_;
+    const namespace_info         *crpcut_ns_info;
+    crpcut_test_case_registrator *crpcut_next;
+    crpcut_test_case_registrator *crpcut_prev;
+    crpcut_test_case_registrator *crpcut_suite_list;
+    unsigned                      crpcut_active_readers;
+    bool                          crpcut_killed;
+    bool                          crpcut_death_note;
+    bool                          crpcut_deadline_set;
+    pid_t                         crpcut_pid_;
+    unsigned long                 crpcut_absolute_deadline_ms;
+    struct timeval                crpcut_cpu_time_at_start;
+    unsigned                      crpcut_dirnum;
+    report_reader                 crpcut_rep_reader;
+    reader<comm::stdout>          crpcut_stdout_reader;
+    reader<comm::stderr>          crpcut_stderr_reader;
+    test_phase                    crpcut_phase;
+    const unsigned long           crpcut_cputime_limit_ms;
+    friend class report_reader;
+  };
 
   class test_case_factory
   {
@@ -1679,11 +1629,11 @@ namespace crpcut {
     static bool tests_as_child_procs();
     static bool timeouts_enabled();
     static bool is_backtrace_enabled();
-    static void set_deadline(implementation::crpcut_test_case_registrator *i);
-    static void clear_deadline(implementation::crpcut_test_case_registrator *i);
+    static void set_deadline(crpcut_test_case_registrator *i);
+    static void clear_deadline(crpcut_test_case_registrator *i);
     static void return_dir(unsigned num);
     static const char *get_working_dir();
-    static void test_succeeded(implementation::crpcut_test_case_registrator*);
+    static void test_succeeded(crpcut_test_case_registrator*);
     static const char *get_start_dir();
     static const char *get_parameter(const char *name);
     static bool is_naughty_child();
@@ -1727,14 +1677,14 @@ namespace crpcut {
     test_case_factory();
     void kill_presenter_process();
     void manage_children(unsigned max_pending_children);
-    void start_test(implementation::crpcut_test_case_registrator *i);
+    void start_test(crpcut_test_case_registrator *i);
 
     int do_run(int argc, const char *argv[], std::ostream &os);
     void do_present(pid_t pid, comm::type t, test_phase phase,
                     size_t len, const char *buff);
     void do_introduce_name(pid_t pid, const char *name, size_t len);
-    void do_set_deadline(implementation::crpcut_test_case_registrator *i);
-    void do_clear_deadline(implementation::crpcut_test_case_registrator *i);
+    void do_set_deadline(crpcut_test_case_registrator *i);
+    void do_clear_deadline(crpcut_test_case_registrator *i);
     void do_return_dir(unsigned num);
     const char *do_get_working_dir() const;
     const char *do_get_start_dir() const;
@@ -1744,9 +1694,9 @@ namespace crpcut {
     const char *do_get_output_charset() const;
     const char *do_get_illegal_rep() const;
     unsigned long do_calc_cputime(const struct timeval&);
-    friend class implementation::crpcut_test_case_registrator;
+    friend class crpcut_test_case_registrator;
 
-    class registrator_list : public implementation::crpcut_test_case_registrator
+    class registrator_list : public crpcut_test_case_registrator
     {
       virtual bool match_name(const char *) const { return false; }
       virtual std::ostream& print_name(std::ostream &os) const { return os; }
@@ -1754,7 +1704,7 @@ namespace crpcut {
       virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
     };
 
-    typedef datatypes::array_v<implementation::crpcut_test_case_registrator*,
+    typedef datatypes::array_v<crpcut_test_case_registrator*,
                                max_parallel> timeout_queue;
 
 
@@ -1784,78 +1734,38 @@ namespace crpcut {
     const char **    argv;
   };
 
-  namespace implementation {
+  template <comm::type t>
+  bool reader<t>::do_read(int fd, bool)
+  {
+    static char buff[1024];
+    for (;;)
+      {
+        ssize_t rv = wrapped::read(fd, buff, sizeof(buff));
+        if (rv == 0) return false;
+        if (rv == -1)
+          {
+            int n = errno;
+            assert(n == EINTR);
+            (void)n; // silence warning
+          }
 
-    template <comm::type t>
-    bool reader<t>::do_read(int fd, bool)
-    {
-      static char buff[1024];
-      for (;;)
-        {
-          ssize_t rv = wrapped::read(fd, buff, sizeof(buff));
-          if (rv == 0) return false;
-          if (rv == -1)
-            {
-              int n = errno;
-              assert(n == EINTR);
-              (void)n; // silence warning
-            }
+        test_case_factory::present(reg->crpcut_get_pid(), t,
+                                   reg->crpcut_get_phase(),
+                                   size_t(rv), buff);
+        return true;
+      }
+  }
 
-          test_case_factory::present(reg->crpcut_get_pid(), t,
-                                     reg->crpcut_get_phase(),
-                                     size_t(rv), buff);
-          return true;
-        }
-    }
+  template <typename C>
+  struct test_wrapper
+  {
+    static void run(test_case_base *t);
+  };
 
-    template <typename C>
-    class test_wrapper;
-
-    template <typename exc>
-    class test_wrapper<policies::exception_wrapper<exc> >
-    {
-    public:
-      static void run(test_case_base *t);
-    };
-
-    template <>
-    class test_wrapper<policies::exception_wrapper<std::exception> >
-    {
-    public:
-      static void run(test_case_base *t);
-    };
-
-    template <>
-    class test_wrapper<void>
-    {
-    public:
-      static void run(test_case_base *t);
-    };
-
-    template <>
-    class test_wrapper<policies::deaths::wrapper>
-    {
-    public:
-      static void run(test_case_base *t);
-    };
-
-    template <>
-    class test_wrapper<policies::deaths::timeout_wrapper>
-    {
-    public:
-      static void run(test_case_base *t);
-    };
-
-    template <>
-    class test_wrapper<policies::any_exception_wrapper>
-    {
-    public:
-      static void run(test_case_base* t);
-    };
-
-    template <typename exc>
-    void
-    test_wrapper<policies::exception_wrapper<exc> >::run(test_case_base* t)
+  template <typename exc>
+  struct test_wrapper<policies::exception_wrapper<exc> >
+  {
+    static void run(test_case_base* t)
     {
       try {
         t->test();
@@ -1864,920 +1774,878 @@ namespace crpcut {
         return;
       }
       catch (...)
-      {
-        std::string s = "Unexpectedly caught "
-          + policies::crpcut_exception_translator::try_all();
-        size_t length = s.length();
-        char *buff = static_cast<char*>(alloca(length));
-        s.copy(buff, length);
-        std::string().swap(s);
-        comm::report(comm::exit_fail,
-                     buff, length);
-      }
+        {
+          std::string s = "Unexpectedly caught "
+            + policies::crpcut_exception_translator::try_all();
+          size_t length = s.length();
+          char *buff = static_cast<char*>(alloca(length));
+          s.copy(buff, length);
+          std::string().swap(s);
+          comm::report(comm::exit_fail,
+                       buff, length);
+        }
       comm::report(comm::exit_fail,
                    "Unexpectedly did not throw");
     }
-
-
-
-    template <typename T,
-              size_t size_limit = sizeof(T),
-              bool b = stream_checker::is_output_streamable<T>::value>
-    struct conditional_streamer
+  };
+  template <typename T,
+            size_t size_limit = sizeof(T),
+            bool b = stream_checker::is_output_streamable<T>::value>
+  struct conditional_streamer
+  {
+    static void stream(std::ostream &os, const T& t)
     {
-      static void stream(std::ostream &os, const T& t)
-      {
-        os << t;
-      }
-    };
-
-    template <typename T, size_t size_limit>
-    struct conditional_streamer<T, size_limit, false>
-    {
-      static void stream(std::ostream &os, const T& t)
-      {
-        if (sizeof(T) > size_limit)
-          {
-            os << '?';
-            return;
-          }
-        static const char lf[] = "\n    ";
-        const size_t bytes = sizeof(T);
-        os << bytes << "-byte object <";
-        if (bytes > 8) os << lf;
-        const char *p = static_cast<const char *>(static_cast<const void*>(&t));
-        char old_fill = os.fill();
-        std::ios_base::fmtflags old_flags = os.flags();
-        os   << std::setfill('0') ;
-        size_t n = 0;
-        for (; n < sizeof(T); ++n)
-          {
-            os << std::hex << std::setw(2)
-               << (static_cast<unsigned>(p[n]) & 0xff);
-            if ((n & 15) == 15)
-              {
-                os << lf;
-              }
-            else if ((n & 3) == 3 && n != bytes - 1)
-              {
-                os << "  ";
-              }
-            else if ((n & 1) == 1 && n != bytes - 1)
-              {
-                os << ' ';
-              }
-          }
-        if (bytes > 8 && (n & 15) != 0)
-          {
-            os << lf;
-          }
-        os.flags(old_flags);
-        os.fill(old_fill);
-        os  << '>';
-      }
-    };
-
-    template <typename T>
-    void conditionally_stream(std::ostream &os, const T& t)
-    {
-      implementation::conditional_streamer<T, sizeof(T)>::stream(os, t);
+      os << t;
     }
-    template <size_t N, typename T>
-    void conditionally_stream(std::ostream &os, const T& t)
-    {
-      implementation::conditional_streamer<T, N>::stream(os, t);
-    }
+  };
 
-    class null_cmp
+  template <typename T, size_t size_limit>
+  struct conditional_streamer<T, size_limit, false>
+  {
+    static void stream(std::ostream &os, const T& t)
     {
-      class secret;
-    public:
-      static char func(secret*);
-      static char (&func(...))[2];
-      template <typename T>
-      static char (&func(T*))[2];
-    };
-
-    template <typename T>
-    class is_struct // or class or union
-    {
-      template <typename U>
-      static char check_member(double U::*);
-      template <typename U>
-      static char (&check_member(...))[2];
-    public:
-      static const bool value = (sizeof(check_member<T>(0)) == 1);
-    };
-    template <bool b, typename T1, typename T2>
-    struct if_else
-    {
-      typedef T1 type;
-    };
-
-    template <typename T1, typename T2>
-    struct if_else<false, T1, T2>
-    {
-      typedef T2 type;
-    };
-
-    template <typename T>
-    struct param_traits
-    {
-      typedef typename if_else<is_struct<T>::value, const  T&, T>::type type;
-    };
-
-    template <typename T>
-    struct param_traits<const T>
-    {
-      typedef typename param_traits<T>::type type;
-    };
-
-    template <typename T>
-    struct param_traits<volatile T>
-    {
-      typedef typename param_traits<T>::type type;
-    };
-
-    template <typename T>
-    struct param_traits<const volatile T>
-    {
-      typedef typename param_traits<T>::type type;
-    };
-
-    template <typename T, size_t N>
-    struct param_traits<T[N]>
-    {
-      typedef T *type;
-    };
-
-    template <typename T, size_t N>
-    struct param_traits<const T[N]>
-    {
-      typedef const T *type;
-    };
-
-    template <typename T, size_t N>
-    struct param_traits<volatile T[N]>
-    {
-      typedef volatile T *type;
-    };
-
-    template <typename T, size_t N>
-    struct param_traits<const volatile T[N]>
-    {
-      typedef volatile const T *type;
-    };
-
-    template <typename T>
-    struct param_traits<T&>
-    {
-      typedef typename param_traits<T>::type type;
-    };
-
-    template <typename T>
-    bool stream_param(std::ostream &os,
-                      const char *prefix,
-                      const char *name, const T& t)
-    {
-      std::ostringstream tmp;
-      conditionally_stream(tmp, t);
-      std::string str = tmp.str();
-      if (str != name)
+      if (sizeof(T) > size_limit)
         {
-          os << prefix << name << " = " << str;
-          return true;
+          os << '?';
+          return;
         }
-      return false;
+      static const char lf[] = "\n    ";
+      const size_t bytes = sizeof(T);
+      os << bytes << "-byte object <";
+      if (bytes > 8) os << lf;
+      const char *p = static_cast<const char *>(static_cast<const void*>(&t));
+      char old_fill = os.fill();
+      std::ios_base::fmtflags old_flags = os.flags();
+      os   << std::setfill('0') ;
+      size_t n = 0;
+      for (; n < sizeof(T); ++n)
+        {
+          os << std::hex << std::setw(2)
+             << (static_cast<unsigned>(p[n]) & 0xff);
+          if ((n & 15) == 15)
+            {
+              os << lf;
+            }
+          else if ((n & 3) == 3 && n != bytes - 1)
+            {
+              os << "  ";
+            }
+          else if ((n & 1) == 1 && n != bytes - 1)
+            {
+              os << ' ';
+            }
+        }
+      if (bytes > 8 && (n & 15) != 0)
+        {
+          os << lf;
+        }
+      os.flags(old_flags);
+      os.fill(old_fill);
+      os  << '>';
     }
+  };
 
-    class tester_base
+  template <typename T>
+  void conditionally_stream(std::ostream &os, const T& t)
+  {
+    conditional_streamer<T, sizeof(T)>::stream(os, t);
+  }
+
+  template <size_t N, typename T>
+  void conditionally_stream(std::ostream &os, const T& t)
+  {
+    conditional_streamer<T, N>::stream(os, t);
+  }
+
+  class null_cmp
+  {
+    class secret;
+  public:
+    static char func(secret*);
+    static char (&func(...))[2];
+    template <typename T>
+    static char (&func(T*))[2];
+  };
+
+  template <typename T>
+  class is_struct // or class or union
+  {
+    template <typename U>
+    static char check_member(double U::*);
+    template <typename U>
+    static char (&check_member(...))[2];
+  public:
+    static const bool value = (sizeof(check_member<T>(0)) == 1);
+  };
+
+  template <bool b, typename T1, typename T2>
+  struct if_else
+  {
+    typedef T1 type;
+  };
+
+  template <typename T1, typename T2>
+  struct if_else<false, T1, T2>
+  {
+    typedef T2 type;
+  };
+
+  template <typename T>
+  struct param_traits
+  {
+    typedef typename if_else<is_struct<T>::value, const  T&, T>::type type;
+  };
+
+  template <typename T>
+  struct param_traits<const T>
+  {
+    typedef typename param_traits<T>::type type;
+  };
+
+  template <typename T>
+  struct param_traits<volatile T>
+  {
+    typedef typename param_traits<T>::type type;
+  };
+
+  template <typename T>
+  struct param_traits<const volatile T>
+  {
+    typedef typename param_traits<T>::type type;
+  };
+
+  template <typename T, size_t N>
+  struct param_traits<T[N]>
+  {
+    typedef T *type;
+  };
+
+  template <typename T, size_t N>
+  struct param_traits<const T[N]>
+  {
+    typedef const T *type;
+  };
+
+  template <typename T, size_t N>
+  struct param_traits<volatile T[N]>
+  {
+    typedef volatile T *type;
+  };
+
+  template <typename T, size_t N>
+  struct param_traits<const volatile T[N]>
+  {
+    typedef volatile const T *type;
+  };
+
+  template <typename T>
+  struct param_traits<T&>
+  {
+    typedef typename param_traits<T>::type type;
+  };
+
+  template <typename T>
+  bool stream_param(std::ostream &os,
+                    const char *prefix,
+                    const char *name, const T& t)
+  {
+    std::ostringstream tmp;
+    conditionally_stream(tmp, t);
+    std::string str = tmp.str();
+    if (str != name)
+      {
+        os << prefix << name << " = " << str;
+        return true;
+      }
+    return false;
+  }
+
+  class tester_base
+  {
+  protected:
+    tester_base(const char *loc, const char *ops)
+      : location(loc), op(ops)
     {
-    protected:
-      tester_base(const char *loc, const char *ops)
-        : location(loc), op(ops)
-      {
-      }
-      template <comm::type action, typename T1, typename T2>
-      void verify(bool b, T1 v1, const char *n1, T2 v2, const char *n2) const
-      {
-        if (!b)
-          {
-            heap::set_limit(heap::system);
-            using std::ostringstream;
-            ostringstream os;
-            os << location
-               << "\n" << crpcut_check_name<action>::string()
-               << "_" << op << "(" << n1 << ", " << n2 << ")";
-
-            static const char *prefix[] = { "\n  where ", "\n        " };
-            bool prev = stream_param(os, prefix[0], n1, v1);
-            stream_param(os, prefix[prev], n2, v2);
-            std::string s(os.str());
-            os.str(std::string());
-            size_t len = s.length();
-            char *p = static_cast<char *>(alloca(len));
-            s.copy(p, len);
-            std::string().swap(s);
-            os.~ostringstream();
-            new (&os) ostringstream();
-            comm::report(action, p, len);
-          }
-      }
-    private:
-      const char *location;
-      const char *op;
-    };
-
+    }
     template <comm::type action, typename T1, typename T2>
-    class tester_t : tester_base
+    void verify(bool b, T1 v1, const char *n1, T2 v2, const char *n2) const
     {
-      typedef typename param_traits<T1>::type type1;
-      typedef typename param_traits<T2>::type type2;
-    public:
-      tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
-      void EQ(type1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, type1, type2>(v1 == v2, v1, n1, v2, n2);
-      }
-      void NE(type1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, type1, type2>(v1 != v2, v1, n1, v2, n2);
-      }
-      void GT(type1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, type1, type2>(v1 > v2, v1, n1, v2, n2);
-      }
-      void GE(type1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, type1, type2>(v1 >= v2, v1, n1, v2, n2);
-      }
-      void LT(type1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, type1, type2>(v1 < v2, v1, n1, v2, n2);
-      }
-      void LE(type1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, type1, type2>(v1 <= v2, v1, n1, v2, n2);
-      }
-    };
-
-    template <comm::type action, typename T1>
-    class tester_t<action, T1, void> : tester_base
-    {
-      typedef typename param_traits<T1>::type type1;
-    public:
-      tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
-      template <typename T2>
-      void EQ(type1 v1, const char *n1, T2 v2, const char *n2) const
-      {
-        verify<action, type1, T2>(v1 == 0, v1, n1, v2, n2);
-      }
-      template <typename T2>
-      void NE(type1 v1, const char *n1, T2 v2, const char *n2) const
-      {
-        verify<action, type1, T2>(v1 != 0, v1, n1, v2, n2);
-      }
-      template <typename T2>
-      void GT(type1 v1, const char *n1, T2 v2, const char *n2) const
-      {
-        verify<action, type1, T2>(v1 > 0, v1, n1, v2, n2);
-      }
-      template <typename T2>
-      void GE(type1 v1, const char *n1, T2 v2, const char *n2) const
-      {
-        verify<action, type1, T2>(v1 >= 0, v1, n1, v2, n2);
-      }
-      template <typename T2>
-      void LT(type1 v1, const char *n1, T2 v2, const char *n2) const
-      {
-        verify<action, type1, T2>(v1 < 0, v1, n1, v2, n2);
-      }
-      template <typename T2>
-      void LE(type1 v1, const char *n1, T2 v2, const char *n2) const
-      {
-        verify<action, type1, T2>(v1 <= 0, v1, n1, v2, n2);
-      }
-    };
-
-    template <comm::type action, typename T2>
-    class tester_t<action, void, T2> : tester_base
-    {
-      typedef typename param_traits<T2>::type type2;
-    public:
-      tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
-      template <typename T1>
-      void EQ(T1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, T1, type2>(0 == v2, v1, n1, v2, n2);
-      }
-      template <typename T1>
-      void NE(T1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, T1, type2>(0 != v2, v1, n1, v2, n2);
-      }
-      template <typename T1>
-      void GT(T1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, T1, type2>(0 > v2, v1, n1, v2, n2);
-      }
-      template <typename T1>
-      void GE(T1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, T1, type2>(0 >= v2, v1, n1, v2, n2);
-      }
-      template <typename T1>
-      void LT(T1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, T1, type2>(0 < v2, v1, n1, v2, n2);
-      }
-      template <typename T1>
-      void LE(T1 v1, const char *n1, type2 v2, const char *n2) const
-      {
-        verify<action, T1, type2>(0 <= v2, v1, n1, v2, n2);
-      }
-    };
-
-    template <comm::type action>
-    class tester_t<action, void, void> /* pretty bizarre */ : tester_base
-    {
-    public:
-      void EQ(int, const char*,int, const char*) const { }
-      void NE(int, const char *n1, int, const char *n2) const
-      {
-        verify<action, int,int>(false, 0, n1, 0, n2);
-      }
-      void GT(int, const char *n1, int, const char *n2) const
-      {
-        verify<action, int,int>(false, 0, n1, 0, n2);
-      }
-      void GE(int, const char*, int, const char *) const { }
-      void LT(int, const char *n1, int, const char *n2) const
-      {
-        verify<action, int,int>(false, 0, n1, 0, n2);
-      }
-      void LE(int, const char*, int, const char*) const { }
-    };
-
-    template <comm::type action, bool null1, typename T1, bool null2, typename T2>
-    tester_t<action,
-             typename if_else<null1, void, T1>::type,
-             typename if_else<null2, void, T2>::type>
-    tester(const char *loc, const char *op)
-    {
-      tester_t<action,
-               typename if_else<null1, void, T1>::type,
-               typename if_else<null2, void, T2>::type> v(loc, op);
-      return v;
-    }
-
-    template <comm::type action>
-    class bool_tester
-    {
-      const char *loc_;
-    public:
-      bool_tester(const char *loc) : loc_(loc) {}
-      template <typename T>
-      void check_true(const T& v, const char *vn) const
-      {
-        if (eval(v)) {} else { report("_TRUE", v, vn); }
-      }
-      template <typename T>
-      void assert_false(const T& v, const char *vn) const
-      {
-        if (eval(v)) { report("_FALSE", v, vn); }
-      }
-    private:
-      template <typename T>
-      void report(const char *name, const T& v, const char *vn) const
-      {
-        heap::set_limit(heap::system);
-        using std::ostringstream;
-        using std::stringbuf;
-        ostringstream os;
-
-        os << loc_ << "\n" << crpcut_check_name<action>::string()
-           << name << "(" << vn << ")\n"
-          "  is evaluated as:\n    ";
-        conditionally_stream<8>(os, v);
-        std::string s(os.str());
-        os.~ostringstream();
-        new (&os) ostringstream();
-        size_t len = s.length();
-        char *p = static_cast<char*>(alloca(len));
-        s.copy(p, len);
-        std::string().swap(s);
-        comm::report(action, p, len);
-      }
-    };
-
-    template <case_convert_type converter>
-    struct convert_traits
-    {
-      static const char *do_convert(char *lo, const char *, const std::locale &)
-      {
-        return lo;
-      }
-    };
-
-    template <>
-    struct convert_traits<uppercase>
-    {
-      static const char *do_convert(char *lo, const char *hi,
-                                    const std::locale &l)
-      {
-        return std::use_facet<std::ctype<char> >(l).toupper(lo, hi);
-      }
-    };
-
-    template <>
-    struct convert_traits<lowercase>
-    {
-      static const char *do_convert(char *lo, const char *hi,
-                                    const std::locale &l)
-      {
-        return std::use_facet<std::ctype<char> >(l).tolower(lo, hi);
-      }
-    };
-
-
-    class collate_result
-    {
-      class comparator;
-      const char *r;
-      const std::string intl;
-      std::locale locale;
-      enum { left, right } side;
-      collate_result(const char *refstr, std::string comp, const std::locale& l)
-        : r(refstr),
-          intl(comp),
-          locale(l),
-          side(right) {}
-    public:
-      collate_result(const collate_result& o)
-        : r(o.r),
-          intl(o.intl),
-          locale(o.locale),
-          side(o.side)
-      {}
-      operator const comparator*() const
-      {
-        return operator()();
-      }
-      const comparator* operator()() const
-      {
-        return reinterpret_cast<const comparator*>(r ? 0 : this);
-      }
-      collate_result& set_lh() { side = left; return *this;}
-      friend std::ostream &operator<<(std::ostream& os, const collate_result &obj)
-      {
-        static const char rs[] = "\"\n"
-          "  and right hand value = \"";
-        os << "Failed in locale \"" << obj.locale.name() << "\"\n"
-          "  with left hand value = \"";
-        if (obj.side == right)
-          {
-            os << obj.intl << rs << obj.r << "\"";
-          }
-        else
-          {
-            os << obj.r << rs << obj.intl << "\"";
-          }
-        return os;
-      }
-      template <case_convert_type>
-      friend class crpcut::collate_t;
-    };
-
-#ifdef CRPCUT_SUPPORTS_VTEMPLATES
-    template <int N, typename ...T>
-    class param_holder;
-
-    template <int N>
-    class param_holder<N>
-    {
-    public:
-      param_holder() {}
-      template <typename P, typename ...V>
-      bool apply(P& func, const V &...v) const {
-        return func(v...);
-      }
-      void print_to(std::ostream &) const { }
-    };
-
-    template <int N, typename T, typename ...Tail>
-    class param_holder<N, T, Tail...> : public param_holder<N+1, Tail...>
-    {
-    public:
-      param_holder(const T& v, const Tail&...tail)
-        : param_holder<N+1,Tail...>(tail...),
-          val(v)
-      {
-      }
-      template <typename P, typename ...V>
-      bool apply(P& func, const V&...v) const {
-        return param_holder<N+1,Tail...>::apply(func, v..., val);
-      }
-      void print_to(std::ostream &os) const {
-        os << "  param" << N << " = " << val << '\n';
-        param_holder<N+1, Tail...>::print_to(os);
-      }
-    private:
-      const T& val;
-    };
-
-    template <typename ...T>
-    param_holder<1, T...> params(const T&... v)
-    {
-      return param_holder<1, T...>(v...);
-    }
-
-#else
-
-    template <int N, typename T>
-    class holder
-    {
-    protected:
-      holder(const T& v) : val(v) {}
-      const T& getval() const { return val; }
-      void print_to(std::ostream &os) const
-      {
-        os << "  param" << N << " = " << val << "\n";
-      }
-    private:
-      const T &val;
-    };
-
-    template <int N>
-    class holder<N, crpcut_none> : private crpcut_none
-    {
-    protected:
-      holder(const crpcut_none&) {}
-      void print_to(std::ostream&) const {};
-      const crpcut_none& getval() const { return *this; }
-    };
-
-    template <typename T1,               typename T2 = crpcut_none,
-              typename T3 = crpcut_none, typename T4 = crpcut_none,
-              typename T5 = crpcut_none, typename T6 = crpcut_none,
-              typename T7 = crpcut_none, typename T8 = crpcut_none,
-              typename T9 = crpcut_none>
-    class param_holder  : holder<1, T1>, holder<2, T2>, holder<3, T3>,
-                          holder<4, T4>, holder<5, T5>, holder<6, T6>,
-                          holder<7, T7>, holder<8, T8>, holder<9, T9>
-    {
-    public:
-      param_holder(const T1 &v1, const T2 &v2 = T2(), const T3 &v3 = T3(),
-                   const T4 &v4 = T4(), const T5 &v5 = T5(),
-                   const T6 &v6 = T6(), const T7 &v7 = T7(),
-                   const T8 &v8 = T8(), const T9 &v9 = T9())
-        : holder<1, T1>(v1),
-          holder<2, T2>(v2),
-          holder<3, T3>(v3),
-          holder<4, T4>(v4),
-          holder<5, T5>(v5),
-          holder<6, T6>(v6),
-          holder<7, T7>(v7),
-          holder<8, T8>(v8),
-          holder<9, T9>(v9)
-      {}
-      template <typename P>
-      bool apply(P &pred) const;
-      void print_to(std::ostream &os) const
-      {
-        holder<1, T1>::print_to(os);
-        holder<2, T2>::print_to(os);
-        holder<3, T3>::print_to(os);
-        holder<4, T4>::print_to(os);
-        holder<5, T5>::print_to(os);
-        holder<6, T6>::print_to(os);
-        holder<7, T7>::print_to(os);
-        holder<8, T8>::print_to(os);
-        holder<9, T9>::print_to(os);
-      }
-    };
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6,
-              typename T7, typename T8, typename T9>
-    struct call_traits
-    {
-      template <typename P>
-      static bool call(P &p,
-                       const T1 &t1, const T2 &t2, const T3 &t3,
-                       const T4 &t4, const T5 &t5, const T6 &t6,
-                       const T7 &t7, const T8 &t8, const T9 &t9)
-      {
-        return p(t1, t2, t3, t4, t5, t6, t7, t8, t9);
-      }
-    };
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6,
-              typename T7, typename T8>
-    struct call_traits<T1, T2, T3, T4, T5, T6, T7, T8, crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p,
-                       const T1 &t1, const T2 &t2, const T3 &t3,
-                       const T4 &t4, const T5 &t5, const T6 &t6,
-                       const T7 &t7, const T8 &t8, const crpcut_none&)
-      {
-        return p(t1, t2, t3, t4, t5, t6, t7, t8);
-      }
-    };
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6,
-              typename T7>
-    struct call_traits<T1, T2, T3, T4, T5, T6, T7, crpcut_none, crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p,
-                       const T1 &t1, const T2 &t2, const T3 &t3,
-                       const T4 &t4, const T5 &t5, const T6 &t6,
-                       const T7 &t7, const crpcut_none&, const crpcut_none&)
-      {
-        return p(t1, t2, t3, t4, t5, t6, t7);
-      }
-    };
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6>
-    struct call_traits<T1, T2, T3, T4, T5, T6,
-                       crpcut_none, crpcut_none, crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p,
-                       const T1 &t1, const T2 &t2, const T3 &t3,
-                       const T4 &t4, const T5 &t5, const T6 &t6,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&)
-      {
-        return p(t1, t2, t3, t4, t5, t6);
-      }
-    };
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5>
-    struct call_traits<T1, T2, T3, T4, T5,
-                       crpcut_none, crpcut_none, crpcut_none, crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
-                       const T4 &t4, const T5 &t5, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&)
-      {
-        return p(t1, t2, t3, t4, t5);
-      }
-    };
-
-    template <typename T1, typename T2, typename T3,
-              typename T4>
-    struct call_traits<T1, T2, T3, T4,
-                       crpcut_none, crpcut_none, crpcut_none,
-                       crpcut_none, crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
-                       const T4 &t4, const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&)
-      {
-        return p(t1, t2, t3, t4);
-      }
-    };
-
-    template <typename T1, typename T2, typename T3>
-    struct call_traits<T1, T2, T3, crpcut_none,
-                       crpcut_none, crpcut_none, crpcut_none, crpcut_none,
-                       crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&)
-      {
-        return p(t1, t2, t3);
-      }
-    };
-
-    template <typename T1, typename T2>
-    struct call_traits<T1, T2, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p, const T1& t1, const T2 &t2, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&)
-      {
-        return p(t1, t2);
-      }
-    };
-
-    template <typename T1>
-    struct call_traits<T1, crpcut_none, crpcut_none,
-                       crpcut_none, crpcut_none, crpcut_none, crpcut_none,
-                       crpcut_none, crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p, const T1& t1, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&)
-      {
-        return p(t1);
-      }
-    };
-
-    template <>
-    struct call_traits<crpcut_none, crpcut_none, crpcut_none, crpcut_none,
-                       crpcut_none, crpcut_none, crpcut_none, crpcut_none,
-                       crpcut_none>
-    {
-      template <typename P>
-      static bool call(P &p,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&, const crpcut_none&,
-                       const crpcut_none&)
-      {
-        return p();
-      }
-    };
-
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6,
-              typename T7, typename T8, typename T9>
-    template <typename P>
-    bool
-    param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9>::apply(P &pred) const
-    {
-      typedef call_traits<T1, T2, T3, T4, T5, T6, T7, T8, T9> traits;
-      return traits::call(pred,
-                          holder<1, T1>::getval(),
-                          holder<2, T2>::getval(),
-                          holder<3, T3>::getval(),
-                          holder<4, T4>::getval(),
-                          holder<5, T5>::getval(),
-                          holder<6, T6>::getval(),
-                          holder<7, T7>::getval(),
-                          holder<8, T8>::getval(),
-                          holder<9, T9>::getval());
-
-    }
-
-    template <typename T1>
-    param_holder<T1>
-    params(const T1& t1)
-    {
-      typedef param_holder<T1> R;
-      return R(t1);
-    }
-
-    template <typename T1, typename T2>
-    param_holder<T1, T2>
-    params(const T1& t1, const T2 &t2)
-    {
-      typedef param_holder<T1, T2> R;
-      return R(t1, t2);
-    }
-
-    template <typename T1, typename T2, typename T3>
-    param_holder<T1, T2, T3>
-    params(const T1& t1, const T2 &t2, const T3 &t3)
-    {
-      typedef param_holder<T1, T2, T3> R;
-      return R(t1, t2, t3);
-    }
-
-    template <typename T1, typename T2, typename T3, typename T4>
-    param_holder<T1, T2, T3, T4>
-    params(const T1& t1, const T2 &t2, const T3 &t3, const T4 &t4)
-    {
-      typedef param_holder<T1, T2, T3, T4> R;
-      return R(t1, t2, t3, t4);
-    }
-
-    template <typename T1, typename T2, typename T3, typename T4, typename T5>
-    param_holder<T1, T2, T3, T4, T5>
-    params(const T1& t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5)
-    {
-      typedef param_holder<T1, T2, T3, T4, T5> R;
-      return R(t1, t2, t3, t4, t5);
-    }
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6>
-    param_holder<T1, T2, T3, T4, T5, T6>
-    params(const T1& t1, const T2 &t2, const T3 &t3,
-           const T4 &t4, const T5 &t5, const T6 &t6)
-    {
-      typedef param_holder<T1, T2, T3, T4, T5, T6> R;
-      return R(t1, t2, t3, t4, t5, t6);
-    }
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6,
-              typename T7>
-    param_holder<T1, T2, T3, T4, T5, T6, T7>
-    params(const T1& t1, const T2 &t2, const T3 &t3,
-           const T4 &t4, const T5 &t5, const T6 &t6,
-           const T7 &t7)
-    {
-      typedef param_holder<T1, T2, T3, T4, T5, T6, T7> R;
-      return R(t1, t2, t3, t4, t5, t6, t7);
-    }
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6,
-              typename T7, typename T8>
-    param_holder<T1, T2, T3, T4, T5, T6, T7, T8>
-    params(const T1& t1, const T2 &t2, const T3 &t3,
-           const T4 &t4, const T5 &t5, const T6 &t6,
-           const T7 &t7, const T8 &t8)
-    {
-      typedef param_holder<T1, T2, T3, T4, T5, T6, T7, T8> R;
-      return R(t1, t2, t3, t4, t5, t6, t7, t8);
-    }
-
-    template <typename T1, typename T2, typename T3,
-              typename T4, typename T5, typename T6,
-              typename T7, typename T8, typename T9>
-    param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9>
-    params(const T1& t1, const T2 &t2, const T3 &t3,
-           const T4 &t4, const T5 &t5, const T6 &t6,
-           const T7 &t7, const T8 &t8, const T9 &t9)
-    {
-      typedef param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9> R;
-      return R(t1, t2, t3, t4, t5, t6, t7, t8, t9);
-    }
-
-    inline
-    param_holder<crpcut_none>
-    params()
-    {
-      return param_holder<crpcut_none>(crpcut_none());
-    }
-#endif
-    template <typename P,
-              bool streamable = stream_checker::is_output_streamable<P>::value>
-    struct predicate_streamer
-    {
-      predicate_streamer(const char *name, const P& pred) : n(name), p(pred) {}
-      std::ostream &stream_to(std::ostream & os) const
-      {
-        return os << n << " :\n" << p << '\n';
-      }
-    private:
-      const char *n;
-      const P& p;
-    };
-
-    template <typename P>
-    struct predicate_streamer<P, false>
-    {
-      predicate_streamer(const char *,const P&) {}
-      std::ostream &stream_to(std::ostream &os) const { return os; }
-    private:
-    };
-
-    template <typename P, bool unstreamable>
-    std::ostream &operator<<(std::ostream &os,
-                             const predicate_streamer<P, unstreamable>& s)
-    {
-      return s.stream_to(os);
-    }
-
-    template <typename P>
-    predicate_streamer<P> stream_predicate(const char *n, const P& p)
-    {
-      return predicate_streamer<P>(n, p);
-    }
-
-    template <typename Pred, typename Params>
-    bool
-    match_pred(std::string &msg, const char *sp, Pred p, const Params &params)
-    {
-      bool b = params.apply(p);
       if (!b)
         {
           heap::set_limit(heap::system);
-          std::ostringstream out;
-          params.print_to(out);
-          out << stream_predicate(sp, p);
-          msg = out.str();
+          using std::ostringstream;
+          ostringstream os;
+          os << location
+             << "\n" << crpcut_check_name<action>::string()
+             << "_" << op << "(" << n1 << ", " << n2 << ")";
+
+          static const char *prefix[] = { "\n  where ", "\n        " };
+          bool prev = stream_param(os, prefix[0], n1, v1);
+          stream_param(os, prefix[prev], n2, v2);
+          std::string s(os.str());
+          os.str(std::string());
+          size_t len = s.length();
+          char *p = static_cast<char *>(alloca(len));
+          s.copy(p, len);
+          std::string().swap(s);
+          os.~ostringstream();
+          new (&os) ostringstream();
+          comm::report(action, p, len);
         }
-      return b;
+      }
+  private:
+    const char *location;
+    const char *op;
+  };
+
+  template <comm::type action, typename T1, typename T2>
+  class tester_t : tester_base
+  {
+    typedef typename param_traits<T1>::type type1;
+    typedef typename param_traits<T2>::type type2;
+  public:
+    tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
+    void EQ(type1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, type1, type2>(v1 == v2, v1, n1, v2, n2);
     }
+    void NE(type1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, type1, type2>(v1 != v2, v1, n1, v2, n2);
+    }
+    void GT(type1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, type1, type2>(v1 > v2, v1, n1, v2, n2);
+    }
+    void GE(type1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, type1, type2>(v1 >= v2, v1, n1, v2, n2);
+    }
+    void LT(type1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, type1, type2>(v1 < v2, v1, n1, v2, n2);
+    }
+    void LE(type1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, type1, type2>(v1 <= v2, v1, n1, v2, n2);
+    }
+  };
+
+  template <comm::type action, typename T1>
+  class tester_t<action, T1, void> : tester_base
+  {
+    typedef typename param_traits<T1>::type type1;
+  public:
+    tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
+    template <typename T2>
+    void EQ(type1 v1, const char *n1, T2 v2, const char *n2) const
+    {
+      verify<action, type1, T2>(v1 == 0, v1, n1, v2, n2);
+    }
+    template <typename T2>
+    void NE(type1 v1, const char *n1, T2 v2, const char *n2) const
+    {
+      verify<action, type1, T2>(v1 != 0, v1, n1, v2, n2);
+    }
+    template <typename T2>
+    void GT(type1 v1, const char *n1, T2 v2, const char *n2) const
+    {
+      verify<action, type1, T2>(v1 > 0, v1, n1, v2, n2);
+    }
+    template <typename T2>
+    void GE(type1 v1, const char *n1, T2 v2, const char *n2) const
+    {
+      verify<action, type1, T2>(v1 >= 0, v1, n1, v2, n2);
+    }
+    template <typename T2>
+    void LT(type1 v1, const char *n1, T2 v2, const char *n2) const
+    {
+      verify<action, type1, T2>(v1 < 0, v1, n1, v2, n2);
+    }
+    template <typename T2>
+    void LE(type1 v1, const char *n1, T2 v2, const char *n2) const
+    {
+      verify<action, type1, T2>(v1 <= 0, v1, n1, v2, n2);
+    }
+  };
+
+  template <comm::type action, typename T2>
+  class tester_t<action, void, T2> : tester_base
+  {
+    typedef typename param_traits<T2>::type type2;
+  public:
+    tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
+    template <typename T1>
+    void EQ(T1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, T1, type2>(0 == v2, v1, n1, v2, n2);
+    }
+    template <typename T1>
+    void NE(T1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, T1, type2>(0 != v2, v1, n1, v2, n2);
+    }
+    template <typename T1>
+    void GT(T1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, T1, type2>(0 > v2, v1, n1, v2, n2);
+    }
+    template <typename T1>
+    void GE(T1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, T1, type2>(0 >= v2, v1, n1, v2, n2);
+    }
+    template <typename T1>
+    void LT(T1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, T1, type2>(0 < v2, v1, n1, v2, n2);
+    }
+    template <typename T1>
+    void LE(T1 v1, const char *n1, type2 v2, const char *n2) const
+    {
+      verify<action, T1, type2>(0 <= v2, v1, n1, v2, n2);
+    }
+  };
+
+  template <comm::type action>
+  class tester_t<action, void, void> /* pretty bizarre */ : tester_base
+  {
+  public:
+    void EQ(int, const char*,int, const char*) const { }
+    void NE(int, const char *n1, int, const char *n2) const
+    {
+      verify<action, int,int>(false, 0, n1, 0, n2);
+    }
+    void GT(int, const char *n1, int, const char *n2) const
+    {
+      verify<action, int,int>(false, 0, n1, 0, n2);
+    }
+    void GE(int, const char*, int, const char *) const { }
+    void LT(int, const char *n1, int, const char *n2) const
+    {
+      verify<action, int,int>(false, 0, n1, 0, n2);
+    }
+    void LE(int, const char*, int, const char*) const { }
+  };
+
+  template <comm::type action, bool null1, typename T1, bool null2, typename T2>
+  tester_t<action,
+           typename if_else<null1, void, T1>::type,
+           typename if_else<null2, void, T2>::type>
+  tester(const char *loc, const char *op)
+  {
+    tester_t<action,
+             typename if_else<null1, void, T1>::type,
+             typename if_else<null2, void, T2>::type> v(loc, op);
+    return v;
+  }
+
+  template <comm::type action>
+  class bool_tester
+  {
+    const char *loc_;
+  public:
+    bool_tester(const char *loc) : loc_(loc) {}
+    template <typename T>
+    void check_true(const T& v, const char *vn) const
+    {
+      if (eval(v)) {} else { report("_TRUE", v, vn); }
+    }
+    template <typename T>
+    void assert_false(const T& v, const char *vn) const
+    {
+      if (eval(v)) { report("_FALSE", v, vn); }
+    }
+  private:
+    template <typename T>
+    void report(const char *name, const T& v, const char *vn) const
+    {
+      heap::set_limit(heap::system);
+      using std::ostringstream;
+      using std::stringbuf;
+      ostringstream os;
+
+      os << loc_ << "\n" << crpcut_check_name<action>::string()
+         << name << "(" << vn << ")\n"
+        "  is evaluated as:\n    ";
+      conditionally_stream<8>(os, v);
+      std::string s(os.str());
+      os.~ostringstream();
+      new (&os) ostringstream();
+      size_t len = s.length();
+      char *p = static_cast<char*>(alloca(len));
+      s.copy(p, len);
+      std::string().swap(s);
+      comm::report(action, p, len);
+    }
+  };
+
+  template <case_convert_type converter>
+  struct convert_traits
+  {
+    static const char *do_convert(char *lo, const char *, const std::locale &)
+    {
+      return lo;
+    }
+  };
+
+  template <>
+  const char *
+  convert_traits<uppercase>
+  ::do_convert(char *lo, const char *, const std::locale &);
+
+  template <>
+  const char *
+  convert_traits<lowercase>
+  ::do_convert(char *lo, const char *, const std::locale &);
 
 
-  } // namespace implementation
+  class collate_result
+  {
+    class comparator;
+    const char *r;
+    const std::string intl;
+    std::locale locale;
+    enum { left, right } side;
+    collate_result(const char *refstr, std::string comp, const std::locale& l);
+  public:
+    collate_result(const collate_result& o);
+    operator const comparator*() const;
+    const comparator* operator()() const;
+    collate_result& set_lh();
+    friend
+    std::ostream &operator<<(std::ostream& os, const collate_result &obj);
 
+    template <case_convert_type>
+    friend class crpcut::collate_t;
+  };
+
+#ifdef CRPCUT_SUPPORTS_VTEMPLATES
+  template <int N, typename ...T>
+  class param_holder;
+
+  template <int N>
+  class param_holder<N>
+  {
+  public:
+    param_holder() {}
+    template <typename P, typename ...V>
+    bool apply(P& func, const V &...v) const {
+      return func(v...);
+    }
+    void print_to(std::ostream &) const { }
+  };
+
+  template <int N, typename T, typename ...Tail>
+  class param_holder<N, T, Tail...> : public param_holder<N+1, Tail...>
+  {
+  public:
+    param_holder(const T& v, const Tail&...tail)
+      : param_holder<N+1,Tail...>(tail...),
+        val(v)
+    {
+    }
+    template <typename P, typename ...V>
+    bool apply(P& func, const V&...v) const {
+      return param_holder<N+1,Tail...>::apply(func, v..., val);
+    }
+    void print_to(std::ostream &os) const {
+      os << "  param" << N << " = " << val << '\n';
+      param_holder<N+1, Tail...>::print_to(os);
+    }
+  private:
+    const T& val;
+  };
+
+  template <typename ...T>
+  param_holder<1, T...> params(const T&... v)
+  {
+    return param_holder<1, T...>(v...);
+  }
+
+#else
+
+  template <int N, typename T>
+  class holder
+  {
+  protected:
+    holder(const T& v) : val(v) {}
+    const T& getval() const { return val; }
+    void print_to(std::ostream &os) const
+    {
+      os << "  param" << N << " = " << val << "\n";
+    }
+  private:
+    const T &val;
+  };
+
+  template <int N>
+  class holder<N, crpcut_none> : private crpcut_none
+  {
+  protected:
+    holder(const crpcut_none&) {}
+    void print_to(std::ostream&) const {};
+    const crpcut_none& getval() const { return *this; }
+  };
+
+  template <typename T1,               typename T2 = crpcut_none,
+            typename T3 = crpcut_none, typename T4 = crpcut_none,
+            typename T5 = crpcut_none, typename T6 = crpcut_none,
+            typename T7 = crpcut_none, typename T8 = crpcut_none,
+            typename T9 = crpcut_none>
+  class param_holder
+    : holder<1, T1>, holder<2, T2>, holder<3, T3>,
+      holder<4, T4>, holder<5, T5>, holder<6, T6>,
+      holder<7, T7>, holder<8, T8>, holder<9, T9>
+  {
+  public:
+    param_holder(const T1 &v1, const T2 &v2 = T2(), const T3 &v3 = T3(),
+                 const T4 &v4 = T4(), const T5 &v5 = T5(),
+                 const T6 &v6 = T6(), const T7 &v7 = T7(),
+                 const T8 &v8 = T8(), const T9 &v9 = T9())
+      : holder<1, T1>(v1),
+        holder<2, T2>(v2),
+        holder<3, T3>(v3),
+        holder<4, T4>(v4),
+        holder<5, T5>(v5),
+        holder<6, T6>(v6),
+        holder<7, T7>(v7),
+        holder<8, T8>(v8),
+        holder<9, T9>(v9)
+    {}
+    template <typename P>
+    bool apply(P &pred) const;
+    void print_to(std::ostream &os) const
+    {
+      holder<1, T1>::print_to(os);
+      holder<2, T2>::print_to(os);
+      holder<3, T3>::print_to(os);
+      holder<4, T4>::print_to(os);
+      holder<5, T5>::print_to(os);
+      holder<6, T6>::print_to(os);
+      holder<7, T7>::print_to(os);
+      holder<8, T8>::print_to(os);
+      holder<9, T9>::print_to(os);
+    }
+  };
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6,
+            typename T7, typename T8, typename T9>
+  struct call_traits
+  {
+    template <typename P>
+    static bool call(P &p,
+                     const T1 &t1, const T2 &t2, const T3 &t3,
+                     const T4 &t4, const T5 &t5, const T6 &t6,
+                     const T7 &t7, const T8 &t8, const T9 &t9)
+    {
+      return p(t1, t2, t3, t4, t5, t6, t7, t8, t9);
+    }
+  };
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6,
+            typename T7, typename T8>
+  struct call_traits<T1, T2, T3, T4, T5, T6, T7, T8, crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p,
+                     const T1 &t1, const T2 &t2, const T3 &t3,
+                     const T4 &t4, const T5 &t5, const T6 &t6,
+                     const T7 &t7, const T8 &t8, const crpcut_none&)
+    {
+      return p(t1, t2, t3, t4, t5, t6, t7, t8);
+    }
+  };
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6,
+            typename T7>
+  struct call_traits<T1, T2, T3, T4, T5, T6, T7, crpcut_none, crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p,
+                     const T1 &t1, const T2 &t2, const T3 &t3,
+                     const T4 &t4, const T5 &t5, const T6 &t6,
+                     const T7 &t7, const crpcut_none&, const crpcut_none&)
+    {
+      return p(t1, t2, t3, t4, t5, t6, t7);
+    }
+  };
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6>
+  struct call_traits<T1, T2, T3, T4, T5, T6,
+                     crpcut_none, crpcut_none, crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p,
+                     const T1 &t1, const T2 &t2, const T3 &t3,
+                     const T4 &t4, const T5 &t5, const T6 &t6,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&)
+    {
+      return p(t1, t2, t3, t4, t5, t6);
+    }
+  };
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5>
+  struct call_traits<T1, T2, T3, T4, T5,
+                     crpcut_none, crpcut_none, crpcut_none, crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
+                     const T4 &t4, const T5 &t5, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&)
+    {
+      return p(t1, t2, t3, t4, t5);
+    }
+  };
+
+  template <typename T1, typename T2, typename T3,
+            typename T4>
+  struct call_traits<T1, T2, T3, T4,
+                     crpcut_none, crpcut_none, crpcut_none,
+                     crpcut_none, crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
+                     const T4 &t4, const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&)
+    {
+      return p(t1, t2, t3, t4);
+    }
+  };
+
+  template <typename T1, typename T2, typename T3>
+  struct call_traits<T1, T2, T3, crpcut_none,
+                     crpcut_none, crpcut_none, crpcut_none, crpcut_none,
+                     crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&)
+    {
+      return p(t1, t2, t3);
+    }
+  };
+
+  template <typename T1, typename T2>
+  struct call_traits<T1, T2, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p, const T1& t1, const T2 &t2, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&)
+    {
+      return p(t1, t2);
+    }
+  };
+
+  template <typename T1>
+  struct call_traits<T1, crpcut_none, crpcut_none,
+                     crpcut_none, crpcut_none, crpcut_none, crpcut_none,
+                     crpcut_none, crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p, const T1& t1, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&)
+    {
+      return p(t1);
+    }
+  };
+
+  template <>
+  struct call_traits<crpcut_none, crpcut_none, crpcut_none, crpcut_none,
+                     crpcut_none, crpcut_none, crpcut_none, crpcut_none,
+                     crpcut_none>
+  {
+    template <typename P>
+    static bool call(P &p,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&, const crpcut_none&,
+                     const crpcut_none&)
+    {
+      return p();
+    }
+  };
+
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6,
+            typename T7, typename T8, typename T9>
+  template <typename P>
+  bool
+  param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9>::apply(P &pred) const
+  {
+    typedef call_traits<T1, T2, T3, T4, T5, T6, T7, T8, T9> traits;
+    return traits::call(pred,
+                        holder<1, T1>::getval(),
+                        holder<2, T2>::getval(),
+                        holder<3, T3>::getval(),
+                        holder<4, T4>::getval(),
+                        holder<5, T5>::getval(),
+                        holder<6, T6>::getval(),
+                        holder<7, T7>::getval(),
+                        holder<8, T8>::getval(),
+                        holder<9, T9>::getval());
+  }
+
+  template <typename T1>
+  param_holder<T1>
+  params(const T1& t1)
+  {
+    typedef param_holder<T1> R;
+    return R(t1);
+  }
+
+  template <typename T1, typename T2>
+  param_holder<T1, T2>
+  params(const T1& t1, const T2 &t2)
+  {
+    typedef param_holder<T1, T2> R;
+    return R(t1, t2);
+  }
+
+  template <typename T1, typename T2, typename T3>
+  param_holder<T1, T2, T3>
+  params(const T1& t1, const T2 &t2, const T3 &t3)
+  {
+    typedef param_holder<T1, T2, T3> R;
+    return R(t1, t2, t3);
+  }
+
+  template <typename T1, typename T2, typename T3, typename T4>
+  param_holder<T1, T2, T3, T4>
+  params(const T1& t1, const T2 &t2, const T3 &t3, const T4 &t4)
+  {
+    typedef param_holder<T1, T2, T3, T4> R;
+    return R(t1, t2, t3, t4);
+  }
+
+  template <typename T1, typename T2, typename T3, typename T4, typename T5>
+  param_holder<T1, T2, T3, T4, T5>
+  params(const T1& t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5)
+  {
+    typedef param_holder<T1, T2, T3, T4, T5> R;
+    return R(t1, t2, t3, t4, t5);
+  }
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6>
+  param_holder<T1, T2, T3, T4, T5, T6>
+  params(const T1& t1, const T2 &t2, const T3 &t3,
+         const T4 &t4, const T5 &t5, const T6 &t6)
+  {
+    typedef param_holder<T1, T2, T3, T4, T5, T6> R;
+    return R(t1, t2, t3, t4, t5, t6);
+  }
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6,
+            typename T7>
+  param_holder<T1, T2, T3, T4, T5, T6, T7>
+  params(const T1& t1, const T2 &t2, const T3 &t3,
+         const T4 &t4, const T5 &t5, const T6 &t6,
+         const T7 &t7)
+  {
+    typedef param_holder<T1, T2, T3, T4, T5, T6, T7> R;
+    return R(t1, t2, t3, t4, t5, t6, t7);
+  }
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6,
+            typename T7, typename T8>
+  param_holder<T1, T2, T3, T4, T5, T6, T7, T8>
+  params(const T1& t1, const T2 &t2, const T3 &t3,
+         const T4 &t4, const T5 &t5, const T6 &t6,
+         const T7 &t7, const T8 &t8)
+  {
+    typedef param_holder<T1, T2, T3, T4, T5, T6, T7, T8> R;
+    return R(t1, t2, t3, t4, t5, t6, t7, t8);
+  }
+
+  template <typename T1, typename T2, typename T3,
+            typename T4, typename T5, typename T6,
+            typename T7, typename T8, typename T9>
+  param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9>
+  params(const T1& t1, const T2 &t2, const T3 &t3,
+         const T4 &t4, const T5 &t5, const T6 &t6,
+         const T7 &t7, const T8 &t8, const T9 &t9)
+  {
+    typedef param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9> R;
+    return R(t1, t2, t3, t4, t5, t6, t7, t8, t9);
+  }
+
+  inline
+  param_holder<crpcut_none>
+  params()
+  {
+    return param_holder<crpcut_none>(crpcut_none());
+  }
+#endif
+  template <typename P,
+            bool streamable = stream_checker::is_output_streamable<P>::value>
+  struct predicate_streamer
+  {
+    predicate_streamer(const char *name, const P& pred) : n(name), p(pred) {}
+    std::ostream &stream_to(std::ostream & os) const
+    {
+      return os << n << " :\n" << p << '\n';
+    }
+  private:
+    const char *n;
+    const P& p;
+  };
+
+  template <typename P>
+  struct predicate_streamer<P, false>
+  {
+    predicate_streamer(const char *,const P&) {}
+    std::ostream &stream_to(std::ostream &os) const { return os; }
+  private:
+  };
+
+  template <typename P, bool unstreamable>
+  std::ostream &operator<<(std::ostream &os,
+                           const predicate_streamer<P, unstreamable>& s)
+  {
+    return s.stream_to(os);
+  }
+
+  template <typename P>
+  predicate_streamer<P> stream_predicate(const char *n, const P& p)
+  {
+    return predicate_streamer<P>(n, p);
+  }
+
+  template <typename Pred, typename Params>
+  bool
+  match_pred(std::string &msg, const char *sp, Pred p, const Params &params)
+  {
+    bool b = params.apply(p);
+    if (!b)
+      {
+        heap::set_limit(heap::system);
+        std::ostringstream out;
+        params.print_to(out);
+        out << stream_predicate(sp, p);
+        msg = out.str();
+      }
+    return b;
+  }
 
   template <case_convert_type converter>
   class collate_t
@@ -2789,131 +2657,131 @@ namespace crpcut {
         locale(loc)
     {
       char *p = &*ref.begin();
-      implementation::convert_traits<converter>::do_convert(p,
-                                                            p + ref.length(),
-                                                            loc);
+      convert_traits<converter>::do_convert(p,
+                                            p + ref.length(),
+                                            loc);
     }
     collate_t(const char *reference, const std::locale& loc = std::locale())
       : ref(reference),
         locale(loc)
     {
       char *p = &*ref.begin();
-      implementation::convert_traits<converter>::do_convert(p,
-                                                            p + ref.length(),
-                                                            loc);
+      convert_traits<converter>::do_convert(p,
+                                            p + ref.length(),
+                                            loc);
     }
 
-    implementation::collate_result operator<(const std::string &s) const
+    collate_result operator<(const std::string &s) const
     {
-      implementation::collate_result rv(compare(s) < 0
-                                        ? 0
-                                        : s.c_str(),
-                                        ref,
-                                        locale);
+      collate_result rv(compare(s) < 0
+                        ? 0
+                        : s.c_str(),
+                        ref,
+                        locale);
       return rv;
     }
-    implementation::collate_result operator<(const char *r) const
+    collate_result operator<(const char *r) const
     {
-      implementation::collate_result rv(compare(r) < 0
-                                        ? 0
-                                        : r,
-                                        ref,
-                                        locale);
-      return rv;
-    }
-
-    implementation::collate_result operator<=(const std::string &s) const
-    {
-      implementation::collate_result rv(compare(s) <= 0
-                                        ? 0
-                                        : s.c_str(),
-                                        ref,
-                                        locale);
-      return rv;
-    }
-    implementation::collate_result operator<=(const char *r) const
-    {
-      implementation::collate_result rv(compare(r) <= 0
-                                        ? 0
-                                        : r,
-                                        ref,
-                                        locale);
+      collate_result rv(compare(r) < 0
+                        ? 0
+                        : r,
+                        ref,
+                        locale);
       return rv;
     }
 
-    implementation::collate_result operator>(const std::string &s) const
+    collate_result operator<=(const std::string &s) const
     {
-      implementation::collate_result rv(compare(s) > 0
-                                        ? 0
-                                        : s.c_str(),
-                                        ref,
-                                        locale);
+      collate_result rv(compare(s) <= 0
+                        ? 0
+                        : s.c_str(),
+                        ref,
+                        locale);
       return rv;
     }
-    implementation::collate_result operator>(const char *r) const
+    collate_result operator<=(const char *r) const
     {
-      implementation::collate_result rv(compare(r) > 0
-                                        ? 0
-                                        : r,
-                                        ref,
-                                        locale);
-      return rv;
-    }
-
-    implementation::collate_result operator>=(const std::string &s) const
-    {
-      implementation::collate_result rv(compare(s) >= 0
-                                        ? 0
-                                        : s.c_str(),
-                                        ref,
-                                        locale);
-      return rv;
-    }
-    implementation::collate_result operator>=(const char *r) const
-    {
-      implementation::collate_result rv(compare(r) >= 0
-                                        ? 0
-                                        : r,
-                                        ref,
-                                        locale);
+      collate_result rv(compare(r) <= 0
+                        ? 0
+                        : r,
+                        ref,
+                        locale);
       return rv;
     }
 
-    implementation::collate_result operator==(const std::string &s) const
+    collate_result operator>(const std::string &s) const
     {
-      implementation::collate_result rv(compare(s) == 0
-                                        ? 0
-                                        : s.c_str(),
-                                        ref,
-                                        locale);
+      collate_result rv(compare(s) > 0
+                        ? 0
+                        : s.c_str(),
+                        ref,
+                        locale);
       return rv;
     }
-    implementation::collate_result operator==(const char *r) const
+    collate_result operator>(const char *r) const
     {
-      implementation::collate_result rv(compare(r) == 0
-                                        ? 0
-                                        : r,
-                                        ref,
-                                        locale);
+      collate_result rv(compare(r) > 0
+                        ? 0
+                        : r,
+                        ref,
+                        locale);
       return rv;
     }
 
-    implementation::collate_result operator!=(const std::string &s) const
+    collate_result operator>=(const std::string &s) const
     {
-      implementation::collate_result rv(compare(s) != 0
-                                        ? 0
-                                        : s.c_str(),
-                                        ref,
-                                        locale);
+      collate_result rv(compare(s) >= 0
+                        ? 0
+                        : s.c_str(),
+                        ref,
+                        locale);
       return rv;
     }
-    implementation::collate_result operator!=(const char *r) const
+    collate_result operator>=(const char *r) const
     {
-      implementation::collate_result rv(compare(r) != 0
-                                        ? 0
-                                        : r,
-                                        ref,
-                                        locale);
+      collate_result rv(compare(r) >= 0
+                        ? 0
+                        : r,
+                        ref,
+                        locale);
+      return rv;
+    }
+
+    collate_result operator==(const std::string &s) const
+    {
+      collate_result rv(compare(s) == 0
+                        ? 0
+                        : s.c_str(),
+                        ref,
+                        locale);
+      return rv;
+    }
+    collate_result operator==(const char *r) const
+    {
+      collate_result rv(compare(r) == 0
+                        ? 0
+                        : r,
+                        ref,
+                        locale);
+      return rv;
+    }
+
+    collate_result operator!=(const std::string &s) const
+    {
+      collate_result rv(compare(s) != 0
+                        ? 0
+                        : s.c_str(),
+                        ref,
+                        locale);
+      return rv;
+    }
+    collate_result operator!=(const char *r) const
+    {
+      collate_result rv(compare(r) != 0
+                        ? 0
+                        : r,
+                        ref,
+                        locale);
       return rv;
     }
   private:
@@ -2921,9 +2789,9 @@ namespace crpcut {
     {
       char *begin = &*s.begin();
       char *end = begin + s.length();
-      implementation::convert_traits<converter>::do_convert(begin,
-                                                            end,
-                                                            locale);
+      convert_traits<converter>::do_convert(begin,
+                                            end,
+                                            locale);
       typedef std::collate<char> coll;
       const coll &fac = std::use_facet<coll>(locale);
       return fac.compare(ref.c_str(), ref.c_str() + ref.length(),
@@ -3227,14 +3095,14 @@ namespace crpcut {
     template <comm::type t> template <typename V>
     direct_reporter<t>& direct_reporter<t>::operator<<(const V& v)
     {
-      implementation::conditionally_stream(os, v);
+      conditionally_stream(os, v);
       return *this;
     }
 
     template <comm::type t> template <typename V>
     direct_reporter<t>& direct_reporter<t>::operator<<(V& v)
     {
-      implementation::conditionally_stream(os, v);
+      conditionally_stream(os, v);
       return *this;
     }
 
@@ -3255,65 +3123,55 @@ namespace crpcut {
     }
   } // namespace comm
 
-  namespace implementation {
+  template <comm::type t>
+  inline
+  reader<t>::reader(crpcut_test_case_registrator *r, int fd)
+    : fdreader(r, fd)
+  {
+  }
 
+  template <comm::type t>
+  inline void
+  reader<t>::set_fd(int fd)
+  {
+    fdreader::set_fd(fd);
+  }
 
-    template <comm::type t>
-    inline
-    reader<t>::reader(crpcut_test_case_registrator *r, int fd)
-      : fdreader(r, fd)
-    {
-    }
+  template <typename T, case_convert_type type>
+  collate_result operator==(T r, const collate_t<type> &c)
+  {
+    return (c == r).set_lh();
+  }
 
-    template <comm::type t>
-    inline void
-    reader<t>::set_fd(int fd)
-    {
-      fdreader::set_fd(fd);
-    }
+  template <typename T, case_convert_type type>
+  collate_result operator!=(T r, const collate_t<type> &c)
+  {
+    return (c != r).set_lh();
+  }
 
+  template <typename T, case_convert_type type>
+  collate_result operator<(T r, const collate_t<type> &c)
+  {
+    return (c > r).set_lh();
+  }
 
+  template <typename T, case_convert_type type>
+  collate_result operator<=(T r, const collate_t<type> &c)
+  {
+    return (c >= r).set_lh();
+  }
 
+  template <typename T, case_convert_type type>
+  collate_result operator>(T r, const collate_t<type> &c)
+  {
+    return (c < r).set_lh();
+  }
 
-    template <typename T, case_convert_type type>
-    collate_result operator==(T r, const collate_t<type> &c)
-    {
-      return (c == r).set_lh();
-    }
-
-    template <typename T, case_convert_type type>
-    collate_result operator!=(T r, const collate_t<type> &c)
-    {
-      return (c != r).set_lh();
-    }
-
-    template <typename T, case_convert_type type>
-    collate_result operator<(T r, const collate_t<type> &c)
-    {
-      return (c > r).set_lh();
-    }
-
-    template <typename T, case_convert_type type>
-    collate_result operator<=(T r, const collate_t<type> &c)
-    {
-      return (c >= r).set_lh();
-    }
-
-    template <typename T, case_convert_type type>
-    collate_result operator>(T r, const collate_t<type> &c)
-    {
-      return (c < r).set_lh();
-    }
-
-    template <typename T, case_convert_type type>
-    collate_result operator>=(T r, const collate_t<type> &c)
-    {
-      return (c <= r).set_lh();
-    }
-
-  } // namespace implementation
-
-
+  template <typename T, case_convert_type type>
+  collate_result operator>=(T r, const collate_t<type> &c)
+  {
+    return (c <= r).set_lh();
+  }
 
 
 #ifdef CRPCUT_SUPPORTS_VTEMPLATES
@@ -3662,55 +3520,38 @@ namespace crpcut {
     return collate_t<type>(s, l);
   }
 
-  namespace implementation {
-    class test_suite_base : public policies::dependencies::basic_enforcer
+  class test_suite_base : public policies::dependencies::basic_enforcer
+  {
+  protected:
+    test_suite_base();
+  public:
+    void add_case(crpcut_test_case_registrator* r);
+    void report_success();
+  private:
+    unsigned num_containing_cases;
+    crpcut_test_case_registrator *list;
+  };
+
+  template <typename T>
+  class test_suite : public test_suite_base
+  {
+  public:
+    test_suite() {}
+    static test_suite& crpcut_reg()
     {
-    protected:
-      test_suite_base() : num_containing_cases(0), list(0) {}
-    public:
-      void add_case(crpcut_test_case_registrator* r)
-      {
-        ++num_containing_cases;
-        r->crpcut_suite_list = list;
-        list = r;
-        r->crpcut_add(this);
-      }
-      void report_success()
-      {
-        --num_containing_cases;
-        if (num_containing_cases == 0) // now everything that depends on this
-          {                            // case may run.
-            crpcut_register_success();
-          }
-      }
-    private:
-      unsigned num_containing_cases;
-      crpcut_test_case_registrator *list;
-    };
-
-    template <typename T>
-    class test_suite : public test_suite_base
+      static test_suite object;
+      return object;
+    }
+    virtual void crpcut_add_action(policies::dependencies::basic_enforcer* e)
     {
-    public:
-      test_suite() {}
-      static test_suite& crpcut_reg()
-      {
-        static test_suite object;
-        return object;
-      }
-      virtual void crpcut_add_action(policies::dependencies::basic_enforcer* e)
-      {
-        e->crpcut_inc(); // how to handle the case where this is empty?
-      }
-    private:
-      virtual void crpcut_dec_action()
-      {
-        crpcut_register_success();
-      }
-    };
-
-  } // namespace implementation
-
+      e->crpcut_inc(); // how to handle the case where this is empty?
+    }
+  private:
+    virtual void crpcut_dec_action()
+    {
+      crpcut_register_success();
+    }
+  };
 
   template <typename T>
   inline void get_parameter(const char *name, T& t)
@@ -3733,12 +3574,12 @@ namespace crpcut {
     {                                                                   \
     public:                                                             \
       name(const T& t, const U& u) : t_(t), u_(u) {}                    \
-      friend                                                     \
+      friend                                                            \
         std::ostream &operator<<(std::ostream &os, const name &a)       \
       {                                                                 \
-        implementation::conditionally_stream<8>(os, a.t_);              \
+        conditionally_stream<8>(os, a.t_);                              \
         os << " " << #opexpr << " ";                                    \
-        implementation::conditionally_stream<8>(os, a.u_);              \
+        conditionally_stream<8>(os, a.u_);                              \
         return os;                                                      \
       }                                                                 \
       friend struct eval_t<name>;                                       \
@@ -3810,7 +3651,7 @@ namespace crpcut {
       friend
       std::ostream &operator<<(std::ostream &os, const atom& a)
       {
-        implementation::conditionally_stream<8>(os, a.t_);
+        conditionally_stream<8>(os, a.t_);
         return os;
       }
     private:
@@ -3927,7 +3768,7 @@ namespace crpcut {
 
 } // namespace crpcut
 
-extern crpcut::implementation::namespace_info current_namespace;
+extern crpcut::namespace_info crpcut_current_namespace;
 
 // Note, the order of inheritance below is important. test_case_base
 // destructor signals ending of test case, so it must be listed as the
@@ -3937,9 +3778,9 @@ extern crpcut::implementation::namespace_info current_namespace;
   class test_case_name                                                  \
     : crpcut::test_case_base, __VA_ARGS__                               \
   {                                                                     \
-    friend class crpcut::implementation::test_wrapper<crpcut_run_wrapper>; \
+    friend struct crpcut::test_wrapper<crpcut_run_wrapper>;              \
     friend class crpcut::policies::dependencies::enforcer<test_case_name>; \
-    friend class crpcut::implementation::crpcut_test_case_registrator;  \
+    friend class crpcut::crpcut_test_case_registrator;  \
     test_case_name() {}                                                 \
     ~test_case_name() {}                                                \
     virtual void crpcut_run_test()                                      \
@@ -3949,8 +3790,7 @@ extern crpcut::implementation::namespace_info current_namespace;
       cputime_enforcer ct(crpcut_cputime_enforcer::crpcut_cputime_timeout_ms); \
       (void)rt; /* silence warning */                                   \
       (void)ct; /* silence warning */                                   \
-      using crpcut::implementation::test_wrapper;                       \
-      test_wrapper<crpcut_run_wrapper>::run(this);                      \
+      crpcut::test_wrapper<crpcut_run_wrapper>::run(this);              \
       if (crpcut::test_case_factory::tests_as_child_procs())            \
         {                                                               \
           crpcut_test_finished(); /* tell destructor to report success */ \
@@ -3958,7 +3798,7 @@ extern crpcut::implementation::namespace_info current_namespace;
     }                                                                   \
     void test();                                                        \
     class crpcut_registrator                                            \
-      : public crpcut::implementation::crpcut_test_case_registrator,    \
+      : public crpcut::crpcut_test_case_registrator,    \
         private virtual crpcut::policies::dependencies::crpcut_base,    \
         public virtual test_case_name::crpcut_expected_death_cause,     \
         private virtual test_case_name::crpcut_dependency,              \
@@ -3966,16 +3806,17 @@ extern crpcut::implementation::namespace_info current_namespace;
         public test_case_name::crpcut_constructor_timeout_enforcer,	\
         public test_case_name::crpcut_destructor_timeout_enforcer	\
     {                                                                   \
-       typedef crpcut::implementation::crpcut_test_case_registrator     \
+       typedef crpcut::crpcut_test_case_registrator     \
          crpcut_registrator_base;                                       \
        static const unsigned long crpcut_cputime_timeout_ms             \
          =test_case_name::crpcut_cputime_enforcer::crpcut_cputime_timeout_ms; \
     public:                                                             \
        crpcut_registrator()                                             \
-         : crpcut_registrator_base(#test_case_name, current_namespace,  \
+         : crpcut_registrator_base(#test_case_name,                     \
+                                   crpcut_current_namespace,            \
                                    crpcut_cputime_timeout_ms)           \
          {                                                              \
-           crpcut::implementation::test_suite<crpcut_testsuite_id>::crpcut_reg().add_case(this); \
+           crpcut::test_suite<crpcut_testsuite_id>::crpcut_reg().add_case(this); \
            crpcut::crpcut_tag_info<crpcut_test_tag>::obj();             \
          }                                                              \
        virtual void crpcut_do_run_test_case()                           \
@@ -3996,7 +3837,7 @@ extern crpcut::implementation::namespace_info current_namespace;
       static crpcut_registrator obj;                                    \
       return obj;                                                       \
     }                                                                   \
-    virtual crpcut::implementation::crpcut_test_case_registrator&       \
+    virtual crpcut::crpcut_test_case_registrator&       \
       crpcut_get_reg() const                                            \
     {                                                                   \
       return crpcut_reg();                                              \
@@ -4133,13 +3974,13 @@ namespace crpcut {
   }
 
 
-#define CRPCUT_IS_ZERO_LIT(x) (sizeof(crpcut::implementation::null_cmp::func(x)) == 1)
+#define CRPCUT_IS_ZERO_LIT(x) (sizeof(crpcut::null_cmp::func(x)) == 1)
 
 
 #define CRPCUT_BINARY_CHECK(action, name, lh, rh)                       \
   do {                                                                  \
     try {                                                               \
-      crpcut::implementation::tester                                    \
+      crpcut::tester                                    \
         <crpcut::comm::action,                                          \
          CRPCUT_IS_ZERO_LIT(lh), CRPCUT_DECLTYPE(lh),                   \
          CRPCUT_IS_ZERO_LIT(rh), CRPCUT_DECLTYPE(rh)>                   \
@@ -4161,7 +4002,7 @@ namespace crpcut {
 #define CRPCUT_CHECK_TRUE(action, a)                                    \
   do {                                                                  \
     try {                                                               \
-      crpcut::implementation::bool_tester<crpcut::comm::action>         \
+      crpcut::bool_tester<crpcut::comm::action>         \
         (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
         .check_true((crpcut::expr::hook()->*a), #a);                    \
     }                                                                   \
@@ -4181,7 +4022,7 @@ namespace crpcut {
 #define CRPCUT_CHECK_FALSE(action, a)                                   \
   do {                                                                  \
     try {                                                               \
-      crpcut::implementation::bool_tester<crpcut::comm::action>         \
+      crpcut::bool_tester<crpcut::comm::action>         \
         (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
         .assert_false((crpcut::expr::hook()->*a), #a);                  \
     }                                                                   \
@@ -4287,10 +4128,10 @@ namespace crpcut {
     static const char CRPCUT_LOCAL_NAME(sep)[][3] = { ", ", "" };       \
     try {                                                               \
       std::string CRPCUT_LOCAL_NAME(m);                                 \
-      if (!crpcut::implementation::match_pred(CRPCUT_LOCAL_NAME(m),     \
+      if (!crpcut::match_pred(CRPCUT_LOCAL_NAME(m),     \
                                               #pred,                    \
                                               pred,                     \
-                                              crpcut::implementation::params(__VA_ARGS__))) \
+                                              crpcut::params(__VA_ARGS__))) \
         {                                                               \
           size_t CRPCUT_LOCAL_NAME(len) = CRPCUT_LOCAL_NAME(m).length(); \
           char *CRPCUT_LOCAL_NAME(p)                                    \
@@ -4385,17 +4226,17 @@ class crpcut_testsuite_dep
           public virtual crpcut::policies::dependencies::nested<__VA_ARGS__>::type \
       {                                                                 \
       };                                                                \
-      static crpcut::implementation::namespace_info *parent_namespace   \
-      = &current_namespace;                                             \
+      static crpcut::namespace_info *parent_namespace                   \
+      = &crpcut_current_namespace;                                      \
     }                                                                   \
     class crpcut_testsuite_id;                                          \
-    static crpcut::implementation::namespace_info                       \
-    current_namespace(#name, parent_namespace);                         \
+    static crpcut::namespace_info                                       \
+    crpcut_current_namespace(#name, parent_namespace);                  \
   }                                                                     \
   namespace name
 
 #define ALL_TESTS(suite_name)                                           \
-  crpcut::implementation::test_suite<suite_name :: crpcut_testsuite_id >
+  crpcut::test_suite<suite_name :: crpcut_testsuite_id >
 
 #define TESTSUITE(...) TESTSUITE_DEF(__VA_ARGS__, crpcut::crpcut_none)
 
@@ -4404,18 +4245,9 @@ class crpcut_testsuite_dep
   << __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__)  "\n"
 
 
-namespace crpcut {
-
-  template <typename T>
-  struct tag_policy : public virtual policies::default_policy
-  {
-    typedef T crpcut_test_tag;
-  };
-
-}
 
 #define WITH_TEST_TAG(tag_name)                         \
-  crpcut::tag_policy<crpcut::crpcut_tags::tag_name>
+  crpcut::policies::tag_policy<crpcut::crpcut_tags::tag_name>
 
 #define DEFINE_TEST_TAG(tag_name)                               \
   namespace crpcut {                                            \

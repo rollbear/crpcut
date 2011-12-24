@@ -24,38 +24,17 @@
  * SUCH DAMAGE.
  */
 
-
-#include <crpcut.hpp>
+#ifndef IO_HPP
+#define IO_HPP
 
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  struct io
   {
-    return test_case_factory::run_test(argc, argv, os);
-  }
+    virtual ~io() {}
+    virtual bool read()      = 0;
+    virtual bool write()     = 0;
+    virtual void exception() = 0;
+  };
+}
 
-  int
-  run(int argc, const char *argv[], std::ostream &os)
-  {
-    return test_case_factory::run_test(argc, argv, os);
-  }
-
-  const char *
-  get_parameter(const char *name)
-  {
-    return test_case_factory::get_parameter(name);
-  }
-
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
-
+#endif // IO_HPP

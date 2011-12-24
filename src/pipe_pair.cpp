@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,64 @@
  * SUCH DAMAGE.
  */
 
+#include "posix_encapsulation.hpp"
+#include "posix_error.hpp"
+#include "pipe_pair.hpp"
 
-#include <crpcut.hpp>
+namespace {
+  inline void close_and_invalidate(int& fd)
+  {
+    int rv = crpcut::wrapped::close(fd);
+    assert(rv == 0);
+    fd = -1;
+  }
+}
 
 namespace crpcut {
-
-
-  int
-  run(int argc, char *argv[], std::ostream &os)
+  pipe_pair
+  ::pipe_pair(const char *purpose_msg)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    int rv = wrapped::pipe(fds);
+    if (rv < 0) throw posix_error(errno, purpose_msg);
+  }
+
+  pipe_pair
+  ::~pipe_pair()
+  {
+    close();
+  }
+
+  void
+  pipe_pair
+  ::close()
+  {
+    if (fds[0] >= 0) { close_and_invalidate(fds[0]); }
+    if (fds[1] >= 0) { close_and_invalidate(fds[1]); }
   }
 
   int
-  run(int argc, const char *argv[], std::ostream &os)
+  pipe_pair
+  ::for_reading(purpose p)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    int rv = wrapped::close(fds[1]);
+    assert(rv == 0);
+    fds[1] = -1;
+    int n = fds[0];
+    if (p == release_ownership) fds[0] = -1;
+    return n;
   }
 
-  const char *
-  get_parameter(const char *name)
+  int
+  pipe_pair
+  ::for_writing(purpose p)
   {
-    return test_case_factory::get_parameter(name);
+    int rv = wrapped::close(fds[0]);
+    assert(rv == 0);
+    fds[0] = -1;
+    int n = fds[1];
+    if (p == release_ownership) fds[1] = -1;
+    return n;
   }
 
-  const char *get_start_dir()
-  {
-    return test_case_factory::get_start_dir();
-  }
-
-  void set_charset(const char *charset)
-  {
-    return test_case_factory::set_charset(charset);
-  }
-} // namespace crpcut
+}
 
