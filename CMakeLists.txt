@@ -1647,6 +1647,25 @@ if (WITH_HTML_DOCS)
       VERBATIM)
 
     #
+    # test_tag
+    #
+    file(GLOB TEST_TAG "${DOC_SRC_LIB}/samples/test_tag.cpp")
+    add_custom_target(
+      test_tag.cpp
+      ${STRIP_SOURCES} < ${TEST_TAG} > test_tag.cpp
+      DEPENDS stripped-src ${TEST_TAG}
+      WORKING_DIRECTORY stripped-src
+      VERBATIM)
+    add_executable(test_tag EXCLUDE_FROM_ALL ${TEST_TAG})
+    target_link_libraries(test_tag crpcut ${EXTRA_LIBS})
+    add_custom_target(
+      test_tag.out
+      test_tag "--tags=-known_bug/uncertain"| sed "s/\\(.*\\)/     \\1/g" > test_tag.out
+      DEPENDS test_tag sample-output
+      WORKING_DIRECTORY sample-output
+      VERBATIM)
+
+    #
     # report_example
     #
     file(GLOB REPORT_EXAMPLE "${DOC_SRC_LIB}/samples/report_example.cpp")
@@ -1661,13 +1680,13 @@ if (WITH_HTML_DOCS)
     set_target_properties(report_example PROPERTIES COMPILE_FLAGS "-ggdb")
     add_custom_target(
       report_example_human.out
-      report_example "-v" | sed "s/\\(.*\\)/     \\1/g" > report_example_human.out
+      report_example "-v" "--tags=/another_tag"| sed "s/\\(.*\\)/     \\1/g" > report_example_human.out
       DEPENDS report_example sample-output
       WORKING_DIRECTORY sample-output
       VERBATIM)
     add_custom_target(
       report_example_xml.out
-      report_example "-v" "-x" | sed "s/\\(.*\\)/     \\1/g" > report_example_xml.out
+      report_example "-v" "--xml=yes"  "--tags=/another_tag" | sed "s/\\(.*\\)/     \\1/g" > report_example_xml.out
       DEPENDS report_example sample-output
       WORKING_DIRECTORY sample-output
       VERBATIM)
@@ -2066,6 +2085,7 @@ if (WITH_HTML_DOCS)
       stripped-src/utf8_code.cpp sample-output/utf8_code.out
       stripped-src/iso8859_1_code.cpp sample-output/iso8859_1_code.out
       stripped-src/simple_testsuite.cpp sample-output/simple_testsuite.out
+      stripped-src/test_tag.cpp sample-output/test_tag.out
       stripped-src/report_example.cpp sample-output/report_example_human.out
       sample-output/report_example_xml.out
       stripped-src/ilist_element.hpp

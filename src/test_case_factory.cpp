@@ -958,7 +958,7 @@ namespace crpcut {
             "        run only one test case, and run it in the main process\n\n"
             "   -t, --disable-timeouts\n"
             "        never fail a test due to time consumption\n\n"
-            "   -T [select][/non-critical], --tags=[select][/non-critical]\n"
+            "   -T {select}{/non-critical}, --tags={select}{/non-critical}\n"
             "        Select tests to run based on their tag, and which\n"
             "        tags represent non-critical tests. Both \"select\"\n"
             "        and \"non-critical\" are comma separated lists of tags.\n"

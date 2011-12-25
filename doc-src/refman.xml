@@ -970,6 +970,38 @@
         command line flag.
       </note>
   </section>
+
+  <section id="DEFINE_TEST_TAG">
+    <title><function>DEFINE_TEST_TAG(tagname)</function></title>
+    <para>Introduce a tag for use by tests.</para>
+    <formalpara><title>Used in:</title>
+    <para>Global scope</para>
+    </formalpara>
+    <para>
+      A tag has the same naming rules and visibility as a
+      <productname>C++</productname> type<footnote><para>In
+      fact, the macro defines a type, and when referring to
+      the tag, the type must be visible.</para></footnote>.
+    </para>
+    <para>See the command line option
+    <xref linkend="tags" xrefstyle="select:title"/> for how to use
+    tags when running a test program.</para>
+    <para>Example. The following test program:
+        <programlisting language="c++">
+<xi:include href="../stripped-src/test_tag.cpp" parse="text"/>
+        </programlisting>
+        Shows how tags are defined and used by tests. Running it with
+        <constant>--tags=-known_bug/uncertain</constant> yields:
+        <screen>
+
+<xi:include href="../sample-output/test_tag.out" parse="text"/>
+        </screen>
+        Which shows two tests run, both failed, but one as non-critical.
+        The test <type>buggy</type> is not run since all tests tagged
+        <type>known_bug</type> were filtered out.
+    </para>
+  </section>
+
   <section id="DEPENDS_ON">
     <title><function>DEPENDS_ON(...)</function></title>
     <para>A test and testsuite modifier to state dependencies. The test(s)
@@ -1427,6 +1459,7 @@
       <xref linkend="VERIFY_SCOPE_MAX_CPUTIME_MS" xrefstyle="select:title"/>,
       <xref linkend="VERIFY_SCOPE_MAX_REALTIME_MS" xrefstyle="select:title"/>,
       <xref linkend="VERIFY_SCOPE_MIN_REALTIME_MS" xrefstyle="select:title"/>,
+      <xref linkend="WITH_TEST_TAG" xrefstyle="select:title"/>
     </para>
     <para>Example: The smallest test that can succeed:</para>
       <programlisting language="c++">
@@ -1542,12 +1575,14 @@
     <section id="modifiers">
       <title>Modifiers</title>
       <para>
-        Modifiers are ways to chance &crpcut;s expectations on the test.
+        Modifiers are ways to chance &crpcut;s expectations and behaviour
+        of the test.
         Normally, a test can be scheduled to run at any time, and for a
         test to pass, it must return from the test body without having
         triggered any error condition. However, modifiers can change that
         expectation.</para>
       <variablelist><title>List of modifiers</title>
+
         <varlistentry><term>
             <xref linkend="DEADLINE_CPU_MS" xrefstyle="select:title"/></term>
           <listitem>
@@ -1600,12 +1635,47 @@
             must die due to a signal in order to pass.</para>
           </listitem>
         </varlistentry>
+
+        <varlistentry><term>
+            <xref linkend="FIXTURE_CONSTRUCTION_DEADLINE_REALTIME_MS"
+                  xrefstyle="select:title"/></term>
+          <listitem>
+            <para>Change the time allowed for the fixture construction.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry><term>
+            <xref linkend="FIXTURE_DESTRUCTION_DEADLINE_REALTIME_MS"
+                  xrefstyle="select:title"/></term>
+          <listitem>
+            <para>Change the time allowed for the fixture destruction.</para>
+          </listitem>
+        </varlistentry>
+
         <varlistentry>
           <term><xref linkend="NO_CORE_FILE" xrefstyle="select:title"/></term>
           <listitem>
             <para>Prevent the test process from dumping core.</para>
           </listitem>
         </varlistentry>
+
+        <varlistentry>
+          <term><xref linkend="WIPE_WORKING_DIR"
+          xrefstyle="select:title"/></term>
+          <listitem>
+            <para>Clean out remaining files after the test.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><xref linkend="WITH_TEST_TAG"
+          xrefstyle="select:title"/></term>
+          <listitem>
+            <para>Set a tag to a test.</para>
+          </listitem>
+        </varlistentry>
+
+
       </variablelist>
     </section>
   </section>
@@ -1621,7 +1691,7 @@
       gets a scoped name <type>testsuitename::testname</type>.
       Testsuites can be nested.
     </para>
-    <para>Example: The following test program:
+    <para>Example. The following test program:
         <programlisting language="c++">
 <xi:include href="../stripped-src/simple_testsuite.cpp" parse="text"/>
         </programlisting>
@@ -2311,6 +2381,11 @@
   </section>
   <section id="WIPE_WORKING_DIR">
     <title><function>WIPE_WORKING_DIR</function></title>
+    <para>Clean out any remaining files after the test</para>
+    <formalpara><title>Used in:</title>
+    <para>The modifier list of a test definition. See
+    <xref linkend="TEST" xrefstyle="select:title"/></para>
+    </formalpara>
     <para>
       Post mortem action for
       <xref linkend="EXPECT_EXIT" xrefstyle="select:title"/> and
@@ -2323,6 +2398,39 @@
       <xref linkend="single-shot" xrefstyle="select:title"/> command line
       parameter.
       </note>
+    </para>
+  </section>
+
+  <section id="WITH_TEST_TAG">
+    <title><function>WITH_TEST_TAG(tagname)</function></title>
+    <para>Mark a test with a tag.</para>
+    <formalpara><title>Used in:</title>
+    <para>The modifier list of a test definition. See
+    <xref linkend="TEST" xrefstyle="select:title"/></para>
+    </formalpara>
+    <para>
+      Set a named tag to a test. The tag must be visible. See
+      <xref linkend="DEFINE_TEST_TAG" xrefstyle="select:title"/> for
+      defining tags.
+      A test can either be untagged (the default,) or have one tag. It is
+      not possible to attach several tags to a test.
+    </para>
+    <para>See the command line option <xref linkend="tags"
+    xrefstyle="select:title"/> for how to use tags when running a test
+    program.</para>
+    <para>Example. The following test program:
+        <programlisting language="c++">
+<xi:include href="../stripped-src/test_tag.cpp" parse="text"/>
+        </programlisting>
+        Shows how tags are defined and used by tests. Running it with
+        <constant>--tags=-known_bug/uncertain</constant> yields:
+        <screen>
+
+<xi:include href="../sample-output/test_tag.out" parse="text"/>
+        </screen>
+        Which shows two tests run, both failed, but one as non-critical.
+        The test <type>buggy</type> is not run since all tests tagged
+        <type>known_bug</type> were filtered out.
     </para>
   </section>
 </chapter>
@@ -3010,6 +3118,27 @@ int main(int argc, char *argv[])
             </note>
           </listitem>
         </varlistentry>
+
+        <varlistentry id="list-tags">
+          <term>
+            <parameter>-L</parameter>
+            /
+            <parameter>--list-tags</parameter>
+          </term>
+          <listitem>
+            <para><xref linkend="run" xrefstyle="select:title"/> prints
+            the names of all tags, defined for the test program, on the output
+            stream and return <literal>-1</literal>.
+            </para>
+            <note>
+              <parameter>-L</parameter> / <parameter>--list-tags</parameter>
+              cannot be combined with any other option.
+            </note>
+            <para>See <xref linkend="DEFINE_TEST_TAG" xrefstyle="select:title"/>
+            for defining tags.</para>
+          </listitem>
+        </varlistentry>
+
         <varlistentry id="nodepend"><term><parameter>-n</parameter> / <parameter>--nodeps</parameter></term>
           <listitem>
             <para>Ignore all dependencies and consider all tests available
@@ -3092,6 +3221,37 @@ int main(int argc, char *argv[])
             </caution>
           </listitem>
         </varlistentry>
+
+        <varlistentry id="tags">
+          <term><parameter>-T</parameter>
+          <constant>{select}{/non-critical}</constant>
+          /
+          <parameter>--tags</parameter>=<constant>{select}{/non-critical}</constant>
+          </term>
+          <listitem>
+            <para>Select tests to run based on their tag, and which tags
+            represent non-critical tests.</para>
+            <para><constant>select</constant> and
+            <constant>non-critical</constant> are comma separated lists of tags.
+            If a list begins with <constant>-</constant> the list is
+            subtractive from the full set of tags in the test program.</para>
+            <para>If <constant>{select}</constant> is omitted, all tags are
+            included. If <constant>{/non-critical}</constant> is omitted,
+            all tests are critical. Untagged tests are always critical.</para>
+            <para>Example:
+            <programlisting>
+    ./testprog --tags=-known_bugs,very_slow/in_development</programlisting>
+
+            runs all tests except those tagged with
+            <constant>known_bugs</constant> or <constant>very_slow</constant>.
+            Tests tagged <constant>in_development</constant> are
+            <constant>non-critical</constant>.</para>
+            <para>See <xref linkend="list-tags" xrefstyle="select:title"/> for
+            listing all available tags, and
+            <xref linkend="WITH_TEST_TAG" xrefstyle="select:title"/> for
+            how to tag a test.</para>
+          </listitem>
+        </varlistentry>
         <varlistentry id="verbose"><term><parameter>-v</parameter>  / <parameter>--verbose</parameter></term>
           <listitem>
             <para>Include the output from passed tests in the report.</para>
@@ -3120,7 +3280,7 @@ int main(int argc, char *argv[])
     </para>
     <para>Example:
       <programlisting>
-    testprog --nodeps --parameter=pwd=`pwd` --xml suite_1</programlisting>
+    testprog --nodeps --parameter=pwd=`pwd` suite_1</programlisting>
       Will run all tests in the testsuite <literal>suite_1</literal>
       regardless of dependencies, and will provide the
       <link linkend="get_parameter">named parameter</link>
@@ -3132,9 +3292,11 @@ int main(int argc, char *argv[])
     <para>The output from a test program is
       <itemizedlist>
         <listitem>A (possibly empty) list of results from individual
-          tests.</listitem>
+        tests.</listitem>
         <listitem>A (possibly empty) list of tests that were blocked
-          from running due to unfulfilled dependencies.</listitem>
+        from running due to unfulfilled dependencies.</listitem>
+        <listitem>A (possibly empty) list of results for each tag used by
+        tests in the run.</listitem>
         <listitem>A result summary.</listitem>
       </itemizedlist>
     </para>
@@ -3146,38 +3308,42 @@ int main(int argc, char *argv[])
       <itemizedlist>
         <listitem>The name of the test</listitem>
         <listitem>The result of the test, <constant>PASSED</constant> or
-          <constant>FAILED</constant>.</listitem>
+        <constant>FAILED</constant>.</listitem>
+        <listitem>The criticality of the test as
+        <constant>!</constant> (critical) or <constant>?</constant>
+        (non-critical)</listitem>
         <listitem>log-items, each with the kind of log -
-          <constant>stdout</constant>, <constant>stderr</constant>
-          and <xref linkend="INFO" xrefstyle="select:title"/>.
+        <constant>stdout</constant>, <constant>stderr</constant>,
+        <constant>fail</constant>
+        and <xref linkend="INFO" xrefstyle="select:title"/>.
         </listitem>
       </itemizedlist>
     </para>
     <para>
       In addition, failed tests include
       <itemizedlist>
-        <listitem>the phase of failure discovery.</listitem>
+        <listitem>the phase of failure.</listitem>
         <listitem>if necessary, information where left behind
           files can be found</listitem>
         <listitem>A description of the failure</listitem>
       </itemizedlist>
-      A short explanation of the phase of failure discovery:
+      A short explanation of the phase of failures:
       <variablelist><title>phase</title>
         <varlistentry><term><constant>creating</constant></term>
-          <listitem>The test failure was detected during the creation of
+          <listitem>The test failure occurred during the creation of
             the <link linkend="fixtures">fixtures</link>.</listitem>
         </varlistentry>
         <varlistentry><term><constant>running</constant></term>
-          <listitem>The test failure was detected during the execution of
+          <listitem>The test failure occurred during the execution of
             the test function body.</listitem>
         </varlistentry>
         <varlistentry><term><constant>destroying</constant></term>
-          <listitem>The test failure was detected  during the destruction
+          <listitem>The test failure occurred during the destruction
             of the <link linkend="fixtures">fixtures</link>.</listitem>
         </varlistentry>
         <varlistentry><term><constant>post_mortem</constant></term>
           <listitem>The test failure was detected by the main process
-            after the test process died</listitem>
+            after the test process had completed sucessfully</listitem>
         </varlistentry>
         <varlistentry><term><constant>child</constant></term>
           <listitem>The test has spawned a child process, which has
@@ -3192,38 +3358,43 @@ int main(int argc, char *argv[])
       is shown on <constant>stdout</constant> (unless silenced by the
       <xref linkend="quiet" xrefstyle="select:title"/> command line
       flag, in which case nothing at all is shown on
-      <constant>stdout</constant>.
+      <constant>stdout</constant>.)
     </para>
     <section>
-      <title>Human readable</title>
-      <para>Example: The following test program
-     <programlisting language="c++">
+      <title>Example program</title>
+      <para>
+        <programlisting language="c++">
 <xi:include href="../stripped-src/report_example.cpp" parse="text"/>
-      </programlisting>
-      shows all types of information in its end report when run with
-     the <xref linkend="verbose" xrefstyle="select:title"/>
-     command line flag.
-      <screen>
+        </programlisting>
+        <section>
+          <title>Human readable output</title>
+          <para>
+            The example program shows all types of information in its end report
+            when run with the command line flags
+            <constant><link linkend="verbose">--verbose</link></constant>
+            <constant><link linkend="tags">--tags</link>=/another_tag</constant>
+            <constant><link linkend="xml">--xml</link>=no</constant>:
+            <screen>
 
 <xi:include href="../sample-output/report_example_human.out" parse="text"/>
-      </screen>
+            </screen>
 
-      </para>
-    </section>
-    <section>
-      <title>XML</title>
-      <para>Example: The following test program
-     <programlisting language="c++">
-<xi:include href="../stripped-src/report_example.cpp" parse="text"/>
-      </programlisting>
-      shows all types of information in its end report when run with
-     the <xref linkend="verbose" xrefstyle="select:title"/>
-     command line flag.
-      <screen>
+          </para>
+        </section>
+        <section>
+          <title>XML output</title>
+          <para>The same example program shows the XML formatted result shown
+          below when run with the command line flags
+          <constant><link linkend="verbose">--verbose</link></constant>
+          <constant><link linkend="tags">--tags</link>=/another_tag</constant>
+          <constant><link linkend="xml">--xml</link>=yes</constant>:
+          <screen>
 
 <xi:include href="../sample-output/report_example_xml.out" parse="text"/>
-      </screen>
+          </screen>
 
+          </para>
+        </section>
       </para>
     </section>
   </section>

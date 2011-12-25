@@ -27,37 +27,22 @@
 
 #include <crpcut.hpp>
 
-DEFINE_TEST_TAG(a_tag);
-DEFINE_TEST_TAG(another_tag);
+DEFINE_TEST_TAG(known_bug);
+DEFINE_TEST_TAG(uncertain);
 
-struct A
+TEST(untagged)
 {
-  A() {}
-  ~A() { abort(); }
-  void do_something() const {}
-};
-
-TESTSUITE(basics)
-{
-  TEST(construct, WITH_TEST_TAG(a_tag))
-  {
-    A *p = new A(); // leak
-    INFO << "created an A, addr=" << p;
-  }
-
-  TEST(destroy, A, DEPENDS_ON(construct), WITH_TEST_TAG(another_tag))
-  {
-    INFO << "running test body";
-  }
+  FAIL << "the critical error";
 }
 
-TESTSUITE(toy, DEPENDS_ON(ALL_TESTS(basics)))
+TEST(buggy, WITH_TEST_TAG(known_bug))
 {
-  TEST(work)
-  {
-    A obj;
-    obj.do_something();
-  }
+  FAIL << "this is a known issue we don't want to be bothered with right now";
+}
+
+TEST(we_dont_know_the_expected_behaviour, WITH_TEST_TAG(uncertain))
+{
+  FAIL << "Was this right or wrong?";
 }
 
 int main(int argc, char *argv[])
