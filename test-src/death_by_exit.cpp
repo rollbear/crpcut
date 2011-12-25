@@ -34,7 +34,7 @@ extern "C"
 #include <sys/types.h>
 }
 
-DEFINE_TEST_TAG(filesystem)
+DEFINE_TEST_TAG(filesystem);
 
 TESTSUITE(death)
 {

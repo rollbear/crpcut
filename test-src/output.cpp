@@ -31,7 +31,7 @@ extern "C"
 #include <signal.h>
 }
 
-DEFINE_TEST_TAG(filesystem)
+DEFINE_TEST_TAG(filesystem);
 
 TESTSUITE(output)
 {

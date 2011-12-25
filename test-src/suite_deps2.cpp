@@ -26,7 +26,7 @@
 
 #include <crpcut.hpp>
 
-DEFINE_TEST_TAG(blocked)
+DEFINE_TEST_TAG(blocked);
 
 TESTSUITE(suite_deps)
 {

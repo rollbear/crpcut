@@ -4270,7 +4270,8 @@ class crpcut_testsuite_dep
     {                                                           \
       return #tag_name;                                         \
     }                                                           \
-  }
+  }                                                             \
+  using crpcut::crpcut_tags::tag_name
 
 #ifdef GMOCK_INCLUDE_GMOCK_GMOCK_H_
 

@@ -31,7 +31,8 @@ extern "C" {
 #include <unistd.h>
 }
 
-DEFINE_TEST_TAG(slow)
+DEFINE_TEST_TAG(slow);
+
 TESTSUITE(timeouts)
 {
   TEST(should_succeed_slow_realtime_deadline,

@@ -40,9 +40,9 @@ struct fixture
   int num ;
 };
 
-DEFINE_TEST_TAG(slow)
-DEFINE_TEST_TAG(filesystem)
-DEFINE_TEST_TAG(blocked)
+DEFINE_TEST_TAG(slow);
+DEFINE_TEST_TAG(filesystem);
+DEFINE_TEST_TAG(blocked);
 
 TEST(default_success)
 {

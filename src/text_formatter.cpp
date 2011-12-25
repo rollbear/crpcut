@@ -145,7 +145,7 @@ namespace crpcut {
     {
       stream::oastream os(buffer, buffer + len);
       os << " " << std::setw(tag_list::longest_name_len()) << "tag"
-	 << std::setw(8) << "total"
+	 << std::setw(8) << "run"
 	 << std::setw(8) << "passed"
 	 << std::setw(8) << "failed"
 	 << '\n';

@@ -29,7 +29,7 @@
 extern "C" {
 #include <unistd.h>
 }
-DEFINE_TEST_TAG(slow)
+DEFINE_TEST_TAG(slow);
 
 TESTSUITE(bad_forks)
 {
