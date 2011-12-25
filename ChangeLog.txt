@@ -1,3 +1,26 @@
+         * It is now possible to set tags to tests. The tags can be used
+           for selecting which tests to run (in addition to name matching, that
+           is,) and also to define which tests are critical and which are not.
+           By default all tests are critical. Tests witout tag are always
+           critical.
+
+           See the reference manual for the DEFINE_TEST_TAG(), the test
+           modifier WITH_TEST_TAG() and the command line options
+           -L/--list-tags and -T/--tags.
+
+           To visualize the result, the test report summary has changed to
+           include tags and critical/non-critical PASS/FAIL.
+
+           In human readable output, PASSED/FAILED for each test has a
+           '!' (critical) or a '?' (non-critical) suffix. If tags are used,
+           a summary is listed for each tag (number of tests, number passed
+           and number failed.) The summary adds information about
+           critical and non-critical PASSED/FAILED counts.
+
+           In XML output, each test has an added attribute "critical". A new
+           list - tag_summary - is adedd, which includes each tag name, the
+           number of passed/failed and whether it is critical or not.
+
 2011-12-20 1.4.1
 
          * Fixed a link dependency problem that caused crpcut to SIGSEGV
