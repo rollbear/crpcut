@@ -58,9 +58,11 @@ namespace crpcut {
     {
       write("<?xml version=\"1.0\"?>\n\n"
             "<crpcut xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-            " xsi:noNamespaceSchemaLocation="
-            "\"http://crpcut.sourceforge.net/crpcut-" CRPCUT_VERSION_STRING ".xsd\""
-            " starttime=\"");
+            "\n        xsi:noNamespaceSchemaLocation="
+            "\"http://crpcut.sourceforge.net/crpcut-"
+            CRPCUT_VERSION_STRING
+            ".xsd\""
+            "\n        starttime=\"");
 
       char time_string[sizeof("2009-01-09T23:59:59Z")];
       time_t now = wrapped::time(0);
@@ -82,10 +84,10 @@ namespace crpcut {
         {
           machine_string[0] = 0;
         }
-      write("\" host=\"");
+      write("\"\n        host=\"");
       write(machine_string, wrapped::strlen(machine_string), translated);
 
-      write("\" command=\"");
+      write("\"\n        command=\"");
       for (int i = 0; i < argc; ++i)
         {
           if (i > 0) write(" ", 1);
@@ -93,7 +95,7 @@ namespace crpcut {
         }
       if (id)
         {
-          write("\" id=\"");
+          write("\"\n        id=\"");
           write(id, translated);
         }
       write("\">\n");
