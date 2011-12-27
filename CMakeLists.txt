@@ -408,7 +408,6 @@ if (WITH_HTML_DOCS)
         endif()
       endforeach()
       GET_FILENAME_COMPONENT(basename ${src_name} NAME_WE)
-      message("basename=\"${basename}\"")
       if (${basename} STREQUAL ${src_name})
         set(filename "${src_name}.cpp")
       else()
@@ -613,6 +612,8 @@ if (WITH_HTML_DOCS)
       cat ${DOC_SRC_LIB}/crpcut-template.xsl | sed "s?CHUNK?${HTML_CHUNK_XSL}?g\;s?PVERSION?${CRPCUT_PRINT_VERSION}?g\;s?VERSION?${CRPCUT_LIB_VERSION}?g" > crpcut.xsl
       )
 
+    set(SS "stripped-src")
+    set(SO "sample-output")
     #
     # html docs
     #
@@ -621,98 +622,100 @@ if (WITH_HTML_DOCS)
       ${XSLTPROC}
       --xinclude
       ${CMAKE_BINARY_DIR}/crpcut.xsl - < ${TOP_DOC_SOURCE}
-      DEPENDS html stripped-src
+      DEPENDS html
       doc-src
-      stripped-src/all_tests.cpp sample-output/all_tests.out
-      stripped-src/exit_any_code.cpp sample-output/exit_any_code.out
-      stripped-src/assert_ne_fails.cpp sample-output/assert_ne_fails.out
-      stripped-src/verify_ne_fails.cpp sample-output/verify_ne_fails.out
-      stripped-src/assert_le_fails.cpp sample-output/assert_le_fails.out
-      stripped-src/verify_le_fails.cpp sample-output/verify_le_fails.out
-      stripped-src/assert_lt_fails.cpp sample-output/assert_lt_fails.out
-      stripped-src/verify_lt_fails.cpp sample-output/verify_lt_fails.out
-      stripped-src/assert_eq_fails.cpp sample-output/assert_eq_fails.out
-      stripped-src/verify_eq_fails.cpp sample-output/verify_eq_fails.out
-      stripped-src/assert_ge_fails.cpp sample-output/assert_ge_fails.out
-      stripped-src/verify_ge_fails.cpp sample-output/verify_ge_fails.out
-      sample-output/debug_assert_eq_fails.out
-      stripped-src/assert_gt_fails.cpp sample-output/assert_gt_fails.out
-      stripped-src/verify_gt_fails.cpp sample-output/verify_gt_fails.out
-      stripped-src/assert_false_fails.cpp sample-output/assert_false_fails.out
-      stripped-src/verify_false_fails.cpp sample-output/verify_false_fails.out
-      stripped-src/assert_true_fails.cpp sample-output/assert_true_fails.out
-      stripped-src/describe_exception.cpp sample-output/describe_exception.out
-      stripped-src/verify_true_fails.cpp sample-output/verify_true_fails.out
-      stripped-src/assert_no_throw_fails.cpp sample-output/assert_no_throw_fails.out
-      stripped-src/verify_no_throw_fails.cpp sample-output/verify_no_throw_fails.out
-      stripped-src/assert_throw_fails.cpp sample-output/assert_throw_fails.out
-      stripped-src/verify_throw_fails.cpp sample-output/verify_throw_fails.out
-      stripped-src/assert_pred_fails.cpp sample-output/assert_pred_fails.out
-      stripped-src/verify_pred_fails.cpp sample-output/verify_pred_fails.out
-      stripped-src/assert_scope_max_cpu.cpp sample-output/assert_scope_max_cpu.out
-      stripped-src/verify_scope_max_cpu.cpp sample-output/verify_scope_max_cpu.out
-      stripped-src/assert_scope_max_real.cpp sample-output/assert_scope_max_real.out
-      stripped-src/verify_scope_max_real.cpp sample-output/verify_scope_max_real.out
-      stripped-src/assert_scope_min_real.cpp sample-output/assert_scope_min_real.out
-      stripped-src/verify_scope_min_real.cpp sample-output/verify_scope_min_real.out
-      stripped-src/assert_scope_leak_free.cpp sample-output/assert_scope_leak_free.out
-      stripped-src/verify_scope_leak_free.cpp sample-output/verify_scope_leak_free.out
-      stripped-src/usleep.cpp sample-output/usleep.out
-      stripped-src/wrap_func.cpp sample-output/wrap_func.out
-      stripped-src/wrap_v_func.cpp sample-output/wrap_v_func.out
-      stripped-src/wrapped.cpp sample-output/wrapped.out
-      stripped-src/collate.cpp sample-output/collate.out
-      stripped-src/collate_case.cpp sample-output/collate_case.out
-      stripped-src/deadline_cpu.cpp sample-output/deadline_cpu.out
-      stripped-src/deadline_realtime.cpp sample-output/deadline_realtime.out
-      stripped-src/depends_on.cpp sample-output/depends_on.out
-      stripped-src/expect_exception.cpp sample-output/expect_exception.out
-      stripped-src/expect_exit.cpp sample-output/expect_exit.out
-      stripped-src/expect_signal_death.cpp sample-output/expect_signal_death.out
-      stripped-src/expect_realtime_timeout.cpp sample-output/expect_realtime_timeout.out
-      stripped-src/fixture_construction_timeout.cpp sample-output/fixture_construction_timeout.out
-      stripped-src/fixture_destruction_timeout.cpp sample-output/fixture_destruction_timeout.out
-      stripped-src/fail.cpp sample-output/fail.out
-      stripped-src/info.cpp sample-output/info.out
-      stripped-src/no_core.cpp sample-output/no_core.out
-      stripped-src/abs_diff.cpp sample-output/abs_diff.out
-      stripped-src/relative_diff.cpp sample-output/relative_diff.out
-      stripped-src/ulps_diff.cpp sample-output/ulps_diff.out
-      stripped-src/regex.cpp sample-output/regex.out
-      stripped-src/bare-minimum.cpp sample-output/bare-minimum.out
-      sample-output/bare-minimum-list.out
-      sample-output/bare-minimum-verbose.out
-      stripped-src/utf8_code.cpp sample-output/utf8_code.out
-      stripped-src/iso8859_1_code.cpp sample-output/iso8859_1_code.out
-      stripped-src/simple_testsuite.cpp sample-output/simple_testsuite.out
-      stripped-src/test_tag.cpp sample-output/test_tag.out
-      stripped-src/report_example.cpp sample-output/report_example_human.out
-      sample-output/report_example_xml.out
-      stripped-src/ilist_element.hpp
-      stripped-src/itest.cpp sample-output/itest.out
-      stripped-src/simple-depend.cpp sample-output/simple-depend.out
-      stripped-src/simple_fix.cpp sample-output/simple_fix.out
-      stripped-src/file_fix.cpp sample-output/file_fix.out
-      stripped-src/ambiguous_fix.cpp sample-output/ambiguous_fix.out
-      stripped-src/file_fail.cpp sample-output/file_fail.out
-      stripped-src/infinite_loop.cpp sample-output/infinite_loop.out
-      stripped-src/suite_depend.cpp sample-output/suite_depend.out
-      stripped-src/suite_define.cpp
-      stripped-src/symtable.hpp
-      stripped-src/symtable-test.cpp sample-output/symtable-test.out
-      stripped-src/symtable-test2.cpp sample-output/symtable-test2.out
-      stripped-src/suite-example.cpp sample-output/suite-example.out
-      stripped-src/string-template-fix.cpp sample-output/string-template-fix.out
-      stripped-src/regex-simple.cpp sample-output/regex-simple.out
-      stripped-src/collate_example.cpp sample-output/collate_example.out
-      stripped-src/sorted-names.hpp
-      stripped-src/heap-check.cpp sample-output/heap-check.out
-      stripped-src/stream-cast.hpp
-      stripped-src/process-example.hpp stripped-src/process-test.cpp
-      sample-output/process-test.out
-      stripped-src/simple-pred.cpp sample-output/simple-pred.out
-      stripped-src/template-pred.cpp sample-output/template-pred.out
-      stripped-src/gmock-example.cpp sample-output/gmock-example.out
+      ${SS}/all_tests.cpp                 ${SO}/all_tests.out
+      ${SS}/exit_any_code.cpp             ${SO}/exit_any_code.out
+      ${SS}/assert_ne_fails.cpp           ${SO}/assert_ne_fails.out
+      ${SS}/verify_ne_fails.cpp           ${SO}/verify_ne_fails.out
+      ${SS}/assert_le_fails.cpp           ${SO}/assert_le_fails.out
+      ${SS}/verify_le_fails.cpp           ${SO}/verify_le_fails.out
+      ${SS}/assert_lt_fails.cpp           ${SO}/assert_lt_fails.out
+      ${SS}/verify_lt_fails.cpp           ${SO}/verify_lt_fails.out
+      ${SS}/assert_eq_fails.cpp           ${SO}/assert_eq_fails.out
+      ${SS}/verify_eq_fails.cpp           ${SO}/verify_eq_fails.out
+      ${SS}/assert_ge_fails.cpp           ${SO}/assert_ge_fails.out
+      ${SS}/verify_ge_fails.cpp           ${SO}/verify_ge_fails.out
+                                          ${SO}/debug_assert_eq_fails.out
+      ${SS}/assert_gt_fails.cpp           ${SO}/assert_gt_fails.out
+      ${SS}/verify_gt_fails.cpp           ${SO}/verify_gt_fails.out
+      ${SS}/assert_false_fails.cpp        ${SO}/assert_false_fails.out
+      ${SS}/verify_false_fails.cpp        ${SO}/verify_false_fails.out
+      ${SS}/assert_true_fails.cpp         ${SO}/assert_true_fails.out
+      ${SS}/describe_exception.cpp        ${SO}/describe_exception.out
+      ${SS}/verify_true_fails.cpp         ${SO}/verify_true_fails.out
+      ${SS}/assert_no_throw_fails.cpp     ${SO}/assert_no_throw_fails.out
+      ${SS}/verify_no_throw_fails.cpp     ${SO}/verify_no_throw_fails.out
+      ${SS}/assert_throw_fails.cpp        ${SO}/assert_throw_fails.out
+      ${SS}/verify_throw_fails.cpp        ${SO}/verify_throw_fails.out
+      ${SS}/assert_pred_fails.cpp         ${SO}/assert_pred_fails.out
+      ${SS}/verify_pred_fails.cpp         ${SO}/verify_pred_fails.out
+      ${SS}/assert_scope_max_cpu.cpp      ${SO}/assert_scope_max_cpu.out
+      ${SS}/verify_scope_max_cpu.cpp      ${SO}/verify_scope_max_cpu.out
+      ${SS}/assert_scope_max_real.cpp     ${SO}/assert_scope_max_real.out
+      ${SS}/verify_scope_max_real.cpp     ${SO}/verify_scope_max_real.out
+      ${SS}/assert_scope_min_real.cpp     ${SO}/assert_scope_min_real.out
+      ${SS}/verify_scope_min_real.cpp     ${SO}/verify_scope_min_real.out
+      ${SS}/assert_scope_leak_free.cpp    ${SO}/assert_scope_leak_free.out
+      ${SS}/verify_scope_leak_free.cpp    ${SO}/verify_scope_leak_free.out
+      ${SS}/usleep.cpp                    ${SO}/usleep.out
+      ${SS}/wrap_func.cpp                 ${SO}/wrap_func.out
+      ${SS}/wrap_v_func.cpp               ${SO}/wrap_v_func.out
+      ${SS}/wrapped.cpp                   ${SO}/wrapped.out
+      ${SS}/collate.cpp                   ${SO}/collate.out
+      ${SS}/collate_case.cpp              ${SO}/collate_case.out
+      ${SS}/deadline_cpu.cpp              ${SO}/deadline_cpu.out
+      ${SS}/deadline_realtime.cpp         ${SO}/deadline_realtime.out
+      ${SS}/depends_on.cpp                ${SO}/depends_on.out
+      ${SS}/expect_exception.cpp          ${SO}/expect_exception.out
+      ${SS}/expect_exit.cpp               ${SO}/expect_exit.out
+      ${SS}/expect_signal_death.cpp       ${SO}/expect_signal_death.out
+      ${SS}/expect_realtime_timeout.cpp   ${SO}/expect_realtime_timeout.out
+      ${SS}/fixture_construction_timeout.cpp
+                                          ${SO}/fixture_construction_timeout.out
+      ${SS}/fixture_destruction_timeout.cpp
+                                          ${SO}/fixture_destruction_timeout.out
+      ${SS}/fail.cpp                      ${SO}/fail.out
+      ${SS}/info.cpp                      ${SO}/info.out
+      ${SS}/no_core.cpp                   ${SO}/no_core.out
+      ${SS}/abs_diff.cpp                  ${SO}/abs_diff.out
+      ${SS}/relative_diff.cpp             ${SO}/relative_diff.out
+      ${SS}/ulps_diff.cpp                 ${SO}/ulps_diff.out
+      ${SS}/regex.cpp                     ${SO}/regex.out
+      ${SS}/bare-minimum.cpp              ${SO}/bare-minimum.out
+                                          ${SO}/bare-minimum-list.out
+                                          ${SO}/bare-minimum-verbose.out
+      ${SS}/utf8_code.cpp                 ${SO}/utf8_code.out
+      ${SS}/iso8859_1_code.cpp            ${SO}/iso8859_1_code.out
+      ${SS}/simple_testsuite.cpp          ${SO}/simple_testsuite.out
+      ${SS}/test_tag.cpp                  ${SO}/test_tag.out
+      ${SS}/report_example.cpp            ${SO}/report_example_human.out
+                                          ${SO}/report_example_xml.out
+      ${SS}/ilist_element.hpp
+      ${SS}/itest.cpp                     ${SO}/itest.out
+      ${SS}/simple-depend.cpp             ${SO}/simple-depend.out
+      ${SS}/simple_fix.cpp                ${SO}/simple_fix.out
+      ${SS}/file_fix.cpp                  ${SO}/file_fix.out
+      ${SS}/ambiguous_fix.cpp             ${SO}/ambiguous_fix.out
+      ${SS}/file_fail.cpp                 ${SO}/file_fail.out
+      ${SS}/infinite_loop.cpp             ${SO}/infinite_loop.out
+      ${SS}/suite_depend.cpp              ${SO}/suite_depend.out
+      ${SS}/suite_define.cpp
+      ${SS}/symtable.hpp
+      ${SS}/symtable-test.cpp             ${SO}/symtable-test.out
+      ${SS}/symtable-test2.cpp            ${SO}/symtable-test2.out
+      ${SS}/suite-example.cpp             ${SO}/suite-example.out
+      ${SS}/string-template-fix.cpp       ${SO}/string-template-fix.out
+      ${SS}/regex-simple.cpp              ${SO}/regex-simple.out
+      ${SS}/collate_example.cpp           ${SO}/collate_example.out
+      ${SS}/sorted-names.hpp
+      ${SS}/heap-check.cpp                ${SO}/heap-check.out
+      ${SS}/stream-cast.hpp
+      ${SS}/process-example.hpp
+      ${SS}/process-test.cpp              ${SO}/process-test.out
+      ${SS}/simple-pred.cpp               ${SO}/simple-pred.out
+      ${SS}/template-pred.cpp             ${SO}/template-pred.out
+      ${SS}/gmock-example.cpp             ${SO}/gmock-example.out
       can_dump_core
       ${DOC_SOURCES} ${DOC_SRC_LIB}/crpcut-doc.css crpcut.xsl
       WORKING_DIRECTORY html)
