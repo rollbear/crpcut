@@ -2892,7 +2892,7 @@ namespace crpcut {
     typename array_v<T, N>::const_reference
     array_v<T, N>::back() const
     {
-      *(end() - !empty());
+      return *(end() - !empty());
     }
 
     template <typename T, std::size_t N>
