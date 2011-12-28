@@ -461,7 +461,7 @@ if (WITH_HTML_DOCS)
         set (OUTNAME "${program}.out")
       endif()
       if (NOT DEFINED FILTER)
-        set (FILTER "s/\\(.*\\)/     \\1/g")
+        set (FILTER "s/\\(.*\\)/     \\1/g\;s:[-./_[:alnum:]]*/crpcut/doc-src/::g")
       endif()
       add_custom_target(
         "${OUTNAME}"
