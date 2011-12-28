@@ -466,7 +466,7 @@ if (WITH_HTML_DOCS)
       add_custom_target(
         "${OUTNAME}"
         ${program} ${PARAMS} | c++filt -t | sed ${FILTER} > "${OUTNAME}"
-        DEPENDS ${program}
+        DEPENDS sample-output ${program}
         WORKING_DIRECTORY sample-output
         VERBATIM)
     endfunction(sample_output)
