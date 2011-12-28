@@ -45,13 +45,15 @@
 <xi:include href="../sample-output/bare-minimum-list.out" parse="text"/>
 </screen>
       </para>
+      <para>The exclamation marks indicate that the tests are critical.
+      </para>
       <para>Running the test program with an empty parameter list
         runs all tests:
         <screen>
 
 <xi:include href="../sample-output/bare-minimum.out" parse="text"/>
 </screen>
-        which isn't too exciting in this case.
+        which isn't too exciting for this program.
       </para>
       <para>Running the test program with the
         <xref linkend="verbose" xrefstyle="select:title"/> command
@@ -359,38 +361,59 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
       </note>
     </para>
   </chapter>
-  <chapter id="testsuites">
-    <title>Grouping tests into testsuites</title>
-    <para>It is often a good idea to group tests that verify similar
-      parts of the functionality into testsuites. In &crpcut; a
-      testsuite is a list of tests and enclosed testsuites. At the
-      out most level, tests are included in the unnamed testsuite.
+  <chapter id="testgroups">
+    <title>Grouping tests</title>
+    <para>It is often a good idea to identify groups of tests that
+    share some common trait. It may be that they belong to the same
+    type of function, or perhaps the same user story.</para>
+    <para>&crpcut; offers two different ways of expressing such groups:
+    <variablelist>
+      <varlistentry>
+	<term><link linkend="testsuites">testsuites</link></term>
+	<listitem><para>Describes a hierarchy of tests which can be used
+	for stating dependencies.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><link linkend="tags">tags</link></term>
+	<listitem>A flat structure that can be used for defining
+	criticality of tests.</listitem>
+      </varlistentry>
+    </variablelist>
     </para>
-    <para>Testsuites are declared using the
+    <para>Both testsuites and tags can be used to select subsets of tests to
+    run.</para>
+    <simplesect id="testsuites">
+      <title>Testsuites</title>
+      <para>In &crpcut; a testsuite is a list of tests and enclosed testsuites.
+      At the out most level, tests are included in the unnamed testsuite. With
+      testsuites you can describe a hierarchy of tests, since testsuites
+      can contain other testsuites.
+      </para>
+      <para>Testsuites are declared using the
       <xref linkend="TESTSUITE" xrefstyle="select:title"/>
       macro. A testsuite is a <symbol>C++</symbol> namespace with some
       decorations attached. For example it is possible to express
       dependencies on testsuites (i.e. the requirement that all tests
       in a testsuite pass,) and it is possible for testsuites to depend
       on tests and other testsuites.
-    </para>
-    <tip>Experience has shown that it is a good idea to let testsuites
+      </para>
+      <tip>Experience has shown that it is a good idea to let testsuites
       depend on testsuites, and tests in testsuites depend on other tests
       in the same testsuite</tip>
-    <para>Consider the simple <type>symtable</type> class from earlier:
+      <para>Consider the simple <type>symtable</type> class from earlier:
       <programlisting language="c++">
 
 <xi:include href="../stripped-src/symtable.hpp" parse="text"/>
 </programlisting>
-    </para>
-    <para>The following longish test program follows the recommended
+      </para>
+      <para>The following longish test program follows the recommended
       form for testsuites with dependencies:
       <programlisting language="c++">
 
 <xi:include href="../stripped-src/suite-example.cpp" parse="text"/>
 </programlisting>
-    </para>
-    <para>Testsuites are also useful when there is a desire to run a
+      </para>
+      <para>Testsuites are also useful when there is a desire to run a
       subset of the tests. Running the above test program with
       "<type>--verbose normal_access</type>" yields:
       <screen>
@@ -398,14 +421,77 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
 <xi:include href="../sample-output/suite-example.out" parse="text"/>
 </screen>
       (the <xref linkend="verbose" xrefstyle="select:title"/> command line
-      flag makes &crpcut; list output also from the tests that succeeds./)
+      flag makes &crpcut; list output also from the tests that succeeds.)
       <note>
         The command line flag
         <xref linkend="nodepend" xrefstyle="select:title"/> is not necessary
         since dependencies are only calculated on tests selected to run, in
         this case the tests in the testsuite <type>normal_access</type>.
       </note>
-    </para>
+      </para>
+    </simplesect>
+    <simplesect id="tags">
+      <title>Tags</title>
+      <para>A tag in a &crpcut; test program is a group identity that can be
+      attached to a test. A test can either be untagged (the default) or have
+      one tag, never more.</para>
+      <para>Tags must be defined with the <xref linkend="DEFINE_TEST_TAG"
+      xrefstyle="select:title"/> macro before they can be used. A tag is a
+      <symbol>C++</symbol> type with some decorations, and from there it
+      follows that a tag must be visible at the site of use.</para>
+      <para>To attach a tag to a test, include the
+      <xref linkend="WITH_TEST_TAG" xrefstyle="select:title"/> macro in
+      the <link linkend="modifiers">modifiers</link> list.</para>
+      <para>Revisit the simple <type>symtable</type> again:
+      <programlisting language="c++">
+
+<xi:include href="../stripped-src/symtable.hpp" parse="text"/>
+</programlisting>
+      </para>
+      <para>Below is a simple test program showing the use of tags. It adds
+      a test for the new requirement that an overwrite shall throw:
+      <programlisting language="c++">
+
+<xi:include href="../stripped-src/tag-example.cpp" parse="text"/>
+</programlisting>
+      </para>
+      <para>Running this test program with the command line flag
+      <xref linkend="list-tags" xrefstyle="select:title"/> shows the
+      list of all tags:
+      <screen>
+
+<xi:include href="../sample-output/tag-example-list.out" parse="text"/>
+</screen>
+      </para>
+      <para>Running the test program with
+      <type><link linkend="tags-cli">--tags</link>=/insert</type> selects all
+      tests for running and defines the tests tagged <type>insert</type> as
+      non-critical. The result is:
+      <screen>
+
+<xi:include href="../sample-output/tag-example.out" parse="text"/>
+</screen>
+      </para>
+      <para>The questionmark in <constant>FAILED?</constant> tells that
+      the test that failed is non-critical.</para>
+      <para>Likewise, in the list of tags with passed/failed statistics for
+      each, every line begins with an exclamation mark for critical tests,
+      or a questionmark for non-critical tests.
+      </para>
+      <para>Tags can also be used to select which tests to run, and can be
+      combined with name matching. Running the same program again with
+      <type><link linkend="verbose">-&#xfeff;-&#xfeff;verbose</link>&#xA0;<link linkend="tags-cli">-&#xfeff;-&#xfeff;tags</link>=-&#xfeff;lookup/insert&#xA0;construct_and_destroy&#xA0;abnormal</type>
+      selects only the tests in the testsuite <type>construct_and_destroy</type>
+      and <type>abnormal</type> that
+      do not have the tag <type>lookup</type> (the minus is a negative
+      selection) and defines tests with the tag <type>insert</type> as
+      non-critical. The result is:
+      <screen>
+
+<xi:include href="../sample-output/tag-example-select.out" parse="text"/>
+</screen>
+      </para>
+    </simplesect>
   </chapter>
   <chapter id="test_fixtures">
     <title>Fixtures for common test setups</title>

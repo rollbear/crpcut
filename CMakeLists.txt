@@ -567,6 +567,11 @@ if (WITH_HTML_DOCS)
     sample_code(symtable.hpp NOCOMPILE)
     sample_result(symtable-test PARAMS "-v")
     sample_result(symtable-test2)
+    sample_result(tag-example PARAMS "--tags=/insert")
+    sample_output(tag-example PARAMS "--list-tags"
+                              OUTNAME "tag-example-list.out")
+    sample_output(tag-example PARAMS "-v" "--tags=-lookup/insert" "construct_and_destroy" "abnormal"
+                              OUTNAME "tag-example-select.out")
     sample_result(suite-example PARAMS "-v" "--nodeps" "normal_access")
     sample_result(string-template-fix PARAMS "-v")
     sample_result(regex-simple PARAMS "-v")
@@ -704,6 +709,9 @@ if (WITH_HTML_DOCS)
       ${SS}/symtable.hpp
       ${SS}/symtable-test.cpp             ${SO}/symtable-test.out
       ${SS}/symtable-test2.cpp            ${SO}/symtable-test2.out
+      ${SS}/tag-example.cpp               ${SO}/tag-example-list.out
+                                          ${SO}/tag-example.out
+					  ${SO}/tag-example-select.out
       ${SS}/suite-example.cpp             ${SO}/suite-example.out
       ${SS}/string-template-fix.cpp       ${SO}/string-template-fix.out
       ${SS}/regex-simple.cpp              ${SO}/regex-simple.out
