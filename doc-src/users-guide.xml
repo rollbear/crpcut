@@ -369,14 +369,14 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
     <para>&crpcut; offers two different ways of expressing such groups:
     <variablelist>
       <varlistentry>
-	<term><link linkend="testsuites">testsuites</link></term>
-	<listitem><para>Describes a hierarchy of tests which can be used
-	for stating dependencies.</para></listitem>
+        <term><link linkend="testsuites">testsuites</link></term>
+        <listitem><para>Describes a hierarchy of tests which can be used
+        for stating dependencies.</para></listitem>
       </varlistentry>
       <varlistentry>
-	<term><link linkend="tags">tags</link></term>
-	<listitem>A flat structure that can be used for defining
-	criticality of tests.</listitem>
+        <term><link linkend="tags">tags</link></term>
+        <listitem>A flat structure that can be used for defining
+        criticality of tests.</listitem>
       </varlistentry>
     </variablelist>
     </para>
@@ -472,7 +472,7 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
 <xi:include href="../sample-output/tag-example.out" parse="text"/>
 </screen>
       </para>
-      <para>The questionmark in <constant>FAILED?</constant> tells that
+      <para>The questionmark in <constant>FAILED?</constant> indicates that
       the test that failed is non-critical.</para>
       <para>Likewise, in the list of tags with passed/failed statistics for
       each, every line begins with an exclamation mark for critical tests,
