@@ -25,6 +25,7 @@
  */
 
 #include <crpcut.hpp>
+#include "posix_encapsulation.hpp"
 #ifdef HAVE_VALGRIND
 #include <valgrind/valgrind.h>
 #include <valgrind/memcheck.h>
@@ -56,8 +57,6 @@ namespace {
   inline void valgrind_mempool_alloc(A, B, C) {}
 }
 #endif
-
-extern "C" int putchar(int);
 
 namespace {
   typedef enum { raw, by_malloc, by_new_elem, by_new_array } alloc_type;
@@ -174,9 +173,21 @@ namespace crpcut
           {
             void **bt = static_cast<void**>(stack_addr);
             char **alloc_stack = backtrace_symbols.call<char**>(bt, size);
+	    bool started = false;
             for (size_t i = 1; i < size; ++i)
               {
-                msg << '\n' << alloc_stack[i];
+		const char *frame = alloc_stack[i];
+		const char *in_libcrpcut = wrapped::strstr(frame,
+							   "libcrpcut.so");
+		if (!started && !in_libcrpcut)
+		  {
+		    started = true;
+		    msg << '\n' << alloc_stack[i-1];
+		  }
+		if (started && in_libcrpcut) break;
+		if (started) {
+		  msg << '\n' << alloc_stack[i];
+		}
               }
             free(alloc_stack);
           }

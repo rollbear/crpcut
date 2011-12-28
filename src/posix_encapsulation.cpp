@@ -217,6 +217,8 @@ namespace crpcut {
                      int,
                      (const char *s1, const char *s2, size_t n),
                      (s1, s2, n))
+    CRPCUT_WRAP_FUNC(libc, strstr, char *, (const char *h, const char *n),
+		     (h, n))
     CRPCUT_WRAP_FUNC(libc, time, time_t, (time_t *p), (p))
     CRPCUT_WRAP_FUNC(libc, waitid,
                      int,

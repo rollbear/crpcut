@@ -1,3 +1,6 @@
+         * Reduced stack-trace for heap violations to only include the
+           frames from the heap function back to the test function.
+
          * It is now possible to set tags to tests. The tags can be used
            for selecting which tests to run (in addition to name matching, that
            is,) and also to define which tests are critical and which are not.

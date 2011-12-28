@@ -66,6 +66,7 @@ namespace crpcut {
     int                  setrlimit(int, const struct rlimit*);
     int                  snprintf(char *s, size_t si, const char *f, ...);
     int                  strncmp(const char *s1, const char *s2, size_t n);
+    char *               strstr(const char *, const char *);
     time_t               time(time_t *t);
     int                  vsnprintf(char *s, size_t si, const char *f, va_list);
     int                  waitid(idtype_t t, id_t i, siginfo_t *si, int o);
