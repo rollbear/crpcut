@@ -119,6 +119,10 @@ endif(NOT HAVE__EXIT)
 
 
 include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-pthread HAVE_PTHREAD_SWITCH)
+if (DEFINED HAVE_PTHREAD_SWITCH)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif(DEFINED HAVE_PTHREAD_SWITCH)
 check_cxx_compiler_flag(-std=c++0x HAVE_CXX0X)
 file(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/typeof.cpp
   "template <typename T> T* func(T);\n"
@@ -173,13 +177,15 @@ if (USE_BACKTRACE)
   message("*** using backtrace() for information on heap objects")
 endif (USE_BACKTRACE)
 
-# check for clock_gettime()
 
 if (DEFINED EXTRA_LIBS)
-  set(EXTRA_LIBS "${EXTRA_LIBS} -l${CMAKE_DL_LIBS} -lpthread")
+  set(EXTRA_LIBS "${EXTRA_LIBS} -l${CMAKE_DL_LIBS}${PTHREAD}")
 else()
-  set(EXTRA_LIBS "-l${CMAKE_DL_LIBS} -lpthread")
+  set(EXTRA_LIBS "-l${CMAKE_DL_LIBS}${PTHREAD}")
 endif()
+
+# check for clock_gettime()
+
 
 check_function_exists("clock_gettime()" HAVE_CLOCK_GETTIME)
 if(HAVE_CLOCK_GETTIME)
