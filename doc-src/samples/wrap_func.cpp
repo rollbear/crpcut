@@ -58,7 +58,7 @@ extern "C"
 size_t read_data(const char *name)
 {
   FILE *handle = ::fopen(name, "r");
-  if (!handle) return -1;
+  if (!handle) return ~size_t();
   char buff[10];
   size_t n = ::fread(buff, 1, sizeof(buff), handle);
   fclose(handle);

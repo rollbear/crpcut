@@ -31,10 +31,10 @@ class to_be_tested
 public:
   to_be_tested() { buffer.at(1) = 0; /* init */ }
   char &next_char() { return buffer[index++]; }
-  int used_chars() const { return index; }
+  size_t used_chars() const { return index; }
 private:
   std::vector<char> buffer;
-  int index;
+  size_t index;
 };
 
 TEST(create)
@@ -54,7 +54,7 @@ TEST(fill, DEPENDS_ON(destroy))
     {
       obj.next_char() = 0;
     }
-  ASSERT_EQ(obj.used_chars(), 100);
+  ASSERT_EQ(obj.used_chars(), 100U);
 }
 
 int main(int argc, char *argv[])

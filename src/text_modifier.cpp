@@ -63,7 +63,7 @@ namespace {
       {
         throw err(msg);
       }
-    crpcut::fixed_string rv = { p, e - p };
+    crpcut::fixed_string rv = { p, std::size_t(e - p) };
     p = e + 1;
     return rv;
   }
@@ -76,7 +76,7 @@ namespace {
          i != end(array);
          ++i)
       {
-        if (*i == s) return i - begin(array);
+        if (*i == s) return int(i - begin(array));
       }
     throw err(std::string(s.str, s.len) + " is not a decorator");
   }
@@ -143,7 +143,7 @@ namespace crpcut {
       assert(m < END_OF_LIST);
       if (!decorators[m]) return;
 
-      os.write(decorators[m].str, decorators[m].len);
+      os.write(decorators[m].str, std::streamsize(decorators[m].len));
     }
 
     void

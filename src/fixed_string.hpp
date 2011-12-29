@@ -45,7 +45,7 @@ namespace crpcut {
     {
       if (len != s.len) return false;
       if (str == s.str) return true;
-      for (int i = 0; i < len; ++i)
+      for (std::size_t i = 0; i < len; ++i)
         {
           if (str[i] != s.str[i]) return false;
         }

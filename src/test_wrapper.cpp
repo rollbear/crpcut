@@ -27,7 +27,7 @@
 #include <crpcut.hpp>
 
 namespace crpcut {
-    template <>
+  template <>
   void test_wrapper<void>::run(test_case_base *t)
   {
     t->test();

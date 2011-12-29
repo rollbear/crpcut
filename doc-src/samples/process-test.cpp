@@ -133,8 +133,9 @@ extern "C" ssize_t read(int fd, void *p, size_t n)
   ssize_t rv = a.retval;
   if (rv != -1)
     {
-      ASSERT_GE(n, size_t(rv));
-      memcpy(p, a.data, rv);
+      size_t srv = size_t(rv);
+      ASSERT_GE(n, srv);
+      memcpy(p, a.data, srv);
     }
   errno = a.err;
   read_actions.pop_front();
@@ -239,8 +240,8 @@ struct read_fixture
     read_actions.push_back(read_data(len,          &rfd,  parent_str,  0));
     read_actions.push_back(read_data(sizeof(zero), &rfd, &zero,        0));
   }
-  const size_t len;
-  const size_t zero;
+  const ssize_t len;
+  const ssize_t zero;
   int rfd;
   int wfd;
 };

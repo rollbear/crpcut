@@ -29,7 +29,7 @@
 
 TEST(output_string)
 {
-  static const char str[] = { 0xc2, 0xbf, 0xc3, 0xa5, 0xc3, 0xb1, 0 };
+  static const char str[] = { '\xc2', '\xbf', '\xc3', '\xa5', '\xc3', '\xb1', 0 };
   INFO << str;
 }
 

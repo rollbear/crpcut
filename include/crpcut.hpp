@@ -1036,7 +1036,7 @@ namespace crpcut {
       };
     } // namespace deaths
 
-    template <unsigned long N, typename action = deaths::no_action>
+    template <int N, typename action = deaths::no_action>
     class signal_death : protected virtual default_policy
     {
     public:
@@ -1044,7 +1044,7 @@ namespace crpcut {
       typedef deaths::signal<N, action> crpcut_expected_death_cause;
     };
 
-    template <unsigned long N, typename action = deaths::no_action>
+    template <int N, typename action = deaths::no_action>
     class exit_death : protected virtual default_policy
     {
     public:

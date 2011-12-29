@@ -83,10 +83,12 @@ namespace crpcut {
     {
       init(lib);
     }
+
     dlloader::~dlloader()
     {
       (void)::dlclose(libp); // nothing much to do in case of error.
     }
+
     void dlloader::init(const char *const *lib)
     {
       static const int flags[] = {

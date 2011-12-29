@@ -53,7 +53,7 @@ TEST(too_narrow)
       sum+= 1.0f/3 + float(n);
    }
   float avg = sum/count;
-  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2), float(mavg), avg);
+  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(2U), float(mavg), avg);
 }
 
 TEST(close_enough)
@@ -66,7 +66,7 @@ TEST(close_enough)
       sum+= 1.0f/3 + float(n);
     }
   float avg = sum/count;
-  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(10), float(mavg), avg);
+  ASSERT_PRED(crpcut::match<crpcut::ulps_diff>(10U), float(mavg), avg);
 }
 
 int main(int argc, char *argv[])

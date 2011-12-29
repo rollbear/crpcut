@@ -31,13 +31,13 @@
 TEST(assert_true_succeeds)
 {
   std::string val;
-  ASSERT_TRUE(val.length() == 0);
+  ASSERT_TRUE(val.length() == 0U);
 }
 
 TEST(assert_true_fails)
 {
   std::string val;
-  ASSERT_TRUE(val.length() > 0);
+  ASSERT_TRUE(val.length() > 0U);
 }
 
 int main(int argc, char *argv[])

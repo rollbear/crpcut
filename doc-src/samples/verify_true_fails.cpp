@@ -31,13 +31,13 @@
 TEST(verify_true_succeeds)
 {
   std::string val;
-  VERIFY_TRUE(val.length() == 0);
+  VERIFY_TRUE(val.length() == 0U);
 }
 
 TEST(verify_true_fails)
 {
   std::string val;
-  VERIFY_TRUE(val.length() > 0);
+  VERIFY_TRUE(val.length() > 0U);
   VERIFY_TRUE(!val.empty());
 }
 
