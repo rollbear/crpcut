@@ -129,6 +129,7 @@
         <listitem><function>dup2</function>()</listitem>
         <listitem><function>fork</function>()</listitem>
         <listitem><function>getcwd</function>()</listitem>
+	<listitem><function>getenv</function>()</listitem>
         <listitem><function>gethostname</function>()</listitem>
         <listitem><function>getpgid</function>()</listitem>
         <listitem><function>getrusage</function>()</listitem>
