@@ -85,6 +85,7 @@ file(GLOB LIB_SRCS
      src/test_suite_base.cpp
      src/test_wrapper.cpp
      src/text_formatter.cpp
+     src/text_modifier.cpp
      src/xml.cpp
      src/xml_formatter.cpp
 )

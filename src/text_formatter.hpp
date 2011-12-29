@@ -32,6 +32,7 @@
 
 namespace crpcut {
   namespace output {
+    class text_modifier;
     class text_formatter : public formatter
     {
       struct tag_result
@@ -45,7 +46,8 @@ namespace crpcut {
       };
       std::vector<tag_result> tag_results;
     public:
-      text_formatter(const char *, int, const char**);
+      text_formatter(const char *, int, const char**,
+		     const text_modifier& = default_text_modifier());
       virtual void begin_case(const char *name,
                               std::size_t name_len,
                               bool        result,
@@ -71,10 +73,13 @@ namespace crpcut {
                                std::size_t num_failed,
                                bool        critical);
     private:
-      void display_tag_list_header(char *buffer, int len);
-      bool did_output_;
-      bool blocked_tests_;
-      formatter::type conversion_type_;
+      static const text_modifier& default_text_modifier();
+      void display_tag_list_header();
+
+      bool                 did_output_;
+      bool                 blocked_tests_;
+      formatter::type      conversion_type_;
+      const text_modifier &modifier_;
     };
   }
 }

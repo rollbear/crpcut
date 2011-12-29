@@ -160,6 +160,7 @@ namespace crpcut {
     CRPCUT_WRAP_FUNC(libc, dup2, int, (int f1, int f2), (f1, f2))
     CRPCUT_WRAP_FUNC(libc, fork, int, (void), ())
     CRPCUT_WRAP_FUNC(libc, getcwd, char*, (char *buf, size_t size), (buf, size))
+    CRPCUT_WRAP_FUNC(libc, getenv, char*, (const char*n), (n))
     CRPCUT_WRAP_FUNC(libc, gethostname, int, (char *n, size_t s), (n, s))
     CRPCUT_WRAP_FUNC(libc, getitimer, int, (int i, struct itimerval *v), (i, v))
     CRPCUT_WRAP_FUNC(libc, getpgid, pid_t, (pid_t p), (p))
@@ -238,6 +239,7 @@ namespace crpcut {
                      int,
                      (const char *s1, const char *s2, size_t n),
                      (s1, s2, n))
+    CRPCUT_WRAP_FUNC(libc, strchr, char *, (const char *s, int c), (s, c))
     CRPCUT_WRAP_FUNC(libc, strstr, char *, (const char *h, const char *n),
 		     (h, n))
     CRPCUT_WRAP_FUNC(libc, time, time_t, (time_t *p), (p))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,38 +24,45 @@
  * SUCH DAMAGE.
  */
 
-#ifndef FIXED_STRING_HPP
-#define FIXED_STRING_HPP
+#ifndef TEXT_MODIFIER_HPP
+#define TEXT_MODIFIER_HPP
 
-#include <cstddef>
+#include "fixed_string.hpp"
+#include "posix_encapsulation.hpp"
+#include <iosfwd>
+#define DECORATORS(x)				\
+  x(NORMAL),					\
+    x(PASSED),					\
+    x(FAILED),					\
+    x(NCFAILED),				\
+    x(NCPASSED),				\
+    x(BLOCKED),					\
+    x(PASSED_SUM),				\
+    x(FAILED_SUM),				\
+    x(NCPASSED_SUM),				\
+    x(NCFAILED_SUM),				\
+    x(BLOCKED_SUM)
+
+
+#define VERBATIM(x) x
+#define EMPTY(x) { 0, 0 }
 namespace crpcut {
-
-  struct fixed_string
-  {
-    const char  *str;
-    std::size_t  len;
-  private:
-    struct secret_bool;
-  public:
-    operator const secret_bool* () const
-    {
-      return len ? reinterpret_cast<const secret_bool*>(this) : 0;
-    }
-    bool operator==(const fixed_string &s) const
-    {
-      if (len != s.len) return false;
-      if (str == s.str) return true;
-      for (int i = 0; i < len; ++i)
-	{
-	  if (str[i] != s.str[i]) return false;
-	}
-      return true;
-    }
-    bool operator!=(const fixed_string &s) const
-    {
-      return !(*this == s);
-    }
-  };
+  namespace output {
+    class formatter;
+    
+    class text_modifier {
+    public:
+      class illegal_decoration_format ;
+      typedef enum { DECORATORS(VERBATIM), END_OF_LIST } decorator;
+      text_modifier(const char *rules =
+		    wrapped::getenv("CRPCUT_TEXT_DECORATION"));
+      void write_to(formatter& output, decorator m) const;
+      void write_to(std::ostream& output, decorator m) const;
+    private:
+      void init_decorator(decorator dest, decorator src);
+      fixed_string decorators[END_OF_LIST];
+    };
+  }
 }
 
-#endif // FIXED_STRING_HPP
+#endif // TEXT_MODIFIER_HPP

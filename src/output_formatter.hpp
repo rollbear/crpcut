@@ -35,6 +35,7 @@ extern "C"
 
 #include "fixed_string.hpp"
 #include <crpcut.hpp>
+#include <iosfwd>
 namespace crpcut {
   namespace output {
 
@@ -46,9 +47,10 @@ namespace crpcut {
       typedef void type;
     };
 
+    class text_modifier;
     class formatter
     {
-
+      friend class text_modifier;
     public:
       typedef enum { translated, verbatim } type;
       virtual void begin_case(const char  *name,
@@ -92,6 +94,7 @@ namespace crpcut {
       {
         return write(o.begin(), o.size(), t);
       }
+      std::size_t write(const std::ostringstream &os, type t = verbatim) const;
       std::size_t write(const char *str, std::size_t len, type t = verbatim) const;
       template <typename T>
       std::size_t write(T val,

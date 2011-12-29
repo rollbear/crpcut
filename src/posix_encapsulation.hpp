@@ -44,6 +44,7 @@ namespace crpcut {
     int                  fork(void);
     void                 free(const void*);
     char *               getcwd(char *buf, size_t size);
+    char *               getenv(const char*);
     int                  gethostname(char *n, size_t l);
     pid_t                getpgid(pid_t);
     pid_t                getpid();
@@ -66,6 +67,7 @@ namespace crpcut {
     int                  setrlimit(int, const struct rlimit*);
     int                  snprintf(char *s, size_t si, const char *f, ...);
     int                  strncmp(const char *s1, const char *s2, size_t n);
+    char *               strchr(const char *, int);
     char *               strstr(const char *, const char *);
     time_t               time(time_t *t);
     int                  vsnprintf(char *s, size_t si, const char *f, va_list);

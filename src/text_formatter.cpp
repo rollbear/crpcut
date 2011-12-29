@@ -25,6 +25,7 @@
  */
 
 #include "text_formatter.hpp"
+#include "text_modifier.hpp"
 
 namespace {
   static const char barrier[] =
@@ -49,17 +50,25 @@ namespace {
   {
     return p ? p : ".";
   }
+
+  typedef crpcut::output::text_modifier tm;
+  static const tm::decorator violation_mods[2][2] =
+    {
+      { tm::NCFAILED, tm::FAILED },
+      { tm::NCPASSED, tm::PASSED }
+    };
 }
 
 namespace crpcut {
   namespace output {
     text_formatter
-    ::text_formatter(const char *, int, const char**)
+    ::text_formatter(const char *, int, const char**, const text_modifier &m)
       : formatter(output_charset(test_case_factory::get_output_charset()),
                   illegal_replacement(test_case_factory::get_illegal_rep())),
         conversion_type_(test_case_factory::get_output_charset()
                          ? translated
-                         : verbatim)
+                         : verbatim),
+	modifier_(m)
     {
     }
 
@@ -70,6 +79,7 @@ namespace crpcut {
                  bool        result,
                  bool        critical)
     {
+      modifier_.write_to(*this, violation_mods[result][critical]);
       did_output_ = false;
       write(rlabel[result].str, rlabel[result].len, conversion_type_);
       write(critical ? "!" : "?");
@@ -82,6 +92,7 @@ namespace crpcut {
     text_formatter
     ::end_case()
     {
+      modifier_.write_to(*this, text_modifier::NORMAL);
       write(barrier, conversion_type_);
     }
 
@@ -141,10 +152,13 @@ namespace crpcut {
 
     void
     text_formatter
-    ::display_tag_list_header(char *buffer, int len)
+    ::display_tag_list_header()
     {
-      stream::oastream os(buffer, buffer + len);
-      os << " " << std::setw(tag_list::longest_name_len()) << "tag"
+      std::ostringstream os;
+      os << " "
+	 << std::setw(tag_list::longest_name_len())
+	 << std::setiosflags(std::ios::left) << "tag"
+	 << std::resetiosflags(std::ios::left)
 	 << std::setw(8) << "run"
 	 << std::setw(8) << "passed"
 	 << std::setw(8) << "failed"
@@ -166,8 +180,6 @@ namespace crpcut {
       if (tag_results.size() > 0)
         {
 	  bool header_displayed = false;
-          const int len = tag_list::longest_name_len() + 3*8 + 3;
-          char *buffer = static_cast<char*>(alloca(len));
           while (!tag_results.empty())
             {
               tag_result &t = tag_results.back();
@@ -175,18 +187,22 @@ namespace crpcut {
                 {
 		  if (!header_displayed)
 		    {
-		      display_tag_list_header(buffer, len);
+		      display_tag_list_header();
 		      header_displayed = true;
 		    }
-                  stream::oastream os(buffer, buffer + len);
+		  std::ostringstream os;
+		  const bool result = t.failed == 0;
+		  modifier_.write_to(os,
+				     violation_mods[result][t.critical]);
                   os << (t.critical ? '!' : '?')
                      << std::setw(tag_list::longest_name_len())
                      << std::setiosflags(std::ios::left) << t.name
                      << std::resetiosflags(std::ios::left)
                      << std::setw(8) << t.passed + t.failed
                      << std::setw(8) << t.passed
-                     << std::setw(8) << t.failed
-                     << '\n';
+                     << std::setw(8) << t.failed;
+		  modifier_.write_to(os, text_modifier::NORMAL);
+		  os << '\n';
                   write(os, conversion_type_);
                 }
               sum_passed[t.critical] += t.passed;
@@ -196,25 +212,38 @@ namespace crpcut {
 
         }
       write("\nTotal    :     Sum   Critical   Non-critical");
-      char b[]="                                              ";
       {
-        stream::oastream os(b);
-        os << "\nPASSED   :" << std::setw(8) << num_run - num_failed
-           << std::setw(11) << (num_run - num_failed - sum_passed[0])
-           << std::setw(15) << sum_passed[0];
+        std::ostringstream os;
+        os << "\n";
+	modifier_.write_to(os, text_modifier::PASSED_SUM);
+	os << "PASSED   :" << std::setw(8) << num_run - num_failed
+           << std::setw(11) << (num_run - num_failed - sum_passed[0]);
+	modifier_.write_to(os, text_modifier::NORMAL);
+	modifier_.write_to(os, text_modifier::NCPASSED_SUM);
+	os << std::setw(15) << sum_passed[0];
+	modifier_.write_to(os, text_modifier::NORMAL);
         write(os);
       }
-      {
-        stream::oastream os(b);
-        os << "\nFAILED   :" << std::setw(8) << num_failed
-           << std::setw(11) << num_failed - sum_failed[0]
-           << std::setw(15) << sum_failed[0];
-        write(os);
-      }
+      if (num_failed)
+	{
+	  std::ostringstream os;
+	  os << "\n";
+	  modifier_.write_to(os, text_modifier::FAILED_SUM);
+	  os << "FAILED   :" << std::setw(8) << num_failed
+	     << std::setw(11) << num_failed - sum_failed[0];
+	  modifier_.write_to(os, text_modifier::NORMAL);
+	  modifier_.write_to(os, text_modifier::NCFAILED_SUM);
+	  os << std::setw(15) << sum_failed[0];
+	  modifier_.write_to(os, text_modifier::NORMAL);
+	  write(os);
+	}
       if (num_selected != num_run)
         {
-          stream::oastream os(b);
-          os << "\nUNTESTED :" << std::setw(8) << num_selected - num_run;
+	  std::ostringstream os;
+          os << "\n";
+	  modifier_.write_to(os, text_modifier::BLOCKED_SUM);
+	  os << "UNTESTED :" << std::setw(8) << num_selected - num_run;
+	  modifier_.write_to(os, text_modifier::NORMAL);
           write(os);
         }
       write("\n", conversion_type_);
@@ -239,10 +268,12 @@ namespace crpcut {
                 conversion_type_);
           blocked_tests_ = true;
         }
-      const std::size_t len = i->crpcut_full_name_len() + 1;
-      char * name = static_cast<char*>(alloca(len));
-      stream::oastream os(name, name+len+2);
-      os << "  " << *i << '\n';
+      std::ostringstream os;
+      os << "  ";
+      modifier_.write_to(os, text_modifier::BLOCKED);
+      os << *i;
+      modifier_.write_to(os, text_modifier::NORMAL);
+      os << '\n';
       write(os, conversion_type_);
     }
 
@@ -259,5 +290,12 @@ namespace crpcut {
                                        critical));
     }
 
+    const text_modifier&
+    text_formatter
+    ::default_text_modifier()
+    {
+      static const text_modifier obj;
+      return obj;
+    }
   }
 }
