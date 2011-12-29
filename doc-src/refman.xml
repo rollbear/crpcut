@@ -3476,16 +3476,16 @@ FAILED_SUM=\E[41m\E[37m\E[1m
 '
     </screen>
     </para><para>
-    This uses the reset sequence <constant>\0x1b[0m</constant> as the reset
+    This uses the reset sequence <constant>\x1b[0m</constant> as the reset
     value. Blocked tests are printed purple both in the list and the summary.
     Passed tests (both critical and non-critical) are coloured green using
     the escape sequence <constant>\x1b[32m</constant>.
     ailed critical tests are coloured red using the escape sequence
-    <constant>\0x1b[31m</constant>, since there is a definition for
+    <constant>\x1b[31m</constant>, since there is a definition for
     failed non-critital tests using <constant>\x1b[33m</constant> for yellow.
     In the summary, the line with failed tests are printed with white bold on
     red background using the espace sequence
-    <constant>\1b[41m\1b[37m\1b[1m</constant>
+    <constant>\x1b[41m\x1b[37m\x1b[1m</constant>
     if there are any failed critical tests, otherwise yellow is used.
     </para>
 
