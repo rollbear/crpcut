@@ -585,7 +585,7 @@
       </question>
       <answer>
         <para><link linkend="tags">Tags</link> are your friends here.
-        Define a tags for each new feature or user-story you are working on, and
+        Define a tag for each new feature or user-story you are working on, and
         use it for each new test. Then run your &crpcut; test program with that
         tag as non-critical. That way you can easily see what is expected
         non-critical failures, and regressions.</para>
