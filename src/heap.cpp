@@ -173,21 +173,21 @@ namespace crpcut
           {
             void **bt = static_cast<void**>(stack_addr);
             char **alloc_stack = backtrace_symbols.call<char**>(bt, size);
-	    bool started = false;
+            bool started = false;
             for (size_t i = 1; i < size; ++i)
               {
-		const char *frame = alloc_stack[i];
-		const char *in_libcrpcut = wrapped::strstr(frame,
-							   "libcrpcut.so");
-		if (!started && !in_libcrpcut)
-		  {
-		    started = true;
-		    msg << '\n' << alloc_stack[i-1];
-		  }
-		if (started && in_libcrpcut) break;
-		if (started) {
-		  msg << '\n' << alloc_stack[i];
-		}
+                const char *frame = alloc_stack[i];
+                const char *in_libcrpcut = wrapped::strstr(frame,
+                                                           "libcrpcut.so");
+                if (!started && !in_libcrpcut)
+                  {
+                    started = true;
+                    msg << '\n' << alloc_stack[i-1];
+                  }
+                if (started && in_libcrpcut) break;
+                if (started) {
+                  msg << '\n' << alloc_stack[i];
+                }
               }
             free(alloc_stack);
           }
