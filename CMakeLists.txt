@@ -176,9 +176,9 @@ endif (USE_BACKTRACE)
 # check for clock_gettime()
 
 if (DEFINED EXTRA_LIBS)
-  set(EXTRA_LIBS "${EXTRA_LIBS} -l${CMAKE_DL_LIBS}")
+  set(EXTRA_LIBS "${EXTRA_LIBS} -l${CMAKE_DL_LIBS} -lpthread")
 else()
-  set(EXTRA_LIBS "-l${CMAKE_DL_LIBS}")
+  set(EXTRA_LIBS "-l${CMAKE_DL_LIBS} -lpthread")
 endif()
 
 check_function_exists("clock_gettime()" HAVE_CLOCK_GETTIME)
@@ -721,7 +721,7 @@ if (WITH_HTML_DOCS)
       ${SS}/symtable-test2.cpp            ${SO}/symtable-test2.out
       ${SS}/tag-example.cpp               ${SO}/tag-example-list.out
                                           ${SO}/tag-example.out
-					  ${SO}/tag-example-select.out
+                                          ${SO}/tag-example-select.out
       ${SS}/suite-example.cpp             ${SO}/suite-example.out
       ${SS}/string-template-fix.cpp       ${SO}/string-template-fix.out
       ${SS}/regex-simple.cpp              ${SO}/regex-simple.out

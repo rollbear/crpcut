@@ -30,17 +30,17 @@
 #include "fixed_string.hpp"
 #include "posix_encapsulation.hpp"
 #include <iosfwd>
-#define DECORATORS(x)				\
-  x(NORMAL),					\
-    x(PASSED),					\
-    x(FAILED),					\
-    x(NCFAILED),				\
-    x(NCPASSED),				\
-    x(BLOCKED),					\
-    x(PASSED_SUM),				\
-    x(FAILED_SUM),				\
-    x(NCPASSED_SUM),				\
-    x(NCFAILED_SUM),				\
+#define DECORATORS(x)                           \
+  x(NORMAL),                                    \
+    x(PASSED),                                  \
+    x(FAILED),                                  \
+    x(NCFAILED),                                \
+    x(NCPASSED),                                \
+    x(BLOCKED),                                 \
+    x(PASSED_SUM),                              \
+    x(FAILED_SUM),                              \
+    x(NCPASSED_SUM),                            \
+    x(NCFAILED_SUM),                            \
     x(BLOCKED_SUM)
 
 
@@ -49,13 +49,13 @@
 namespace crpcut {
   namespace output {
     class formatter;
-    
+
     class text_modifier {
     public:
       class illegal_decoration_format ;
       typedef enum { DECORATORS(VERBATIM), END_OF_LIST } decorator;
       text_modifier(const char *rules =
-		    wrapped::getenv("CRPCUT_TEXT_DECORATION"));
+                    wrapped::getenv("CRPCUT_TEXT_DECORATION"));
       void write_to(formatter& output, decorator m) const;
       void write_to(std::ostream& output, decorator m) const;
     private:

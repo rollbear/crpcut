@@ -48,20 +48,20 @@ namespace {
   {
     while (b != e)
       {
-	b->str = 0;
-	b->len = 0;
-	++b;
+        b->str = 0;
+        b->len = 0;
+        ++b;
       }
   }
 
   template <typename err>
   crpcut::fixed_string get_substr(const char *&p, char separator,
-				  const std::string &msg)
+                                  const std::string &msg)
   {
     const char *e = crpcut::wrapped::strchr(p, separator);
     if (!e)
       {
-	throw err(msg);
+        throw err(msg);
       }
     crpcut::fixed_string rv = { p, e - p };
     p = e + 1;
@@ -69,14 +69,14 @@ namespace {
   }
 
   template <typename err, size_t N>
-  int get_decorator(crpcut::fixed_string s, 
-		   const crpcut::fixed_string (&array)[N])
+  int get_decorator(crpcut::fixed_string s,
+                   const crpcut::fixed_string (&array)[N])
   {
     for (const crpcut::fixed_string *i = begin(array);
-	 i != end(array);
-	 ++i)
+         i != end(array);
+         ++i)
       {
-	if (*i == s) return i - begin(array);
+        if (*i == s) return i - begin(array);
       }
     throw err(std::string(s.str, s.len) + " is not a decorator");
   }
@@ -100,23 +100,23 @@ namespace crpcut {
 
       typedef illegal_decoration_format err;
       if (*rules)
-	{
-	  decorators[NORMAL]
-	    = get_substr<err>(rules, separator,
-			      "Missing separator after default decorator");
-	  
-	}
+        {
+          decorators[NORMAL]
+            = get_substr<err>(rules, separator,
+                              "Missing separator after default decorator");
+
+        }
       while (*rules)
-	{
-	  fixed_string name = get_substr<err>(rules, '=',
-					      "Missing = after name");
-	  std::string msg = "Missing separator after value for "
-	    + std::string(name.str, name.len);
-	  fixed_string value = get_substr<err>(rules, separator,
-					       msg);
-	  int idx = get_decorator<err>(name, decorator_names);
-	  decorators[idx] = value;
-	}
+        {
+          fixed_string name = get_substr<err>(rules, '=',
+                                              "Missing = after name");
+          std::string msg = "Missing separator after value for "
+            + std::string(name.str, name.len);
+          fixed_string value = get_substr<err>(rules, separator,
+                                               msg);
+          int idx = get_decorator<err>(name, decorator_names);
+          decorators[idx] = value;
+        }
       init_decorator(NCFAILED,     FAILED);
       init_decorator(NCPASSED,     PASSED);
       init_decorator(NCPASSED_SUM, NCPASSED);
@@ -132,7 +132,7 @@ namespace crpcut {
     {
       assert(m < END_OF_LIST);
       if (!decorators[m]) return;
-      
+
       output.do_write(decorators[m].str, decorators[m].len);
     }
 
@@ -142,7 +142,7 @@ namespace crpcut {
     {
       assert(m < END_OF_LIST);
       if (!decorators[m]) return;
-      
+
       os.write(decorators[m].str, decorators[m].len);
     }
 
@@ -151,9 +151,9 @@ namespace crpcut {
     ::init_decorator(decorator dest, decorator src)
     {
       if (!decorators[dest])
-	{
-	  decorators[dest] = decorators[src];
-	}
+        {
+          decorators[dest] = decorators[src];
+        }
     }
   }
 }

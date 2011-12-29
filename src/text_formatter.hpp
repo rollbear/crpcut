@@ -47,7 +47,7 @@ namespace crpcut {
       std::vector<tag_result> tag_results;
     public:
       text_formatter(const char *, int, const char**,
-		     const text_modifier& = default_text_modifier());
+                     const text_modifier& = default_text_modifier());
       virtual void begin_case(const char *name,
                               std::size_t name_len,
                               bool        result,

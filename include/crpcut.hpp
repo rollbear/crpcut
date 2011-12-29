@@ -3803,8 +3803,8 @@ extern crpcut::namespace_info crpcut_current_namespace;
         public virtual test_case_name::crpcut_expected_death_cause,     \
         private virtual test_case_name::crpcut_dependency,              \
         public virtual crpcut_testsuite_dep,                            \
-        public test_case_name::crpcut_constructor_timeout_enforcer,	\
-        public test_case_name::crpcut_destructor_timeout_enforcer	\
+        public test_case_name::crpcut_constructor_timeout_enforcer,     \
+        public test_case_name::crpcut_destructor_timeout_enforcer       \
     {                                                                   \
        typedef crpcut::crpcut_test_case_registrator     \
          crpcut_registrator_base;                                       \

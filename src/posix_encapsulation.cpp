@@ -90,17 +90,17 @@ namespace crpcut {
     void dlloader::init(const char *const *lib)
     {
       static const int flags[] = {
-	RTLD_NOW | RTLD_NOLOAD,
-	RTLD_NOW
+        RTLD_NOW | RTLD_NOLOAD,
+        RTLD_NOW
       };
-      
+
       for (const int *pf = begin(flags); pf != end(flags); ++pf)
-	{
-	  for (const char * const *name = lib; *name; ++name)
-	    {
-	      libp = ::dlopen(*name, *pf);
-	      if (libp) return;
-	    }
+        {
+          for (const char * const *name = lib; *name; ++name)
+            {
+              libp = ::dlopen(*name, *pf);
+              if (libp) return;
+            }
         }
     }
     void *dlloader::symbol(const char *name) const
@@ -241,7 +241,7 @@ namespace crpcut {
                      (s1, s2, n))
     CRPCUT_WRAP_FUNC(libc, strchr, char *, (const char *s, int c), (s, c))
     CRPCUT_WRAP_FUNC(libc, strstr, char *, (const char *h, const char *n),
-		     (h, n))
+                     (h, n))
     CRPCUT_WRAP_FUNC(libc, time, time_t, (time_t *p), (p))
     CRPCUT_WRAP_FUNC(libc, waitid,
                      int,

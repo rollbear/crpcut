@@ -84,7 +84,7 @@ namespace crpcut {
       const std::string &s = os.str();
       return write(s.c_str(), s.length(), t);
     }
-    
+
     size_t
     formatter
     ::write(const char *str, std::size_t len, type t) const
@@ -116,7 +116,7 @@ namespace crpcut {
 
     }
 
-    
+
     std::size_t
     formatter
     ::do_write(const char *p, std::size_t len) const

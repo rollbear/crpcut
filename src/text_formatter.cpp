@@ -68,7 +68,7 @@ namespace crpcut {
         conversion_type_(test_case_factory::get_output_charset()
                          ? translated
                          : verbatim),
-	modifier_(m)
+        modifier_(m)
     {
     }
 
@@ -156,13 +156,13 @@ namespace crpcut {
     {
       std::ostringstream os;
       os << " "
-	 << std::setw(tag_list::longest_name_len())
-	 << std::setiosflags(std::ios::left) << "tag"
-	 << std::resetiosflags(std::ios::left)
-	 << std::setw(8) << "run"
-	 << std::setw(8) << "passed"
-	 << std::setw(8) << "failed"
-	 << '\n';
+         << std::setw(tag_list::longest_name_len())
+         << std::setiosflags(std::ios::left) << "tag"
+         << std::resetiosflags(std::ios::left)
+         << std::setw(8) << "run"
+         << std::setw(8) << "passed"
+         << std::setw(8) << "failed"
+         << '\n';
       write(os, conversion_type_);
     }
 
@@ -179,21 +179,21 @@ namespace crpcut {
       std::size_t sum_failed[] = { 0, 0 };
       if (tag_results.size() > 0)
         {
-	  bool header_displayed = false;
+          bool header_displayed = false;
           while (!tag_results.empty())
             {
               tag_result &t = tag_results.back();
               if (!t.name.empty())
                 {
-		  if (!header_displayed)
-		    {
-		      display_tag_list_header();
-		      header_displayed = true;
-		    }
-		  std::ostringstream os;
-		  const bool result = t.failed == 0;
-		  modifier_.write_to(os,
-				     violation_mods[result][t.critical]);
+                  if (!header_displayed)
+                    {
+                      display_tag_list_header();
+                      header_displayed = true;
+                    }
+                  std::ostringstream os;
+                  const bool result = t.failed == 0;
+                  modifier_.write_to(os,
+                                     violation_mods[result][t.critical]);
                   os << (t.critical ? '!' : '?')
                      << std::setw(tag_list::longest_name_len())
                      << std::setiosflags(std::ios::left) << t.name
@@ -201,8 +201,8 @@ namespace crpcut {
                      << std::setw(8) << t.passed + t.failed
                      << std::setw(8) << t.passed
                      << std::setw(8) << t.failed;
-		  modifier_.write_to(os, text_modifier::NORMAL);
-		  os << '\n';
+                  modifier_.write_to(os, text_modifier::NORMAL);
+                  os << '\n';
                   write(os, conversion_type_);
                 }
               sum_passed[t.critical] += t.passed;
@@ -215,35 +215,38 @@ namespace crpcut {
       {
         std::ostringstream os;
         os << "\n";
-	modifier_.write_to(os, text_modifier::PASSED_SUM);
-	os << "PASSED   :" << std::setw(8) << num_run - num_failed
+        modifier_.write_to(os, text_modifier::PASSED_SUM);
+        os << "PASSED   :" << std::setw(8) << num_run - num_failed
            << std::setw(11) << (num_run - num_failed - sum_passed[0]);
-	modifier_.write_to(os, text_modifier::NORMAL);
-	modifier_.write_to(os, text_modifier::NCPASSED_SUM);
-	os << std::setw(15) << sum_passed[0];
-	modifier_.write_to(os, text_modifier::NORMAL);
+        modifier_.write_to(os, text_modifier::NORMAL);
+        modifier_.write_to(os, text_modifier::NCPASSED_SUM);
+        os << std::setw(15) << sum_passed[0];
+        modifier_.write_to(os, text_modifier::NORMAL);
         write(os);
       }
       if (num_failed)
-	{
-	  std::ostringstream os;
-	  os << "\n";
-	  modifier_.write_to(os, text_modifier::FAILED_SUM);
-	  os << "FAILED   :" << std::setw(8) << num_failed
-	     << std::setw(11) << num_failed - sum_failed[0];
-	  modifier_.write_to(os, text_modifier::NORMAL);
-	  modifier_.write_to(os, text_modifier::NCFAILED_SUM);
-	  os << std::setw(15) << sum_failed[0];
-	  modifier_.write_to(os, text_modifier::NORMAL);
-	  write(os);
-	}
+        {
+          std::ostringstream os;
+          os << "\n";
+          modifier_.write_to(os,
+                             sum_failed[0] == num_failed
+                             ? text_modifier::NCFAILED_SUM
+                             : text_modifier::FAILED_SUM);
+          os << "FAILED   :" << std::setw(8) << num_failed
+             << std::setw(11) << num_failed - sum_failed[0];
+          modifier_.write_to(os, text_modifier::NORMAL);
+          modifier_.write_to(os, text_modifier::NCFAILED_SUM);
+          os << std::setw(15) << sum_failed[0];
+          modifier_.write_to(os, text_modifier::NORMAL);
+          write(os);
+        }
       if (num_selected != num_run)
         {
-	  std::ostringstream os;
+          std::ostringstream os;
           os << "\n";
-	  modifier_.write_to(os, text_modifier::BLOCKED_SUM);
-	  os << "UNTESTED :" << std::setw(8) << num_selected - num_run;
-	  modifier_.write_to(os, text_modifier::NORMAL);
+          modifier_.write_to(os, text_modifier::BLOCKED_SUM);
+          os << "UNTESTED :" << std::setw(8) << num_selected - num_run;
+          modifier_.write_to(os, text_modifier::NORMAL);
           write(os);
         }
       write("\n", conversion_type_);

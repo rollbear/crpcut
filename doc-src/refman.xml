@@ -3366,7 +3366,7 @@ int main(int argc, char *argv[])
         <programlisting language="c++">
 <xi:include href="../stripped-src/report_example.cpp" parse="text"/>
         </programlisting>
-        <section>
+        <section id="human_readable">
           <title>Human readable output</title>
           <para>
             The example program shows all types of information in its end report
@@ -3381,7 +3381,7 @@ int main(int argc, char *argv[])
 
           </para>
         </section>
-        <section>
+        <section id="XML">
           <title>XML output</title>
           <para>The same example program shows the XML formatted result shown
           below when run with the command line flags
@@ -3425,6 +3425,71 @@ int main(int argc, char *argv[])
       </note>
     </para>
   </section>
+</chapter>
+<chapter id="environment_variables">
+  <title>Environment variables</title>
+  <simplesect id="CRPCUT_TEXT_DECORATION">
+    <title>CRPCUT_TEXT_DECORATION</title>
+    <para>
+      This environment controls decorations in
+      <link linkend="human_readable">human readable</link> test reports (i.e.
+      non <link linkend="XML">XML</link> reports.) It is typically used for
+      colourizing the output, but is not specialized for it.
+    </para>
+    <para>Syntax:
+    <screen>
+      CRPCUT_TEXT_DECORATION = SEPARATOR VALUE DECORATORLIST SEPARATOR
+      SEPARATOR = char
+      VALUE = [^SEPARATOR]+
+      DECORATORLIST =
+                    |  DECORATORDEF SEPARATOR DECORATORLIST
+      DECORATORDEF  =  DECORATORNAME '=' VALUE
+      DECORATORNAME = 'PASSED'
+                    | 'FAILED'
+                    | 'NCPASSED'      /* defaults to same as PASSED */
+                    | 'NCFAILED'      /* defaults to same as FAILED */
+                    | 'BLOCKED'
+                    | 'PASSED_SUM'    /* defaults to same as PASSED */
+                    | 'FAILED_SUM'    /* defaults to same as FAILED */
+                    | 'NCPASSED_SUM'  /* defaults to same as NCPASSED */
+                    | 'NCFAILED_SUM'  /* defaults to same as NCFAILED */
+                    | 'BLOCKED_SUM'   /* defaults to same as BLOCKED */
+    </screen>
+    </para>
+    <para>
+    <constant>SEPARATOR</constant> can be any character that is not ever used in
+    any value, and is repeated between each decorator definition.
+    </para>
+    <para>The first value is the reset value, a string printed at the end of
+    every section.
+    </para>
+    <para>An example using ANSI-escapes in
+    <ulink url='http://www.gnu.org/software/bash/'>bash</ulink>-syntax:
+    <screen>
+      export CRPCUT_TEXT_DECORATION=$'
+\E[0m
+BLOCKED=\E[35m
+PASSED=\E[32m
+FAILED=\E[31m
+NCFAILED=\E[33m
+FAILED_SUM=\E[41m\E[37m\E[1m
+'
+    </screen>
+    </para><para>
+    This uses the reset sequence <constant>\0x1b[0m</constant> as the reset
+    value. Blocked tests are printed purple both in the list and the summary.
+    Passed tests (both critical and non-critical) are coloured green using
+    the escape sequence <constant>\x1b[32m</constant>.
+    ailed critical tests are coloured red using the escape sequence
+    <constant>\0x1b[31m</constant>, since there is a definition for
+    failed non-critital tests using <constant>\x1b[33m</constant> for yellow.
+    In the summary, the line with failed tests are printed with white bold on
+    red background using the espace sequence
+    <constant>\1b[41m\1b[37m\1b[1m</constant>
+    if there are any failed critical tests, otherwise yellow is used.
+    </para>
+
+  </simplesect>
 </chapter>
 <appendix id="license">
   <title>LICENSE</title>

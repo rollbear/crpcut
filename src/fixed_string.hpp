@@ -46,9 +46,9 @@ namespace crpcut {
       if (len != s.len) return false;
       if (str == s.str) return true;
       for (int i = 0; i < len; ++i)
-	{
-	  if (str[i] != s.str[i]) return false;
-	}
+        {
+          if (str[i] != s.str[i]) return false;
+        }
       return true;
     }
     bool operator!=(const fixed_string &s) const
