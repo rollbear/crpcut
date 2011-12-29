@@ -1,3 +1,13 @@
+         * Made a real fix for the librt dependency problem patched in
+           1.4.1. This means a slight difference in behaviour if you
+           use the CRPCUT_WRAP_FUNC or CRPCUT_WRAP_V_FUNC. The difference
+           is that now the functions will load a library if needed to
+           find the symbols, whereas it earlier only looked into what was
+           already loaded. This may also point to slightly more false
+           leaks reported by valgrind.
+
+           See http://bugs.kde.org/show_bug.cgi?id=233298
+
          * Reduced stack-trace for heap violations to only include the
            frames from the heap function back to the test function.
 

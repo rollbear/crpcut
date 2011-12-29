@@ -113,7 +113,7 @@ namespace crpcut
 
 
 
-    local_root *local_root::current_root;
+    local_root *local_root::current_root = 0;
 
     static mem_list_element *raw_alloc_mem(size_t s) throw ();
 
@@ -231,16 +231,6 @@ namespace crpcut
       }
 
     }
-
-    local_root::local_root()
-      : file_(0),
-        line_(0),
-        old_root_(0),
-        check_type_(comm::exit_fail)
-    {
-      next = prev = this;
-    }
-
     local_root::local_root(comm::type t, const char *file, size_t line)
       : file_(file),
         line_(line),
@@ -267,7 +257,7 @@ namespace crpcut
     local_root::~local_root()
     {
       valgrind_make_mem_defined(this, sizeof(mem_list_element));
-      if (!old_root_)
+      if (old_root_)
         {
           mem_list_element *n = next;
           mem_list_element *p = prev;
@@ -277,7 +267,6 @@ namespace crpcut
           p->next = p;
           valgrind_make_mem_noaccess(n, sizeof(mem_list_element));
           valgrind_make_mem_noaccess(p, sizeof(mem_list_element));
-          return;
         }
       current_root = old_root_;
       if (file_) assert_empty();
@@ -285,13 +274,6 @@ namespace crpcut
     }
     local_root* local_root::current()
     {
-      static bool first = true;
-      if (first)
-        {
-          static local_root obj;
-          current_root = &obj;
-          first = false;
-        }
       return current_root;
     }
 

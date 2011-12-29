@@ -41,6 +41,19 @@ extern "C"
 #include <stdarg.h>
 }
 
+namespace {
+  template <typename T, std::size_t N>
+  inline T* begin(T (&array)[N])
+  {
+    return array;
+  }
+
+  template <typename T, std::size_t N>
+  inline T* end(T (&array)[N])
+  {
+    return array + N;
+  }
+}
 namespace crpcut {
   namespace libs {
     const char * const * libc()
@@ -76,10 +89,18 @@ namespace crpcut {
     }
     void dlloader::init(const char *const *lib)
     {
-      for (const char * const *name = lib; *name; ++name)
-        {
-          libp = ::dlopen(*name, RTLD_NOW | RTLD_NOLOAD);
-          if (libp) break;
+      static const int flags[] = {
+	RTLD_NOW | RTLD_NOLOAD,
+	RTLD_NOW
+      };
+      
+      for (const int *pf = begin(flags); pf != end(flags); ++pf)
+	{
+	  for (const char * const *name = lib; *name; ++name)
+	    {
+	      libp = ::dlopen(*name, *pf);
+	      if (libp) return;
+	    }
         }
     }
     void *dlloader::symbol(const char *name) const
