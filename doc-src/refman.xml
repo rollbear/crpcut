@@ -3431,13 +3431,14 @@ int main(int argc, char *argv[])
   <simplesect id="CRPCUT_TEXT_DECORATION">
     <title>CRPCUT_TEXT_DECORATION</title>
     <para>
-      This environment controls decorations in
+      This environment variable controls decorations in
       <link linkend="human_readable">human readable</link> test reports (i.e.
       non <link linkend="XML">XML</link> reports.) It is typically used for
       colourizing the output, but is not specialized for it.
     </para>
     <para>Syntax:
     <screen>
+
       CRPCUT_TEXT_DECORATION = SEPARATOR VALUE DECORATORLIST SEPARATOR
       SEPARATOR = char
       VALUE = [^SEPARATOR]+
@@ -3446,18 +3447,18 @@ int main(int argc, char *argv[])
       DECORATORDEF  =  DECORATORNAME '=' VALUE
       DECORATORNAME = 'PASSED'
                     | 'FAILED'
-                    | 'NCPASSED'      /* defaults to same as PASSED */
-                    | 'NCFAILED'      /* defaults to same as FAILED */
+                    | 'NCPASSED'      /* defaults to same as PASSED   */
+                    | 'NCFAILED'      /* defaults to same as FAILED   */
                     | 'BLOCKED'
-                    | 'PASSED_SUM'    /* defaults to same as PASSED */
-                    | 'FAILED_SUM'    /* defaults to same as FAILED */
+                    | 'PASSED_SUM'    /* defaults to same as PASSED   */
+                    | 'FAILED_SUM'    /* defaults to same as FAILED   */
                     | 'NCPASSED_SUM'  /* defaults to same as NCPASSED */
                     | 'NCFAILED_SUM'  /* defaults to same as NCFAILED */
-                    | 'BLOCKED_SUM'   /* defaults to same as BLOCKED */
+                    | 'BLOCKED_SUM'   /* defaults to same as BLOCKED  */
     </screen>
     </para>
     <para>
-    <constant>SEPARATOR</constant> can be any character that is not ever used in
+    <constant>SEPARATOR</constant> can be any character that is not used in
     any value, and is repeated between each decorator definition.
     </para>
     <para>The first value is the reset value, a string printed at the end of
@@ -3466,27 +3467,29 @@ int main(int argc, char *argv[])
     <para>An example using ANSI-escapes in
     <ulink url='http://www.gnu.org/software/bash/'>bash</ulink>-syntax:
     <screen>
-      export CRPCUT_TEXT_DECORATION=$'
-\E[0m
-BLOCKED=\E[35m
-PASSED=\E[32m
-FAILED=\E[31m
-NCFAILED=\E[33m
-FAILED_SUM=\E[41m\E[37m\E[1m
-'
+
+      $> export CRPCUT_TEXT_DECORATION=$'
+      \E[0m
+      BLOCKED=\E[35m
+      PASSED=\E[32m
+      FAILED=\E[31m
+      NCFAILED=\E[33m
+      FAILED_SUM=\E[41m\E[37m\E[1m
+      '
     </screen>
     </para><para>
     This uses the reset sequence <constant>\x1b[0m</constant> as the reset
     value. Blocked tests are printed purple both in the list and the summary.
     Passed tests (both critical and non-critical) are coloured green using
     the escape sequence <constant>\x1b[32m</constant>.
-    ailed critical tests are coloured red using the escape sequence
-    <constant>\x1b[31m</constant>, since there is a definition for
-    failed non-critital tests using <constant>\x1b[33m</constant> for yellow.
+    Failed critical tests are coloured red using the escape sequence
+    <constant>\x1b[31m</constant>, and non-critital tests are printed in
+    yellow with the <constant>\x1b[33m</constant>.
     In the summary, the line with failed tests are printed with white bold on
     red background using the espace sequence
     <constant>\x1b[41m\x1b[37m\x1b[1m</constant>
-    if there are any failed critical tests, otherwise yellow is used.
+    if there are any failed critical tests, otherwise yellow is used (as defined
+    for failed non-critical tests.)
     </para>
 
   </simplesect>
