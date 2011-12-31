@@ -182,12 +182,16 @@
           variadic macros and <symbol>decltype</symbol>?</para>
       </question>
       <answer>
-        <para>Most compilers today already support the functionality, so
-          it isn't too outrageous. The advantage gained in ease of writing
-          test cases far outweighs the disadvantage.</para>
+        <para>Correction, they are standardized in <ulink
+        url="http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=50372">ISO/IEC 14882:2011</ulink>.</para>
+        <para>While few, if any, compilers supports the standard in full, most
+        compilers today supports the functionality required for &crpcut;, and
+        has done so for years, so it isn't too outrageous. The advantage gained
+        in ease of writing test cases far outweighs the disadvantage of not
+        working with a select few old compilers.</para>
         <note>It is only the test code itself that must be
-          compiled with support for the non-standard functionality. The
-          units under test do not.
+        compiled with support for the new standard functionality. The
+        units under test do not.
         </note>
       </answer>
     </qandaentry>
