@@ -297,8 +297,8 @@
           <itemizedlist>
             <listitem><ulink url="http://www.gentoo.org">gentoo</ulink> x86</listitem>
             <listitem><ulink url="http://www.gentoo.org">gentoo</ulink> amd64</listitem>
-            <listitem><ulink url="http://www.ubuntu.com">Ubuntu</ulink> Linux 10.10 (maverick meerkat) and 11.04 (natty narwahl) x86</listitem>
-            <listitem><ulink url="http://www.ubuntu.com">Ubuntu</ulink> Linux 10.10 (maverick meerkat) and 11.04 (natty narwahl) x86-64</listitem>
+            <listitem><ulink url="http://www.ubuntu.com">Ubuntu</ulink> Linux 11.10 (oneiric ocelot) and 11.04 (natty narwahl) x86</listitem>
+            <listitem><ulink url="http://www.ubuntu.com">Ubuntu</ulink> Linux 11.10 (oneiric ocelot) and 11.04 (natty narwahl) x86-64</listitem>
           </itemizedlist>
         </para>
       </answer>
