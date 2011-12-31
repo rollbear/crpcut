@@ -472,11 +472,11 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
 <xi:include href="../sample-output/tag-example.out" parse="text"/>
 </screen>
       </para>
-      <para>The questionmark in <constant>FAILED?</constant> indicates that
+      <para>The question mark in <constant>FAILED?</constant> indicates that
       the test that failed is non-critical.</para>
       <para>Likewise, in the list of tags with passed/failed statistics for
       each, every line begins with an exclamation mark for critical tests,
-      or a questionmark for non-critical tests.
+      or a question mark for non-critical tests.
       </para>
       <para>Tags can also be used to select which tests to run, and can be
       combined with name matching. Running the same program again with
@@ -806,7 +806,7 @@ macro.
   </chapter>
   <chapter id="heap-management">
     <title>Heap Management</title>
-    <para>Finding memory leaks can be tricky, and testing behavior under
+    <para>Finding memory leaks can be tricky, and testing behaviour under
       out of memory situations even trickier still. With &crpcut; both
       are easy, since &crpcut; provides simple access to query and limit
       the heap.
@@ -964,12 +964,12 @@ macro.
 </programlisting>
     </para>
     <para>In this case, simple stubs are used to provide preprogrammed
-      behavior, and fall back to the normal library function when nothing
+      behaviour, and fall back to the normal library function when nothing
       preprogrammed exists.</para>
     <para>The test program is a bit long, but take some time to read
       it through. For each wrapped library function, there is a
       configuration in the shape of a list. If the list is
-      empty, the normal function applies, otherwise the behavior mandated
+      empty, the normal function applies, otherwise the behaviour mandated
       by the list-item is carried out. <function>pipe</function>()
       calls the library function, unless explicitly instructed to fail,
       but stores the allocated file descriptors for later use.
@@ -978,7 +978,7 @@ macro.
       they are verified to be in valid state.</para>
     <caution>
       Your versions of the library functions are in effect for all tests
-      in the entire program. Make sure they have a decent default behavior
+      in the entire program. Make sure they have a decent default behaviour
       to save yourself from debugging headaches.
     </caution>
     <para>A short walk-through of the tests:
@@ -1012,7 +1012,7 @@ macro.
             <para>The complex one, where all library function wrappers
               are strictly controlled. <function>fork</function>() will
               return a <type>pid</type>, thus testing the parent process
-              behavior.</para>
+              behaviour.</para>
             <para>
               The <function>pipe</function>() wrapper lets the calls
               to the library function through, but it stores the

@@ -2546,11 +2546,11 @@
               <parameter>tested_string</parameter> to upper case, in the
               locale, before collation order comparison.</para></listitem>
         </varlistentry>
-        <varlistentry><term><type>crccut::verbatim</type></term>
+        <varlistentry><term><type>crpcut::verbatim</type></term>
           <listitem><para>Do not translate
               <parameter>reference_string</parameter> nor
               <parameter>tested_string</parameter> before collation order
-              comparison. This is the behavior of the non-templated
+              comparison. This is the behaviour of the non-templated
               version of <type>crpcut::</type><function>collate</function>()
           </para></listitem>
         </varlistentry>
@@ -2579,8 +2579,8 @@
         See <xref linkend="TEST" xrefstyle="select:title"/>.</para>
     </formalpara>
     <para><type>crpcut::</type><function>get_parameter()</function> exists
-      in three flavors.
-      <variablelist><title>Flavor</title>
+      in three flavours.
+      <variablelist><title>Flavour</title>
         <varlistentry><term><type>const char *</type><type>crpcut::</type><function>get_parameter</function>(<type>const char *</type><parameter>name</parameter>)</term>
           <listitem>
             <para>Returns the raw C-string value of the parameter, or
@@ -2888,7 +2888,7 @@
 
 <xi:include href="../sample-output/iso8859_1_code.out" parse="text"/>
       </screen>
-      which gives the character sequence a different appearence.
+      which gives the character sequence a different appearance.
     </para>
   </section>
 
@@ -2989,7 +2989,7 @@ int main(int argc, char *argv[])
     <para>Template parameter to
       <xref linkend="collate" xrefstyle="select:title"/>, making
       the collation without any conversion of the strings. This
-      is the default used by the untemplated
+      is the default used by the non-templated
       <xref linkend="collate" xrefstyle="select:title"/>.
     </para>
   </section>
@@ -3343,7 +3343,7 @@ int main(int argc, char *argv[])
         </varlistentry>
         <varlistentry><term><constant>post_mortem</constant></term>
           <listitem>The test failure was detected by the main process
-            after the test process had completed sucessfully</listitem>
+            after the test process had completed successfully</listitem>
         </varlistentry>
         <varlistentry><term><constant>child</constant></term>
           <listitem>The test has spawned a child process, which has

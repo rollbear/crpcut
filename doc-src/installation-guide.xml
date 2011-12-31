@@ -250,7 +250,7 @@
   </simplesect>
   <simplesect><title>Debug compiled lib</title>
     <para>Compiling &crpcut; with debugging enabled may make it easier
-      to debug your tests, or analyze core dumps, since the tests are
+      to debug your tests, or analyse core dumps, since the tests are
       started from &crpcut;</para>
     <para>To enable debug builds, add the command line parameter
       <constant>-DCMAKE_BUILD_TYPE</constant>="debug" to the CMake
