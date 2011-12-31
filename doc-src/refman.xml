@@ -15,7 +15,7 @@
   <title>Macros</title>
   <section id="ALL_TESTS">
     <title><function>ALL_TESTS(testsuitename)</function></title>
-    <para>Dependency accessor for a whole testsuite.</para>
+    <para>Dependency access for a whole testsuite.</para>
     <formalpara><title>Used in:</title>
       <para>a <xref linkend="DEPENDS_ON" xrefstyle="select:title"/>
         modifier for either a <xref linkend="TEST" xrefstyle="select:title"/>
@@ -710,7 +710,7 @@
 <xi:include href="../sample-output/describe_exception.out" parse="text"/>
       </screen>
       The first exception type does not have a custom describer, but since it
-      inherits from <type>std::exception</type>, sime information is shown
+      inherits from <type>std::exception</type>, some information is shown
       anyway.
       The second exception matches the signature used for the custom
       describer, and thus the message looks as expected.
@@ -1119,7 +1119,7 @@
       <para>The modifier list of a test.
         See <xref linkend="TEST" xrefstyle="select:title"/></para>
     </formalpara>
-    <para><variablelist><title>Parametes</title>
+    <para><variablelist><title>Parameters</title>
     <varlistentry><term><parameter>num</parameter></term>
     <listitem>
       the exit code required to pass the test, or
@@ -1622,7 +1622,7 @@
         <varlistentry>
           <term><xref linkend="EXPECT_REALTIME_TIMEOUT_MS" xrefstyle="select:title"/></term>
           <listitem>
-            <para>Channge the success expectation such that the duration of
+            <para>Change the success expectation such that the duration of
             the test must meet or exceed a minimum amount of time in order to
             pass.</para>
           </listitem>
