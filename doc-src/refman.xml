@@ -3474,7 +3474,9 @@ int main(int argc, char *argv[])
       PASSED=\E[32m
       FAILED=\E[31m
       NCFAILED=\E[33m
+      PASSED_SUM=\E[42m\E[37m\E[1m
       FAILED_SUM=\E[41m\E[37m\E[1m
+      BLOCKED_SUM=\E[45m\E[37m\E[1m
       '
     </screen>
     </para><para>
@@ -3491,14 +3493,18 @@ int main(int argc, char *argv[])
     if there are any failed critical tests, otherwise yellow is used (as defined
     for failed non-critical tests.)
     </para>
-
+    <para>An example test report has, with possible differences in colour
+    representation, the following appearence:
+    <screen>
+<?dbhtml-include href="../sample-output/coloured-test-report.out"?></screen>
+    </para>
   </simplesect>
 </chapter>
 <appendix id="license">
   <title>LICENSE</title>
   <screen>
 
- Copyright 2009-2011 Bjorn Fahller &lt;bjorn@fahller.se&gt;
+ Copyright 2009-2012 Bjorn Fahller &lt;bjorn@fahller.se&gt;
  All rights reserved
 
  Redistribution and use in source and binary forms, with or without

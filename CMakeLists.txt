@@ -1,4 +1,4 @@
-#  Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+#  Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
 #  All rights reserved
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions
@@ -497,6 +497,13 @@ if (WITH_HTML_DOCS)
     sample_code(assert_eq_fails COMPILE_OPT "-ggdb")
     sample_output(assert_eq_fails)
 
+    add_custom_target(
+      coloured-test-report.out
+      ${DOC_SRC_LIB}/colourize-output ../test/report_example --verbose --tags=/another_tag  > coloured-test-report.out
+      DEPENDS ${DOC_SRC_LIB}/colourize-output sample-output report_example
+      WORKING_DIRECTORY sample-output
+      VERBATIM)
+
     file(GLOB DEBUG_CMD "${DOC_SRC_LIB}/samples/debug_cmd")
     add_custom_target(
       debug_assert_eq_fails.out
@@ -712,6 +719,7 @@ if (WITH_HTML_DOCS)
       ${SS}/test_tag.cpp                  ${SO}/test_tag.out
       ${SS}/report_example.cpp            ${SO}/report_example_human.out
                                           ${SO}/report_example_xml.out
+                                          ${SO}/coloured-test-report.out
       ${SS}/ilist_element.hpp
       ${SS}/itest.cpp                     ${SO}/itest.out
       ${SS}/simple-depend.cpp             ${SO}/simple-depend.out

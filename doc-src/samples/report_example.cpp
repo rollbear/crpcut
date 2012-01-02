@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ struct A
 {
   A() {}
   ~A() { abort(); }
+  int func() const { return 3; }
   void do_something() const {}
 };
 
@@ -45,6 +46,10 @@ TESTSUITE(basics)
     INFO << "created an A, addr=" << p;
   }
 
+  TEST(call_func, A, DEPENDS_ON(construct), WITH_TEST_TAG(a_tag))
+  {
+    ASSERT_TRUE(func() == 1);
+  }
   TEST(destroy, A, DEPENDS_ON(construct), WITH_TEST_TAG(another_tag))
   {
     INFO << "running test body";
