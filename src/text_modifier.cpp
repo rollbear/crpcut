@@ -119,10 +119,10 @@ namespace crpcut {
         }
       init_decorator(NCFAILED,     FAILED);
       init_decorator(NCPASSED,     PASSED);
-      init_decorator(NCPASSED_SUM, NCPASSED);
-      init_decorator(NCFAILED_SUM, NCFAILED);
       init_decorator(PASSED_SUM,   PASSED);
       init_decorator(FAILED_SUM,   FAILED);
+      init_decorator(NCPASSED_SUM, PASSED_SUM);
+      init_decorator(NCFAILED_SUM, FAILED_SUM);
       init_decorator(BLOCKED_SUM,  BLOCKED);
     }
 
