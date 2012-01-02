@@ -504,6 +504,13 @@ if (WITH_HTML_DOCS)
       WORKING_DIRECTORY sample-output
       VERBATIM)
 
+    add_custom_target(
+      COPYING
+      sed "s/^/    /1" < ${CMAKE_SOURCE_DIR}/COPYING > COPYING
+      DEPENDS sample-output ${CMAKE_SOURCE_DIR}/COPYING
+      WORKING_DIRECTORY sample-output
+      VERBATIM)
+
     file(GLOB DEBUG_CMD "${DOC_SRC_LIB}/samples/debug_cmd")
     add_custom_target(
       debug_assert_eq_fails.out
@@ -749,6 +756,7 @@ if (WITH_HTML_DOCS)
       ${SS}/template-pred.cpp             ${SO}/template-pred.out
       ${SS}/gmock-example.cpp             ${SO}/gmock-example.out
       can_dump_core
+                                          ${SO}/COPYING
       ${DOC_SOURCES} ${DOC_SRC_LIB}/crpcut-doc.css crpcut.xsl
       WORKING_DIRECTORY html)
 
