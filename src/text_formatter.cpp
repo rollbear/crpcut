@@ -212,17 +212,18 @@ namespace crpcut {
 
         }
       write("\nTotal    :     Sum   Critical   Non-critical");
-      {
-        std::ostringstream os;
-        os << "\n";
-        modifier_.write_to(os, text_modifier::PASSED_SUM);
-        os << "PASSED   :" << std::setw(8) << num_run - num_failed
-           << std::setw(11) << (num_run - num_failed - sum_passed[0]);
-        modifier_.write_to(os, text_modifier::NORMAL);
-        modifier_.write_to(os, text_modifier::NCPASSED_SUM);
-        os << std::setw(15) << sum_passed[0];
-        modifier_.write_to(os, text_modifier::NORMAL);
-        write(os);
+      if (num_run != num_failed)
+        {
+          std::ostringstream os;
+          os << "\n";
+          modifier_.write_to(os, sum_passed[1]
+                             ? text_modifier::PASSED_SUM
+                             : text_modifier::NCPASSED_SUM);
+          os << "PASSED   :" << std::setw(8) << num_run - num_failed
+             << std::setw(11) << (num_run - num_failed - sum_passed[0]);
+          os << std::setw(15) << sum_passed[0];
+          modifier_.write_to(os, text_modifier::NORMAL);
+          write(os);
       }
       if (num_failed)
         {
@@ -234,8 +235,6 @@ namespace crpcut {
                              : text_modifier::FAILED_SUM);
           os << "FAILED   :" << std::setw(8) << num_failed
              << std::setw(11) << num_failed - sum_failed[0];
-          modifier_.write_to(os, text_modifier::NORMAL);
-          modifier_.write_to(os, text_modifier::NCFAILED_SUM);
           os << std::setw(15) << sum_failed[0];
           modifier_.write_to(os, text_modifier::NORMAL);
           write(os);
