@@ -3462,7 +3462,70 @@ int main(int argc, char *argv[])
     any value, and is repeated between each decorator definition.
     </para>
     <para>The first value is the reset value, a string printed at the end of
-    every section.
+    every section. The other value are:
+    <variablelist>
+      <varlistentry>
+        <term><constant>FAILED</constant></term>
+        <listitem>Printed at the beginning of the result from a failed
+        test. This is also used for tags in the tag-list which have failed
+        tests.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>NCFAILED</constant></term>
+        <listitem>Printed at the beginning of the result from a non-critical
+        test that has failed. This is also used for non-critical tags in the
+        tag-list which have failed tests. Defaults to the same as
+        <constant>FAILED</constant> if not specified.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>PASSED</constant></term>
+        <listitem>Printed at the beginning of the result from a passed
+        test. This is also used for tags in the tag-list for which all tests
+        have passed.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>NCPASSED</constant></term>
+        <listitem>Printed at the beginning of the result from a non-critical
+        test that has passed. This is also used for non-critical tags in the
+        tag-list for which all tests have passed. Defaults to the same as
+        <constant>PASSED</constant> ifnot specified.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>BLOCKED</constant></term>
+        <listitem>Printed at the beginning of each test name the list of
+        blocked tests.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>FAILED_SUM</constant></term>
+        <listitem>Printed at the beginning of the FAILED line of the report
+        summary, if there are failed tests. Defaults to the same as
+        <constant>FAILED</constant> if not specified.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>NCFAILED_SUM</constant></term>
+        <listitem>Printed at the beginning of the FAILED line of the report
+        summary if all failed tests are non-critical. Defaults to the same as
+        <constant>FAILED_SUM</constant> if not specified.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>PASSED_SUM</constant></term>
+        <listitem>Printed at the beginning of the PASSED line of the report
+        summary if there are tests that have passed. Defaults to the same as
+      <constant>PASSED</constant> if not specified.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>NCPASSED_SUM</constant></term>
+        <listitem>Printed at the beginning of the PASSED line of the reprort
+        summary if all tests that passed are non-critical. Defaults to the same
+        as <constant>PASSED_SUM</constant> if not specified.</listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>BLOCKED_SUM</constant></term>
+        <listitem>Printed at the beginning of the BLOCKED line in the
+        report summary, if there any blocked tests. Defaults to the same as
+        <constant>BLOCKED</constant> if not specified.</listitem>
+      </varlistentry>
+    </variablelist>
     </para>
     <para>An example using ANSI-escapes in
     <ulink url='http://www.gnu.org/software/bash/'>bash</ulink>-syntax:
@@ -3481,17 +3544,14 @@ int main(int argc, char *argv[])
     </screen>
     </para><para>
     This uses the reset sequence <constant>\x1b[0m</constant> as the reset
-    value. Blocked tests are printed purple both in the list and the summary.
+    value. Blocked tests are printed purple.
     Passed tests (both critical and non-critical) are coloured green using
     the escape sequence <constant>\x1b[32m</constant>.
     Failed critical tests are coloured red using the escape sequence
     <constant>\x1b[31m</constant>, and non-critital tests are printed in
     yellow with the <constant>\x1b[33m</constant>.
-    In the summary, the line with failed tests are printed with white bold on
-    red background using the espace sequence
-    <constant>\x1b[41m\x1b[37m\x1b[1m</constant>
-    if there are any failed critical tests, otherwise yellow is used (as defined
-    for failed non-critical tests.)
+    In the summary, all lines use the corresponding colours, but printed
+    inverse with bold white text.
     </para>
     <para>An example test report has, with possible differences in colour
     representation, the following appearence:
