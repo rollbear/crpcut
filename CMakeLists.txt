@@ -481,7 +481,7 @@ if (WITH_HTML_DOCS)
       endif()
       add_custom_target(
         "${OUTNAME}"
-        ${program} ${PARAMS} | c++filt -t | sed ${FILTER} > "${OUTNAME}"
+        ${DOC_SRC_LIB}/nondecorated ../test/${program} ${PARAMS} | c++filt -t | sed ${FILTER} > "${OUTNAME}"
         DEPENDS sample-output ${program}
         WORKING_DIRECTORY sample-output
         VERBATIM)
@@ -632,7 +632,7 @@ if (WITH_HTML_DOCS)
     target_link_libraries(suite_depend crpcut ${EXTRA_LIBS})
     add_custom_target(
       suite_depend.out
-      suite_depend | sed "s/\\(.*\\)/     \\1/g" > suite_depend.out
+      ${DOC_SRC_LIB}/nondecorated ../test/suite_depend | sed "s/\\(.*\\)/     \\1/g" > suite_depend.out
       DEPENDS suite_depend sample-output
       WORKING_DIRECTORY sample-output
       VERBATIM)
