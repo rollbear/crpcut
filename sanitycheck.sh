@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+#  Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
 #  All rights reserved
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions
@@ -70,7 +70,7 @@ tests=(
     "-n -c 8"                  "run=$RN failed=$F blocked=0 nodeps=1"
     "-n -c 8 -v"               "run=$RN failed=$F blocked=0 nodeps=1 verbose=1"
     )
-echo "sanity check takes just over one minute to complete"
+echo "sanity check takes some time - be patient"
 n=0
 echo apa > apafil
 while [ $n -lt ${#tests[*]} ]

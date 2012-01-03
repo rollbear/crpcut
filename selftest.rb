@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-#  Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+#  Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
 #  All rights reserved
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions
@@ -1756,7 +1756,7 @@ if ulimit != "unlimited" && ulimit.to_i == 0  then
   puts "> ulimit -c 100000"
   exit 1
 end
-puts "Self test takes approx 20 seconds to complete"
+puts "Self test takes a while - be patient"
 RUNS.each do | names, verbosity, blocking, slowliness, specials |
   flag=''
   post=''
