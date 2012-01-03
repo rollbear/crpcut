@@ -3431,12 +3431,12 @@ int main(int argc, char *argv[])
   <simplesect id="CRPCUT_TEXT_DECORATION">
     <title>CRPCUT_TEXT_DECORATION</title>
     <para>
-      This environment variable controls decorations in
-      <link linkend="human_readable">human readable</link> test reports (i.e.
-      non <link linkend="XML">XML</link> reports.) It is typically used for
-      colourizing the output, but is not specialized for it.
+      This environment variable controls experimental support for decorations
+      in <link linkend="human_readable">human readable</link> test reports
+      (i.e. non <link linkend="XML">XML</link> reports.) It is typically used
+      for colourizing the output, but is not specialized for it.
     </para>
-    <para>Syntax:
+    <para>The syntax (subject to change) is:
     <screen>
 
       CRPCUT_TEXT_DECORATION = SEPARATOR VALUE DECORATORLIST SEPARATOR
