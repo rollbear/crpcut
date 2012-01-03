@@ -1,6 +1,6 @@
          * Added experimental support for colouring the human-
            readable test reports. The exact format (and name) of the
-           environment varibale CRPCUT_TEST_DECORATION may change.
+           environment varibale CRPCUT_TEXT_DECORATION may change.
 
            See the chapter "Environment variables" in the reference-
            manual for details.
@@ -14,6 +14,9 @@
            leaks reported by valgrind.
 
            See http://bugs.kde.org/show_bug.cgi?id=233298
+
+           It is now recommended to build test programs with the
+           -pthreads flag to gcc/clang/icc.
 
          * Reduced stack-trace for heap violations to only include the
            frames from the heap function back to the test function.
