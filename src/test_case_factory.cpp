@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -599,476 +599,479 @@ namespace crpcut {
     const char  *identity          = 0;
     const char **p                 = argv+1;
 
-    while (const char *param = *p)
-      {
-        if (param[0] != '-') break;
+    try {
 
-        const char *value = *(p+1);
-        char       cmd    = param[1];
-        unsigned   pcount = 2;
+      while (const char *param = *p)
+        {
+          if (param[0] != '-') break;
 
-        if (cmd == '-')
-          {
-            pcount = 1;
-            param += 2;
-            value = nullindex(param, '=');
-            size_t len = size_t(value - param);
-            if (*value)
-              {
-                ++value;
-              }
-            else
-              {
-                value = 0;
-              }
-            if (wrapped::strncmp("output-charset", param, len) == 0)
-              {
-                cmd = 'C';
-              }
-            else if (wrapped::strncmp("list", param, len) == 0)
-              {
-                cmd = 'l';
-              }
-            else if (wrapped::strncmp("list-tags", param, len) == 0)
-              {
-                cmd = 'L';
-              }
-            else if (wrapped::strncmp("tags", param, len) == 0)
-              {
-                cmd = 'T';
-              }
-            else if (wrapped::strncmp("illegal-char", param, len) == 0)
-              {
-                cmd = 'I';
-              }
-            else if (wrapped::strncmp("identity", param, len) == 0)
-              {
-                cmd = 'i';
-              }
-            else if (wrapped::strncmp("disable-timeouts", param, len) == 0)
-              {
-                cmd = 't';
-              }
-            else if (wrapped::strncmp("verbose", param, len) == 0)
-              {
-                cmd = 'v';
-              }
-            else if (wrapped::strncmp("children", param, len) == 0)
-              {
-                cmd = 'c';
-              }
-            else if (wrapped::strncmp("xml", param, len) == 0)
-              {
-                cmd = 'x';
-              }
-            else if (wrapped::strncmp("nodeps", param, len) == 0)
-              {
-                cmd = 'n';
-              }
-            else if (wrapped::strncmp("quiet", param, len) == 0)
-              {
-                cmd = 'q';
-              }
-            else if (wrapped::strncmp("output", param, len) == 0)
-              {
-                cmd = 'o';
-              }
-            else if (wrapped::strncmp("single-shot", param, len) == 0)
-              {
-                cmd = 's';
-              }
-            else if (wrapped::strncmp("working-dir", param, len) == 0)
-              {
-                cmd = 'd';
-              }
-            else if (wrapped::strncmp("param", param, len) == 0)
-              {
-                cmd = 'p';
-              }
-#ifdef USE_BACKTRACE
-            else if (wrapped::strncmp("backtrace-heap", param, len) == 0)
-              {
-                cmd = 'b';
-              }
-#endif // USE_BACKTRACE
-          }
-        switch (cmd) {
-        case 'q':
-          quiet = true;
-          pcount = 1;
-          break;
-        case 'i':
-          if (!value)
-            {
-              err_os << "-i must be followed by a string\n";
-              return -1;
-            }
-          if (identity)
-            {
-              err_os << "-i may only be used once\n";
-              return -1;
-            }
-          identity = value;
-          break;
-        case 'o':
-          if (!value)
-            {
-              err_os << "-o must be followed by a filename\n";
-              return -1;
-            }
-          output_fd = wrapped::open(value, O_CREAT | O_WRONLY | O_TRUNC, 0666);
-          if (output_fd < 0)
-            {
-              err_os << "Failed to open " << value << " for writing\n";
-              return -1;
-            }
-          xml = !xml;
-          break;
-        case 'v':
-          verbose_mode = true;
-          pcount = 1;
-          break;
-        case 'c':
-          if (process_limit_set)
-            {
-              err_os <<
-                "The number of child processes is already limited with the -"
-                     << process_limit_set << "flag\n";
-              return -1;
-            }
-          if (value)
-            {
-              stream::iastream i(value);
-              unsigned l;
-              if ((i >> l) && l <= max_parallel && l > 0)
-                {
-                  num_parallel = l;
-                  process_limit_set = 'c';
-                  pcount = 2;
-                  break;
-                }
-            }
-          err_os <<
-            "num child processes must be a positive integer no greater than "
-                 << max_parallel
-                 << "\n";
-          return -1;
-        case 's':
-          if (process_limit_set)
-            {
-              err_os <<
-                "The number of child processes is already limited with the -"
-                     << process_limit_set << "flag\n";
-              return -1;
-            }
-          pcount = 1;
-          num_parallel = 0;
-          nodeps = true;
-          enable_timeouts = false;
-          process_limit_set = 's';
-          break;
-        case 'L':
-          {
-            for (tag_list::iterator i = tag_list::begin();
-                 i != tag_list::end();
-                 ++i)
-              {
-                std::cout << i->get_name() << "\n";
-              }
-            return 0;
-          }
-        case 'T':
-          {
-            tag_filter filter(value);
+          const char *value = *(p+1);
+          char       cmd    = param[1];
+          unsigned   pcount = 2;
 
-            // tag_list::end refers to the defaulted nameless tag which
-            // we want to include in this loop, hence the odd appearence
-            tag_list::iterator ti = tag_list::begin();
-            tag_list::iterator end = tag_list::end();
-            do
-              {
-                tag::importance i = filter.lookup(ti->get_name());
-                ti->set_importance(i);
-              } while(ti++ != end);
-            break;
-          }
-        case 'l':
-          {
-            const char **names = ++p;
-            if (*names && **names == '-')
-              {
-                err_os <<
-                  "-l must be followed by a (possibly empty) test case list\n";
-                return -1;
-              }
-            int longest_tag_len = tag_list::longest_name_len();
-            if (longest_tag_len > 0)
-              {
-                std::cout
-                  << ' ' << std::setw(longest_tag_len) << "tag"
-                  << " : test-name\n="
-                  << std::setfill('=') << std::setw(longest_tag_len) << "==="
-                  << "============\n" << std::setfill(' ');
-              }
-            for (crpcut_test_case_registrator *i
-                   = reg.crpcut_get_next();
-                 i != &reg;
-                 i = i->crpcut_get_next())
-              {
-                tag &test_tag = i->crpcut_tag();
-                tag::importance importance = test_tag.get_importance();
-                if (importance == tag::ignored) continue;
-                const char prefix = importance == tag::critical ? '!' : '?';
-                bool matched = !*names;
-                for (const char **name = names; !matched && *name; ++name)
-                  {
-                    matched = i->crpcut_match_name(*name);
-                  }
-                if (matched)
-                  {
-                    std::cout << prefix;
-                    if (longest_tag_len > 0)
-                      {
-                        std::cout
-                          << std::setw(longest_tag_len)
-                          << i->crpcut_tag().get_name() << " : ";
-                      }
-                    std::cout << *i << '\n';
-                  }
-              }
-            return 0;
-          }
-        case 'd':
-          working_dir = value;
-          if (!working_dir)
+          if (cmd == '-')
             {
-              err_os << "-d must be followed by a directory name\n";
-              return -1;
-            }
-          lib::strcpy(dirbase, working_dir);
-          break;
-        case 'n':
-          nodeps = true;
-          pcount = 1;
-          break;
-        case 't':
-          enable_timeouts = false;
-          pcount = 1;
-          break;
-        case 'x':
-          if (value && value[0] != '-')
-            {
-              if (wrapped::strcmp(value, "yes") == 0 ||
-                  wrapped::strcmp(value, "Yes") == 0 ||
-                  wrapped::strcmp(value, "YES") == 0)
+              pcount = 1;
+              param += 2;
+              value = nullindex(param, '=');
+              size_t len = size_t(value - param);
+              if (*value)
                 {
-                  xml = true;
-                }
-              else if (wrapped::strcmp(value, "no") == 0 ||
-                       wrapped::strcmp(value, "No") == 0 ||
-                       wrapped::strcmp(value, "NO") == 0)
-                {
-                  xml = false;
+                  ++value;
                 }
               else
                 {
-                  err_os << "expected boolean value for --xml\n";
-                  return -1;
+                  value = 0;
                 }
-            }
-          else
-            {
-              pcount = 1;
-              xml = !xml;
-            }
-
-          break;
-        case 'p':
-          // just make a syntax check here. What follows must be a name=value.
-          {
-            const char *n = nullindex(value, '=');
-            if (*n == 0)
-              {
-                err_os << "-p must be followed by a name and =\n";
-                return -1;
-              }
-            break;
-          }
+              if (wrapped::strncmp("output-charset", param, len) == 0)
+                {
+                  cmd = 'C';
+                }
+              else if (wrapped::strncmp("list", param, len) == 0)
+                {
+                  cmd = 'l';
+                }
+              else if (wrapped::strncmp("list-tags", param, len) == 0)
+                {
+                  cmd = 'L';
+                }
+              else if (wrapped::strncmp("tags", param, len) == 0)
+                {
+                  cmd = 'T';
+                }
+              else if (wrapped::strncmp("illegal-char", param, len) == 0)
+                {
+                  cmd = 'I';
+                }
+              else if (wrapped::strncmp("identity", param, len) == 0)
+                {
+                  cmd = 'i';
+                }
+              else if (wrapped::strncmp("disable-timeouts", param, len) == 0)
+                {
+                  cmd = 't';
+                }
+              else if (wrapped::strncmp("verbose", param, len) == 0)
+                {
+                  cmd = 'v';
+                }
+              else if (wrapped::strncmp("children", param, len) == 0)
+                {
+                  cmd = 'c';
+                }
+              else if (wrapped::strncmp("xml", param, len) == 0)
+                {
+                  cmd = 'x';
+                }
+              else if (wrapped::strncmp("nodeps", param, len) == 0)
+                {
+                  cmd = 'n';
+                }
+              else if (wrapped::strncmp("quiet", param, len) == 0)
+                {
+                  cmd = 'q';
+                }
+              else if (wrapped::strncmp("output", param, len) == 0)
+                {
+                  cmd = 'o';
+                }
+              else if (wrapped::strncmp("single-shot", param, len) == 0)
+                {
+                  cmd = 's';
+                }
+              else if (wrapped::strncmp("working-dir", param, len) == 0)
+                {
+                  cmd = 'd';
+                }
+              else if (wrapped::strncmp("param", param, len) == 0)
+                {
+                  cmd = 'p';
+                }
 #ifdef USE_BACKTRACE
-        case 'b':
-          {
-            backtrace_enabled = true;
+              else if (wrapped::strncmp("backtrace-heap", param, len) == 0)
+                {
+                  cmd = 'b';
+                }
+#endif // USE_BACKTRACE
+            }
+          switch (cmd) {
+          case 'q':
+            quiet = true;
             pcount = 1;
             break;
-          }
-#endif // USE_BACKTRACE
-        case 'C':
-          {
-            output_charset = value;
-            break;
-          }
-        case 'I':
-          {
-            illegal_rep = value;
-            break;
-          }
-        case 'V':
-          {
-            err_os <<
-              "crpcut-" << CRPCUT_VERSION_STRING << "\n";
-            return -1;
-          }
-        default:
-          err_os <<
-            "Usage: " << argv[0] << " [flags] {testcases}\n"
-            "  where flags can be:\n"
-#ifdef USE_BACKTRACE
-            "   -b, --backtrace-heap\n"
-            "        store stack backtrace for all heap objects for\n"
-            "        better error pinpointing of heap violations (slow)\n\n"
-#endif // USE_BACKTRACE
-            "   -c number, --children=number\n"
-            "        control number of concurrently running test processes\n"
-            "        number must be >= 1 and <= "
-                      << max_parallel << "\n\n"
-            "   -C charset, --output-charset=charset\n"
-            "        specify the output character set to convert text-output\n"
-            "        to. Does not apply for XML-output\n\n"
-            "   -d dir, --working-dir=dir\n"
-            "        specify working directory (must exist)\n\n"
-            "   -i \"id string\", --identity=\"id string\"\n"
-            "        specify an identity string for the XML-header\n\n"
-            "   -I string, --illegal-char=string\n"
-            "        specify how characters that are illegal for the chosen\n"
-            "        output character set are to be represented\n\n"
-            "   -l, --list\n"
-            "        list test cases\n\n"
-            "   -L, --list-tags\n"
-            "        list all tags used by tests in the test program\n\n"
-            "   -n, --nodeps\n"
-            "        ignore dependencies\n\n"
-            "   -o file, --output=file\n"
-            "        direct XML output to named file. A brief summary will be\n"
-            "        displayed on stdout\n\n"
-            "   -p name=val, --param=name=val\n"
-            "        define a named variable for the test cases to pick up\n\n"
-            "   -q, --quiet\n"
-            "        don't display the -o brief summary\n\n"
-            "   -s, --single-shot\n"
-            "        run only one test case, and run it in the main process\n\n"
-            "   -t, --disable-timeouts\n"
-            "        never fail a test due to time consumption\n\n"
-            "   -T {select}{/non-critical}, --tags={select}{/non-critical}\n"
-            "        Select tests to run based on their tag, and which\n"
-            "        tags represent non-critical tests. Both \"select\"\n"
-            "        and \"non-critical\" are comma separated lists of tags.\n"
-            "        Both lists can be empty. If a list begin with \"-\",\n"
-            "        the list is subtractive from the full set.\n"
-            "        Untagged tests cannot be made non-critical.\n\n"
-            "   -v, --verbose\n"
-            "        verbose mode, print result from passed tests\n\n"
-            "   -V, --version\n"
-            "        print version string and exit\n\n"
-            "   -x, --xml\n"
-            "        XML output on std-out or non-XML output on file\n";
-
-          return -1;
-        }
-        p += pcount;
-      }
-
-    if (output_charset && xml)
-      {
-        err_os <<
-          "-C / --output-charset cannot be used with XML output, since the\n"
-          "output charset is always UTF-8 in crpcut XML reports.\n";
-        return -1;
-      }
-    wrapped::getcwd(homedir, sizeof(homedir));
-    registrator_list tentative;
-    {
-      crpcut_test_case_registrator *i = reg.crpcut_get_next();
-      while (i != &reg)
-        {
-          const tag& test_tag = i->crpcut_tag();
-          crpcut_test_case_registrator *next = i->crpcut_get_next();
-          if (test_tag.get_importance() == tag::ignored)
-            {
-              i->crpcut_uninhibit_dependants();
-              i->crpcut_unlink();
-              i = next;
-              continue;
-            }
-          ++num_registered_tests;
-          if (*p)
-            {
-              i->crpcut_unlink();
-              i->crpcut_link_after(&tentative);
-            }
-          i = next;
-        }
-    }
-    unsigned mismatches = 0;
-    if (*p == 0)
-      {
-        num_selected_tests = num_registered_tests;
-      }
-    else
-      {
-        for (const char **name = p; *name; ++name)
-          {
-            crpcut_test_case_registrator *i = tentative.crpcut_get_next();
-            unsigned matches = 0;
-            while (i != &tentative)
+          case 'i':
+            if (!value)
               {
-                if (i->crpcut_match_name(*name))
+                err_os << "-i must be followed by a string\n";
+                return -1;
+              }
+            if (identity)
+              {
+                err_os << "-i may only be used once\n";
+                return -1;
+              }
+            identity = value;
+            break;
+          case 'o':
+            if (!value)
+              {
+                err_os << "-o must be followed by a filename\n";
+                return -1;
+              }
+            output_fd = wrapped::open(value,
+                                      O_CREAT | O_WRONLY | O_TRUNC,
+                                      0666);
+            if (output_fd < 0)
+              {
+                err_os << "Failed to open " << value << " for writing\n";
+                return -1;
+              }
+            xml = !xml;
+            break;
+          case 'v':
+            verbose_mode = true;
+            pcount = 1;
+            break;
+          case 'c':
+            if (process_limit_set)
+              {
+                err_os <<
+                  "The number of child processes is already limited with the -"
+                       << process_limit_set << "flag\n";
+                return -1;
+              }
+            if (value)
+              {
+                stream::iastream i(value);
+                unsigned l;
+                if ((i >> l) && l <= max_parallel && l > 0)
                   {
-                    ++matches;
-                    ++num_selected_tests;
-                    crpcut_test_case_registrator *next = i->crpcut_unlink();
-                    i->crpcut_link_after(&reg);
-                    i = next;
+                    num_parallel = l;
+                    process_limit_set = 'c';
+                    pcount = 2;
+                    break;
+                  }
+              }
+            err_os <<
+              "num child processes must be a positive integer no greater than "
+                   << max_parallel
+                   << "\n";
+            return -1;
+          case 's':
+            if (process_limit_set)
+              {
+                err_os <<
+                  "The number of child processes is already limited with the -"
+                       << process_limit_set << "flag\n";
+                return -1;
+              }
+            pcount = 1;
+            num_parallel = 0;
+            nodeps = true;
+            enable_timeouts = false;
+            process_limit_set = 's';
+            break;
+          case 'L':
+            {
+              for (tag_list::iterator i = tag_list::begin();
+                   i != tag_list::end();
+                   ++i)
+                {
+                  std::cout << i->get_name() << "\n";
+                }
+              return 0;
+            }
+          case 'T':
+            {
+              tag_filter filter(value);
+              filter.assert_names(tag_list::obj());
+              // tag_list::end refers to the defaulted nameless tag which
+              // we want to include in this loop, hence the odd appearence
+              tag_list::iterator ti = tag_list::begin();
+              tag_list::iterator end = tag_list::end();
+              do
+                {
+                  tag::importance i = filter.lookup(ti->get_name());
+                  ti->set_importance(i);
+                } while(ti++ != end);
+              break;
+            }
+          case 'l':
+            {
+              const char **names = ++p;
+              if (*names && **names == '-')
+                {
+                  err_os <<
+                    "-l must be followed by a (possibly empty) test case list"
+                    "\n";
+                  return -1;
+                }
+              int longest_tag_len = tag_list::longest_name_len();
+              if (longest_tag_len > 0)
+                {
+                  std::cout
+                    << ' ' << std::setw(longest_tag_len) << "tag"
+                    << " : test-name\n="
+                    << std::setfill('=') << std::setw(longest_tag_len) << "==="
+                    << "============\n" << std::setfill(' ');
+                }
+              for (crpcut_test_case_registrator *i
+                     = reg.crpcut_get_next();
+                   i != &reg;
+                   i = i->crpcut_get_next())
+                {
+                  tag &test_tag = i->crpcut_tag();
+                  tag::importance importance = test_tag.get_importance();
+                  if (importance == tag::ignored) continue;
+                  const char prefix = importance == tag::critical ? '!' : '?';
+                  bool matched = !*names;
+                  for (const char **name = names; !matched && *name; ++name)
+                    {
+                      matched = i->crpcut_match_name(*name);
+                    }
+                  if (matched)
+                    {
+                      std::cout << prefix;
+                      if (longest_tag_len > 0)
+                        {
+                          std::cout
+                            << std::setw(longest_tag_len)
+                            << i->crpcut_tag().get_name() << " : ";
+                        }
+                      std::cout << *i << '\n';
+                    }
+                }
+              return 0;
+            }
+          case 'd':
+            working_dir = value;
+            if (!working_dir)
+              {
+                err_os << "-d must be followed by a directory name\n";
+                return -1;
+              }
+            lib::strcpy(dirbase, working_dir);
+            break;
+          case 'n':
+            nodeps = true;
+            pcount = 1;
+            break;
+          case 't':
+            enable_timeouts = false;
+            pcount = 1;
+            break;
+          case 'x':
+            if (value && value[0] != '-')
+              {
+                if (wrapped::strcmp(value, "yes") == 0 ||
+                    wrapped::strcmp(value, "Yes") == 0 ||
+                    wrapped::strcmp(value, "YES") == 0)
+                  {
+                    xml = true;
+                  }
+                else if (wrapped::strcmp(value, "no") == 0 ||
+                         wrapped::strcmp(value, "No") == 0 ||
+                         wrapped::strcmp(value, "NO") == 0)
+                  {
+                    xml = false;
                   }
                 else
                   {
-                    i = i->crpcut_get_next();
+                    err_os << "expected boolean value for --xml\n";
+                    return -1;
                   }
               }
-            if (matches == 0)
+            else
               {
-                if (mismatches++)
-                  {
-                    err_os << ", ";
-                  }
-                err_os << *name;
+                pcount = 1;
+                xml = !xml;
               }
+            break;
+          case 'p':
+            // just make a syntax check here. What follows must be a name=value.
+            {
+              const char *n = nullindex(value, '=');
+              if (*n == 0)
+                {
+                  err_os << "-p must be followed by a name and =\n";
+                  return -1;
+                }
+              break;
+            }
+#ifdef USE_BACKTRACE
+          case 'b':
+            {
+              backtrace_enabled = true;
+              pcount = 1;
+              break;
+            }
+#endif // USE_BACKTRACE
+          case 'C':
+            {
+              output_charset = value;
+              break;
+            }
+          case 'I':
+            {
+              illegal_rep = value;
+              break;
+            }
+          case 'V':
+            {
+              err_os <<
+                "crpcut-" << CRPCUT_VERSION_STRING << "\n";
+              return -1;
+            }
+          default:
+            err_os <<
+              "Usage: " << argv[0] << " [flags] {testcases}\n"
+              "  where flags can be:\n"
+#ifdef USE_BACKTRACE
+              "   -b, --backtrace-heap\n"
+              "        store stack backtrace for all heap objects for\n"
+              "        better error pinpointing of heap violations (slow)\n\n"
+#endif // USE_BACKTRACE
+              "   -c number, --children=number\n"
+              "        control number of concurrently running test processes\n"
+              "        number must be >= 1 and <= "
+                        << max_parallel << "\n\n"
+              "   -C charset, --output-charset=charset\n"
+              "        specify the output character set to convert text-output\n"
+              "        to. Does not apply for XML-output\n\n"
+              "   -d dir, --working-dir=dir\n"
+              "        specify working directory (must exist)\n\n"
+              "   -i \"id string\", --identity=\"id string\"\n"
+              "        specify an identity string for the XML-header\n\n"
+              "   -I string, --illegal-char=string\n"
+              "        specify how characters that are illegal for the chosen\n"
+              "        output character set are to be represented\n\n"
+              "   -l, --list\n"
+              "        list test cases\n\n"
+              "   -L, --list-tags\n"
+              "        list all tags used by tests in the test program\n\n"
+              "   -n, --nodeps\n"
+              "        ignore dependencies\n\n"
+              "   -o file, --output=file\n"
+              "        direct XML output to named file. A brief summary will be\n"
+              "        displayed on stdout\n\n"
+              "   -p name=val, --param=name=val\n"
+              "        define a named variable for the test cases to pick up\n\n"
+              "   -q, --quiet\n"
+              "        don't display the -o brief summary\n\n"
+              "   -s, --single-shot\n"
+              "        run only one test case, and run it in the main process\n\n"
+              "   -t, --disable-timeouts\n"
+              "        never fail a test due to time consumption\n\n"
+              "   -T {select}{/non-critical}, --tags={select}{/non-critical}\n"
+              "        Select tests to run based on their tag, and which\n"
+              "        tags represent non-critical tests. Both \"select\"\n"
+              "        and \"non-critical\" are comma separated lists of tags.\n"
+              "        Both lists can be empty. If a list begin with \"-\",\n"
+              "        the list is subtractive from the full set.\n"
+              "        Untagged tests cannot be made non-critical.\n\n"
+              "   -v, --verbose\n"
+              "        verbose mode, print result from passed tests\n\n"
+              "   -V, --version\n"
+              "        print version string and exit\n\n"
+              "   -x, --xml\n"
+              "        XML output on std-out or non-XML output on file\n";
+
+            return -1;
+          }
+          p += pcount;
+        }
+
+      if (output_charset && xml)
+        {
+          err_os <<
+            "-C / --output-charset cannot be used with XML output, since the\n"
+            "output charset is always UTF-8 in crpcut XML reports.\n";
+          return -1;
+        }
+      wrapped::getcwd(homedir, sizeof(homedir));
+      registrator_list tentative;
+      {
+        crpcut_test_case_registrator *i = reg.crpcut_get_next();
+        while (i != &reg)
+          {
+            const tag& test_tag = i->crpcut_tag();
+            crpcut_test_case_registrator *next = i->crpcut_get_next();
+            if (test_tag.get_importance() == tag::ignored)
+              {
+                i->crpcut_uninhibit_dependants();
+                i->crpcut_unlink();
+                i = next;
+                continue;
+              }
+            ++num_registered_tests;
+            if (*p)
+              {
+                i->crpcut_unlink();
+                i->crpcut_link_after(&tentative);
+              }
+            i = next;
           }
       }
-    if (mismatches)
-      {
-        err_os << (mismatches == 1 ? " does" : " do")
-               << " not match any test names\n";
-        return -1;
-      }
-    if (num_parallel == 0 && num_selected_tests != 1)
-      {
-        err_os << "Single shot requires exactly one test selected\n";
-        return -1;
-      }
-
-    {
-      crpcut_test_case_registrator *i = tentative.crpcut_get_next();
-      while (i != &tentative)
+      unsigned mismatches = 0;
+      if (*p == 0)
         {
-          i->crpcut_uninhibit_dependants();
-          i = i->crpcut_get_next();
+          num_selected_tests = num_registered_tests;
         }
-    }
+      else
+        {
+          for (const char **name = p; *name; ++name)
+            {
+              crpcut_test_case_registrator *i = tentative.crpcut_get_next();
+              unsigned matches = 0;
+              while (i != &tentative)
+                {
+                  if (i->crpcut_match_name(*name))
+                    {
+                      ++matches;
+                      ++num_selected_tests;
+                      crpcut_test_case_registrator *next = i->crpcut_unlink();
+                      i->crpcut_link_after(&reg);
+                      i = next;
+                    }
+                  else
+                    {
+                      i = i->crpcut_get_next();
+                    }
+                }
+              if (matches == 0)
+                {
+                  if (mismatches++)
+                    {
+                      err_os << ", ";
+                    }
+                  err_os << *name;
+                }
+            }
+        }
+      if (mismatches)
+        {
+          err_os << (mismatches == 1 ? " does" : " do")
+                 << " not match any test names\n";
+          return -1;
+        }
+      if (num_parallel == 0 && num_selected_tests != 1)
+        {
+          err_os << "Single shot requires exactly one test selected\n";
+          return -1;
+        }
 
-    std_exception_translator std_except_obj;
-    c_string_translator c_string_obj;
+      {
+        crpcut_test_case_registrator *i = tentative.crpcut_get_next();
+        while (i != &tentative)
+          {
+            i->crpcut_uninhibit_dependants();
+            i = i->crpcut_get_next();
+          }
+      }
 
-    try {
+      std_exception_translator std_except_obj;
+      c_string_translator c_string_obj;
+
       output::formatter &fmt = output_formatter(xml, identity, argc, argv);
 
       if (tests_as_child_procs())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,14 @@
 
 #include <crpcut.hpp>
 
+
 namespace crpcut {
   class tag_filter
   {
   public:
+    class spec_error;
     tag_filter(const char * p = 0);
+    void assert_names(tag_list& l) const;
     tag::importance lookup(const char *name) const;
   private:
     const char *begin_select;
@@ -43,6 +46,14 @@ namespace crpcut {
     bool subtract_select;
     bool subtract_noncritical;
   };
+
+  class tag_filter::spec_error : public std::runtime_error
+  {
+  public:
+    template <typename T>
+    spec_error(T t) : std::runtime_error(t) {}
+  };
+
 }
 
 #endif // TAG_FILTER_HPP

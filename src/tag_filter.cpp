@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,41 @@
 #include "tag_filter.hpp"
 
 namespace {
+
+  void
+  assert_name_list(const char *begin, const char*end, crpcut::tag_list &l)
+  {
+    const char *p = begin;
+    while (p)
+      {
+        if (*p == ',' || p == end)
+          {
+            using crpcut::tag_list;
+            bool found = false;
+            tag_list::iterator e = tag_list::iterator(&l);
+            tag_list::iterator i = e;
+            do 
+              {
+                const char *n = i->get_name();
+                const char *t = begin;
+                while (t != p && *t == *n) { ++t; ++n; }
+                if (t == p && *n == 0) { found = true; break; }
+                ++i;
+              }
+            while (i != e);
+            if (!found)
+              {
+                std::string msg(begin,p);
+                msg+= " is not a tag";
+                throw crpcut::tag_filter::spec_error(msg);
+              }
+            begin = p + 1;
+          }
+        if (p == end) break;
+        ++p;
+      }
+  }
+
   bool match_name(const char *name,
                   const char *begin, const char *end)
   {
@@ -35,7 +70,7 @@ namespace {
       {
         int idx = 0;
         while (i + idx != end && i[idx] != ',' && i[idx] == name[idx]) ++idx;
-        if (i + idx == end || i[idx] == ',') return true;
+        if (name[idx] == 0 && (i + idx == end || i[idx] == ',')) return true;
         while (i != end && *i++ != ',')
           ;
       }
@@ -44,6 +79,7 @@ namespace {
 }
 
 namespace crpcut {
+
   tag_filter
   ::tag_filter(const char * p)
     : begin_select(0),
@@ -91,4 +127,11 @@ namespace crpcut {
     return tag::critical;
   }
 
+  void
+  tag_filter
+  ::assert_names(tag_list &l) const
+  {
+    assert_name_list(begin_select,      end_select,      l);
+    assert_name_list(begin_noncritical, end_noncritical, l);
+  }
 }

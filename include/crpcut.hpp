@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -868,7 +868,8 @@ namespace crpcut {
     crpcut_tag_info();
     virtual const char* get_name() const;
   public:
-    static tag& obj();
+    class crpcut_test_tag;
+    static crpcut_tag_info& obj();
     class iterator
     {
     public:
@@ -893,7 +894,7 @@ namespace crpcut {
   class crpcut_tag_info : public tag
   {
   public:
-    static tag& obj()
+    static crpcut_tag_info& obj()
     {
       static crpcut_tag_info t;
       return t;
