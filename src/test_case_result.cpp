@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@ namespace crpcut {
 
   test_case_result
   ::test_case_result(pid_t pid)
-    :list_elem<test_case_result>(this),
-     id(pid),
+    :id(pid),
      explicit_fail(false),
      success(false),
      nonempty_dir(false),

@@ -90,7 +90,9 @@ file(GLOB LIB_SRCS
      src/xml_formatter.cpp
 )
 include_directories(include)
-
+file(GLOB DOGFOOD_SRCS
+     src/dogfood.cpp
+     src/list_elem_test.cpp)
 
 if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)
@@ -321,6 +323,8 @@ file(GLOB TEST_SRCS
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FEATURE_SELECTION}")
+add_executable(dogfood EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
+target_link_libraries(dogfood crpcut ${EXTRA_LIBS})
 add_executable(testprog EXCLUDE_FROM_ALL ${TEST_SRCS})
 if (GMOCK_LIBS)
   target_link_libraries(testprog crpcut ${GMOCK_LIBS} ${EXTRA_LIBS})

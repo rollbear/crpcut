@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@ namespace crpcut {
   {
   public:
     list_elem();
-    list_elem(T *p);
     virtual ~list_elem();
     void link_after(list_elem& r);
     void link_before(list_elem &r);
@@ -52,13 +51,6 @@ namespace crpcut {
   inline list_elem<T>::list_elem()
     : next_(static_cast<T*>(this)),
       prev_(static_cast<T*>(this))
-  {
-  }
-
-  template <typename T>
-  inline list_elem<T>::list_elem(T *p)
-    : next_(p),
-      prev_(p)
   {
   }
 
