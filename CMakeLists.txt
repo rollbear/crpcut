@@ -92,7 +92,8 @@ file(GLOB LIB_SRCS
 include_directories(include)
 file(GLOB DOGFOOD_SRCS
      src/dogfood.cpp
-     src/list_elem_test.cpp)
+     src/list_elem_test.cpp
+     src/fixed_string_test.cpp)
 
 if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)
