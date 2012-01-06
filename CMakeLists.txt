@@ -39,7 +39,7 @@ set(CRPCUT_LIB_PATCH_VERSION "0")
 #set(CRPCUT_LIB_ALIAS_VERSION "")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "-O")
-set(CMAKE_CXX_FLAGS_MAINT "-ggdb -Wall -Wextra -Wcast-qual -Wconversion -Wshadow -Wunused-parameter -Wwrite-strings -pedantic -Wno-variadic-macros -D_GLIBCXX_DEBUG=1")
+set(CMAKE_CXX_FLAGS_MAINT "-ggdb -Wall -Wextra -Wcast-qual -Wconversion -Wshadow -Wunused-parameter -Wwrite-strings -pedantic -Wno-variadic-macros")
 set(CRPCUT_LIB_VERSION "${CRPCUT_LIB_MAJOR_VERSION}.${CRPCUT_LIB_MINOR_VERSION}.${CRPCUT_LIB_PATCH_VERSION}")
 add_definitions(-DCRPCUT_VERSION_STRING="${CRPCUT_LIB_VERSION}")
 set(CRPCUT_LIB_SOVERSION ${CRPCUT_LIB_MAJOR_VERSION})
@@ -62,7 +62,7 @@ file(GLOB LIB_SRCS
      src/heap.cpp
      src/namespace_info.cpp
      src/output.cpp
-     src/output_buffer.cpp
+     src/output_heap_buffer.cpp
      src/output_formatter.cpp
      src/pipe_pair.cpp
      src/policies.cpp
@@ -96,7 +96,7 @@ file(GLOB DOGFOOD_SRCS
      src/fixed_string_test.cpp
      src/tag_filter_test.cpp,
      src/posix_error_test.cpp,
-     src/output_buffer_test.cpp)
+     src/output_heap_buffer_test.cpp)
 
 if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)

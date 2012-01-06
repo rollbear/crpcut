@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-#include "output_buffer.hpp"
+#include "output_heap_buffer.hpp"
 
 namespace {
   const char data[] = "abcdefghijklmnopqrstuvwxyz12345";
@@ -50,11 +50,11 @@ namespace {
 TESTSUITE(output_buffer)
 {
 
-  using crpcut::output::buffer;
+  using crpcut::output::heap_buffer;
 
   TEST(default_constructed_buffer_is_empty)
   {
-    buffer b;
+    heap_buffer b;
     ASSERT_TRUE(b.is_empty());
     std::pair<const char*, std::size_t> r = b.get_buffer();
     static const char *const zerostr = 0;
@@ -67,7 +67,7 @@ TESTSUITE(output_buffer)
   {
     ASSERT_SCOPE_HEAP_LEAK_FREE
     {
-      buffer b;
+      heap_buffer b;
       fill_buffer(b);
       const char *p = data;
       while (!b.is_empty())
@@ -87,7 +87,7 @@ TESTSUITE(output_buffer)
   {
     ASSERT_SCOPE_HEAP_LEAK_FREE
     {
-      buffer b;
+      heap_buffer b;
       fill_buffer(b);
     }
   }

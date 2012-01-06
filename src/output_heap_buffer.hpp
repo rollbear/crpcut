@@ -24,27 +24,35 @@
  * SUCH DAMAGE.
  */
 
-#ifndef OUTPUT_BUFFER_HPP
-#define OUTPUT_BUFFER_HPP
+#ifndef OUTPUT_HEAP_BUFFER_HPP
+#define OUTPUT_HEAP_BUFFER_HPP
 
-#include <utility>
-extern "C" {
-#  include <sys/types.h>
-}
+#include "output_buffer.hpp"
+
 namespace crpcut {
   namespace output {
-    class buffer
+    class heap_buffer : public buffer
     {
     public:
-      virtual std::pair<const char*, std::size_t> get_buffer() const = 0;
-      virtual void advance() = 0;
-      virtual ssize_t write(const char *buff, std::size_t len) = 0;
-      virtual bool is_empty() const = 0;
+      heap_buffer();
+      ~heap_buffer();
+      virtual std::pair<const char*, std::size_t> get_buffer() const;
+      virtual void advance();
+      virtual ssize_t write(const char *buff, std::size_t len);
+      virtual bool is_empty() const;
     private:
+      heap_buffer(const buffer&);
+      heap_buffer& operator=(const heap_buffer&);
+
+      struct block;
+
+
+      block  *head_;
+      block **current_;
     };
 
 
   }
 }
 
-#endif // OUTPUT_BUFFER_HPP
+#endif // OUTPUT_HEAP_BUFFER_HPP

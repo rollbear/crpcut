@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,13 +24,13 @@
  * SUCH DAMAGE.
  */
 
-#include "output_buffer.hpp"
+#include "output_heap_buffer.hpp"
 #include "posix_encapsulation.hpp"
 
 namespace crpcut {
   namespace output {
 
-    struct buffer::block
+    struct heap_buffer::block
     {
       block() :next_(0), len_(0) {}
       static const std::size_t size = 128;
@@ -40,13 +40,16 @@ namespace crpcut {
       std::size_t  len_;
     };
 
-    buffer::buffer()
+    heap_buffer
+    ::heap_buffer()
       : head_(0),
         current_(&head_)
     {
     }
 
-    ssize_t buffer::write(const char *buff, std::size_t len)
+    ssize_t
+    heap_buffer
+    ::write(const char *buff, std::size_t len)
     {
       if (!*current_)
         {
@@ -64,7 +67,8 @@ namespace crpcut {
       return ssize_t(size);
     }
 
-    buffer::~buffer()
+    heap_buffer
+    ::~heap_buffer()
     {
       while (head_)
         {
@@ -74,7 +78,9 @@ namespace crpcut {
         }
     }
 
-    std::pair<const char *, std::size_t> buffer::get_buffer() const
+    std::pair<const char *, std::size_t>
+    heap_buffer
+    ::get_buffer() const
     {
       static const char *null = 0;
       static const std::size_t zero = 0;
@@ -84,7 +90,9 @@ namespace crpcut {
       return std::make_pair(head_->mem_, head_->len_);
     }
 
-    void buffer::advance()
+    void
+    heap_buffer
+    ::advance()
     {
       if (head_)
         {
@@ -93,6 +101,14 @@ namespace crpcut {
           delete tmp;
         }
       if (!head_) current_ = &head_;
+    }
+
+    inline
+    bool
+    heap_buffer
+    ::is_empty() const
+    {
+      return !head_;
     }
   }
 }

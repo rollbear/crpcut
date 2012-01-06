@@ -32,7 +32,7 @@
 #include "poll_singleton.hpp"
 #include "fsfuncs.hpp"
 #include "pipe_pair.hpp"
-#include "output_buffer.hpp"
+#include "output_heap_buffer.hpp"
 #include <algorithm>
 #include "presentation.hpp"
 #include "xml_formatter.hpp"
@@ -1074,7 +1074,7 @@ namespace crpcut {
       std_exception_translator std_except_obj;
       c_string_translator c_string_obj;
 
-      output::buffer buffer;
+      output::heap_buffer buffer;
       output::formatter &fmt = output_formatter(buffer,
                                                 xml,
                                                 identity,
