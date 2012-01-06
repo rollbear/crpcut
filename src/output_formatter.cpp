@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 -2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,13 +56,14 @@ namespace crpcut {
     }
 
     formatter
-    ::formatter(const char *to_charset, const char *subst)
-      : iconv_handle(wrapped::iconv_open(to_charset,
-                                         test_case_factory::get_charset())),
-        illegal_substitute(subst),
-        illegal_substitute_len(wrapped::strlen(subst))
+    ::formatter(buffer &buff, const char *to_charset, const char *subst)
+      : buffer_(buff),
+        iconv_handle_(wrapped::iconv_open(to_charset,
+                                          test_case_factory::get_charset())),
+        illegal_substitute_(subst),
+        illegal_substitute_len_(wrapped::strlen(subst))
     {
-      if (iconv_handle == iconv_t(-1))
+      if (iconv_handle_ == iconv_t(-1))
         {
           std::ostringstream oss;
           oss << "Can't convert from \"" << test_case_factory::get_charset()
@@ -74,7 +75,7 @@ namespace crpcut {
     formatter
     ::~formatter()
     {
-      wrapped::iconv_close(iconv_handle);
+      wrapped::iconv_close(iconv_handle_);
     }
 
     std::size_t
@@ -113,7 +114,6 @@ namespace crpcut {
     {
       static fixed_string no_escape = { 0, 0 };
       return no_escape;
-
     }
 
 
@@ -124,7 +124,7 @@ namespace crpcut {
       std::size_t bytes_written = 0;
       while (bytes_written < len)
         {
-          ssize_t rv = buffer::write(p + bytes_written, len - bytes_written);
+          ssize_t rv = buffer_.write(p + bytes_written, len - bytes_written);
           assert(rv >= 0);
           bytes_written += size_t(rv);
         }
@@ -143,7 +143,7 @@ namespace crpcut {
 
           char *output_ptr = conversion_buffer;
           const char *const out_begin  = output_ptr;
-          const std::size_t rv = wrapped::iconv(iconv_handle,
+          const std::size_t rv = wrapped::iconv(iconv_handle_,
                                                 const_cast<char**>(&in), &len,
                                                 &output_ptr, &out_remaining);
           const std::size_t out_length(size_t(output_ptr - out_begin));
@@ -159,7 +159,7 @@ namespace crpcut {
             case EINVAL:
             case EILSEQ:
               if (len) { ++in; --len; }
-              do_write(illegal_substitute, illegal_substitute_len);
+              do_write(illegal_substitute_, illegal_substitute_len_);
               break;
             default:
               wrapped::abort();

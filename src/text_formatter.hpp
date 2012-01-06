@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 
 namespace crpcut {
   namespace output {
+    class buffer;
     class text_modifier;
     class text_formatter : public formatter
     {
@@ -46,7 +47,10 @@ namespace crpcut {
       };
       std::vector<tag_result> tag_results;
     public:
-      text_formatter(const char *, int, const char**,
+      text_formatter(output::buffer &buffer,
+                     const char *,
+                     int,
+                     const char**,
                      const text_modifier& = default_text_modifier());
       virtual void begin_case(const char *name,
                               std::size_t name_len,

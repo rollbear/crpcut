@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,13 @@
 namespace crpcut {
   namespace output {
 
-    ssize_t buffer::do_write(const char *buff, std::size_t len)
+    buffer::buffer()
+      : head(0),
+        current(&head)
+    {
+    }
+
+    ssize_t buffer::write(const char *buff, std::size_t len)
     {
       if (!*current)
         {
@@ -58,7 +64,7 @@ namespace crpcut {
         }
     }
 
-    std::pair<const char *, std::size_t> buffer::do_get_buffer() const
+    std::pair<const char *, std::size_t> buffer::get_buffer() const
     {
       static const char *null = 0;
       static const std::size_t zero = 0;
@@ -68,7 +74,7 @@ namespace crpcut {
       return std::make_pair(head->mem, head->len);
     }
 
-    void buffer::do_advance()
+    void buffer::advance()
     {
       if (head)
         {

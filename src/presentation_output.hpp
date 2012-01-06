@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,15 @@
 #include "poll.hpp"
 
 namespace crpcut {
+  namespace output {
+    class buffer;
+  }
   class presentation_output : public io
   {
   public:
-    presentation_output(poll<io, 2> &poller_, int fd_);
+    presentation_output(output::buffer &buffer,
+                        poll<io, 2>    &poller,
+                        int            fd);
     virtual ~presentation_output();
     virtual bool read();
     virtual bool write();
@@ -42,10 +47,11 @@ namespace crpcut {
     virtual void enable(bool val);
     bool         enabled() const;
   private:
-    poll<io, 2> &poller;
-    int          fd;
-    size_t       pos;
-    bool         is_enabled;
+    output::buffer &buffer_;
+    poll<io, 2>    &poller_;
+    int             fd_;
+    size_t          pos_;
+    bool            is_enabled_;
   };
 
 }

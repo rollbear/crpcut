@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,19 +36,16 @@ namespace crpcut {
     class buffer
     {
     public:
-      static std::pair<const char*, std::size_t> get_buffer();
-      static void advance();
-      static ssize_t write(const char *buff, std::size_t len);
-      static bool is_empty();
-    private:
       buffer();
       ~buffer();
+      std::pair<const char*, std::size_t> get_buffer() const;
+      void advance();
+      ssize_t write(const char *buff, std::size_t len);
+      bool is_empty() const;
+    private:
+      buffer(const buffer&);
+      buffer& operator=(const buffer&);
 
-      static buffer& obj();
-      std::pair<const char*, std::size_t> do_get_buffer() const;
-      void do_advance();
-      ssize_t do_write(const char *buff, std::size_t len);
-      bool do_is_empty() const;
       struct block
       {
         block() :next(0), len(0) {}
@@ -64,39 +61,10 @@ namespace crpcut {
       block **current;
     };
 
-    inline std::pair<const char*, std::size_t> buffer::get_buffer()
-    {
-      return obj().do_get_buffer();
-    }
-
-    inline void buffer::advance()
-    {
-      obj().do_advance();
-    }
-
-    inline ssize_t buffer::write(const char *buff, std::size_t len)
-    {
-      return obj().do_write(buff, len);
-    }
-
-    inline bool buffer::is_empty()
-    {
-      return obj().do_is_empty();
-    }
-
-    inline buffer::buffer()
-      : head(0),
-        current(&head)
-    {
-    }
-
-    inline buffer& buffer::obj()
-    {
-      static buffer object;
-      return object;
-    }
-
-    inline bool buffer::do_is_empty() const
+    inline
+    bool
+    buffer
+    ::is_empty() const
     {
       return !head;
     }

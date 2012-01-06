@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,11 +30,14 @@
 namespace crpcut {
 
   presentation_output
-  ::presentation_output(poll<io, 2> &poller_, int fd_)
-    : poller(poller_),
-      fd(fd_),
-      pos(0),
-      is_enabled(false)
+  ::presentation_output(output::buffer &buffer,
+                        poll<io, 2>    &poller,
+                        int            fd)
+    : buffer_(buffer),
+      poller_(poller),
+      fd_(fd),
+      pos_(0),
+      is_enabled_(false)
   {
   }
 
@@ -47,17 +50,17 @@ namespace crpcut {
   presentation_output
   ::enable(bool val)
   {
-    if (val != is_enabled)
+    if (val != is_enabled_)
       {
         if (val)
           {
-            poller.add_fd(fd, this, poll<io, 2>::polltype::w);
+            poller_.add_fd(fd_, this, poll<io, 2>::polltype::w);
           }
         else
           {
-            poller.del_fd(fd);
+            poller_.del_fd(fd_);
           }
-        is_enabled = val;
+        is_enabled_ = val;
       }
   }
 
@@ -65,7 +68,7 @@ namespace crpcut {
   presentation_output
   ::enabled() const
   {
-    return is_enabled;
+    return is_enabled_;
   }
 
   bool
@@ -81,23 +84,23 @@ namespace crpcut {
   ::write()
   {
     assert(enabled());
-    assert(!output::buffer::is_empty());
-    while (!output::buffer::is_empty())
+    assert(!buffer_.is_empty());
+    while (!buffer_.is_empty())
       {
-        std::pair<const char *, size_t> data = output::buffer::get_buffer();
+        std::pair<const char *, size_t> data = buffer_.get_buffer();
         const char *buff = data.first;
         size_t      len  = data.second;
 
         assert(buff);
         assert(len);
 
-        ssize_t n = wrapped::write(fd, buff + pos, len - pos);
+        ssize_t n = wrapped::write(fd_, buff + pos_, len - pos_);
         assert(n >= 0);
-        pos+= size_t(n);
-        if (pos == len)
+        pos_+= size_t(n);
+        if (pos_ == len)
           {
-            pos = 0;
-            output::buffer::advance();
+            pos_ = 0;
+            buffer_.advance();
           }
       }
     return false;

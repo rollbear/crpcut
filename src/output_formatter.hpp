@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ extern "C"
 #include <iosfwd>
 namespace crpcut {
   namespace output {
+    class buffer;
 
     template <bool b>
     struct enable_if;
@@ -80,7 +81,7 @@ namespace crpcut {
       virtual ~formatter();
     protected:
       static const fixed_string &phase_str(test_phase);
-      formatter(const char *to_charset, const char *subst);
+      formatter(buffer& buff, const char *to_charset, const char *subst);
       std::size_t write(const char *s, type t = verbatim) const
       {
         return write(s, wrapped::strlen(s), t);
@@ -109,9 +110,10 @@ namespace crpcut {
       std::size_t do_write(const char *p, std::size_t len) const;
       std::size_t do_write_converted(const char *buff, std::size_t len) const;
 
-      iconv_t     iconv_handle;
-      const char *illegal_substitute;
-      std::size_t illegal_substitute_len;
+      buffer     &buffer_;
+      iconv_t     iconv_handle_;
+      const char *illegal_substitute_;
+      std::size_t illegal_substitute_len_;
     };
 
   }

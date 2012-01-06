@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,12 @@ namespace crpcut {
   namespace output {
 
     xml_formatter
-    ::xml_formatter(const char *id, int argc, const char *argv[])
-      : formatter("UTF-8",
+    ::xml_formatter(output::buffer &buffer,
+                    const char     *id,
+                    int             argc,
+                    const char *argv[])
+      : formatter(buffer,
+                  "UTF-8",
                   xml_replacement(test_case_factory::get_illegal_rep())),
         last_closed_(false),
         blocked_tests_(false),

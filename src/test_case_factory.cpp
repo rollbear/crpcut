@@ -51,15 +51,17 @@ namespace {
     return str;
   }
 
-  crpcut::output::formatter &output_formatter(bool use_xml, const char *id,
+  crpcut::output::formatter &output_formatter(crpcut::output::buffer &buffer,
+                                              bool use_xml,
+                                              const char *id,
                                               int argc, const char *argv[])
   {
     if (use_xml)
       {
-        static crpcut::output::xml_formatter xo(id, argc, argv);
+        static crpcut::output::xml_formatter xo(buffer, id, argc, argv);
         return xo;
       }
-    static crpcut::output::text_formatter to(id, argc, argv);
+    static crpcut::output::text_formatter to(buffer, id, argc, argv);
     return to;
   }
 
@@ -1072,7 +1074,11 @@ namespace crpcut {
       std_exception_translator std_except_obj;
       c_string_translator c_string_obj;
 
-      output::formatter &fmt = output_formatter(xml, identity, argc, argv);
+      output::buffer buffer;
+      output::formatter &fmt = output_formatter(buffer,
+                                                xml,
+                                                identity,
+                                                argc, argv);
 
       if (tests_as_child_procs())
         {
@@ -1087,9 +1093,9 @@ namespace crpcut {
               wrapped::rmdir(dirbase);
               return 1;
             }
-          while (!output::buffer::is_empty())
+          while (!buffer.is_empty())
             {
-              std::pair<const char *, size_t> data = output::buffer::get_buffer();
+              std::pair<const char *, size_t> data = buffer.get_buffer();
               size_t bytes_written = 0;
               while (bytes_written < data.second)
                 {
@@ -1099,9 +1105,12 @@ namespace crpcut {
                   assert(n >= 0);
                   bytes_written+= size_t(n);
                 }
-              output::buffer::advance();
+              buffer.advance();
             }
-          presenter_pipe = start_presenter_process(output_fd, fmt, verbose_mode);
+          presenter_pipe = start_presenter_process(buffer,
+                                                   output_fd,
+                                                   fmt,
+                                                   verbose_mode);
         }
       for (;;)
         {
@@ -1260,9 +1269,9 @@ namespace crpcut {
                         << '\n';
             }
         }
-      while (!output::buffer::is_empty())
+      while (!buffer.is_empty())
         {
-          std::pair<const char *, size_t> data = output::buffer::get_buffer();
+          std::pair<const char *, size_t> data = buffer.get_buffer();
           const char *buff = data.first;
           const size_t len = data.second;
           size_t bytes_written = 0;
@@ -1272,7 +1281,7 @@ namespace crpcut {
               assert(n >= 0);
               bytes_written += size_t(n);
             }
-          output::buffer::advance();
+          buffer.advance();
         }
       return int(num_tests_run - num_successful_tests);
     }

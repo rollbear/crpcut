@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,15 @@
 
 namespace crpcut {
   namespace output {
+    class buffer;
 
     class xml_formatter : public formatter
     {
     public:
-      xml_formatter(const char *id, int argc, const char *argv[]);
+      xml_formatter(output::buffer &buffer,
+                    const char     *id,
+                    int             argc,
+                    const char     *argv[]);
       virtual ~xml_formatter();
       virtual void begin_case(const char *name,
                               std::size_t name_len,

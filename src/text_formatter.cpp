@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,13 @@ namespace {
 namespace crpcut {
   namespace output {
     text_formatter
-    ::text_formatter(const char *, int, const char**, const text_modifier &m)
-      : formatter(output_charset(test_case_factory::get_output_charset()),
+    ::text_formatter(buffer              &buff,
+                     const char          *,
+                     int,
+                     const char         **,
+                     const text_modifier &m)
+      : formatter(buff,
+                  output_charset(test_case_factory::get_output_charset()),
                   illegal_replacement(test_case_factory::get_illegal_rep())),
         conversion_type_(test_case_factory::get_output_charset()
                          ? translated

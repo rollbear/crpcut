@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,11 @@
 namespace crpcut {
   namespace output {
     class formatter;
+    class buffer;
   }
-  int start_presenter_process(int fd, output::formatter& fmt, int verbose);
+  int start_presenter_process(output::buffer    &buffer,
+                              int                fd,
+                              output::formatter &fmt,
+                              int                verbose);
 }
 #endif // PRESENTATION_HPP
