@@ -46,19 +46,11 @@ namespace crpcut {
       buffer(const buffer&);
       buffer& operator=(const buffer&);
 
-      struct block
-      {
-        block() :next(0), len(0) {}
-        static const std::size_t size = 128;
-
-        block       *next;
-        char         mem[size];
-        std::size_t  len;
-      };
+      struct block;
 
 
-      block  *head;
-      block **current;
+      block  *head_;
+      block **current_;
     };
 
     inline
@@ -66,7 +58,7 @@ namespace crpcut {
     buffer
     ::is_empty() const
     {
-      return !head;
+      return !head_;
     }
 
   }

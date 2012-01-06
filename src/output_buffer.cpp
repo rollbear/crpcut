@@ -30,36 +30,46 @@
 namespace crpcut {
   namespace output {
 
+    struct buffer::block
+    {
+      block() :next_(0), len_(0) {}
+      static const std::size_t size = 128;
+
+      block       *next_;
+      char         mem_[size];
+      std::size_t  len_;
+    };
+
     buffer::buffer()
-      : head(0),
-        current(&head)
+      : head_(0),
+        current_(&head_)
     {
     }
 
     ssize_t buffer::write(const char *buff, std::size_t len)
     {
-      if (!*current)
+      if (!*current_)
         {
-          *current = new block;
+          *current_ = new block;
         }
-      std::size_t size = len < block::size - (*current)->len
+      std::size_t size = len < block::size - (*current_)->len_
         ? len
-        : block::size - (*current)->len;
-      wrapped::memcpy((*current)->mem + (*current)->len, buff, size);
-      (*current)->len += size;
-      if ((*current)->len == block::size)
+        : block::size - (*current_)->len_;
+      wrapped::memcpy((*current_)->mem_ + (*current_)->len_, buff, size);
+      (*current_)->len_ += size;
+      if ((*current_)->len_ == block::size)
         {
-          current = &(*current)->next;
+          current_ = &(*current_)->next_;
         }
       return ssize_t(size);
     }
 
     buffer::~buffer()
     {
-      while (head)
+      while (head_)
         {
-          block *tmp = head;
-          head = head->next;
+          block *tmp = head_;
+          head_ = head_->next_;
           delete tmp;
         }
     }
@@ -69,20 +79,20 @@ namespace crpcut {
       static const char *null = 0;
       static const std::size_t zero = 0;
 
-      if (!head) return std::make_pair(null, zero);
+      if (!head_) return std::make_pair(null, zero);
 
-      return std::make_pair(head->mem, head->len);
+      return std::make_pair(head_->mem_, head_->len_);
     }
 
     void buffer::advance()
     {
-      if (head)
+      if (head_)
         {
-          block *tmp = head;
-          head = tmp->next;
+          block *tmp = head_;
+          head_ = tmp->next_;
           delete tmp;
         }
-      if (!head) current=&head;
+      if (!head_) current_ = &head_;
     }
   }
 }

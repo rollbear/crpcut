@@ -95,7 +95,8 @@ file(GLOB DOGFOOD_SRCS
      src/list_elem_test.cpp
      src/fixed_string_test.cpp
      src/tag_filter_test.cpp,
-     src/posix_error_test.cpp)
+     src/posix_error_test.cpp,
+     src/output_buffer_test.cpp)
 
 if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)
