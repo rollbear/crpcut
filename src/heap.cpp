@@ -505,16 +505,16 @@ namespace crpcut
       free_mem_raw(p);
     }
 
+    std::bad_alloc bad_alloc_exc;
 
     void *alloc_new_mem(size_t s, alloc_type type) throw (std::bad_alloc)
     {
-      static std::bad_alloc exc;
       for (;;)
         {
           new_handler_caller handler;
           void *p = crpcut::heap::alloc_mem(s, type);
           if (p) return p;
-          if (!handler) throw exc;
+          if (!handler) throw bad_alloc_exc;
           handler();
         }
     }
