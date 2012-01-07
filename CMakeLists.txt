@@ -69,6 +69,7 @@ file(GLOB LIB_SRCS
      src/poll_singleton.cpp
      src/posix_encapsulation.cpp
      src/posix_error.cpp
+     src/posix_write.cpp
      src/presentation.cpp
      src/presentation_output.cpp
      src/presentation_reader.cpp

@@ -34,12 +34,14 @@ namespace crpcut {
   presentation_output
   ::presentation_output(output::buffer &buffer,
                         poll<io>       &poller,
-                        int            fd)
+                        int             fd,
+                        posix_write    &w)
     : buffer_(buffer),
       poller_(poller),
       fd_(fd),
       pos_(0),
-      is_enabled_(false)
+      is_enabled_(false),
+      write_(w)
   {
   }
 
@@ -96,7 +98,7 @@ namespace crpcut {
         assert(buff);
         assert(len);
 
-        ssize_t n = wrapped::write(fd_, buff + pos_, len - pos_);
+        ssize_t n = write_(fd_, buff + pos_, len - pos_);
         assert(n >= 0);
         pos_+= size_t(n);
         if (pos_ == len)
@@ -108,4 +110,11 @@ namespace crpcut {
     return false;
   }
 
+  posix_write&
+  presentation_output
+  ::default_write()
+  {
+    static libc_write obj;
+    return obj;
+  }
 }

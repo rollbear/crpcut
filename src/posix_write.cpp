@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,42 +24,11 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PRESENTATION_OUTPUT_HPP
-#define PRESENTATION_OUTPUT_HPP
+#include "posix_write.hpp"
 
-#include "io.hpp"
-#include <cstddef>
 namespace crpcut {
-  template <typename T>
-  class poll;
-
-  namespace output {
-    class buffer;
-  }
-
-  class posix_write;
-  class presentation_output : public io
+  posix_write
+  ::~posix_write()
   {
-  public:
-    presentation_output(output::buffer &buffer,
-                        poll<io>       &poller,
-                        int             fd,
-                        posix_write    &w = default_write());
-    virtual ~presentation_output();
-    virtual bool read();
-    virtual bool write();
-    virtual void exception() { enable(false); }
-    virtual void enable(bool val);
-    bool         enabled() const;
-  private:
-    static posix_write& default_write();
-    output::buffer &buffer_;
-    poll<io>       &poller_;
-    int             fd_;
-    std::size_t     pos_;
-    bool            is_enabled_;
-    posix_write    &write_;
-  };
-
+  }
 }
-#endif // PRESENTATION_OUTPUT_HPP

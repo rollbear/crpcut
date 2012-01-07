@@ -40,7 +40,7 @@ extern "C"
 #include <dirent.h>
 #include <stdarg.h>
 }
-
+#include "posix_encapsulation.hpp"
 namespace {
   template <typename T, std::size_t N>
   inline T* begin(T (&array)[N])
@@ -256,5 +256,12 @@ namespace crpcut {
     CRPCUT_WRAP_V_FUNC(libc, _Exit, CRPCUT_NORETURN void, (int n), (n))
     CRPCUT_WRAP_V_FUNC(libc, abort, CRPCUT_NORETURN void, (void),  ())
     CRPCUT_WRAP_V_FUNC(libc, exit,  CRPCUT_NORETURN void, (int n), (n))
+  }
+
+  ssize_t
+  libc_write
+  ::operator()(int fd, const void *p, std::size_t n)
+  {
+    return wrapped::write(fd, p, n);
   }
 }

@@ -32,6 +32,9 @@
 extern "C" {
 #  include <stdarg.h>
 }
+
+#include "posix_write.hpp"
+
 namespace crpcut {
   namespace wrapped {
     CRPCUT_NORETURN void _Exit(int c);
@@ -73,5 +76,10 @@ namespace crpcut {
     int                  vsnprintf(char *s, size_t si, const char *f, va_list);
     int                  waitid(idtype_t t, id_t i, siginfo_t *si, int o);
   }
+
+  class libc_write : public posix_write
+  {
+    virtual ssize_t operator()(int fd, const void *p, std::size_t n);
+  };
 }
 #endif // POSIX_ENCAPSULATION_HPP
