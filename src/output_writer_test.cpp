@@ -25,14 +25,14 @@
  */
 
 #include <crpcut.hpp>
-#include "output_formatter.hpp"
+#include "output_writer.hpp"
 #include "output_buffer.hpp"
-TESTSUITE(output_formatter)
+TESTSUITE(output_writer)
 {
-  class empty_formatter : public crpcut::output::formatter
+  class empty_writer : public crpcut::output::writer
   {
   public:
-    virtual ~empty_formatter();
+    virtual ~empty_writer();
   private:
     void begin_case(const char *, std::size_t, bool, bool) {}
     void end_case() {}
@@ -48,16 +48,15 @@ TESTSUITE(output_formatter)
     void tag_summary(const char *, std::size_t, std::size_t, bool) {}
   public:
     typedef enum { no_escape, with_escape } escape_type;
-    empty_formatter(crpcut::output::buffer &buff,
+    empty_writer(crpcut::output::buffer &buff,
                     const char *to,
                     const char *subst,
                     escape_type esc = no_escape)
-      : crpcut::output::formatter(buff, to, subst),
+      : crpcut::output::writer(buff, to, subst),
         escape_(esc == with_escape)
     {
     }
-    using formatter::phase_str;
-    using formatter::write;
+    using writer::write;
     virtual crpcut::fixed_string escape(char c) const
     {
       static const crpcut::fixed_string none = { 0, 0 };
@@ -75,7 +74,7 @@ TESTSUITE(output_formatter)
     bool escape_;
   };
 
-  empty_formatter::~empty_formatter()
+  empty_writer::~empty_writer()
   {
   }
 
@@ -121,7 +120,7 @@ TESTSUITE(output_formatter)
   {
     buffer b(0, "");
     try {
-      empty_formatter f(b, "tjolahopp!", "apa");
+      empty_writer f(b, "tjolahopp!", "apa");
     }
     catch (std::runtime_error &e)
     {
@@ -136,15 +135,6 @@ TESTSUITE(output_formatter)
     return std::string(s.str, s.len);
   }
 
-  TEST(all_phase_strings_are_correct)
-  {
-    typedef empty_formatter f;
-    VERIFY_TRUE(str(f::phase_str(crpcut::creating)) == "\"creating\"");
-    VERIFY_TRUE(str(f::phase_str(crpcut::running)) == "\"running\"");
-    VERIFY_TRUE(str(f::phase_str(crpcut::destroying)) == "\"destroying\"");
-    VERIFY_TRUE(str(f::phase_str(crpcut::post_mortem)) == "\"post_mortem\"");
-    VERIFY_TRUE(str(f::phase_str(crpcut::child)) == "\"child\"");
-  }
 
   static const char msg[] =
     "abcdefghijklmnopqrstuvwxyz\n"
@@ -161,7 +151,7 @@ TESTSUITE(output_formatter)
   TEST(char_array_verbatim_write)
   {
     buffer b(7, msg);
-    empty_formatter f(b, "UTF-8", "--illegal--");
+    empty_writer f(b, "UTF-8", "--illegal--");
     std::size_t rv = f.write(msg);
     ASSERT_TRUE(rv == sizeof(msg) - 1);
   }
@@ -169,7 +159,7 @@ TESTSUITE(output_formatter)
   TEST(char_ptr_verbatim_write)
   {
     buffer b(11, msg);
-    empty_formatter f(b, "UTF-8", "--illegal--");
+    empty_writer f(b, "UTF-8", "--illegal--");
     const char* m = msg;
     std::size_t rv = f.write(m);
     ASSERT_TRUE(rv == sizeof(msg) - 1);
@@ -178,7 +168,7 @@ TESTSUITE(output_formatter)
   TEST(char_ptr_with_len_write)
   {
     buffer b(11, msg);
-    empty_formatter f(b, "UTF-8", "--illegal--");
+    empty_writer f(b, "UTF-8", "--illegal--");
     const char* m = msg;
     std::size_t rv = f.write(m, sizeof(msg) - 1);
     ASSERT_TRUE(rv == sizeof(msg) - 1);
@@ -188,7 +178,7 @@ TESTSUITE(output_formatter)
     void assert_integer_write(T t, const char (&array)[N])
   {
     buffer b(N/2, array);
-    empty_formatter f(b, "UTF-8", "--illegal--");
+    empty_writer f(b, "UTF-8", "--illegal--");
     std::size_t rv = f.write(t);
     ASSERT_TRUE(rv == N - 1);
   }
@@ -208,8 +198,8 @@ TESTSUITE(output_formatter)
     static const char in[] =  "abc\x85" "def\xf0" "gh";
     static const char out[] =  "abc--illegal--def--illegal--gh";
     buffer b(3, out);
-    empty_formatter f(b, "UTF-8", "--illegal--");
-    std::size_t rv = f.write(in, crpcut::output::formatter::translated);
+    empty_writer f(b, "UTF-8", "--illegal--");
+    std::size_t rv = f.write(in, crpcut::output::writer::translated);
     ASSERT_TRUE(rv == sizeof(in) - 1);
   }
 
@@ -218,8 +208,8 @@ TESTSUITE(output_formatter)
     static const char in[] =  "abc\x05" "def\xf0" "gh";
     static const char out[] =  "abc\\x05def--illegal--gh";
     buffer b(3, out);
-    empty_formatter f(b, "UTF-8", "--illegal--", empty_formatter::with_escape);
-    std::size_t rv = f.write(in, crpcut::output::formatter::translated);
+    empty_writer f(b, "UTF-8", "--illegal--", empty_writer::with_escape);
+    std::size_t rv = f.write(in, crpcut::output::writer::translated);
     ASSERT_TRUE(rv == sizeof(in) - 1);
   }
 
@@ -227,8 +217,8 @@ TESTSUITE(output_formatter)
   {
     static const char in[] =  "abc\x05" "def\xf0" "gh";
     buffer b(3, in);
-    empty_formatter f(b, "UTF-8", "--illegal--", empty_formatter::with_escape);
-    std::size_t rv = f.write(in, crpcut::output::formatter::verbatim);
+    empty_writer f(b, "UTF-8", "--illegal--", empty_writer::with_escape);
+    std::size_t rv = f.write(in, crpcut::output::writer::verbatim);
     ASSERT_TRUE(rv == sizeof(in) - 1);
   }
 }

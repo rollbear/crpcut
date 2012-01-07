@@ -25,7 +25,7 @@
  */
 
 #include "text_modifier.hpp"
-#include "output_formatter.hpp"
+#include "output_writer.hpp"
 #include <stdexcept>
 
 #define MK_F_STR(x) { #x, sizeof(#x) - 1 }
@@ -128,12 +128,12 @@ namespace crpcut {
 
     void
     text_modifier
-    ::write_to(formatter &output, decorator m) const
+    ::write_to(writer &output, decorator m) const
     {
       assert(m < END_OF_LIST);
       if (!decorators[m]) return;
 
-      output.do_write(decorators[m].str, decorators[m].len);
+      output.write(decorators[m].str, decorators[m].len, writer::verbatim);
     }
 
     void

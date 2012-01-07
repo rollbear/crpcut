@@ -48,7 +48,7 @@
 #define EMPTY(x) { 0, 0 }
 namespace crpcut {
   namespace output {
-    class formatter;
+    class writer;
 
     class text_modifier {
     public:
@@ -56,7 +56,7 @@ namespace crpcut {
       typedef enum { DECORATORS(VERBATIM), END_OF_LIST } decorator;
       text_modifier(const char *rules =
                     wrapped::getenv("CRPCUT_TEXT_DECORATION"));
-      void write_to(formatter& output, decorator m) const;
+      void write_to(writer& output, decorator m) const;
       void write_to(std::ostream& output, decorator m) const;
     private:
       void init_decorator(decorator dest, decorator src);

@@ -28,12 +28,14 @@
 #define XML_FORMATTER_HPP
 
 #include "output_formatter.hpp"
+#include "output_writer.hpp"
 
 namespace crpcut {
   namespace output {
     class buffer;
 
-    class xml_formatter : public formatter
+    class xml_formatter : public formatter,
+                          private writer
     {
     public:
       xml_formatter(output::buffer &buffer,

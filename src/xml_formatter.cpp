@@ -53,9 +53,9 @@ namespace crpcut {
                     const char     *id,
                     int             argc,
                     const char *argv[])
-      : formatter(buffer,
-                  "UTF-8",
-                  xml_replacement(test_case_factory::get_illegal_rep())),
+      : writer(buffer,
+               "UTF-8",
+               xml_replacement(test_case_factory::get_illegal_rep())),
         last_closed_(false),
         blocked_tests_(false),
         tag_summary_(false)

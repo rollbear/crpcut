@@ -64,6 +64,7 @@ file(GLOB LIB_SRCS
      src/output.cpp
      src/output_heap_buffer.cpp
      src/output_formatter.cpp
+     src/output_writer.cpp
      src/pipe_pair.cpp
      src/policies.cpp
      src/poll_singleton.cpp
@@ -87,6 +88,7 @@ file(GLOB LIB_SRCS
      src/test_wrapper.cpp
      src/text_formatter.cpp
      src/text_modifier.cpp
+     src/text_writer.cpp
      src/xml.cpp
      src/xml_formatter.cpp
 )
@@ -98,8 +100,9 @@ file(GLOB DOGFOOD_SRCS
      src/fixed_string_test.cpp
      src/tag_filter_test.cpp,
      src/posix_error_test.cpp
-     src/output_formatter_test.cpp
-     src/presentation_output_test.cpp)
+     src/output_writer_test.cpp
+     src/presentation_output_test.cpp
+     src/text_modifier_test.cpp)
 
 if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)

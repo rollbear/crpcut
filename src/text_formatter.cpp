@@ -67,9 +67,9 @@ namespace crpcut {
                      int,
                      const char         **,
                      const text_modifier &m)
-      : formatter(buff,
-                  output_charset(test_case_factory::get_output_charset()),
-                  illegal_replacement(test_case_factory::get_illegal_rep())),
+      : writer(buff,
+               output_charset(test_case_factory::get_output_charset()),
+               illegal_replacement(test_case_factory::get_illegal_rep())),
         conversion_type_(test_case_factory::get_output_charset()
                          ? translated
                          : verbatim),

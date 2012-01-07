@@ -27,11 +27,6 @@
 #ifndef OUTPUT_FORMATTER_HPP
 #define OUTPUT_FORMATTER_HPP
 
-extern "C"
-{
-#  include <sys/types.h>
-#  include <iconv.h>
-}
 
 #include "fixed_string.hpp"
 #include <crpcut.hpp>
@@ -40,20 +35,9 @@ namespace crpcut {
   namespace output {
     class buffer;
 
-    template <bool b>
-    struct enable_if;
-    template <>
-    struct enable_if<true>
-    {
-      typedef void type;
-    };
-
-    class text_modifier;
     class formatter
     {
-      friend class text_modifier;
     public:
-      typedef enum { translated, verbatim } type;
       virtual void begin_case(const char  *name,
                               std::size_t  name_len,
                               bool         result,
@@ -81,39 +65,6 @@ namespace crpcut {
       virtual ~formatter();
     protected:
       static const fixed_string &phase_str(test_phase);
-      formatter(buffer& buff, const char *to_charset, const char *subst);
-      std::size_t write(const char *s, type t = verbatim) const
-      {
-        return write(s, wrapped::strlen(s), t);
-      }
-      template <std::size_t N>
-      std::size_t write(const char (&str)[N], type t = verbatim) const
-      {
-        return write(&str[0], N - 1, t);
-      }
-      std::size_t write(const stream::oastream &o, type t = verbatim) const
-      {
-        return write(o.begin(), o.size(), t);
-      }
-      std::size_t write(const std::ostringstream &os, type t = verbatim) const;
-      std::size_t write(const char *str, std::size_t len, type t = verbatim) const;
-      template <typename T>
-      std::size_t write(T val,
-                        typename enable_if<std::numeric_limits<T>::is_integer>::type * = 0)
-      {
-        stream::toastream<std::numeric_limits<T>::digits10 + 2> o;
-        o << val;
-        return write(o);
-      }
-    private:
-      virtual fixed_string escape(char c) const;
-      std::size_t do_write(const char *p, std::size_t len) const;
-      std::size_t do_write_converted(const char *buff, std::size_t len) const;
-
-      buffer     &buffer_;
-      iconv_t     iconv_handle_;
-      const char *illegal_substitute_;
-      std::size_t illegal_substitute_len_;
     };
 
   }

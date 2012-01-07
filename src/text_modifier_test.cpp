@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 -2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,25 +24,38 @@
  * SUCH DAMAGE.
  */
 
+#include "text_modifier.hpp"
+#include <crpcut.hpp>
+#include <sstream>
 
-#include "output_formatter.hpp"
-
-namespace crpcut {
-  namespace output {
-
-    const fixed_string &formatter::phase_str(test_phase phase)
-    {
-#define MK_QFIXSTR(s) { "\"" #s "\"", sizeof(#s) + 1 }
-      static const fixed_string str[] = {
-        CRPCUT_TEST_PHASES(MK_QFIXSTR)
-      };
-      return str[phase];
-    }
-
-    formatter
-    ::~formatter()
-    {
-    }
-
+TESTSUITE(text_modifier)
+{
+  using crpcut::output::text_modifier;
+  TEST(nullstring_does_nothing)
+  {
+    text_modifier obj(0);
+    std::ostringstream os;
+    obj.write_to(os, text_modifier::NORMAL);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::PASSED);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::FAILED);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::NCFAILED);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::NCPASSED);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::BLOCKED);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::PASSED_SUM);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::FAILED_SUM);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::NCPASSED_SUM);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::NCFAILED_SUM);
+    ASSERT_TRUE(os.str() == "");
+    obj.write_to(os, text_modifier::BLOCKED_SUM);
+    ASSERT_TRUE(os.str() == "");
   }
 }

@@ -29,12 +29,14 @@
 
 #include <vector>
 #include "output_formatter.hpp"
+#include "output_writer.hpp"
 
 namespace crpcut {
   namespace output {
     class buffer;
     class text_modifier;
-    class text_formatter : public formatter
+    class text_formatter : public formatter,
+                           private writer
     {
       struct tag_result
       {
@@ -82,7 +84,7 @@ namespace crpcut {
 
       bool                 did_output_;
       bool                 blocked_tests_;
-      formatter::type      conversion_type_;
+      writer::type         conversion_type_;
       const text_modifier &modifier_;
     };
   }
