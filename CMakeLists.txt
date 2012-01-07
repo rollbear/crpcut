@@ -344,7 +344,7 @@ find_program(BASH "bash")
 find_program(XMLLINT "xmllint")
 
 if (WITH_HTML_DOCS)
-
+  add_custom_target(dogfood_test dogfood DEPENDS dogfood VERBATIM)
   add_custom_target(can_dump_core
     ulimit -c | egrep -q "\\(Unlimited\\)\\|\\[1-9\\]" && touch can_dump_core)
   find_program(XSLTPROC "xsltproc")
