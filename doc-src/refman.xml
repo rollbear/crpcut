@@ -3505,7 +3505,7 @@ int main(int argc, char *argv[])
         <term><constant>NCFAILED_SUM</constant></term>
         <listitem>Printed at the beginning of the FAILED line of the report
         summary if all failed tests are non-critical. Defaults to the same as
-        <constant>FAILED_SUM</constant> if not specified.</listitem>
+        <constant>NCFAILED</constant> if not specified.</listitem>
       </varlistentry>
       <varlistentry>
         <term><constant>PASSED_SUM</constant></term>
@@ -3517,7 +3517,7 @@ int main(int argc, char *argv[])
         <term><constant>NCPASSED_SUM</constant></term>
         <listitem>Printed at the beginning of the PASSED line of the reprort
         summary if all tests that passed are non-critical. Defaults to the same
-        as <constant>PASSED_SUM</constant> if not specified.</listitem>
+        as <constant>NCPASSED</constant> if not specified.</listitem>
       </varlistentry>
       <varlistentry>
         <term><constant>BLOCKED_SUM</constant></term>

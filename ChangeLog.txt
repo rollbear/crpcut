@@ -1,3 +1,7 @@
+         * Changed the default propagation rules for text report (colour)
+           decoration configuration from the CRPCUT_TEXT_DECORATION
+           environment variable. See the reference manual for details.
+
          * Improved error handling for faulty tags provided in CLI-flags.
 
 2012-01-03 1.5.0

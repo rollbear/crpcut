@@ -84,12 +84,6 @@ namespace {
 
 namespace crpcut {
   namespace output {
-    class text_modifier::illegal_decoration_format
-      : public std::runtime_error
-    {
-    public:
-      illegal_decoration_format(const std::string &s) : std::runtime_error(s) {}
-    };
 
     text_modifier
     ::text_modifier(const char *rules)
@@ -121,8 +115,8 @@ namespace crpcut {
       init_decorator(NCPASSED,     PASSED);
       init_decorator(PASSED_SUM,   PASSED);
       init_decorator(FAILED_SUM,   FAILED);
-      init_decorator(NCPASSED_SUM, PASSED_SUM);
-      init_decorator(NCFAILED_SUM, FAILED_SUM);
+      init_decorator(NCPASSED_SUM, NCPASSED);
+      init_decorator(NCFAILED_SUM, NCFAILED);
       init_decorator(BLOCKED_SUM,  BLOCKED);
     }
 

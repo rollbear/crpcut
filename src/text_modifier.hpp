@@ -62,6 +62,17 @@ namespace crpcut {
       void init_decorator(decorator dest, decorator src);
       fixed_string decorators[END_OF_LIST];
     };
+
+    class text_modifier::illegal_decoration_format
+      : public std::runtime_error
+    {
+    public:
+      illegal_decoration_format(const std::string &s)
+        : std::runtime_error(s)
+      {
+      }
+    };
+
   }
 }
 
