@@ -101,9 +101,9 @@ namespace crpcut {
       std::size_t write(T val,
                         typename enable_if<std::numeric_limits<T>::is_integer>::type * = 0)
       {
-        stream::toastream<std::numeric_limits<T>::digits10> o;
+        stream::toastream<std::numeric_limits<T>::digits10 + 2> o;
         o << val;
-        return write(o.begin(), o.size());
+        return write(o);
       }
     private:
       virtual fixed_string escape(char c) const;
