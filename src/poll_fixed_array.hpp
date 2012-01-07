@@ -25,8 +25,10 @@
  */
 
 
-#ifndef POLL_HPP
-#define POLL_HPP
+#ifndef POLL_FIXED_ARRAY_HPP
+#define POLL_FIXED_ARRAY_HPP
+
+#include "poll.hpp"
 
 extern "C" void perror(const char*);
 #include <cassert>
@@ -75,86 +77,55 @@ namespace crpcut {
     fd_set rset;
     fd_set wset;
     fd_set xset;
-
-
-    static const int readbit  = 1;
-    static const int writebit = 2;
-    static const int hupbit   = 4;
   };
 }
 
 
 namespace crpcut {
   template <typename T, size_t N>
-  class poll : private polldata<N>
+  class poll_fixed_array : public poll<T>,
+                           private polldata<N>
   {
   public:
-    struct polltype
-    {
-      typedef enum { r = 1, w = 2, rw = 3 } type;
-    };
-    class descriptor
-    {
-    public:
-      T* operator->() const { return data; }
-      T* get() const { return data; }
-      bool read() const;
-      bool write() const;
-      bool hup() const;
-      bool timeout() const { return mode == 0; }
-    private:
-      descriptor(T* t, int m) : data(t), mode(m) {}
-
-      T* data;
-      int mode;
-      friend class poll<T, N>;
-    };
-    poll();
-    ~poll();
-    void add_fd(int fd, T* data, int flags = polltype::r);
-    void del_fd(int fd);
-    descriptor wait(int timeout_ms = -1);
-    size_t num_fds() const;
+    typedef typename poll<T>::descriptor descriptor;
+    typedef typename poll<T>::polltype   polltype;
+    poll_fixed_array();
+    ~poll_fixed_array();
+  private:
+    virtual void do_add_fd(int fd, T* data, int flags = polltype::r);
+    virtual void do_del_fd(int fd);
+    virtual descriptor do_wait(int timeout_ms);
+    virtual size_t do_num_fds() const;
   };
 }
 
 namespace crpcut {
-  template <typename T, size_t N>
-  inline bool poll<T, N>::descriptor::read() const
-  {
-    return mode & polldata<N>::readbit;
-  }
 
   template <typename T, size_t N>
-  inline bool poll<T, N>::descriptor::write() const
-  {
-    return mode & polldata<N>::writebit;
-  }
-
-  template <typename T, size_t N>
-  inline bool poll<T, N>::descriptor::hup() const
-  {
-    return mode & polldata<N>::hupbit;
-  }
-
-  template <typename T, size_t N>
-  inline poll<T, N>::poll()
+  inline poll_fixed_array<T, N>::poll_fixed_array()
   {
   }
 
   template <typename T, size_t N>
-  inline poll<T, N>::~poll()
+  inline poll_fixed_array<T, N>::~poll_fixed_array()
   {
   }
 
   template <typename T, size_t N>
-  inline void poll<T, N>::add_fd(int fd, T* data, int flags)
+  inline
+  void
+  poll_fixed_array<T, N>
+  ::do_add_fd(int fd, T* data, int flags)
   {
-    this->access[this->num_subscribers++] = typename polldata<N>::fdinfo(fd, flags, data);
+    typedef typename polldata<N>::fdinfo info;
+    this->access[this->num_subscribers++] = info(fd, flags, data);
   }
 
   template <typename T, size_t N>
-  inline void poll<T, N>::del_fd(int fd)
+  inline
+  void
+  poll_fixed_array<T, N>
+  ::do_del_fd(int fd)
   {
     typedef typename polldata<N>::fdinfo info;
     info *i = std::find_if(this->access,
@@ -174,7 +145,10 @@ namespace crpcut {
   }
 
   template <typename T, size_t N>
-  inline typename poll<T, N>::descriptor poll<T, N>::wait(int timeout_ms)
+  inline
+  typename poll<T>::descriptor
+  poll_fixed_array<T, N>
+  ::do_wait(int timeout_ms)
   {
     if (this->pending_fds == 0)
       {
@@ -208,17 +182,17 @@ namespace crpcut {
         int mode = 0;
         if (FD_ISSET(fd, &this->rset))
           {
-            mode|= polldata<N>::readbit;
+            mode|= descriptor::readbit;
             FD_CLR(fd, &this->rset);
           }
         if (FD_ISSET(fd, &this->wset))
           {
-            mode|= polldata<N>::writebit;
+            mode|= descriptor::writebit;
             FD_CLR(fd, &this->wset);
           }
         if (FD_ISSET(fd, &this->xset))
           {
-            mode|= polldata<N>::hupbit;
+            mode|= descriptor::hupbit;
             FD_CLR(fd, &this->xset);
           }
         if (mode)
@@ -231,6 +205,15 @@ namespace crpcut {
     return descriptor(0, 0);
   }
 
+  template <typename T, size_t N>
+  inline
+  size_t
+  poll_fixed_array<T, N>
+  ::do_num_fds() const
+  {
+    return this->num_subscribers;
+  }
+
   template <size_t N>
   polldata<N>::polldata()
     : num_subscribers(0U),
@@ -240,12 +223,6 @@ namespace crpcut {
     FD_ZERO(&wset);
     FD_ZERO(&xset);
   }
-
-  template <typename T, size_t N>
-  inline size_t poll<T, N>::num_fds() const
-  {
-    return this->num_subscribers;
-  }
 }
 
-#endif // POLL_HPP
+#endif // POLL_FIXED_ARRAY_HPP

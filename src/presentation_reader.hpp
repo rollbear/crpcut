@@ -35,12 +35,12 @@ namespace crpcut {
     class formatter;
   }
 
-  template <typename T, size_t> class poll;
+  template <typename T> class poll;
 
   class presentation_reader : public io
   {
   public:
-    presentation_reader(poll<io, 2>       &poller_,
+    presentation_reader(poll<io>          &poller_,
                         int                fd_,
                         output::formatter &fmt_,
                         bool               verbose_);
@@ -50,7 +50,7 @@ namespace crpcut {
     virtual void exception();
   private:
     list_elem<test_case_result>  messages;
-    poll<io, 2>                 &poller;
+    poll<io>                    &poller;
     int                          fd;
     output::formatter           &fmt;
     bool                         verbose;

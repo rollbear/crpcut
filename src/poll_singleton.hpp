@@ -28,11 +28,11 @@
 #define POLL_SINGLETON_HPP
 
 #include <crpcut.hpp>
-#include "poll.hpp"
+#include "poll_fixed_array.hpp"
 
 namespace crpcut {
 
-  typedef poll<fdreader, test_case_factory::max_parallel*3> polltype;
+  typedef poll_fixed_array<fdreader, test_case_factory::max_parallel*3> polltype;
   extern polltype poller;
 }
 

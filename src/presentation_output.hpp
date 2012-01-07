@@ -28,9 +28,11 @@
 #define PRESENTATION_OUTPUT_HPP
 
 #include "io.hpp"
-#include "poll.hpp"
-
+#include <cstddef>
 namespace crpcut {
+  template <typename T>
+  class poll;
+
   namespace output {
     class buffer;
   }
@@ -38,7 +40,7 @@ namespace crpcut {
   {
   public:
     presentation_output(output::buffer &buffer,
-                        poll<io, 2>    &poller,
+                        poll<io>       &poller,
                         int            fd);
     virtual ~presentation_output();
     virtual bool read();
@@ -48,9 +50,9 @@ namespace crpcut {
     bool         enabled() const;
   private:
     output::buffer &buffer_;
-    poll<io, 2>    &poller_;
+    poll<io>       &poller_;
     int             fd_;
-    size_t          pos_;
+    std::size_t     pos_;
     bool            is_enabled_;
   };
 

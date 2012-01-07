@@ -31,7 +31,7 @@
 #include "posix_encapsulation.hpp"
 #include "posix_error.hpp"
 #include "io.hpp"
-#include "poll.hpp"
+#include "poll_fixed_array.hpp"
 #include "output_buffer.hpp"
 
 namespace crpcut {
@@ -54,12 +54,12 @@ namespace crpcut {
       }
     int presenter_pipe = p.for_reading();
 
-    poll<io, 2> poller;
+    poll_fixed_array<io, 2> poller;
     presentation_reader r(poller, presenter_pipe, fmt, verbose);
     presentation_output o(buffer, poller, fd);
     while (poller.num_fds() > 0)
       {
-        poll<io, 2>::descriptor desc = poller.wait();
+        poll<io>::descriptor desc = poller.wait();
         bool exc = false;
         if (desc.read())  exc |= desc->read();
         if (desc.write()) exc |= desc->write();

@@ -27,11 +27,13 @@
 #include "presentation_output.hpp"
 #include "output_buffer.hpp"
 #include "posix_encapsulation.hpp"
+#include "poll.hpp"
+
 namespace crpcut {
 
   presentation_output
   ::presentation_output(output::buffer &buffer,
-                        poll<io, 2>    &poller,
+                        poll<io>       &poller,
                         int            fd)
     : buffer_(buffer),
       poller_(poller),
@@ -54,7 +56,7 @@ namespace crpcut {
       {
         if (val)
           {
-            poller_.add_fd(fd_, this, poll<io, 2>::polltype::w);
+            poller_.add_fd(fd_, this, poll<io>::polltype::w);
           }
         else
           {

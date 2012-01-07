@@ -26,9 +26,9 @@
 
 
 #include "presentation_reader.hpp"
-#include "poll.hpp"
 #include "printer.hpp"
 #include "output_formatter.hpp"
+#include "poll.hpp"
 #include <crpcut.hpp>
 
 namespace {
@@ -41,7 +41,7 @@ namespace {
 namespace crpcut {
 
   presentation_reader
-  ::presentation_reader(poll<io, 2>       &poller_,
+  ::presentation_reader(poll<io>          &poller_,
                         int                fd_,
                         output::formatter &fmt_,
                         bool               verbose_)
