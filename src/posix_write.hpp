@@ -37,7 +37,12 @@ namespace crpcut {
   {
   public:
     virtual ~posix_write();
-    virtual ssize_t operator()(int fd, const void *p, std::size_t n) = 0;
+    ssize_t operator()(int fd, const void *p, std::size_t n)
+    {
+      return do_write(fd, p, n);
+    }
+  private:
+    virtual ssize_t do_write(int fd, const void *p, std::size_t n) = 0;
   };
 }
 

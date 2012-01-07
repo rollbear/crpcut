@@ -260,7 +260,7 @@ namespace crpcut {
 
   ssize_t
   libc_write
-  ::operator()(int fd, const void *p, std::size_t n)
+  ::do_write(int fd, const void *p, std::size_t n)
   {
     return wrapped::write(fd, p, n);
   }

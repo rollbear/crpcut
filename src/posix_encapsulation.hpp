@@ -79,7 +79,7 @@ namespace crpcut {
 
   class libc_write : public posix_write
   {
-    virtual ssize_t operator()(int fd, const void *p, std::size_t n);
+    virtual ssize_t do_write(int fd, const void *p, std::size_t n);
   };
 }
 #endif // POSIX_ENCAPSULATION_HPP

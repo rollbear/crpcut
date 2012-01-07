@@ -39,7 +39,7 @@ set(CRPCUT_LIB_PATCH_VERSION "0")
 #set(CRPCUT_LIB_ALIAS_VERSION "")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "-O")
-set(CMAKE_CXX_FLAGS_MAINT "-ggdb -Wall -Wextra -Wcast-qual -Wconversion -Wshadow -Wunused-parameter -Wwrite-strings -pedantic -Wno-variadic-macros")
+set(CMAKE_CXX_FLAGS_MAINT "-ggdb -Wall -Wextra -Wcast-qual -Wconversion -Wshadow -Wunused-parameter -Wwrite-strings -pedantic -Wno-variadic-macros -std=c++0x")
 set(CRPCUT_LIB_VERSION "${CRPCUT_LIB_MAJOR_VERSION}.${CRPCUT_LIB_MINOR_VERSION}.${CRPCUT_LIB_PATCH_VERSION}")
 add_definitions(-DCRPCUT_VERSION_STRING="${CRPCUT_LIB_VERSION}")
 set(CRPCUT_LIB_SOVERSION ${CRPCUT_LIB_MAJOR_VERSION})
@@ -98,7 +98,8 @@ file(GLOB DOGFOOD_SRCS
      src/fixed_string_test.cpp
      src/tag_filter_test.cpp,
      src/posix_error_test.cpp
-     src/output_formatter_test.cpp)
+     src/output_formatter_test.cpp
+     src/presentation_output_test.cpp)
 
 if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)
@@ -329,10 +330,10 @@ file(GLOB TEST_SRCS
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FEATURE_SELECTION}")
-add_executable(dogfood EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
-target_link_libraries(dogfood crpcut ${EXTRA_LIBS})
 add_executable(testprog EXCLUDE_FROM_ALL ${TEST_SRCS})
 if (GMOCK_LIBS)
+  add_executable(dogfood EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
+  target_link_libraries(dogfood crpcut ${EXTRA_LIBS} ${GMOCK_LIBS})
   target_link_libraries(testprog crpcut ${GMOCK_LIBS} ${EXTRA_LIBS})
 else (GMOCK_LIBS)
   target_link_libraries(testprog crpcut ${EXTRA_LIBS})
