@@ -101,11 +101,10 @@ namespace crpcut {
         ssize_t n = write_(fd_, buff + pos_, len - pos_);
         assert(n >= 0);
         pos_+= size_t(n);
-        if (pos_ == len)
-          {
-            pos_ = 0;
-            buffer_.advance();
-          }
+        if (pos_ != len) return false;
+
+        pos_ = 0;
+        buffer_.advance();
       }
     return false;
   }
