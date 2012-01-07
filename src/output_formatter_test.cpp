@@ -203,7 +203,7 @@ TESTSUITE(output_formatter)
     ASSERT_INTEGER_WRITE(unsigned, 4000000000);
   }
 
-  TEST(illegal_subst)
+  TEST(string_with_illegal_chars_gets_substitutions)
   {
     static const char in[] =  "abc\x85" "def\xf0" "gh";
     static const char out[] =  "abc--illegal--def--illegal--gh";
@@ -213,7 +213,7 @@ TESTSUITE(output_formatter)
     ASSERT_TRUE(rv == sizeof(in) - 1);
   }
 
-  TEST(escape_and_illegal_subst)
+  TEST(escapes_are_honoured_and_and_illegal_chars_substituted)
   {
     static const char in[] =  "abc\x05" "def\xf0" "gh";
     static const char out[] =  "abc\\x05def--illegal--gh";
