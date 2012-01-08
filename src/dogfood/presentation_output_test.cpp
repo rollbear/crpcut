@@ -45,7 +45,11 @@ namespace {
   class test_write : public crpcut::posix_write
   {
   public:
-    MOCK_METHOD3(do_write, ssize_t(int, const void*, std::size_t));
+    MOCK_METHOD3(do_write, ssize_t(int, const char*, std::size_t));
+    ssize_t do_write(int i, const void* p, std::size_t s)
+    {
+      return do_write(i, (const char*)p, s);
+    }
   };
 
   class test_buffer : public crpcut::output::buffer
@@ -61,9 +65,9 @@ namespace {
   class fix
   {
   protected:
-    test_buffer buffer;
-    test_poller poller;
-    test_write writer;
+    StrictMock<test_buffer> buffer;
+    StrictMock<test_poller> poller;
+    StrictMock<test_write> writer;
   };
 }
 TESTSUITE(presentation_output)
@@ -111,7 +115,7 @@ TESTSUITE(presentation_output)
     EXPECT_CALL(buffer, get_buffer())
       .InSequence(seq)
       .WillOnce(Return(buff_data[0]));
-    EXPECT_CALL(writer, do_write(10, "hej hopp alla", 13))
+    EXPECT_CALL(writer, do_write(10, StartsWith("hej hopp alla"), 13))
       .InSequence(seq)
       .WillOnce(Return(10));
     bool rv = obj.write();
@@ -121,7 +125,7 @@ TESTSUITE(presentation_output)
     EXPECT_CALL(buffer, get_buffer())
       .InSequence(seq)
       .WillOnce(Return(buff_data[0]));
-    EXPECT_CALL(writer, do_write(10, "lla", 3))
+    EXPECT_CALL(writer, do_write(10, StartsWith("lla"), 3))
       .InSequence(seq)
       .WillOnce(Return(3));
     EXPECT_CALL(buffer, advance())
@@ -129,7 +133,7 @@ TESTSUITE(presentation_output)
     EXPECT_CALL(buffer, get_buffer())
       .InSequence(seq)
       .WillOnce(Return(buff_data[1]));
-    EXPECT_CALL(writer, do_write(10, "barnen i bullerbyn", 18))
+    EXPECT_CALL(writer, do_write(10, StartsWith("barnen i bullerbyn"), 18))
       .InSequence(seq)
       .WillOnce(Return(18));
     EXPECT_CALL(buffer, advance())
