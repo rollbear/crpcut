@@ -104,6 +104,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/fixed_string_test.cpp
      src/dogfood/list_elem_test.cpp
      src/dogfood/output/heap_buffer_test.cpp
+     src/dogfood/output/formatter_test.cpp
      src/dogfood/output/text_modifier_test.cpp
      src/dogfood/output/writer_test.cpp
      src/dogfood/posix_error_test.cpp

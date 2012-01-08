@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,25 +24,34 @@
  * SUCH DAMAGE.
  */
 
+#include "../../output/formatter.hpp"
 
-#include "formatter.hpp"
+template <size_t N>
+crpcut::fixed_string mks(const char (&f)[N])
+{
+  crpcut::fixed_string rv = { f, N - 1 };
+  return rv;
+}
 
-namespace crpcut {
-  namespace output {
+#define S(x) mks("\"" #x "\"")
 
-    const fixed_string &formatter::phase_str(test_phase phase)
+TESTSUITE(output)
+{
+  TESTSUITE(formatter)
+  {
+    class access : public crpcut::output::formatter
     {
-#define MK_QFIXSTR(s) { "\"" #s "\"", sizeof(#s) + 1 }
-      static const fixed_string str[] = {
-        CRPCUT_TEST_PHASES(MK_QFIXSTR)
-      };
-      return str[phase];
-    }
-
-    formatter
-    ::~formatter()
+    public:
+      using crpcut::output::formatter::phase_str;
+    };
+    TEST(phase_strings_are_correct)
     {
+      typedef access a;
+      ASSERT_TRUE(a::phase_str(crpcut::creating)    == S(creating));
+      ASSERT_TRUE(a::phase_str(crpcut::running)     == S(running));
+      ASSERT_TRUE(a::phase_str(crpcut::destroying)  == S(destroying));
+      ASSERT_TRUE(a::phase_str(crpcut::post_mortem) == S(post_mortem));
+      ASSERT_TRUE(a::phase_str(crpcut::child)       == S(child));
     }
-
   }
 }
