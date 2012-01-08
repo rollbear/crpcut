@@ -61,14 +61,22 @@ file(GLOB LIB_SRCS
      src/fsfuncs.cpp
      src/heap.cpp
      src/namespace_info.cpp
-     src/output/heap_buffer.cpp
      src/output/formatter.cpp
+     src/output/heap_buffer.cpp
      src/output/text_formatter.cpp
      src/output/text_modifier.cpp
      src/output/writer.cpp
      src/output/xml_formatter.cpp
      src/pipe_pair.cpp
+     src/policies/deaths/no_action.cpp
+     src/policies/deaths/none.cpp
+     src/policies/deaths/wipe_working_dir.cpp
+     src/policies/dependencies/base.cpp
+     src/policies/exception_translator.cpp
+     src/policies/no_core_file.cpp
      src/policies/policies.cpp
+     src/policies/timeout/cputime_enforcer.cpp
+     src/policies/timeout/monotonic_enforcer.cpp
      src/poll_singleton.cpp
      src/posix_error.cpp
      src/posix_write.cpp
@@ -79,8 +87,8 @@ file(GLOB LIB_SRCS
      src/report_reader.cpp
      src/scope/scope.cpp
      src/tag.cpp
-     src/tag_info.cpp
      src/tag_filter.cpp
+     src/tag_info.cpp
      src/test_case_base.cpp
      src/test_case_factory.cpp
      src/test_case_registrator.cpp
@@ -89,7 +97,6 @@ file(GLOB LIB_SRCS
      src/test_wrapper.cpp
      src/text_writer.cpp
      src/wrapped/posix_encapsulation.cpp
-     src/xml.cpp
 )
 include_directories(include)
 file(GLOB DOGFOOD_SRCS
