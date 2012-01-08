@@ -94,7 +94,7 @@ TESTSUITE(text_modifier)
   {
   protected:
     fix() : writer(buff, "UTF-8", "--illegal--") {}
-    test_buffer buff;
+    StrictMock<test_buffer> buff;
     crpcut::output::writer writer;
     Sequence seq;
   };
@@ -156,10 +156,12 @@ TESTSUITE(text_modifier)
     modifier.write_to(writer, text_modifier::NCFAILED);
     modifier.write_to(writer, text_modifier::FAILED_SUM);
     modifier.write_to(writer, text_modifier::NCFAILED_SUM);
+    Mock::VerifyAndClearExpectations(&buff);
 
     EXPECT_CALL(buff, write(StartsWith("0"), 1)).Times(1);
     modifier.write_to(writer, text_modifier::NORMAL);
-    EXPECT_CALL(buff, write(_,_)).Times(0);
+    Mock::VerifyAndClearExpectations(&buff);
+
     modifier.write_to(writer, text_modifier::PASSED);
     modifier.write_to(writer, text_modifier::NCPASSED);
     modifier.write_to(writer, text_modifier::BLOCKED);
@@ -180,10 +182,12 @@ TESTSUITE(text_modifier)
     EXPECT_CALL(buff, write(StartsWith("F"), 1)).Times(2);
     modifier.write_to(writer, text_modifier::NCFAILED);
     modifier.write_to(writer, text_modifier::NCFAILED_SUM);
+    Mock::VerifyAndClearExpectations(&buff);
 
     EXPECT_CALL(buff, write(StartsWith("0"), 1)).Times(1);
     modifier.write_to(writer, text_modifier::NORMAL);
-    EXPECT_CALL(buff, write(_,_)).Times(0);
+    Mock::VerifyAndClearExpectations(&buff);
+
     modifier.write_to(writer, text_modifier::FAILED_SUM);
     modifier.write_to(writer, text_modifier::FAILED);
     modifier.write_to(writer, text_modifier::PASSED);
