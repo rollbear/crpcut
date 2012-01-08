@@ -146,7 +146,7 @@ namespace crpcut {
 
   template <typename T, size_t N>
   inline
-  typename poll<T>::descriptor
+  typename poll_fixed_array<T, N>::descriptor
   poll_fixed_array<T, N>
   ::do_wait(int timeout_ms)
   {
