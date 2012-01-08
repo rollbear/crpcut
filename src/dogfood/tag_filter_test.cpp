@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-#include "tag_filter.hpp"
+#include "../tag_filter.hpp"
 
 std::ostream &operator<<(std::ostream &os, crpcut::tag::importance i)
 {
@@ -43,7 +43,7 @@ namespace {
   {
   public:
     test_tag(std::string name, crpcut::tag* root)
-      : crpcut::tag(name.length(), root),
+      : crpcut::tag(int(name.length()), root),
         name_(name) {}
     virtual const char *get_name() const { return name_.c_str(); }
   private:

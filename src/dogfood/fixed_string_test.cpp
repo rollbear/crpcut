@@ -25,34 +25,43 @@
  */
 
 #include <crpcut.hpp>
-#include "posix_error.hpp"
+#include "../fixed_string.hpp"
 
-
-namespace {
-  static const char re[] = ".*permi\\(tted\\|ssion\\).*from shame shame shame";
-}
-
-TESTSUITE(posix_error)
+TESTSUITE(fixed_string)
 {
-  using crpcut::posix_error;
-  
-  TEST(construction_and_what_string)
+  static const char common_val[] = "lemur";
+  static const crpcut::fixed_string zero = { 0, 0 };
+  static const crpcut::fixed_string no_len = { "apa", 0 };
+  static const crpcut::fixed_string lemur = { common_val, 5 };
+  static const crpcut::fixed_string lem = { common_val, 3 };
+
+  TEST(zero_initialized_string_is_false)
   {
-    posix_error p(EPERM, "shame shame shame");
-    std::string what = p.what();
-    ASSERT_PRED(crpcut::match<crpcut::regex>(re), what);
+    ASSERT_FALSE(zero);
   }
 
-  TEST(copy_construction)
+  TEST(zero_len_string_is_false)
   {
-    posix_error *pp;
-    {
-      const posix_error p(EPERM, "shame shame shame");
-      pp = new posix_error(p);
-      const char *nullstr = 0;
-      ASSERT_TRUE(p.what() == nullstr);
-    }
-    ASSERT_PRED(crpcut::match<crpcut::regex>(re), pp->what());
-    delete pp;
+    ASSERT_FALSE(no_len);
+  }
+
+  TEST(two_empty_strings_are_equal)
+  {
+    ASSERT_TRUE(zero == no_len);
+    ASSERT_FALSE(zero != no_len);
+  }
+
+  TEST(substrings_are_inequal)
+  {
+    ASSERT_FALSE(lemur == lem);
+    ASSERT_TRUE(lemur != lem);
+    ASSERT_FALSE(lemur == zero);
+    ASSERT_TRUE(lemur != zero);
+    ASSERT_FALSE(lemur == no_len);
+    ASSERT_TRUE(lemur != no_len);
+    ASSERT_FALSE(lem == zero);
+    ASSERT_TRUE(lem != zero);
+    ASSERT_FALSE(lem == no_len);
+    ASSERT_TRUE(lem != no_len);
   }
 }

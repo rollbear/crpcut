@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 -2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,25 +24,35 @@
  * SUCH DAMAGE.
  */
 
+#ifndef OUTPUT_HEAP_BUFFER_HPP
+#define OUTPUT_HEAP_BUFFER_HPP
 
-#include "output_formatter.hpp"
+#include "buffer.hpp"
 
 namespace crpcut {
   namespace output {
-
-    const fixed_string &formatter::phase_str(test_phase phase)
+    class heap_buffer : public buffer
     {
-#define MK_QFIXSTR(s) { "\"" #s "\"", sizeof(#s) + 1 }
-      static const fixed_string str[] = {
-        CRPCUT_TEST_PHASES(MK_QFIXSTR)
-      };
-      return str[phase];
-    }
+    public:
+      heap_buffer();
+      ~heap_buffer();
+      virtual std::pair<const char*, std::size_t> get_buffer() const;
+      virtual void advance();
+      virtual ssize_t write(const char *buff, std::size_t len);
+      virtual bool is_empty() const;
+    private:
+      heap_buffer(const buffer&);
+      heap_buffer& operator=(const heap_buffer&);
 
-    formatter
-    ::~formatter()
-    {
-    }
+      struct block;
+
+
+      block  *head_;
+      block **current_;
+    };
+
 
   }
 }
+
+#endif // OUTPUT_HEAP_BUFFER_HPP

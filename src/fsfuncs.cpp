@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  */
 
 #include "fsfuncs.hpp"
-#include "posix_encapsulation.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 extern "C" {
 #  include <dirent.h>
 }

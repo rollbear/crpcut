@@ -27,7 +27,7 @@
 #ifndef OUTPUT_WRITER_HPP
 #define OUTPUT_WRITER_HPP
 
-#include "fixed_string.hpp"
+#include "../fixed_string.hpp"
 #include <iosfwd>
 extern "C"
 {

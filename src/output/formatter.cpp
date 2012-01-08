@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011 -2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,44 +24,25 @@
  * SUCH DAMAGE.
  */
 
-#include <crpcut.hpp>
-#include "fixed_string.hpp"
 
-TESTSUITE(fixed_string)
-{
-  static const char common_val[] = "lemur";
-  static const crpcut::fixed_string zero = { 0, 0 };
-  static const crpcut::fixed_string no_len = { "apa", 0 };
-  static const crpcut::fixed_string lemur = { common_val, 5 };
-  static const crpcut::fixed_string lem = { common_val, 3 };
+#include "formatter.hpp"
 
-  TEST(zero_initialized_string_is_false)
-  {
-    ASSERT_FALSE(zero);
-  }
+namespace crpcut {
+  namespace output {
 
-  TEST(zero_len_string_is_false)
-  {
-    ASSERT_FALSE(no_len);
-  }
+    const fixed_string &formatter::phase_str(test_phase phase)
+    {
+#define MK_QFIXSTR(s) { "\"" #s "\"", sizeof(#s) + 1 }
+      static const fixed_string str[] = {
+        CRPCUT_TEST_PHASES(MK_QFIXSTR)
+      };
+      return str[phase];
+    }
 
-  TEST(two_empty_strings_are_equal)
-  {
-    ASSERT_TRUE(zero == no_len);
-    ASSERT_FALSE(zero != no_len);
-  }
+    formatter
+    ::~formatter()
+    {
+    }
 
-  TEST(substrings_are_inequal)
-  {
-    ASSERT_FALSE(lemur == lem);
-    ASSERT_TRUE(lemur != lem);
-    ASSERT_FALSE(lemur == zero);
-    ASSERT_TRUE(lemur != zero);
-    ASSERT_FALSE(lemur == no_len);
-    ASSERT_TRUE(lemur != no_len);
-    ASSERT_FALSE(lem == zero);
-    ASSERT_TRUE(lem != zero);
-    ASSERT_FALSE(lem == no_len);
-    ASSERT_TRUE(lem != no_len);
   }
 }

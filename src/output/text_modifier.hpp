@@ -27,8 +27,8 @@
 #ifndef TEXT_MODIFIER_HPP
 #define TEXT_MODIFIER_HPP
 
-#include "fixed_string.hpp"
-#include "posix_encapsulation.hpp"
+#include "../fixed_string.hpp"
+#include "../wrapped/posix_encapsulation.hpp"
 #include <iosfwd>
 #define DECORATORS(x)                           \
   x(NORMAL),                                    \

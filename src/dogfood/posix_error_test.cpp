@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,35 +24,35 @@
  * SUCH DAMAGE.
  */
 
-#ifndef OUTPUT_HEAP_BUFFER_HPP
-#define OUTPUT_HEAP_BUFFER_HPP
-
-#include "output_buffer.hpp"
-
-namespace crpcut {
-  namespace output {
-    class heap_buffer : public buffer
-    {
-    public:
-      heap_buffer();
-      ~heap_buffer();
-      virtual std::pair<const char*, std::size_t> get_buffer() const;
-      virtual void advance();
-      virtual ssize_t write(const char *buff, std::size_t len);
-      virtual bool is_empty() const;
-    private:
-      heap_buffer(const buffer&);
-      heap_buffer& operator=(const heap_buffer&);
-
-      struct block;
+#include <crpcut.hpp>
+#include "../posix_error.hpp"
 
 
-      block  *head_;
-      block **current_;
-    };
-
-
-  }
+namespace {
+  static const char re[] = ".*permi\\(tted\\|ssion\\).*from shame shame shame";
 }
 
-#endif // OUTPUT_HEAP_BUFFER_HPP
+TESTSUITE(posix_error)
+{
+  using crpcut::posix_error;
+
+  TEST(construction_and_what_string)
+  {
+    posix_error p(EPERM, "shame shame shame");
+    std::string what = p.what();
+    ASSERT_PRED(crpcut::match<crpcut::regex>(re), what);
+  }
+
+  TEST(copy_construction)
+  {
+    posix_error *pp;
+    {
+      const posix_error p(EPERM, "shame shame shame");
+      pp = new posix_error(p);
+      const char *nullstr = 0;
+      ASSERT_TRUE(p.what() == nullstr);
+    }
+    ASSERT_PRED(crpcut::match<crpcut::regex>(re), pp->what());
+    delete pp;
+  }
+}

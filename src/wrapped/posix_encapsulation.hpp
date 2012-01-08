@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
 
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ extern "C" {
 #  include <stdarg.h>
 }
 
-#include "posix_write.hpp"
+#include "../posix_write.hpp"
 
 namespace crpcut {
   namespace wrapped {

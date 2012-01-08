@@ -25,10 +25,10 @@
  */
 
 #include <crpcut.hpp>
-#include "list_elem.hpp"
+#include "../list_elem.hpp"
 
 template <typename T, size_t N>
-size_t size(T (&f)[N])
+size_t size(T (&)[N])
 {
   return N;
 }

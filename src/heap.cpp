@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
 
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-#include "posix_encapsulation.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 #ifdef HAVE_VALGRIND
 #include <valgrind/valgrind.h>
 #include <valgrind/memcheck.h>

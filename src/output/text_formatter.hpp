@@ -24,25 +24,36 @@
  * SUCH DAMAGE.
  */
 
-#ifndef XML_FORMATTER_HPP
-#define XML_FORMATTER_HPP
+#ifndef TEXT_FORMATTER_HPP
+#define TEXT_FORMATTER_HPP
 
-#include "output_formatter.hpp"
-#include "output_writer.hpp"
+#include <vector>
+#include "formatter.hpp"
+#include "writer.hpp"
 
 namespace crpcut {
   namespace output {
     class buffer;
-
-    class xml_formatter : public formatter,
-                          private writer
+    class text_modifier;
+    class text_formatter : public formatter,
+                           private writer
     {
+      struct tag_result
+      {
+        tag_result(std::string n, std::size_t p, std::size_t f, bool c)
+          : name(n), passed(p), failed(f), critical(c) {}
+        std::string name;
+        std::size_t passed;
+        std::size_t failed;
+        bool        critical;
+      };
+      std::vector<tag_result> tag_results;
     public:
-      xml_formatter(output::buffer &buffer,
-                    const char     *id,
-                    int             argc,
-                    const char     *argv[]);
-      virtual ~xml_formatter();
+      text_formatter(output::buffer &buffer,
+                     const char *,
+                     int,
+                     const char**,
+                     const text_modifier& = default_text_modifier());
       virtual void begin_case(const char *name,
                               std::size_t name_len,
                               bool        result,
@@ -62,21 +73,20 @@ namespace crpcut {
                               unsigned num_run,
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);
-      virtual void blocked_test(const crpcut_test_case_registrator*);
+      virtual void blocked_test(const crpcut_test_case_registrator *i);
       virtual void tag_summary(const char *tag_name,
                                std::size_t num_passed,
                                std::size_t num_failed,
                                bool        critical);
     private:
-      virtual fixed_string escape(char c) const;
-      void make_closed();
+      static const text_modifier& default_text_modifier();
+      void display_tag_list_header();
 
-      std::size_t non_critical_fail_sum;
-      bool        last_closed_;
-      bool        blocked_tests_;
-      bool        tag_summary_;
+      bool                 did_output_;
+      bool                 blocked_tests_;
+      writer::type         conversion_type_;
+      const text_modifier &modifier_;
     };
   }
 }
-
-#endif // XML_FORMATTER_HPP
+#endif // TEXT_FORMATTER_HPP

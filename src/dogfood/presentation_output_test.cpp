@@ -26,11 +26,11 @@
 
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
-#include "presentation_output.hpp"
-#include "poll.hpp"
-#include "posix_write.hpp"
-#include "output_buffer.hpp"
-#include "io.hpp"
+#include "../presentation_output.hpp"
+#include "../poll.hpp"
+#include "../posix_write.hpp"
+#include "../output/buffer.hpp"
+#include "../io.hpp"
 namespace {
   using namespace testing;
   class test_poller : public crpcut::poll<crpcut::io>

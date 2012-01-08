@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include "posix_encapsulation.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 #include "test_case_result.hpp"
 #include "fix_allocator.hpp"
 namespace crpcut {

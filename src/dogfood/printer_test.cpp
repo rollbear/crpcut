@@ -25,8 +25,8 @@
  */
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
-#include "printer.hpp"
-#include "output_formatter.hpp"
+#include "../printer.hpp"
+#include "../output/formatter.hpp"
 
 TESTSUITE(printer)
 {

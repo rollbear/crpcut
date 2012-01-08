@@ -24,50 +24,59 @@
  * SUCH DAMAGE.
  */
 
-#ifndef OUTPUT_FORMATTER_HPP
-#define OUTPUT_FORMATTER_HPP
+#ifndef XML_FORMATTER_HPP
+#define XML_FORMATTER_HPP
 
+#include "formatter.hpp"
+#include "writer.hpp"
 
-#include "fixed_string.hpp"
-#include <crpcut.hpp>
-#include <iosfwd>
 namespace crpcut {
   namespace output {
     class buffer;
 
-    class formatter
+    class xml_formatter : public formatter,
+                          private writer
     {
     public:
-      virtual void begin_case(const char  *name,
-                              std::size_t  name_len,
-                              bool         result,
-                              bool         critical) = 0;
-      virtual void end_case()  = 0;
-      virtual void terminate(test_phase   phase,
-                             const char  *msg,
-                             std::size_t  msg_len,
-                             const char  *dirname = 0,
-                             std::size_t  dn_len = 0) = 0;
-      virtual void print(const char  *tag,
-                         std::size_t  tlen,
-                         const char  *data,
-                         std::size_t  dlen) = 0;
+      xml_formatter(output::buffer &buffer,
+                    const char     *id,
+                    int             argc,
+                    const char     *argv[]);
+      virtual ~xml_formatter();
+      virtual void begin_case(const char *name,
+                              std::size_t name_len,
+                              bool        result,
+                              bool        critical);
+      virtual void end_case();
+      virtual void terminate(test_phase phase,
+                             const char *msg,
+                             std::size_t msg_len,
+                             const char *dirname = 0,
+                             std::size_t dn_len = 0);
+      virtual void print(const char *tag,
+                         std::size_t tlen,
+                         const char *data,
+                         std::size_t dlen);
       virtual void statistics(unsigned num_registered,
                               unsigned num_selected,
                               unsigned num_run,
-                              unsigned num_failed) = 0;
-      virtual void nonempty_dir(const  char*)  = 0;
-      virtual void blocked_test(const crpcut_test_case_registrator *)  = 0;
+                              unsigned num_failed);
+      virtual void nonempty_dir(const char *s);
+      virtual void blocked_test(const crpcut_test_case_registrator*);
       virtual void tag_summary(const char *tag_name,
                                std::size_t num_passed,
                                std::size_t num_failed,
-                               bool        critical) = 0;
-      virtual ~formatter();
-    protected:
-      static const fixed_string &phase_str(test_phase);
-    };
+                               bool        critical);
+    private:
+      virtual fixed_string escape(char c) const;
+      void make_closed();
 
+      std::size_t non_critical_fail_sum;
+      bool        last_closed_;
+      bool        blocked_tests_;
+      bool        tag_summary_;
+    };
   }
 }
 
-#endif // OUTPUT_FORMATTER_HPP
+#endif // XML_FORMATTER_HPP

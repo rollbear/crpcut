@@ -25,7 +25,7 @@
  */
 
 #include "xml_formatter.hpp"
-#include "posix_encapsulation.hpp"
+#include "../wrapped/posix_encapsulation.hpp"
 
 namespace {
   inline const char *xml_replacement(const char *p)

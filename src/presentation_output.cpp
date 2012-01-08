@@ -25,8 +25,8 @@
  */
 
 #include "presentation_output.hpp"
-#include "output_buffer.hpp"
-#include "posix_encapsulation.hpp"
+#include "output/buffer.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 #include "poll.hpp"
 
 namespace crpcut {

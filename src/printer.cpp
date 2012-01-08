@@ -25,7 +25,7 @@
  */
 
 #include "printer.hpp"
-#include "output_formatter.hpp"
+#include "output/formatter.hpp"
 
 namespace crpcut {
   printer

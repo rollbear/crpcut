@@ -25,18 +25,18 @@
  */
 
 #include <crpcut.hpp>
-#include "posix_encapsulation.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
 #include "tag_filter.hpp"
 #include "poll.hpp"
 #include "poll_singleton.hpp"
 #include "fsfuncs.hpp"
 #include "pipe_pair.hpp"
-#include "output_heap_buffer.hpp"
+#include "output/heap_buffer.hpp"
 #include <algorithm>
 #include "presentation.hpp"
-#include "xml_formatter.hpp"
-#include "text_formatter.hpp"
+#include "output/xml_formatter.hpp"
+#include "output/text_formatter.hpp"
 extern "C" {
 #  include <sys/time.h>
 #  include <fcntl.h>

@@ -25,8 +25,8 @@
  */
 
 #include <crpcut.hpp>
-#include "output_writer.hpp"
-#include "output_buffer.hpp"
+#include "../../output/writer.hpp"
+#include "../../output/buffer.hpp"
 TESTSUITE(output_writer)
 {
   class empty_writer : public crpcut::output::writer

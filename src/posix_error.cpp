@@ -25,7 +25,7 @@
  */
 
 #include "posix_error.hpp"
-#include "posix_encapsulation.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 
 namespace crpcut {
   posix_error

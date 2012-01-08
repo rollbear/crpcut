@@ -24,9 +24,9 @@
  * SUCH DAMAGE.
  */
 
-#include "output_writer.hpp"
-#include "output_buffer.hpp"
-#include "posix_encapsulation.hpp"
+#include "writer.hpp"
+#include "buffer.hpp"
+#include "../wrapped/posix_encapsulation.hpp"
 extern "C" {
 #  include <iconv.h>
 }

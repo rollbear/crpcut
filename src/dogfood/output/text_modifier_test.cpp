@@ -23,12 +23,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+
 #include <gmock/gmock.h>
-#include "text_modifier.hpp"
 #include <crpcut.hpp>
+#include "../../output/writer.hpp"
+#include "../../output/buffer.hpp"
+#include "../../output/text_modifier.hpp"
 #include <sstream>
-#include "output_writer.hpp"
-#include "output_buffer.hpp"
 
 
 TESTSUITE(text_modifier)

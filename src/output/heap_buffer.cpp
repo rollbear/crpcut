@@ -24,8 +24,8 @@
  * SUCH DAMAGE.
  */
 
-#include "output_heap_buffer.hpp"
-#include "posix_encapsulation.hpp"
+#include "heap_buffer.hpp"
+#include "../wrapped/posix_encapsulation.hpp"
 
 namespace crpcut {
   namespace output {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,8 @@
  */
 
 #include <crpcut.hpp>
-#include "posix_encapsulation.hpp"
-#include "clocks.hpp"
+#include "wrapped/posix_encapsulation.hpp"
+#include "clocks/clocks.hpp"
 #include "fsfuncs.hpp"
 extern "C" {
 #include <sys/time.h>

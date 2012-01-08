@@ -28,11 +28,11 @@
 #include "presentation_output.hpp"
 #include "presentation_reader.hpp"
 #include "pipe_pair.hpp"
-#include "posix_encapsulation.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
 #include "io.hpp"
 #include "poll_fixed_array.hpp"
-#include "output_buffer.hpp"
+#include "output/buffer.hpp"
 
 namespace crpcut {
 

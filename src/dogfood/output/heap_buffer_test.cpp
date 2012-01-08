@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-#include "output_heap_buffer.hpp"
+#include "../../output/heap_buffer.hpp"
 
 namespace {
   const char data[] = "abcdefghijklmnopqrstuvwxyz12345";

@@ -51,9 +51,9 @@ endif (CRPCUT_LIB_ALIAS_VERSION)
 set(SHAREDIR "share/crpcut-${CRPCUT_LIB_VERSION}")
 file(GLOB LIB_SRCS
      src/check_name.cpp
-     src/clocks.cpp
+     src/clocks/clocks.cpp
      src/collate_result.cpp
-     src/comm_reporter.cpp
+     src/comm/reporter.cpp
      src/convert_traits.cpp
      src/crpcut.cpp
      src/event.cpp
@@ -61,14 +61,15 @@ file(GLOB LIB_SRCS
      src/fsfuncs.cpp
      src/heap.cpp
      src/namespace_info.cpp
-     src/output.cpp
-     src/output_heap_buffer.cpp
-     src/output_formatter.cpp
-     src/output_writer.cpp
+     src/output/heap_buffer.cpp
+     src/output/formatter.cpp
+     src/output/text_formatter.cpp
+     src/output/text_modifier.cpp
+     src/output/writer.cpp
+     src/output/xml_formatter.cpp
      src/pipe_pair.cpp
-     src/policies.cpp
+     src/policies/policies.cpp
      src/poll_singleton.cpp
-     src/posix_encapsulation.cpp
      src/posix_error.cpp
      src/posix_write.cpp
      src/presentation.cpp
@@ -76,7 +77,7 @@ file(GLOB LIB_SRCS
      src/presentation_reader.cpp
      src/printer.cpp
      src/report_reader.cpp
-     src/scope.cpp
+     src/scope/scope.cpp
      src/tag.cpp
      src/tag_info.cpp
      src/tag_filter.cpp
@@ -86,25 +87,23 @@ file(GLOB LIB_SRCS
      src/test_case_result.cpp
      src/test_suite_base.cpp
      src/test_wrapper.cpp
-     src/text_formatter.cpp
-     src/text_modifier.cpp
      src/text_writer.cpp
+     src/wrapped/posix_encapsulation.cpp
      src/xml.cpp
-     src/xml_formatter.cpp
 )
 include_directories(include)
 file(GLOB DOGFOOD_SRCS
-     src/dogfood.cpp
-     src/output_heap_buffer_test.cpp
-     src/list_elem_test.cpp
-     src/fixed_string_test.cpp
-     src/tag_filter_test.cpp,
-     src/posix_error_test.cpp
-     src/output_writer_test.cpp
-     src/presentation_output_test.cpp
-     src/printer_test.cpp
-     src/text_modifier_test.cpp)
-
+     src/dogfood/dogfood.cpp
+     src/dogfood/fixed_string_test.cpp
+     src/dogfood/list_elem_test.cpp
+     src/dogfood/output/heap_buffer_test.cpp
+     src/dogfood/output/text_modifier_test.cpp
+     src/dogfood/output/writer_test.cpp
+     src/dogfood/posix_error_test.cpp
+     src/dogfood/presentation_output_test.cpp
+     src/dogfood/printer_test.cpp
+     src/dogfood/tag_filter_test.cpp
+)
 if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)
 endif (NOT CMAKE_INSTALL_PREFIX)

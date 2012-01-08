@@ -25,7 +25,7 @@
  */
 
 #include "text_modifier.hpp"
-#include "output_writer.hpp"
+#include "writer.hpp"
 #include <stdexcept>
 
 #define MK_F_STR(x) { #x, sizeof(#x) - 1 }

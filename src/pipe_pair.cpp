@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include "posix_encapsulation.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
 #include "pipe_pair.hpp"
 

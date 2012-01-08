@@ -25,8 +25,8 @@
  */
 
 #include <crpcut.hpp>
-#include "clocks.hpp"
-#include "posix_encapsulation.hpp"
+#include "clocks/clocks.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 
 namespace crpcut {
 
