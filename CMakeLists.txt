@@ -102,6 +102,7 @@ file(GLOB DOGFOOD_SRCS
      src/posix_error_test.cpp
      src/output_writer_test.cpp
      src/presentation_output_test.cpp
+     src/printer_test.cpp
      src/text_modifier_test.cpp)
 
 if (NOT CMAKE_INSTALL_PREFIX)
