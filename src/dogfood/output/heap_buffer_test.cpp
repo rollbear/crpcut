@@ -47,48 +47,50 @@ namespace {
   }
 }
 
-TESTSUITE(output_buffer)
+TESTSUITE(output)
 {
-
-  using crpcut::output::heap_buffer;
-
-  TEST(default_constructed_buffer_is_empty)
+  TESTSUITE(buffer)
   {
-    heap_buffer b;
-    ASSERT_TRUE(b.is_empty());
-    std::pair<const char*, std::size_t> r = b.get_buffer();
-    static const char *const zerostr = 0;
-    ASSERT_TRUE(r.first == zerostr);
-    ASSERT_TRUE(r.second == 0U);
-    b.advance();
-  }
+    using crpcut::output::heap_buffer;
 
-  TEST(block_handling)
-  {
-    ASSERT_SCOPE_HEAP_LEAK_FREE
+    TEST(default_constructed_buffer_is_empty)
     {
       heap_buffer b;
-      fill_buffer(b);
-      const char *p = data;
-      while (!b.is_empty())
+      ASSERT_TRUE(b.is_empty());
+      std::pair<const char*, std::size_t> r = b.get_buffer();
+      static const char *const zerostr = 0;
+      ASSERT_TRUE(r.first == zerostr);
+      ASSERT_TRUE(r.second == 0U);
+      b.advance();
+    }
+
+    TEST(block_handling)
+    {
+      ASSERT_SCOPE_HEAP_LEAK_FREE
         {
-          std::pair<const char*, std::size_t> m = b.get_buffer();
-          for (std::size_t n = 0U; n < m.second; ++n)
+          heap_buffer b;
+          fill_buffer(b);
+          const char *p = data;
+          while (!b.is_empty())
             {
-              ASSERT_TRUE(m.first[n] == *p);
-              if (++p == data + sizeof(data) - 1) p = data;
+              std::pair<const char*, std::size_t> m = b.get_buffer();
+              for (std::size_t n = 0U; n < m.second; ++n)
+                {
+                  ASSERT_TRUE(m.first[n] == *p);
+                  if (++p == data + sizeof(data) - 1) p = data;
+                }
+              b.advance();
             }
-          b.advance();
         }
     }
-  }
 
-  TEST(destructor_cleans_memory)
-  {
-    ASSERT_SCOPE_HEAP_LEAK_FREE
+    TEST(destructor_cleans_memory)
     {
-      heap_buffer b;
-      fill_buffer(b);
+      ASSERT_SCOPE_HEAP_LEAK_FREE
+        {
+          heap_buffer b;
+          fill_buffer(b);
+        }
     }
   }
 }
