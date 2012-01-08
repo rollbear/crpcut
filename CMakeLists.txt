@@ -85,7 +85,7 @@ file(GLOB LIB_SRCS
      src/presentation_reader.cpp
      src/printer.cpp
      src/report_reader.cpp
-     src/scope/scope.cpp
+     src/scope/time_base.cpp
      src/tag.cpp
      src/tag_filter.cpp
      src/tag_info.cpp
