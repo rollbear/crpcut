@@ -40,12 +40,14 @@ namespace {
             bool found = false;
             tag_list::iterator e = tag_list::iterator(&l);
             tag_list::iterator i = e;
-            do 
+            do
               {
-                const char *n = i->get_name();
+                crpcut::datatypes::fixed_string name = i->get_name();
+                const char *n = name.str;
+                const char *name_end = n + name.len;
                 const char *t = begin;
                 while (t != p && *t == *n) { ++t; ++n; }
-                if (t == p && *n == 0) { found = true; break; }
+                if (t == p && n == name_end) { found = true; break; }
                 ++i;
               }
             while (i != e);
@@ -62,15 +64,16 @@ namespace {
       }
   }
 
-  bool match_name(const char *name,
+  bool match_name(crpcut::datatypes::fixed_string name,
                   const char *begin, const char *end)
   {
     const char *i = begin;
+    const char *n = name.str;
     while (i != end)
       {
         int idx = 0;
-        while (i + idx != end && i[idx] != ',' && i[idx] == name[idx]) ++idx;
-        if (name[idx] == 0 && (i + idx == end || i[idx] == ',')) return true;
+        while (i + idx != end && i[idx] != ',' && i[idx] == n[idx]) ++idx;
+        if (idx == name.len && (i + idx == end || i[idx] == ',')) return true;
         while (i != end && *i++ != ',')
           ;
       }
@@ -108,7 +111,7 @@ namespace crpcut {
 
   tag::importance
   tag_filter
-  ::lookup(const char *name) const
+  ::lookup(datatypes::fixed_string name) const
   {
     if (begin_select != end_select) {
       if (match_name(name, begin_select, end_select) == subtract_select)
@@ -116,7 +119,7 @@ namespace crpcut {
           return tag::ignored;
         }
     }
-    if (*name && begin_noncritical != end_noncritical)
+    if (name && begin_noncritical != end_noncritical)
       {
         bool match = match_name(name, begin_noncritical, end_noncritical);
         if (match != subtract_noncritical)

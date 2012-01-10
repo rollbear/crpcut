@@ -1698,9 +1698,9 @@ def check_run(command, tests)
   end
   if expected_failed != fails
   then
-    printf "\n  Expected %s fails, but report summary says %s"
-           % "#{expected_failed}"
-           % "#{fails}"
+    printf("\n  Expected %s fails, but report summary says %s",
+           expected_failed,
+           fails)
   end
   if expected_passed != passed
   then

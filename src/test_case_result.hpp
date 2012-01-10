@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,15 +37,13 @@ namespace crpcut {
     ~test_case_result();
     void *operator new(size_t);
     void operator delete(void *p);
-    pid_t            id;
-    bool             explicit_fail;
-    bool             success;
-    bool             nonempty_dir;
-    const char      *name;
-    size_t           name_len;
-    const char      *termination;
-    size_t           term_len;
-    list_elem<event> history;
+    pid_t                   id;
+    bool                    explicit_fail;
+    bool                    success;
+    bool                    nonempty_dir;
+    datatypes::fixed_string name;
+    datatypes::fixed_string termination;
+    list_elem<event>        history;
   private:
     test_case_result(const test_case_result& r);
     test_case_result& operator=(const test_case_result&r);

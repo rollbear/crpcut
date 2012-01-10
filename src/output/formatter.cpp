@@ -30,10 +30,10 @@
 namespace crpcut {
   namespace output {
 
-    const fixed_string &formatter::phase_str(test_phase phase)
+    const datatypes::fixed_string &formatter::phase_str(test_phase phase)
     {
 #define MK_QFIXSTR(s) { "\"" #s "\"", sizeof(#s) + 1 }
-      static const fixed_string str[] = {
+      static const datatypes::fixed_string str[] = {
         CRPCUT_TEST_PHASES(MK_QFIXSTR)
       };
       return str[phase];

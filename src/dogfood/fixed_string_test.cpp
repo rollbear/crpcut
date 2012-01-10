@@ -25,15 +25,15 @@
  */
 
 #include <crpcut.hpp>
-#include "../fixed_string.hpp"
+
 
 TESTSUITE(fixed_string)
 {
   static const char common_val[] = "lemur";
-  static const crpcut::fixed_string zero = { 0, 0 };
-  static const crpcut::fixed_string no_len = { "apa", 0 };
-  static const crpcut::fixed_string lemur = { common_val, 5 };
-  static const crpcut::fixed_string lem = { common_val, 3 };
+  static const crpcut::datatypes::fixed_string zero = { 0, 0 };
+  static const crpcut::datatypes::fixed_string no_len = { "apa", 0 };
+  static const crpcut::datatypes::fixed_string lemur = { common_val, 5 };
+  static const crpcut::datatypes::fixed_string lem = { common_val, 3 };
 
   TEST(zero_initialized_string_is_false)
   {

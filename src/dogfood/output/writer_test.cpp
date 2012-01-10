@@ -47,7 +47,8 @@ TESTSUITE(output)
       void statistics(unsigned, unsigned, unsigned, unsigned) {}
       void nonempty_dir(const char*) {}
       void blocked_test(const crpcut::crpcut_test_case_registrator *) {}
-      void tag_summary(const char *, std::size_t, std::size_t, bool) {}
+      void tag_summary(crpcut::datatypes::fixed_string,
+                       std::size_t, std::size_t, bool) {}
     public:
       typedef enum { no_escape, with_escape } escape_type;
       empty_writer(crpcut::output::buffer &buff,
@@ -59,15 +60,15 @@ TESTSUITE(output)
       {
       }
       using writer::write;
-      virtual crpcut::fixed_string escape(char c) const
+      virtual crpcut::datatypes::fixed_string escape(char c) const
       {
-        static const crpcut::fixed_string none = { 0, 0 };
+        static const crpcut::datatypes::fixed_string none = { 0, 0 };
         if (!escape_ || c < 0 || c >= ' ')
           {
             return none;
           }
         static char buff[] = "      ";
-        static crpcut::fixed_string esc = { buff, 4 };
+        static crpcut::datatypes::fixed_string esc = { buff, 4 };
         crpcut::stream::oastream out(buff);
         out << "\\x" << std::hex << std::setw(2) << std::setfill('0') << int(c);
         return esc;
@@ -129,7 +130,7 @@ TESTSUITE(output)
       }
     }
 
-    std::string str(crpcut::fixed_string s)
+    std::string str(crpcut::datatypes::fixed_string s)
     {
       return std::string(s.str, s.len);
     }

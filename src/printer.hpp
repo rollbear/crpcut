@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
 #ifndef PRINTER_HPP
 #define PRINTER_HPP
 
+#include <crpcut.hpp>
 #include <memory>
 namespace crpcut {
   namespace output {
@@ -36,14 +37,13 @@ namespace crpcut {
   class printer
   {
   public:
-    printer(output::formatter& o_,
-            const char *name,
-            std::size_t n_len,
-            bool        result,
-            bool        critical);
+    printer(output::formatter      &o,
+            datatypes::fixed_string name,
+            bool                    result,
+            bool                    critical);
     ~printer();
   private:
-    output::formatter &o;
+    output::formatter &o_;
   };
 }
 

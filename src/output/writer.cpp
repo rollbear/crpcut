@@ -85,7 +85,7 @@ namespace crpcut {
       std::size_t prev_n = 0;
       for (std::size_t n = 0; n < len; ++n)
         {
-          const fixed_string esc = escape(str[n]);
+          const datatypes::fixed_string esc = escape(str[n]);
           if (!esc) continue;
           do_write_converted(str + prev_n, n - prev_n);
           prev_n = n + 1;
@@ -95,11 +95,11 @@ namespace crpcut {
       return len;
     }
 
-    fixed_string
+    datatypes::fixed_string
     writer
     ::escape(char) const
     {
-      static fixed_string no_escape = { 0, 0 };
+      static datatypes::fixed_string no_escape = { 0, 0 };
       return no_escape;
     }
 

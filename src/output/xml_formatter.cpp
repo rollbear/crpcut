@@ -111,13 +111,13 @@ namespace crpcut {
     {
     }
 
-    fixed_string
+    datatypes::fixed_string
     xml_formatter
     ::escape(char c) const
     {
       const char *illegal = xml_replacement(test_case_factory::get_illegal_rep());
       const std::size_t ill_len = wrapped::strlen(illegal);
-      fixed_string esc = { 0, 0 };
+      datatypes::fixed_string esc = { 0, 0 };
       switch (c)
         {
         case '\t' : break;
@@ -147,13 +147,12 @@ namespace crpcut {
 
     void
     xml_formatter
-    ::begin_case(const char *name,
-                 std::size_t name_len,
-                 bool        result,
-                 bool        critical)
+    ::begin_case(datatypes::fixed_string name,
+                 bool                    result,
+                 bool                    critical)
     {
       write("  <test name=\"");
-      write(name, name_len, translated);
+      write(name, translated);
       write("\" critical=\"");
       write(critical ? "true" : "false");
       write("\" result=");
@@ -178,51 +177,47 @@ namespace crpcut {
 
     void
     xml_formatter
-    ::terminate(test_phase  phase,
-                const char *msg,
-                std::size_t msg_len,
-                const char *dirname,
-                std::size_t dn_len)
+    ::terminate(test_phase              phase,
+                datatypes::fixed_string msg,
+                datatypes::fixed_string dirname)
     {
       make_closed();
       write("      <violation phase=");
-      const fixed_string &ps = phase_str(phase);
+      const datatypes::fixed_string &ps = phase_str(phase);
       write(ps.str, ps.len);
       if (dirname)
         {
           write(" nonempty_dir=\"");
-          write(dirname, dn_len, translated);
+          write(dirname, translated);
           write("\"");
         }
-      if (msg_len == 0)
+      if (!msg)
         {
           write("/>\n");
           return;
         }
       write(">");
-      write(msg, msg_len, translated);
+      write(msg, translated);
       write("</violation>\n");
     }
 
     void
     xml_formatter
-    ::print(const char *tag,
-            std::size_t tlen,
-            const char *data,
-            std::size_t dlen)
+    ::print(datatypes::fixed_string label,
+            datatypes::fixed_string data)
     {
       make_closed();
       write("    <");
-      write(tag, tlen);
-      if (dlen == 0)
+      write(label);
+      if (!label)
         {
           write("/>\n");
           return;
         }
       write(">");
-      write(data, dlen, translated);
+      write(data, translated);
       write("</");
-      write(tag);
+      write(label);
       write(">\n");
     }
 
@@ -272,28 +267,24 @@ namespace crpcut {
 
     void
     xml_formatter
-    ::blocked_test(const crpcut_test_case_registrator *i)
+    ::blocked_test(datatypes::fixed_string name)
     {
       if (!blocked_tests_)
         {
           write("  <blocked_tests>\n");
           blocked_tests_ = true;
         }
-      const std::size_t len = i->crpcut_full_name_len() + 1;
-      char *name = static_cast<char*>(alloca(len));
-      stream::oastream os(name, name + len);
       write("    <test name=\"");
-      os << *i;
-      write(os, translated);
+      write(name, translated);
       write("\"/>\n");
     }
 
     void
     xml_formatter
-    ::tag_summary(const char *tag_name,
-                  std::size_t num_passed,
-                  std::size_t num_failed,
-                  bool        critical)
+    ::tag_summary(datatypes::fixed_string tag_name,
+                  std::size_t             num_passed,
+                  std::size_t             num_failed,
+                  bool                    critical)
     {
       if (blocked_tests_)
         {
@@ -301,7 +292,7 @@ namespace crpcut {
           blocked_tests_ = false;
         }
       if (!critical) non_critical_fail_sum+= num_failed;
-      if (!*tag_name) return;
+      if (!tag_name) return;
       if (!tag_summary_)
         {
           write("  <tag_summary>\n");

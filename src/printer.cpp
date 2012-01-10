@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,20 +29,19 @@
 
 namespace crpcut {
   printer
-  ::printer(output::formatter& o_,
-            const char *name,
-            size_t      n_len,
-            bool        result,
-            bool        critical)
-    : o(o_)
+  ::printer(output::formatter      &o,
+            datatypes::fixed_string name,
+            bool                    result,
+            bool                    critical)
+    : o_(o)
   {
-    o.begin_case(name, n_len, result, critical);
+    o_.begin_case(name, result, critical);
   }
 
   printer
   ::~printer()
   {
-    o.end_case();
+    o_.end_case();
   }
 
 }

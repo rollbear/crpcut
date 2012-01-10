@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
 #ifndef TEXT_MODIFIER_HPP
 #define TEXT_MODIFIER_HPP
 
-#include "../fixed_string.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
 #include <iosfwd>
 #define DECORATORS(x)                           \
@@ -58,9 +57,14 @@ namespace crpcut {
                     wrapped::getenv("CRPCUT_TEXT_DECORATION"));
       void write_to(writer& output, decorator m) const;
       void write_to(std::ostream& output, decorator m) const;
+      std::size_t longest_decorator_len() const
+      {
+        return longest_decorator_len_;
+      }
     private:
       void init_decorator(decorator dest, decorator src);
-      fixed_string decorators[END_OF_LIST];
+      datatypes::fixed_string decorators[END_OF_LIST];
+      std::size_t             longest_decorator_len_;
     };
 
     class text_modifier::illegal_decoration_format

@@ -779,7 +779,7 @@ namespace crpcut {
                    i != tag_list::end();
                    ++i)
                 {
-                  std::cout << i->get_name() << "\n";
+                  std::cout << i->get_name().str << "\n";
                 }
               return 0;
             }
@@ -838,7 +838,7 @@ namespace crpcut {
                         {
                           std::cout
                             << std::setw(longest_tag_len)
-                            << i->crpcut_tag().get_name() << " : ";
+                            << i->crpcut_tag().get_name().str << " : ";
                         }
                       std::cout << *i << '\n';
                     }
@@ -1182,7 +1182,11 @@ namespace crpcut {
                i != &reg;
                i = i->crpcut_get_next())
             {
-              fmt.blocked_test(i);
+              std::size_t name_len = i->crpcut_full_name_len();
+              char *buff = static_cast<char*>(alloca(name_len));
+              stream::oastream os(buff, name_len);
+              os << *i;
+              fmt.blocked_test(os);
               if (output_fd != 1 && !quiet)
                 {
                   std::cout << "  " << *i << '\n';
@@ -1220,7 +1224,7 @@ namespace crpcut {
               bool header_displayed = false;
               for (tag_list::iterator i = begin; i != end; ++i)
                 {
-                  if (*i->get_name() == 0) continue;
+                  if (!i->get_name()) continue;
                   if (i->num_passed() + i->num_failed() == 0) continue;
                   if (!header_displayed)
                     {

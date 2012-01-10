@@ -28,7 +28,6 @@
 #define OUTPUT_FORMATTER_HPP
 
 
-#include "../fixed_string.hpp"
 #include <crpcut.hpp>
 #include <iosfwd>
 namespace crpcut {
@@ -38,33 +37,29 @@ namespace crpcut {
     class formatter
     {
     public:
-      virtual void begin_case(const char  *name,
-                              std::size_t  name_len,
-                              bool         result,
-                              bool         critical) = 0;
+      virtual void begin_case(datatypes::fixed_string name,
+                              bool                    result,
+                              bool                    critical) = 0;
       virtual void end_case()  = 0;
-      virtual void terminate(test_phase   phase,
-                             const char  *msg,
-                             std::size_t  msg_len,
-                             const char  *dirname = 0,
-                             std::size_t  dn_len = 0) = 0;
-      virtual void print(const char  *tag,
-                         std::size_t  tlen,
-                         const char  *data,
-                         std::size_t  dlen) = 0;
+      virtual void terminate(test_phase              phase,
+                             datatypes::fixed_string msg,
+                             datatypes::fixed_string dirname
+                             = datatypes::fixed_string::make("")) = 0;
+      virtual void print(datatypes::fixed_string label,
+                         datatypes::fixed_string data) = 0;
       virtual void statistics(unsigned num_registered,
                               unsigned num_selected,
                               unsigned num_run,
                               unsigned num_failed) = 0;
       virtual void nonempty_dir(const  char*)  = 0;
-      virtual void blocked_test(const crpcut_test_case_registrator *)  = 0;
-      virtual void tag_summary(const char *tag_name,
-                               std::size_t num_passed,
-                               std::size_t num_failed,
-                               bool        critical) = 0;
+      virtual void blocked_test(datatypes::fixed_string name)  = 0;
+      virtual void tag_summary(datatypes::fixed_string tag_name,
+                               std::size_t             num_passed,
+                               std::size_t             num_failed,
+                               bool                    critical) = 0;
       virtual ~formatter();
     protected:
-      static const fixed_string &phase_str(test_phase);
+      static const datatypes::fixed_string &phase_str(test_phase);
     };
 
   }

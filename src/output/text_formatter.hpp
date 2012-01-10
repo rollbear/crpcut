@@ -38,15 +38,7 @@ namespace crpcut {
     class text_formatter : public formatter,
                            private writer
     {
-      struct tag_result
-      {
-        tag_result(std::string n, std::size_t p, std::size_t f, bool c)
-          : name(n), passed(p), failed(f), critical(c) {}
-        std::string name;
-        std::size_t passed;
-        std::size_t failed;
-        bool        critical;
-      };
+      struct tag_result;
       std::vector<tag_result> tag_results;
     public:
       text_formatter(output::buffer &buffer,
@@ -54,30 +46,26 @@ namespace crpcut {
                      int,
                      const char**,
                      const text_modifier& = default_text_modifier());
-      virtual void begin_case(const char *name,
-                              std::size_t name_len,
-                              bool        result,
-                              bool        critical);
+      ~text_formatter();
+      virtual void begin_case(datatypes::fixed_string name,
+                              bool                    result,
+                              bool                    critical);
       virtual void end_case();
       virtual void terminate(test_phase phase,
-                             const char *msg,
-                             std::size_t msg_len,
-                             const char *dirname = 0,
-                             std::size_t dn_len = 0);
-      virtual void print(const char *tag,
-                         std::size_t tlen,
-                         const char *data,
-                         std::size_t dlen);
+                             datatypes::fixed_string msg,
+                             datatypes::fixed_string dirname);
+      virtual void print(datatypes::fixed_string label,
+                         datatypes::fixed_string data);
       virtual void statistics(unsigned num_registered,
                               unsigned num_selected,
                               unsigned num_run,
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);
-      virtual void blocked_test(const crpcut_test_case_registrator *i);
-      virtual void tag_summary(const char *tag_name,
-                               std::size_t num_passed,
-                               std::size_t num_failed,
-                               bool        critical);
+      virtual void blocked_test(datatypes::fixed_string name);
+      virtual void tag_summary(datatypes::fixed_string tag_name,
+                               std::size_t             num_passed,
+                               std::size_t             num_failed,
+                               bool                    critical);
     private:
       static const text_modifier& default_text_modifier();
       void display_tag_list_header();

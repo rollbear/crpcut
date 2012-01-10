@@ -27,7 +27,6 @@
 #ifndef OUTPUT_WRITER_HPP
 #define OUTPUT_WRITER_HPP
 
-#include "../fixed_string.hpp"
 #include <iosfwd>
 extern "C"
 {
@@ -53,6 +52,10 @@ namespace crpcut {
       typedef enum { translated, verbatim } type;
       writer(buffer& buff, const char *to_charset, const char *subst);
       ~writer();
+      std::size_t write(datatypes::fixed_string s, type t = verbatim) const
+      {
+        return write(s.str, s.len, t);
+      }
       std::size_t write(const char *s, type t = verbatim) const
       {
         return write(s, wrapped::strlen(s), t);
@@ -77,7 +80,7 @@ namespace crpcut {
         return write(o);
       }
     private:
-      virtual fixed_string escape(char c) const;
+      virtual datatypes::fixed_string escape(char c) const;
       std::size_t do_write(const char *p, std::size_t len) const;
       std::size_t do_write_converted(const char *buff, std::size_t len) const;
 

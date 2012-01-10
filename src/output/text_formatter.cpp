@@ -33,7 +33,7 @@ namespace {
 
 #define MK_FIXSTR(s) {  #s , sizeof(#s) - 1 } /* no need for '\0' in len */
 
-  static const crpcut::fixed_string rlabel[] =
+  static const crpcut::datatypes::fixed_string rlabel[] =
     {
       MK_FIXSTR(FAILED),
       MK_FIXSTR(PASSED)
@@ -61,6 +61,16 @@ namespace {
 
 namespace crpcut {
   namespace output {
+    using datatypes::fixed_string;
+    struct text_formatter::tag_result
+    {
+      tag_result(fixed_string n, std::size_t p, std::size_t f, bool c)
+        : name(n), passed(p), failed(f), critical(c) {}
+      fixed_string name;
+      std::size_t passed;
+      std::size_t failed;
+      bool        critical;
+    };
     text_formatter
     ::text_formatter(buffer              &buff,
                      const char          *,
@@ -77,19 +87,23 @@ namespace crpcut {
     {
     }
 
+    text_formatter
+    ::~text_formatter()
+    {
+    }
+
     void
     text_formatter
-    ::begin_case(const char *name,
-                 std::size_t name_len,
-                 bool        result,
-                 bool        critical)
+    ::begin_case(datatypes::fixed_string name,
+                 bool                    result,
+                 bool                    critical)
     {
       modifier_.write_to(*this, violation_mods[result][critical]);
       did_output_ = false;
       write(rlabel[result].str, rlabel[result].len, conversion_type_);
       write(critical ? "!" : "?");
       write(": ");
-      write(name, name_len, conversion_type_);
+      write(name, conversion_type_);
       write("\n", conversion_type_);
     }
 
@@ -103,11 +117,9 @@ namespace crpcut {
 
     void
     text_formatter
-    ::terminate(test_phase   phase,
-                const char  *msg,
-                std::size_t  msg_len,
-                const char  *dirname,
-                std::size_t  dn_len)
+    ::terminate(test_phase              phase,
+                datatypes::fixed_string msg,
+                datatypes::fixed_string dirname)
     {
       if (did_output_)
         {
@@ -116,10 +128,10 @@ namespace crpcut {
       did_output_ = true;
       if (dirname)
         {
-          write(dirname, dn_len, conversion_type_);
+          write(dirname, conversion_type_);
           write(" is not empty!!\n", conversion_type_);
         }
-      if (msg_len)
+      if (msg)
         {
           write("phase=", conversion_type_);
           const fixed_string &ps = phase_str(phase);
@@ -128,7 +140,7 @@ namespace crpcut {
           write(delim + 8 + ps.len,
                 sizeof(delim) - 8 - ps.len - 1,
                 conversion_type_);
-          write(msg, msg_len, conversion_type_);
+          write(msg, conversion_type_);
           write("\n", conversion_type_);
           write(delim, conversion_type_);
         }
@@ -136,22 +148,16 @@ namespace crpcut {
 
     void
     text_formatter
-    ::print(const char *tag,
-            std::size_t tlen,
-            const char *data,
-            std::size_t dlen)
+    ::print(datatypes::fixed_string label,
+            datatypes::fixed_string data)
     {
       if (did_output_)
         {
           write(delim, conversion_type_);
         }
       did_output_ = true;
-      const std::size_t len = write(tag, tlen, conversion_type_);
-      if (len < sizeof(delim))
-        {
-          write(delim + len, sizeof(delim) - len - 1, conversion_type_);
-        }
-      write(data, dlen, conversion_type_);
+      const std::size_t len = write(label, conversion_type_);
+      write(data, conversion_type_);
       write("\n", conversion_type_);
     }
 
@@ -185,25 +191,27 @@ namespace crpcut {
       if (tag_results.size() > 0)
         {
           bool header_displayed = false;
+          const std::size_t buff_len = 1 + tag_list::longest_name_len() + 8 + 8 + 8 + 1 + 2 * modifier_.longest_decorator_len()*2;
+          char *buffer = static_cast<char*>(alloca(buff_len));
           while (!tag_results.empty())
             {
               tag_result &t = tag_results.back();
-              if (!t.name.empty())
+              if (t.name)
                 {
                   if (!header_displayed)
                     {
                       display_tag_list_header();
                       header_displayed = true;
                     }
-                  std::ostringstream os;
+                  stream::oastream os(buffer, buff_len);
                   const bool result = t.failed == 0;
                   modifier_.write_to(os,
                                      violation_mods[result][t.critical]);
                   os << (t.critical ? '!' : '?')
-                     << std::setw(tag_list::longest_name_len())
-                     << std::setiosflags(std::ios::left) << t.name
-                     << std::resetiosflags(std::ios::left)
-                     << std::setw(8) << t.passed + t.failed
+                     << std::string(t.name.str, t.name.len)
+                     << std::setw(tag_list::longest_name_len() - t.name.len + 1)
+                     << ' '
+                     << std::setw(7) << t.passed + t.failed
                      << std::setw(8) << t.passed
                      << std::setw(8) << t.failed;
                   modifier_.write_to(os, text_modifier::NORMAL);
@@ -267,7 +275,7 @@ namespace crpcut {
 
     void
     text_formatter
-    ::blocked_test(const crpcut_test_case_registrator *i)
+    ::blocked_test(datatypes::fixed_string name)
     {
       if (!blocked_tests_)
         {
@@ -275,21 +283,19 @@ namespace crpcut {
                 conversion_type_);
           blocked_tests_ = true;
         }
-      std::ostringstream os;
-      os << "  ";
-      modifier_.write_to(os, text_modifier::BLOCKED);
-      os << *i;
-      modifier_.write_to(os, text_modifier::NORMAL);
-      os << '\n';
-      write(os, conversion_type_);
+      write("  ");
+      modifier_.write_to(*this, text_modifier::BLOCKED);
+      write(name, conversion_type_);
+      modifier_.write_to(*this, text_modifier::NORMAL);
+      write("\n");
     }
 
     void
     text_formatter
-    ::tag_summary(const char *tag_name,
-                  std::size_t num_passed,
-                  std::size_t num_failed,
-                  bool        critical)
+    ::tag_summary(fixed_string tag_name,
+                  std::size_t  num_passed,
+                  std::size_t  num_failed,
+                  bool         critical)
     {
       tag_results.push_back(tag_result(tag_name,
                                        num_passed,

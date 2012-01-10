@@ -763,6 +763,45 @@ namespace crpcut {
       type;
     };
 #endif
+
+    struct fixed_string
+    {
+      const char  *str;
+      std::size_t  len;
+    private:
+      struct secret_bool;
+    public:
+      static fixed_string make(const char * p, size_t len)
+      {
+        fixed_string s = { p, len };
+        return s;
+      }
+      template <size_t N>
+      static fixed_string make(const char (&f)[N])
+      {
+        fixed_string s = { f, N - 1 };
+        return s;
+      }
+      operator const secret_bool* () const
+      {
+        return len ? reinterpret_cast<const secret_bool*>(this) : 0;
+      }
+      bool operator==(const fixed_string &s) const
+      {
+        if (len != s.len) return false;
+        if (str == s.str) return true;
+        for (std::size_t i = 0; i < len; ++i)
+          {
+            if (str[i] != s.str[i]) return false;
+          }
+        return true;
+      }
+      bool operator!=(const fixed_string &s) const
+      {
+        return !(*this == s);
+      }
+    };
+
     template <template <typename> class envelope, typename T>
     class wrap
     {
@@ -848,7 +887,7 @@ namespace crpcut {
     void pass();
     size_t num_failed() const;
     size_t num_passed() const;
-    virtual const char* get_name() const = 0;
+    virtual datatypes::fixed_string get_name() const = 0;
     tag *get_next() const;
     tag *get_prev() const;
     void set_importance(importance i);
@@ -866,7 +905,7 @@ namespace crpcut {
   class crpcut_tag_info<crpcut_none> : public crpcut::tag
   {
     crpcut_tag_info();
-    virtual const char* get_name() const;
+    virtual datatypes::fixed_string get_name() const;
   public:
     class crpcut_test_tag;
     static crpcut_tag_info& obj();
@@ -902,7 +941,7 @@ namespace crpcut {
   private:
     crpcut_tag_info() : tag(get_name_len(), &tag_list::obj()) {}
     int get_name_len() const;
-    virtual const char *get_name() const;
+    virtual datatypes::fixed_string get_name() const;
   };
 
   namespace policies {
@@ -1438,6 +1477,11 @@ namespace crpcut {
       using oabuf<charT, traits>::begin;
       using oabuf<charT, traits>::end;
       std::size_t size() const { return size_t(end() - begin()); }
+      operator datatypes::fixed_string() const
+      {
+        datatypes::fixed_string rv = { begin(), size() };
+        return rv;
+      }
     };
 
     template <typename charT, class traits = std::char_traits<charT> >
@@ -4265,11 +4309,13 @@ class crpcut_testsuite_dep
     }                                                           \
     template <>                                                 \
     inline                                                      \
-    const char *                                                \
+    crpcut::datatypes::fixed_string                             \
     crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
     ::get_name() const                                          \
     {                                                           \
-      return #tag_name;                                         \
+      using crpcut::datatypes::fixed_string;                    \
+      fixed_string s = { #tag_name, sizeof(#tag_name) - 1};     \
+      return s;                                                 \
     }                                                           \
   }                                                             \
   using crpcut::crpcut_tags::tag_name

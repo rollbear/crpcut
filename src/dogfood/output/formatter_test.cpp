@@ -27,9 +27,9 @@
 #include "../../output/formatter.hpp"
 
 template <size_t N>
-crpcut::fixed_string mks(const char (&f)[N])
+crpcut::datatypes::fixed_string mks(const char (&f)[N])
 {
-  crpcut::fixed_string rv = { f, N - 1 };
+  crpcut::datatypes::fixed_string rv = { f, N - 1 };
   return rv;
 }
 

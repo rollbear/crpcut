@@ -42,12 +42,16 @@ namespace {
   class test_tag : public crpcut::tag
   {
   public:
-    test_tag(std::string name, crpcut::tag* root)
-      : crpcut::tag(int(name.length()), root),
-        name_(name) {}
-    virtual const char *get_name() const { return name_.c_str(); }
+    template <std::size_t N>
+    test_tag(const char (&f)[N], crpcut::tag* root)
+      : crpcut::tag(int(N-1), root)
+    {
+      name_.str = f;
+      name_.len = N - 1;
+    }
+    virtual crpcut::datatypes::fixed_string get_name() const { return name_; }
   private:
-    std::string name_;
+    crpcut::datatypes::fixed_string name_;
   };
 
   class test_tag_list
@@ -67,6 +71,13 @@ namespace {
     test_tag                          ko;
     test_tag                          lemur;
   };
+
+  template <std::size_t N>
+  crpcut::datatypes::fixed_string s(const char (&f)[N])
+  {
+    crpcut::datatypes::fixed_string rv = { f, N - 1 };
+    return rv;
+  }
 }
 
 TESTSUITE(tag_filter)
@@ -75,7 +86,7 @@ TESTSUITE(tag_filter)
        test_tag_list)
   {
     crpcut::tag_filter filter;
-    ASSERT_TRUE(filter.lookup("apa") == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("apa")) == crpcut::tag::critical);
     filter.assert_names(root);
   }
 
@@ -83,9 +94,9 @@ TESTSUITE(tag_filter)
        test_tag_list)
   {
     crpcut::tag_filter filter("apa");
-    ASSERT_TRUE(filter.lookup("apa") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("ap") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("apan") == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("apa")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("ap")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("apan")) == crpcut::tag::ignored);
     filter.assert_names(root);
   }
 
@@ -93,15 +104,15 @@ TESTSUITE(tag_filter)
        test_tag_list)
   {
     crpcut::tag_filter filter("apa,katt,ko");
-    ASSERT_TRUE(filter.lookup("apa") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("katt") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("ko") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("ap") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("apan") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("kat") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("katta") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("k") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("koo") == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("apa")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("katt")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("ko")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("ap")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("apan")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("kat")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("katta")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("k")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("koo")) == crpcut::tag::ignored);
     filter.assert_names(root);
   }
 
@@ -109,15 +120,15 @@ TESTSUITE(tag_filter)
        test_tag_list)
   {
     crpcut::tag_filter filter("-apa,katt,ko");
-    ASSERT_TRUE(filter.lookup("apa") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("katt") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("ko") == crpcut::tag::ignored);
-    ASSERT_TRUE(filter.lookup("ap") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("apan") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("kat") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("katta") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("k") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("koo") == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("apa")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("katt")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("ko")) == crpcut::tag::ignored);
+    ASSERT_TRUE(filter.lookup(s("ap")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("apan")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("kat")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("katta")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("k")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("koo")) == crpcut::tag::critical);
     filter.assert_names(root);
   }
 
@@ -125,15 +136,15 @@ TESTSUITE(tag_filter)
        test_tag_list)
   {
     crpcut::tag_filter filter("/apa,katt,ko");
-    ASSERT_TRUE(filter.lookup("apa") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("ap") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("apan") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("katt") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("kat") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("katta") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("ko") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("k") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("koo") == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("apa")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("ap")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("apan")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("katt")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("kat")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("katta")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("ko")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("k")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("koo")) == crpcut::tag::critical);
     filter.assert_names(root);
   }
 
@@ -141,15 +152,15 @@ TESTSUITE(tag_filter)
        test_tag_list)
   {
     crpcut::tag_filter filter("/-apa,katt,ko");
-    ASSERT_TRUE(filter.lookup("apa") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("ap") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("apan") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("katt") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("kat") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("katta") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("ko") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("k") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("koo") == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("apa")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("ap")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("apan")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("katt")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("kat")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("katta")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("ko")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("k")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("koo")) == crpcut::tag::non_critical);
     filter.assert_names(root);
   }
 
@@ -157,10 +168,10 @@ TESTSUITE(tag_filter)
        test_tag_list)
   {
     crpcut::tag_filter filter("apa,katt,ko,lemur/-katt,lemur");
-    ASSERT_TRUE(filter.lookup("apa") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("katt") == crpcut::tag::critical);
-    ASSERT_TRUE(filter.lookup("ko") == crpcut::tag::non_critical);
-    ASSERT_TRUE(filter.lookup("lemur") == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("apa")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("katt")) == crpcut::tag::critical);
+    ASSERT_TRUE(filter.lookup(s("ko")) == crpcut::tag::non_critical);
+    ASSERT_TRUE(filter.lookup(s("lemur")) == crpcut::tag::critical);
   }
 
   TEST(non_existing_tag_names_throws,

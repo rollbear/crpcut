@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,11 @@ namespace {
     return array + N;
   }
 
-  const crpcut::fixed_string decorator_names[] = { DECORATORS(MK_F_STR) };
+  const crpcut::datatypes::fixed_string decorator_names[] =
+    { DECORATORS(MK_F_STR) };
 
-  void zero_decorators(crpcut::fixed_string *b, crpcut::fixed_string *e)
+  void zero_decorators(crpcut::datatypes::fixed_string *b,
+                       crpcut::datatypes::fixed_string *e)
   {
     while (b != e)
       {
@@ -55,24 +57,24 @@ namespace {
   }
 
   template <typename err>
-  crpcut::fixed_string get_substr(const char *&p, char separator,
-                                  const std::string &msg)
+  crpcut::datatypes::fixed_string get_substr(const char *&p, char separator,
+                                             const std::string &msg)
   {
     const char *e = crpcut::wrapped::strchr(p, separator);
     if (!e)
       {
         throw err(msg);
       }
-    crpcut::fixed_string rv = { p, std::size_t(e - p) };
+    crpcut::datatypes::fixed_string rv = { p, std::size_t(e - p) };
     p = e + 1;
     return rv;
   }
 
   template <typename err, size_t N>
-  int get_decorator(crpcut::fixed_string s,
-                   const crpcut::fixed_string (&array)[N])
+  int get_decorator(crpcut::datatypes::fixed_string s,
+                    const crpcut::datatypes::fixed_string (&array)[N])
   {
-    for (const crpcut::fixed_string *i = begin(array);
+    for (const crpcut::datatypes::fixed_string *i = begin(array);
          i != end(array);
          ++i)
       {
@@ -87,6 +89,7 @@ namespace crpcut {
 
     text_modifier
     ::text_modifier(const char *rules)
+      : longest_decorator_len_(0)
     {
       zero_decorators(begin(decorators), end(decorators));
       if (!rules) return;
@@ -98,18 +101,23 @@ namespace crpcut {
           decorators[NORMAL]
             = get_substr<err>(rules, separator,
                               "Missing separator after default decorator");
+          longest_decorator_len_ = decorators[NORMAL].len;
 
         }
       while (*rules)
         {
-          fixed_string name = get_substr<err>(rules, '=',
-                                              "Missing = after name");
+          datatypes::fixed_string name =
+            get_substr<err>(rules, '=', "Missing = after name");
           std::string msg = "Missing separator after value for "
             + std::string(name.str, name.len);
-          fixed_string value = get_substr<err>(rules, separator,
-                                               msg);
+          datatypes::fixed_string value = get_substr<err>(rules, separator,
+                                                          msg);
           int idx = get_decorator<err>(name, decorator_names);
           decorators[idx] = value;
+          if (value.len > longest_decorator_len_)
+            {
+              longest_decorator_len_ = value.len;
+            }
         }
       init_decorator(NCFAILED,     FAILED);
       init_decorator(NCPASSED,     PASSED);

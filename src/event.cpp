@@ -32,17 +32,17 @@ namespace crpcut {
                         test_case_factory::max_parallel*3> allocator;
 
   event
-  ::event(comm::type t, const char *b, size_t bl)
-    : tag(t),
-      body(b),
-      body_len(bl)
+  ::event(comm::type t, const char *b, std::size_t b_len)
+    : tag(t)
   {
+    body.str = b;
+    body.len = b_len;
   }
 
   event
   ::~event()
   {
-    wrapped::free(body);
+    wrapped::free(body.str);
   }
 
   void *

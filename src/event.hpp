@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,10 @@ namespace crpcut {
 
   struct event : public list_elem<event>
   {
-    event(comm::type t, const char *b, size_t bl);
+    event(comm::type t, const char *b, std::size_t b_len);
     ~event();
     comm::type tag;
-    const char *body;
-    size_t body_len;
+    datatypes::fixed_string body;
     void *operator new(size_t);
     void operator delete(void *p);
   private:

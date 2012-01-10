@@ -33,11 +33,12 @@ namespace crpcut {
   {
   }
 
-  const char*
+  datatypes::fixed_string
   crpcut_tag_info<crpcut_none>
   ::get_name() const
   {
-    return "";
+    static datatypes::fixed_string empty = { "", 0 };
+    return empty;
   }
 
   crpcut_tag_info<crpcut_none>&

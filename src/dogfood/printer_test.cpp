@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,33 +28,42 @@
 #include "../printer.hpp"
 #include "../output/formatter.hpp"
 
+namespace {
+  template <size_t N>
+  crpcut::datatypes::fixed_string s(const char (&f)[N])
+  {
+    crpcut::datatypes::fixed_string rv = { f, N - 1 };
+    return rv;
+  }
+}
 TESTSUITE(printer)
 {
   class test_formatter : public crpcut::output::formatter
   {
   public:
-    MOCK_METHOD4(begin_case, void(const char*, std::size_t, bool, bool));
+    MOCK_METHOD3(begin_case, void(crpcut::datatypes::fixed_string, bool, bool));
     MOCK_METHOD0(end_case, void());
-    MOCK_METHOD5(terminate,
+    MOCK_METHOD3(terminate,
                  void(crpcut::test_phase,
-                      const char*, std::size_t,
-                      const char*, std::size_t));
-    MOCK_METHOD4(print, void(const char*, std::size_t,
-                             const char *, std::size_t));
+                      crpcut::datatypes::fixed_string,
+                      crpcut::datatypes::fixed_string));
+    MOCK_METHOD2(print, void(crpcut::datatypes::fixed_string,
+                             crpcut::datatypes::fixed_string));
     MOCK_METHOD4(statistics, void(unsigned, unsigned, unsigned, unsigned));
     MOCK_METHOD1(nonempty_dir, void(const char*));
     MOCK_METHOD1(blocked_test,
-                 void(const crpcut::crpcut_test_case_registrator *));
+                 void(crpcut::datatypes::fixed_string));
     MOCK_METHOD4(tag_summary,
-                 void(const char*, std::size_t, std::size_t, bool));
+                 void(crpcut::datatypes::fixed_string,
+                      std::size_t, std::size_t, bool));
   };
   TEST(create_and_destroy_calls_formatter_begin_and_end)
   {
     using namespace testing;
     StrictMock<test_formatter> fmt;
 
-    EXPECT_CALL(fmt, begin_case("apa", 3, false, true)).Times(1);
-    crpcut::printer p(fmt, "apa", 3, false, true);
+    EXPECT_CALL(fmt, begin_case(s("apa"), false, true)).Times(1);
+    crpcut::printer p(fmt, s("apa"), false, true);
     Mock::VerifyAndClearExpectations(&fmt);
     EXPECT_CALL(fmt, end_case()).Times(1);
   }

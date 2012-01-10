@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,9 @@
 #include <crpcut.hpp>
 
 namespace {
-  struct info { size_t len; const char *str; };
-#define ESTR(s) { sizeof(#s)-1, #s }
-  static const info tag_info[] =  { CRPCUT_COMM_MSGS(ESTR) };
+#define ESTR(s) { #s, sizeof(#s)-1 }
+  static const crpcut::datatypes::fixed_string tag_info[]
+  =  { CRPCUT_COMM_MSGS(ESTR) };
 #undef ESTR
 }
 
@@ -109,7 +109,7 @@ namespace crpcut {
       {
       case comm::begin_test:
         {
-          assert(s->name_len == 0);
+          assert(!s->name);
           assert(s->history.is_empty());
           // introduction to test case, name follows
 
@@ -135,8 +135,8 @@ namespace crpcut {
               bytes_read += size_t(rv);
             }
           buff[len] = 0;
-          s->name = buff;
-          s->name_len = len;
+          s->name.str = buff;
+          s->name.len = len;
           s->success = true;
           s->nonempty_dir = false;
         }
@@ -155,7 +155,6 @@ namespace crpcut {
             {
               printer print(fmt,
                             s->name,
-                            s->name_len,
                             s->success && !s->explicit_fail,
                             critical);
 
@@ -164,10 +163,9 @@ namespace crpcut {
                    i = i->next())
                 {
 
-                  fmt.print(tag_info[i->tag].str, tag_info[i->tag].len,
-                            i->body, i->body_len);
+                  fmt.print(tag_info[i->tag], i->body);
                 }
-              if (s->term_len || s->nonempty_dir || s->explicit_fail)
+              if (s->termination || s->nonempty_dir || s->explicit_fail)
                 {
                   if (s->nonempty_dir)
                     {
@@ -175,16 +173,17 @@ namespace crpcut {
                       const size_t dlen = wrapped::strlen(wd);
                       len = dlen;
                       len+= 1;
-                      len+= s->name_len;
+                      len+= s->name.len;
                       char *dn = static_cast<char*>(alloca(len + 1));
                       lib::strcpy(lib::strcpy(lib::strcpy(dn,  wd),
                                               "/"),
-                                  s->name);
-                      fmt.terminate(phase, s->termination, s->term_len, dn, len);
+                                  s->name.str);
+                      fmt.terminate(phase, s->termination,
+                                    datatypes::fixed_string::make(dn, len));
                     }
                   else
                     {
-                      fmt.terminate(phase, s->termination, s->term_len);
+                      fmt.terminate(phase, s->termination);
                     }
                 }
             }
@@ -222,8 +221,7 @@ namespace crpcut {
 
               if (t == comm::exit_ok || t == comm::exit_fail)
                 {
-                  s->termination = buff;
-                  s->term_len = len;
+                  s->termination = datatypes::fixed_string::make(buff, len);
                 }
               else
                 {

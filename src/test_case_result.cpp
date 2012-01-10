@@ -37,18 +37,16 @@ namespace crpcut {
      explicit_fail(false),
      success(false),
      nonempty_dir(false),
-     name(0),
-     name_len(0),
-     termination(0),
-     term_len(0)
+     name(datatypes::fixed_string::make("")),
+     termination(datatypes::fixed_string::make(""))
   {
   }
 
   test_case_result
   ::~test_case_result()
   {
-    wrapped::free(termination);
-    wrapped::free(name);
+    if (termination) wrapped::free(termination.str);
+    if (name) wrapped::free(name.str);
     while (!history.is_empty())
       {
         event *e = history.next();
