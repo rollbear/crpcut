@@ -156,7 +156,7 @@ namespace crpcut {
           write(delim, conversion_type_);
         }
       did_output_ = true;
-      const std::size_t len = write(label, conversion_type_);
+      write(label, conversion_type_);
       write(data, conversion_type_);
       write("\n", conversion_type_);
     }
@@ -191,7 +191,10 @@ namespace crpcut {
       if (tag_results.size() > 0)
         {
           bool header_displayed = false;
-          const std::size_t buff_len = 1 + tag_list::longest_name_len() + 8 + 8 + 8 + 1 + 2 * modifier_.longest_decorator_len()*2;
+          const std::size_t tag_space = size_t(tag_list::longest_name_len());
+          const std::size_t dec_space = modifier_.longest_decorator_len()*2U;
+          const std::size_t ws_len = 1 + 8 + 8 + 8 + 1 + 2;
+          const std::size_t buff_len = tag_space + dec_space + ws_len;
           char *buffer = static_cast<char*>(alloca(buff_len));
           while (!tag_results.empty())
             {
@@ -209,7 +212,7 @@ namespace crpcut {
                                      violation_mods[result][t.critical]);
                   os << (t.critical ? '!' : '?')
                      << std::string(t.name.str, t.name.len)
-                     << std::setw(tag_list::longest_name_len() - t.name.len + 1)
+                     << std::setw(int(tag_space - t.name.len + 1))
                      << ' '
                      << std::setw(7) << t.passed + t.failed
                      << std::setw(8) << t.passed

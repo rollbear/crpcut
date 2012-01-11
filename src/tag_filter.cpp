@@ -71,7 +71,7 @@ namespace {
     const char *n = name.str;
     while (i != end)
       {
-        int idx = 0;
+        std::size_t idx = 0;
         while (i + idx != end && i[idx] != ',' && i[idx] == n[idx]) ++idx;
         if (idx == name.len && (i + idx == end || i[idx] == ',')) return true;
         while (i != end && *i++ != ',')
