@@ -77,7 +77,6 @@ file(GLOB LIB_SRCS
      src/policies/policies.cpp
      src/policies/timeout/cputime_enforcer.cpp
      src/policies/timeout/monotonic_enforcer.cpp
-     src/poll_singleton.cpp
      src/posix_error.cpp
      src/posix_write.cpp
      src/presentation.cpp

@@ -28,8 +28,7 @@
 #include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
 #include "tag_filter.hpp"
-#include "poll.hpp"
-#include "poll_singleton.hpp"
+#include "poll_fixed_array.hpp"
 #include "fsfuncs.hpp"
 #include "pipe_pair.hpp"
 #include "output/heap_buffer.hpp"
@@ -131,14 +130,15 @@ namespace crpcut {
 
   void
   test_case_factory
-  ::manage_children(unsigned max_pending_children)
+  ::manage_children(unsigned max_pending_children, poll<fdreader> &poller)
   {
     while (pending_children >= max_pending_children)
       {
         int timeout_ms = timeouts_enabled() && deadlines.size()
           ? int(deadlines.front()->crpcut_ms_until_deadline())
           : -1;
-        polltype::descriptor desc = poller.wait(timeout_ms);
+
+        poll<fdreader>::descriptor desc = poller.wait(timeout_ms);
 
         if (desc.timeout())
           {
@@ -172,7 +172,7 @@ namespace crpcut {
 
   void
   test_case_factory
-  ::start_test(crpcut_test_case_registrator *i)
+  ::start_test(crpcut_test_case_registrator *i, poll<fdreader>& poller)
   {
     ++num_tests_run;
     if (!tests_as_child_procs())
@@ -221,12 +221,12 @@ namespace crpcut {
 
     // parent
     ++pending_children;
-    i->crpcut_setup(pid,
+    i->crpcut_setup(poller, pid,
                     c2p.for_reading(pipe_pair::release_ownership),
                     p2c.for_writing(pipe_pair::release_ownership),
                     stdout.for_reading(pipe_pair::release_ownership),
                     stderr.for_reading(pipe_pair::release_ownership));
-    manage_children(num_parallel);
+    manage_children(num_parallel, poller);
   }
 
   void
@@ -1112,6 +1112,7 @@ namespace crpcut {
                                                    fmt,
                                                    verbose_mode);
         }
+      poll_fixed_array<fdreader, max_parallel*3> poller;
       for (;;)
         {
           bool progress = false;
@@ -1124,7 +1125,7 @@ namespace crpcut {
                   continue;
                 }
               progress = true;
-              start_test(i);
+              start_test(i, poller);
               i = i->crpcut_unlink();
               if (!tests_as_child_procs())
                 {
@@ -1137,10 +1138,10 @@ namespace crpcut {
                 {
                   break;
                 }
-              manage_children(1);
+              manage_children(1, poller);
             }
         }
-      if (pending_children) manage_children(1);
+      if (pending_children) manage_children(1, poller);
       if (tests_as_child_procs())
         {
           kill_presenter_process();

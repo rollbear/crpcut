@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,8 @@
  */
 
 #include <crpcut.hpp>
-#include "poll_singleton.hpp"
+//#include "poll_singleton.hpp"
+#include "poll.hpp"
 namespace crpcut {
 
 
@@ -40,7 +41,7 @@ namespace crpcut {
   fdreader
   ::get_registrator() const
   {
-    return reg;
+    return reg_;
   }
 
   void
@@ -56,26 +57,32 @@ namespace crpcut {
 
   fdreader
   ::fdreader(crpcut_test_case_registrator *r, int fd)
-    : reg(r),
-      fd_(fd)
+    : reg_(r),
+      fd_(fd),
+      poller_(0)
   {
   }
 
-  void fdreader::set_fd(int fd)
+  void fdreader::set_fd(int fd, poll<fdreader> *poller)
   {
     assert(fd_ == 0);
-    assert(reg != 0);
+    assert(reg_ != 0);
+    assert(!poller_);
+    assert(poller);
     fd_ = fd;
-    poller.add_fd(fd_, this);
-    reg->crpcut_activate_reader();
+    poller_ = poller;
+    poller_->add_fd(fd_, this);
+    reg_->crpcut_activate_reader();
   }
 
   void fdreader::unregister()
   {
+    assert(poller_);
     assert(fd_ != 0);
-    assert(reg != 0);
-    reg->crpcut_deactivate_reader();
-    poller.del_fd(fd_);
+    assert(reg_ != 0);
+    reg_->crpcut_deactivate_reader();
+    poller_->del_fd(fd_);
     fd_ = 0;
+    poller_ = 0;
   }
 }

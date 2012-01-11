@@ -1554,6 +1554,9 @@ namespace crpcut {
     namespace_info *parent;
   };
 
+  template <typename T>
+  class poll;
+
   class fdreader
   {
   public:
@@ -1564,11 +1567,12 @@ namespace crpcut {
     ~fdreader() { }
   protected:
     fdreader(crpcut_test_case_registrator *r, int fd = 0);
-    void set_fd(int fd);
-    crpcut_test_case_registrator *const reg;
+    void set_fd(int fd, poll<fdreader> *poller);
+    crpcut_test_case_registrator *const reg_;
   private:
     virtual bool do_read(int fd, bool do_reply) = 0;
     int fd_;
+    poll<fdreader> *poller_;
   };
 
   template <comm::type t>
@@ -1576,7 +1580,7 @@ namespace crpcut {
   {
   public:
     reader(crpcut_test_case_registrator *r, int fd = 0);
-    void set_fd(int fd);
+    using fdreader::set_fd;
   private:
     virtual bool do_read(int fd, bool do_reply);
   };
@@ -1586,7 +1590,7 @@ namespace crpcut {
   public:
     report_reader(crpcut_test_case_registrator *r);
     virtual void close();
-    void set_fds(int in_fd, int out_fd);
+    void set_fds(int in_fd, int out_fd, poll<fdreader> *read_poller);
   private:
     virtual bool do_read(int fd, bool do_reply);
     int response_fd;
@@ -1608,7 +1612,8 @@ namespace crpcut {
     }
     std::size_t crpcut_full_name_len() const;
     bool crpcut_match_name(const char *name) const;
-    void crpcut_setup(pid_t pid,
+    void crpcut_setup(poll<fdreader> &poller,
+                      pid_t pid,
                       int in_fd, int out_fd,
                       int stdout_fd,
                       int stderr_fd);
@@ -1730,8 +1735,8 @@ namespace crpcut {
     static test_case_factory& obj();
     test_case_factory();
     void kill_presenter_process();
-    void manage_children(unsigned max_pending_children);
-    void start_test(crpcut_test_case_registrator *i);
+    void manage_children(unsigned max_pending_children, poll<fdreader> &poller);
+    void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
 
     int do_run(int argc, const char *argv[], std::ostream &os);
     void do_present(pid_t pid, comm::type t, test_phase phase,
@@ -1803,8 +1808,8 @@ namespace crpcut {
             (void)n; // silence warning
           }
 
-        test_case_factory::present(reg->crpcut_get_pid(), t,
-                                   reg->crpcut_get_phase(),
+        test_case_factory::present(reg_->crpcut_get_pid(), t,
+                                   reg_->crpcut_get_phase(),
                                    size_t(rv), buff);
         return true;
       }
@@ -3188,13 +3193,6 @@ namespace crpcut {
   reader<t>::reader(crpcut_test_case_registrator *r, int fd)
     : fdreader(r, fd)
   {
-  }
-
-  template <comm::type t>
-  inline void
-  reader<t>::set_fd(int fd)
-  {
-    fdreader::set_fd(fd);
   }
 
   template <typename T, case_convert_type type>

@@ -301,15 +301,16 @@ namespace crpcut {
 
   void
   crpcut_test_case_registrator
-  ::crpcut_setup(pid_t pid,
+  ::crpcut_setup(poll<fdreader> &poller,
+                 pid_t pid,
                  int in_fd, int out_fd,
                  int stdout_fd,
                  int stderr_fd)
   {
     crpcut_pid_ = pid;
-    crpcut_stdout_reader.set_fd(stdout_fd);
-    crpcut_stderr_reader.set_fd(stderr_fd);
-    crpcut_rep_reader.set_fds(in_fd, out_fd);
+    crpcut_stdout_reader.set_fd(stdout_fd, &poller);
+    crpcut_stderr_reader.set_fd(stderr_fd, &poller);
+    crpcut_rep_reader.set_fds(in_fd, out_fd, &poller);
     stream::toastream<1024> os;
     os << *this;
     test_case_factory::introduce_name(pid, os.begin(), os.size());
