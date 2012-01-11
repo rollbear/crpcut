@@ -129,7 +129,7 @@ namespace crpcut {
       if (dirname)
         {
           write(dirname, conversion_type_);
-          write(" is not empty!!\n", conversion_type_);
+          write(" is not empty!\n", conversion_type_);
         }
       if (msg)
         {
@@ -156,7 +156,11 @@ namespace crpcut {
           write(delim, conversion_type_);
         }
       did_output_ = true;
-      write(label, conversion_type_);
+      std::size_t len = write(label, conversion_type_);
+      if (len < sizeof(delim))
+        {
+          write(delim + len, sizeof(delim) - len - 1, conversion_type_);
+        }
       write(data, conversion_type_);
       write("\n", conversion_type_);
     }

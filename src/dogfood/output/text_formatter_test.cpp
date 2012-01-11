@@ -71,15 +71,10 @@ namespace {
     StrictMock<stream_buffer> test_buffer;
   };
 
-  template <std::size_t N>
-  inline crpcut::datatypes::fixed_string s(const char (&f)[N])
-  {
-    crpcut::datatypes::fixed_string rv = { f, N - 1 };
-    return rv;
-  }
 }
 
-#define S "[[:space:]]*"
+#define _ "[[:space:]]*"
+#define s crpcut::datatypes::fixed_string::make
 
 
 TESTSUITE(output)
@@ -121,9 +116,9 @@ TESTSUITE(output)
 
         static const char re[] =
           "14 test cases selected\n\n"
-              "Total"    S ":" S "Sum" S "Critical" S "Non-critical\n"
-          "<PS>PASSED"   S ":" S "13"  S "13"       S "0<>\n"
-          "<BS>UNTESTED" S ":" S "1<>\n$";
+              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<PS>PASSED"   _ ":" _ "13"  _ "13"       _ "0<>\n"
+          "<BS>UNTESTED" _ ":" _ "1<>\n$";
 
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
@@ -146,8 +141,8 @@ TESTSUITE(output)
         }
         static const char re[] =
               "13 test cases selected\n\n"
-              "Total"    S ":" S "Sum" S "Critical" S "Non-critical\n"
-          "<FS>FAILED"   S ":" S "13"  S "13"       S "0<>\n$";
+              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<FS>FAILED"   _ ":" _ "13"  _ "13"       _ "0<>\n$";
 
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
@@ -172,11 +167,11 @@ TESTSUITE(output)
         }
         static const char re[] =
               "8 test cases selected\n"
-               " tag" S "run" S "passed" S "failed\n"
-           "<P>!apa"  S "5"   S "5"      S "0<>\n"
-          "<NP>?katt" S "3"   S "3"      S "0<>\n\n"
-              "Total"    S ":" S "Sum" S "Critical" S "Non-critical\n"
-          "<PS>PASSED"   S ":" S "8"   S "5"        S "3<>\n$"
+               " tag" _ "run" _ "passed" _ "failed\n"
+           "<P>!apa"  _ "5"   _ "5"      _ "0<>\n"
+          "<NP>?katt" _ "3"   _ "3"      _ "0<>\n\n"
+              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<PS>PASSED"   _ ":" _ "8"   _ "5"        _ "3<>\n$"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
@@ -201,11 +196,11 @@ TESTSUITE(output)
         }
         static const char re[] =
               "8 test cases selected\n"
-               " tag" S "run" S "passed" S "failed\n"
-           "<F>!apa"  S "5"   S "0"      S "5<>\n"
-          "<NF>?katt" S "3"   S "0"      S "3<>\n\n"
-              "Total"    S ":" S "Sum" S "Critical" S "Non-critical\n"
-          "<FS>FAILED"   S ":" S "8"   S "5"        S "3<>\n$"
+               " tag" _ "run" _ "passed" _ "failed\n"
+           "<F>!apa"  _ "5"   _ "0"      _ "5<>\n"
+          "<NF>?katt" _ "3"   _ "0"      _ "3<>\n\n"
+              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<FS>FAILED"   _ ":" _ "8"   _ "5"        _ "3<>\n$"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
@@ -230,12 +225,12 @@ TESTSUITE(output)
         }
         static const char re[] =
               "8 test cases selected\n"
-               " tag" S "run" S "passed" S "failed\n"
-           "<F>!apa"  S "5"   S "2"      S "3<>\n"
-          "<NF>?katt" S "3"   S "1"      S "2<>\n\n"
-              "Total"    S ":" S "Sum" S "Critical" S "Non-critical\n"
-          "<PS>PASSED"   S ":" S "3"   S "2"        S "1<>\n"
-          "<FS>FAILED"   S ":" S "5"   S "3"        S "2<>\n$"
+               " tag" _ "run" _ "passed" _ "failed\n"
+           "<F>!apa"  _ "5"   _ "2"      _ "3<>\n"
+          "<NF>?katt" _ "3"   _ "1"      _ "2<>\n\n"
+              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<PS>PASSED"   _ ":" _ "3"   _ "2"        _ "1<>\n"
+          "<FS>FAILED"   _ ":" _ "5"   _ "3"        _ "2<>\n$"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
@@ -260,12 +255,12 @@ TESTSUITE(output)
         }
         static const char re[] =
               "8 test cases selected\n"
-               " tag" S "run" S "passed" S "failed\n"
-          "<NF>?apa"  S "5"   S "2"      S "3<>\n"
-          "<NF>?katt" S "3"   S "1"      S "2<>\n\n"
-              "Total"    S ":" S "Sum" S "Critical" S "Non-critical\n"
-          "<NPS>PASSED"   S ":" S "3"   S "0"        S "3<>\n"
-          "<NFS>FAILED"   S ":" S "5"   S "0"        S "5<>\n$"
+               " tag" _ "run" _ "passed" _ "failed\n"
+          "<NF>?apa"  _ "5"   _ "2"      _ "3<>\n"
+          "<NF>?katt" _ "3"   _ "1"      _ "2<>\n\n"
+              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<NPS>PASSED"   _ ":" _ "3"   _ "0"        _ "3<>\n"
+          "<NFS>FAILED"   _ ":" _ "5"   _ "0"        _ "5<>\n$"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
@@ -333,6 +328,120 @@ TESTSUITE(output)
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<NF>FAILED?: apa\n<>=*\n"),
                     test_buffer.os.str());
+      }
+    }
+
+    TEST(terminate_without_files_with_correct_phase_and_format)
+    {
+      StrictMock<stream_buffer> test_buffer;
+      {
+        crpcut::output::text_formatter obj(test_buffer,
+                                           "one",
+                                           1,
+                                           vec,
+                                           test_modifier);
+        obj.begin_case(s("apa"), false, false);
+        obj.terminate(crpcut::destroying, s("katt"), s(""));
+        obj.end_case();
+        const char re[] =
+          "^<NF>FAILED?: apa\n"
+          "phase=\"destroying\"" _ "-*\n"
+          "katt\n"
+          "-*\n"
+          "<>=*\n"
+          ;
+        ASSERT_PRED(crpcut::regex(re, crpcut::regex::m), test_buffer.os.str());
+      }
+    }
+
+    TEST(terminate_with_files_with_correct_phase_and_format)
+    {
+      StrictMock<stream_buffer> test_buffer;
+      {
+        crpcut::output::text_formatter obj(test_buffer,
+                                           "one",
+                                           1,
+                                           vec,
+                                           test_modifier);
+        obj.begin_case(s("apa"), false, false);
+        obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpfile"));
+        obj.end_case();
+        const char re[] =
+          "^<NF>FAILED?: apa\n"
+          "/tmp/tmpfile is not empty!\n"
+          "phase=\"creating\"" _ "-*\n"
+          "katt\n"
+          "-*\n"
+          "<>=*\n"
+          ;
+        ASSERT_PRED(crpcut::regex(re, crpcut::regex::m), test_buffer.os.str());
+      }
+    }
+
+    TEST(multiple_prints_are_shown_in_sequence)
+    {
+      StrictMock<stream_buffer> test_buffer;
+      {
+        crpcut::output::text_formatter obj(test_buffer,
+                                           "one",
+                                           1,
+                                           vec,
+                                           test_modifier);
+        obj.begin_case(s("apa"), false, false);
+        obj.print(s("type"),
+                  s("the quick brown fox jumps over the lazy dog"));
+        obj.print(s("morse"),
+                  s("jag missade hissen\ni mississippi"));
+        obj.terminate(crpcut::creating, s("katt"), s(""));
+        obj.end_case();
+        const char re[] =
+          "^<NF>FAILED?: apa\n"
+          "type-*\n"
+          "the quick brown fox jumps over the lazy dog\n"
+          "-*\n"
+          "morse-*\n"
+          "jag missade hissen\n"
+          "i mississippi\n"
+          "-*\n"
+          "phase=\"creating\"" _ "-*\n"
+          "katt\n"
+          "-*\n"
+          "<>=*\n"
+          ;
+        ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
+                    test_buffer.os.str());
+      }
+    }
+
+    TEST(report_with_non_empty_dir)
+    {
+      StrictMock<stream_buffer> test_buffer;
+      {
+        crpcut::output::text_formatter obj(test_buffer,
+                                           "one",
+                                           1,
+                                           vec,
+                                           test_modifier);
+        obj.begin_case(s("apa"), false, false);
+        obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpdir/hoppla"));
+        obj.end_case();
+        obj.tag_summary(s(""), 32, 1, true);
+        obj.nonempty_dir("/tmp/tmpdir");
+        obj.statistics(32, 32, 32, 1);
+        const char re[] =
+          "^<NF>FAILED?: apa\n"
+          "/tmp/tmpdir/hoppla is not empty!\n"
+          "phase=\"creating\"" _ "-*\n"
+          "katt\n"
+          "-*\n"
+          "<>=*\n"
+          "Files remain under /tmp/tmpdir\n"
+          "32 test cases selected\n\n"
+          "Total"      _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<PS>PASSED" _ ":" _  "31" _       "31" _            "0<>\n"
+          "<FS>FAILED" _ ":" _   "1" _        "1" _            "0<>\n"
+          ;
+        ASSERT_PRED(crpcut::regex(re, crpcut::regex::m), test_buffer.os.str());
       }
     }
   }
