@@ -1299,6 +1299,97 @@ namespace crpcut {
 
   class test_case_factory;
 
+  namespace stream {
+    template <typename charT, class traits = std::char_traits<charT> >
+    class oabuf : public std::basic_streambuf<charT, traits>
+    {
+      typedef std::basic_streambuf<charT, traits> parent;
+    public:
+      oabuf(charT *begin_, charT *end_)
+      {
+        parent::setp(begin_, end_);
+      }
+      const charT *begin() const { return parent::pbase(); }
+      const charT *end() const { return parent::pptr(); }
+    };
+
+    template <typename charT, typename traits = std::char_traits<charT> >
+    class basic_oastream : private oabuf<charT, traits>,
+                           public  std::basic_ostream<charT, traits>
+    {
+    public:
+      basic_oastream(charT *begin_, charT *end_)
+        : oabuf<charT, traits>(begin_, end_),
+          std::basic_ostream<charT, traits>(this)
+      {
+      }
+      basic_oastream(charT *begin_, size_t size_)
+        : oabuf<charT, traits>(begin_, begin_ + size_),
+          std::basic_ostream<charT, traits>(this)
+      {
+      }
+      template <size_t N>
+      basic_oastream(charT (&buff)[N])
+        : oabuf<charT, traits>(buff, buff + N),
+          std::basic_ostream<charT, traits>(this)
+      {
+      }
+      using oabuf<charT, traits>::begin;
+      using oabuf<charT, traits>::end;
+      std::size_t size() const { return size_t(end() - begin()); }
+      operator datatypes::fixed_string() const
+      {
+        datatypes::fixed_string rv = { begin(), size() };
+        return rv;
+      }
+    };
+
+    template <typename charT, class traits = std::char_traits<charT> >
+    class iabuf : public std::basic_streambuf<charT, traits>
+    {
+    public:
+      iabuf(const charT *begin, const charT *end)
+      {
+        std::basic_streambuf<charT, traits>::setbuf(const_cast<charT *>(begin),
+                                                    end - begin);
+        std::basic_streambuf<charT, traits>::setg(const_cast<charT *>(begin),
+                                                  const_cast<charT *>(begin),
+                                                  const_cast<charT *>(end));
+      }
+    };
+
+    template <typename charT, typename traits = std::char_traits<charT> >
+    class basic_iastream : private iabuf<charT, traits>, public std::basic_istream<charT, traits>
+    {
+    public:
+      basic_iastream(const charT *begin, const charT *end)
+        : iabuf<charT, traits>(begin, end),
+          std::basic_istream<charT, traits>(this)
+      {
+      }
+      basic_iastream(const charT *begin)
+        : iabuf<charT, traits>(begin, begin + wrapped::strlen(begin)),
+          std::basic_istream<charT, traits>(this)
+      {
+      }
+    };
+
+    template <size_t N,
+              typename charT = char,
+              typename traits = std::char_traits<charT> >
+    class toastream : public basic_oastream<charT, traits>
+    {
+    public:
+      toastream() : basic_oastream<charT, traits>(buffer, N) {}
+    private:
+      charT buffer[N];
+    };
+
+    typedef basic_oastream<char> oastream;
+    typedef basic_iastream<char> iastream;
+
+  } // stream
+
   namespace comm {
 
 #define CRPCUT_COMM_MSGS(translator)             \
@@ -1330,9 +1421,17 @@ namespace crpcut {
     public:
       reporter();
       void set_fds(int read, int write);
-      void operator()(type t, std::ostringstream &os) const;
+      void operator()(type t, const std::ostringstream &os) const;
+      template <size_t N>
+      void operator()(type t, const stream::toastream<N> &os) const;
+      void operator()(type t, const stream::oastream &os) const;
       void operator()(type t, const char *msg) const;
       void operator()(type t, const char *msg, size_t len) const;
+      template <size_t N>
+      void operator()(type t, const char (&msg)[N]) const
+      {
+        operator()(t, msg, N - 1);
+      }
       template <typename T>
       void operator()(type t, const T& data) const;
     private:
@@ -1439,96 +1538,6 @@ namespace crpcut {
   };
 
 
-  namespace stream {
-    template <typename charT, class traits = std::char_traits<charT> >
-    class oabuf : public std::basic_streambuf<charT, traits>
-    {
-      typedef std::basic_streambuf<charT, traits> parent;
-    public:
-      oabuf(charT *begin_, charT *end_)
-      {
-        parent::setp(begin_, end_);
-      }
-      const charT *begin() const { return parent::pbase(); }
-      const charT *end() const { return parent::pptr(); }
-    };
-
-    template <typename charT, typename traits = std::char_traits<charT> >
-    class basic_oastream : private oabuf<charT, traits>,
-                           public  std::basic_ostream<charT, traits>
-    {
-    public:
-      basic_oastream(charT *begin_, charT *end_)
-        : oabuf<charT, traits>(begin_, end_),
-          std::basic_ostream<charT, traits>(this)
-      {
-      }
-      basic_oastream(charT *begin_, size_t size_)
-        : oabuf<charT, traits>(begin_, begin_ + size_),
-          std::basic_ostream<charT, traits>(this)
-      {
-      }
-      template <size_t N>
-      basic_oastream(charT (&buff)[N])
-        : oabuf<charT, traits>(buff, buff + N),
-          std::basic_ostream<charT, traits>(this)
-      {
-      }
-      using oabuf<charT, traits>::begin;
-      using oabuf<charT, traits>::end;
-      std::size_t size() const { return size_t(end() - begin()); }
-      operator datatypes::fixed_string() const
-      {
-        datatypes::fixed_string rv = { begin(), size() };
-        return rv;
-      }
-    };
-
-    template <typename charT, class traits = std::char_traits<charT> >
-    class iabuf : public std::basic_streambuf<charT, traits>
-    {
-    public:
-      iabuf(const charT *begin, const charT *end)
-      {
-        std::basic_streambuf<charT, traits>::setbuf(const_cast<charT *>(begin),
-                                                    end - begin);
-        std::basic_streambuf<charT, traits>::setg(const_cast<charT *>(begin),
-                                                  const_cast<charT *>(begin),
-                                                  const_cast<charT *>(end));
-      }
-    };
-
-    template <typename charT, typename traits = std::char_traits<charT> >
-    class basic_iastream : private iabuf<charT, traits>, public std::basic_istream<charT, traits>
-    {
-    public:
-      basic_iastream(const charT *begin, const charT *end)
-        : iabuf<charT, traits>(begin, end),
-          std::basic_istream<charT, traits>(this)
-      {
-      }
-      basic_iastream(const charT *begin)
-        : iabuf<charT, traits>(begin, begin + wrapped::strlen(begin)),
-          std::basic_istream<charT, traits>(this)
-      {
-      }
-    };
-
-    template <size_t N,
-              typename charT = char,
-              typename traits = std::char_traits<charT> >
-    class toastream : public basic_oastream<charT, traits>
-    {
-    public:
-      toastream() : basic_oastream<charT, traits>(buffer, N) {}
-    private:
-      charT buffer[N];
-    };
-
-    typedef basic_oastream<char> oastream;
-    typedef basic_iastream<char> iastream;
-
-  } // stream
 
   struct namespace_info
   {
@@ -1708,7 +1717,7 @@ namespace crpcut {
           msg << "no value";
         }
       msg << " cannot be interpreted as desired type";
-      comm::report(comm::exit_fail, msg.begin(), msg.size());
+      comm::report(comm::exit_fail, msg);
     }
     template <typename T>
     static T get_parameter(const char *name)
@@ -1826,8 +1835,7 @@ namespace crpcut {
           char *buff = static_cast<char*>(alloca(length));
           s.copy(buff, length);
           std::string().swap(s);
-          comm::report(comm::exit_fail,
-                       buff, length);
+          comm::report(comm::exit_fail, buff, length);
         }
       comm::report(comm::exit_fail,
                    "Unexpectedly did not throw");
@@ -3079,6 +3087,13 @@ namespace crpcut {
   namespace comm {
 
 
+    template <size_t N>
+    void
+    reporter::operator()(type t, const stream::toastream<N> &os) const
+    {
+      const stream::oastream &os_(os);
+      operator()(t, os_);
+    }
 
     template <typename T>
     void

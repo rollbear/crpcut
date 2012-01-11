@@ -413,7 +413,7 @@ TESTSUITE(output)
       }
     }
 
-    TEST(report_with_non_empty_dir)
+    TEST(full_report_with_non_empty_dir)
     {
       StrictMock<stream_buffer> test_buffer;
       {
@@ -425,9 +425,11 @@ TESTSUITE(output)
         obj.begin_case(s("apa"), false, false);
         obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpdir/hoppla"));
         obj.end_case();
-        obj.tag_summary(s(""), 32, 1, true);
+        obj.tag_summary(s(""), 30, 1, true);
         obj.nonempty_dir("/tmp/tmpdir");
-        obj.statistics(32, 32, 32, 1);
+        obj.blocked_test(s("ko"));
+        obj.blocked_test(s("tupp"));
+        obj.statistics(32, 32, 30, 1);
         const char re[] =
           "^<NF>FAILED?: apa\n"
           "/tmp/tmpdir/hoppla is not empty!\n"
@@ -436,10 +438,14 @@ TESTSUITE(output)
           "-*\n"
           "<>=*\n"
           "Files remain under /tmp/tmpdir\n"
+          "The following tests were blocked from running:\n"
+          "  <B>ko<>\n"
+          "  <B>tupp<>\n"
           "32 test cases selected\n\n"
-          "Total"      _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
-          "<PS>PASSED" _ ":" _  "31" _       "31" _            "0<>\n"
-          "<FS>FAILED" _ ":" _   "1" _        "1" _            "0<>\n"
+          "Total"      _   ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<PS>PASSED" _   ":" _  "29" _       "29" _            "0<>\n"
+          "<FS>FAILED" _   ":" _   "1" _        "1" _            "0<>\n"
+          "<BS>UNTESTED" _ ":" _ "2<>\n"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m), test_buffer.os.str());
       }

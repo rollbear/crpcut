@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
 
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ namespace crpcut {
     stream::toastream<128> os;
     os << "Unexpectedly survived\nExpected ";
     t->crpcut_get_reg().crpcut_expected_death(os);
-    comm::report(comm::exit_fail, os.begin(), os.size());
+    comm::report(comm::exit_fail, os);
   }
 
   template <>
@@ -51,7 +51,7 @@ namespace crpcut {
     stream::toastream<128> os;
     os << "Unexpectedly survived\nExpected ";
     t->crpcut_get_reg().crpcut_expected_death(os);
-    comm::report(comm::exit_fail, os.begin(), os.size());
+    comm::report(comm::exit_fail, os);
   }
 
   template <>

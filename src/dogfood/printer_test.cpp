@@ -57,6 +57,7 @@ TESTSUITE(printer)
                  void(crpcut::datatypes::fixed_string,
                       std::size_t, std::size_t, bool));
   };
+
   TEST(create_and_destroy_calls_formatter_begin_and_end)
   {
     using namespace testing;

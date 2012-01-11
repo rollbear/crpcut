@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
 
  * Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,13 @@ namespace crpcut {
     }
 
     void
-    reporter::operator()(type t, std::ostringstream &os) const
+    reporter::operator()(type t, const stream::oastream &os) const
+    {
+      operator()(t, os.begin(), os.size());
+    }
+
+    void
+    reporter::operator()(type t, const std::ostringstream &os) const
     {
       const std::string &s = os.str();
       operator()(t, s.c_str(), s.length());
