@@ -80,6 +80,8 @@ namespace crpcut {
       : writer(buff,
                output_charset(test_case_factory::get_output_charset()),
                illegal_replacement(test_case_factory::get_illegal_rep())),
+        did_output_(false),
+        blocked_tests_(false),
         conversion_type_(test_case_factory::get_output_charset()
                          ? translated
                          : verbatim),
