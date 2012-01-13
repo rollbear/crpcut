@@ -1,3 +1,6 @@
+         * Fixed a heap init bug which in some cases could cause a deadlock
+           at start up.
+
          * Changed the default propagation rules for text report (colour)
            decoration configuration from the CRPCUT_TEXT_DECORATION
            environment variable. See the reference manual for details.

@@ -403,7 +403,7 @@ namespace crpcut
       recurse_counter recurse_checker(recursive);
       typedef libwrapper::loader<libs::libc> libc_loader;
 
-      has_malloc_sym |= !recursive && libc_loader::obj().has_symbol("malloc");
+      has_malloc_sym |= !recursive && libc_loader::has_symbol("malloc");
       if (!has_malloc_sym)
         {
           if (current_offset == 0)

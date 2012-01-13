@@ -376,38 +376,47 @@ namespace crpcut {
 
   namespace libwrapper {
 
-    class dlloader
+    class dlloader // thin wrapper around dlopen(), dlclose(), dlsym()
     {
     protected:
-      dlloader(const char *const *lib);
-      ~dlloader();
-      void *libptr() const { return libp;  }
-      void *symbol(const char *name) const;
-      void assert_lib_is_loaded() const;
+      static void *load(const char *const *lib);
+      static void *symbol(void *, const char *name);
+      static void unload(void*);
+      static void assert_lib_is_loaded(void*);
+      dlloader() {}
+      ~dlloader() {}
     private:
-      void init(const char *const *lib);
-      void *libp;
     };
 
     template <const char * const * (&lib)()>
     class loader : dlloader
     {
-      loader() : dlloader(lib()) {}
+      static void *& libptr()
+      {
+        static void *p = 0;
+        return p;
+      }
+      loader()  {
+        libptr() = dlloader::load(lib());
+        assert_lib_is_loaded(libptr());
+      }
+      ~loader() { unload(libptr()); libptr() = 0;}
     public:
+      static bool is_loaded() { return libptr(); }
       template <typename T>
       T sym(const char *name)
       {
-        assert_lib_is_loaded();
+        assert_lib_is_loaded(libptr());
         union {       // I don't like silencing the warning this way,
           T func;     // but it should be safe. *IF* the function pointer
           void *addr; // can't be represented by void*, dlsym() can't
         } dlr;        // exist either.
-        dlr.addr = symbol(name);
+        dlr.addr = symbol(libptr(), name);
         return dlr.func;
       }
-      bool has_symbol(const char *name)
+      static bool has_symbol(const char *name)
       {
-        return symbol(name);
+        return is_loaded() && symbol(libptr(), name);
       }
       static loader& obj()
       {

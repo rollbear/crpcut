@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2010-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,38 +78,35 @@ namespace crpcut {
 
   namespace libwrapper
   {
-    dlloader::dlloader(const char *const *lib)
-      : libp(0)
-    {
-      init(lib);
-    }
-
-    dlloader::~dlloader()
-    {
-      (void)::dlclose(libp); // nothing much to do in case of error.
-    }
-
-    void dlloader::init(const char *const *lib)
+    void *dlloader::load(const char *const *lib)
     {
       static const int flags[] = {
         RTLD_NOW | RTLD_NOLOAD,
         RTLD_NOW
       };
-
+      void *libp = 0;
       for (const int *pf = begin(flags); pf != end(flags); ++pf)
         {
           for (const char * const *name = lib; *name; ++name)
             {
               libp = ::dlopen(*name, *pf);
-              if (libp) return;
+              if (libp) return libp;
             }
         }
+      return 0;
     }
-    void *dlloader::symbol(const char *name) const
+
+    void *dlloader::symbol(void *libp, const char *name)
     {
       return libp ? ::dlsym(libp, name) : 0;
     }
-    void dlloader::assert_lib_is_loaded() const
+
+    void dlloader::unload(void *libp)
+    {
+      (void)::dlclose(libp); // nothing much to do in case of error.
+    }
+
+    void dlloader::assert_lib_is_loaded(void *libp)
     {
       if (!libp) *(int*)libp = 0; // can't rely on abort() here
     }
