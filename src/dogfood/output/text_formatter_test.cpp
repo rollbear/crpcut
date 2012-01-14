@@ -65,10 +65,49 @@ namespace {
     std::ostringstream os;
   };
 
+  class tag_list : public crpcut::tag_list_root
+  {
+  public:
+    MOCK_METHOD0(fail, void());
+    MOCK_METHOD0(pass, void());
+    MOCK_CONST_METHOD0(num_failed, size_t());
+    MOCK_CONST_METHOD0(num_passed, size_t());
+    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
+    MOCK_CONST_METHOD0(longest_tag_name, int());
+    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
+    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
+  };
+
+  class test_tag : public crpcut::tag
+  {
+  public:
+    template <size_t N>
+    test_tag(const char (&f)[N], tag_list *root)
+      : crpcut::tag(N, root),
+        name_(crpcut::datatypes::fixed_string::make(f))
+    {
+      EXPECT_CALL(*this, get_name()).WillOnce(Return(name_));
+    }
+    MOCK_METHOD0(fail, void());
+    MOCK_METHOD0(pass, void());
+    MOCK_CONST_METHOD0(num_failed, size_t());
+    MOCK_CONST_METHOD0(num_passed, size_t());
+    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
+    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
+    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
+    crpcut::datatypes::fixed_string name_;
+  };
+  static crpcut::datatypes::fixed_string empty_string = { "", 0 };
+
   class fix
   {
   protected:
-    StrictMock<stream_buffer> test_buffer;
+    fix()
+    {
+      EXPECT_CALL(tags, get_name()).WillRepeatedly(Return(empty_string));
+      EXPECT_CALL(tags, longest_tag_name()).WillRepeatedly(Return(0));
+    }
+    StrictMock<tag_list> tags;
   };
 
 }
@@ -88,19 +127,26 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
+        StrictMock<stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
                                              1,
                                              vec,
+                                             tags,
                                              test_modifier);
         }
         ASSERT_TRUE(test_buffer.os.str() == "");
       }
     }
 
-    TEST(stats_without_test_list_shows_only_pass_line_for_only_pass_results)
+    TEST(stats_without_test_list_shows_only_pass_line_for_only_pass_results,
+         fix)
     {
+      EXPECT_CALL(tags, num_passed()).WillOnce(Return(13));
+      EXPECT_CALL(tags, num_failed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, get_importance()).WillOnce(Return(crpcut::tag::critical));
+
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
         StrictMock<stream_buffer> test_buffer;
@@ -109,8 +155,8 @@ TESTSUITE(output)
                                              "one",
                                              1,
                                              vec,
+                                             tags,
                                              test_modifier);
-          obj.tag_summary(s(""), 13, 0, true);
           obj.statistics(15, 14, 13, 0);
         }
 
@@ -125,8 +171,13 @@ TESTSUITE(output)
       }
     }
 
-    TEST(stats_without_test_list_shows_only_fail_line_for_only_fail_results)
+    TEST(stats_without_test_list_shows_only_fail_line_for_only_fail_results,
+         fix)
     {
+      EXPECT_CALL(tags, num_passed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, num_failed()).WillOnce(Return(13));
+      EXPECT_CALL(tags, get_importance()).WillOnce(Return(crpcut::tag::critical));
+
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
         StrictMock<stream_buffer> test_buffer;
@@ -135,8 +186,8 @@ TESTSUITE(output)
                                              "one",
                                              1,
                                              vec,
+                                             tags,
                                              test_modifier);
-          obj.tag_summary(s(""), 0, 13, true);
           obj.statistics(15, 13, 13, 13);
         }
         static const char re[] =
@@ -149,8 +200,112 @@ TESTSUITE(output)
       }
     }
 
-    TEST(stats_with_mixed_crit_ncrit_pass_only_shows_pass_sum)
+#define MAKE_TAG(n) test_tag n(#n, &tags)
+
+    TEST(stats_with_mixed_crit_ncrit_pass_only_shows_pass_sum,
+         fix)
     {
+      EXPECT_CALL(tags, longest_tag_name()).WillRepeatedly(Return(15));
+      EXPECT_CALL(tags, num_passed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, num_failed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
+      MAKE_TAG(apa);
+      EXPECT_CALL(apa, num_passed())
+        .WillRepeatedly(Return(5));
+
+      EXPECT_CALL(apa, num_failed())
+        .WillRepeatedly(Return(0));
+
+      EXPECT_CALL(apa, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
+      MAKE_TAG(katt);
+      EXPECT_CALL(katt, num_passed())
+        .WillRepeatedly(Return(3));
+
+      EXPECT_CALL(katt, num_failed())
+        .WillRepeatedly(Return(0));
+
+      EXPECT_CALL(katt, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      MAKE_TAG(a_long_tag_name);
+      EXPECT_CALL(a_long_tag_name, num_passed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(a_long_tag_name, num_failed())
+        .WillRepeatedly(Return(0));
+
+      EXPECT_CALL(a_long_tag_name, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      ASSERT_SCOPE_HEAP_LEAK_FREE
+      {
+        StrictMock<stream_buffer> test_buffer;
+        {
+          crpcut::output::text_formatter obj(test_buffer,
+                                             "one",
+                                             1,
+                                            vec,
+                                             tags,
+                                             test_modifier);
+          obj.statistics(9, 9, 9, 0);
+        }
+        static const char re[] =
+              "9 test cases selected\n"
+              " tag                 run  passed  failed\n"
+           "<P>!apa                   5       5       0<>\n"
+          "<NP>?katt                  3       3       0<>\n"
+          "<NP>?a_long_tag_name       1       1       0<>\n"
+          "\n"
+              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<PS>PASSED"   _ ":" _ "9"   _ "5"        _ "4<>\n$"
+          ;
+        ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
+                    test_buffer.os.str());
+      }
+    }
+
+    TEST(stats_with_mixed_crit_ncrit_fail_only_shows_fail_sum, fix)
+    {
+      EXPECT_CALL(tags, longest_tag_name()).WillRepeatedly(Return(20));
+      EXPECT_CALL(tags, num_passed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, num_failed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
+      MAKE_TAG(apa);
+      EXPECT_CALL(apa, num_passed())
+        .WillRepeatedly(Return(0));
+
+      EXPECT_CALL(apa, num_failed())
+        .WillRepeatedly(Return(5));
+
+      EXPECT_CALL(apa, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
+      MAKE_TAG(katt);
+      EXPECT_CALL(katt, num_passed())
+        .WillRepeatedly(Return(0));
+
+      EXPECT_CALL(katt, num_failed())
+        .WillRepeatedly(Return(3));
+
+      EXPECT_CALL(katt, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      MAKE_TAG(a_very_long_tag_name);
+      EXPECT_CALL(a_very_long_tag_name, num_passed())
+        .WillRepeatedly(Return(0));
+
+      EXPECT_CALL(a_very_long_tag_name, num_failed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(a_very_long_tag_name, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
         StrictMock<stream_buffer> test_buffer;
@@ -159,27 +314,64 @@ TESTSUITE(output)
                                              "one",
                                              1,
                                              vec,
+                                             tags,
                                              test_modifier);
-          obj.tag_summary(s(""), 0, 0, true);
-          obj.tag_summary(s("katt"), 3, 0, false);
-          obj.tag_summary(s("apa"), 5, 0, true);
-          obj.statistics(8, 8, 8, 0);
+          obj.statistics(9, 9, 9, 9);
         }
         static const char re[] =
-              "8 test cases selected\n"
-               " tag" _ "run" _ "passed" _ "failed\n"
-           "<P>!apa"  _ "5"   _ "5"      _ "0<>\n"
-          "<NP>?katt" _ "3"   _ "3"      _ "0<>\n\n"
+              "9 test cases selected\n"
+              " tag                      run  passed  failed\n"
+           "<F>!apa                        5       0       5<>\n"
+          "<NF>?katt                       3       0       3<>\n"
+           "<F>!a_very_long_tag_name       1       0       1<>\n"
+          "\n"
               "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
-          "<PS>PASSED"   _ ":" _ "8"   _ "5"        _ "3<>\n$"
+          "<FS>FAILED"   _ ":" _ "9"   _ "6"        _ "3<>\n$"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
       }
     }
 
-    TEST(stats_with_mixed_crit_ncrit_fail_only_shows_fail_sum)
+    TEST(stats_with_mixed_crit_ncrit_fail_pass_only_shows_crit_sum, fix)
     {
+      EXPECT_CALL(tags, longest_tag_name()).WillRepeatedly(Return(10));
+
+      EXPECT_CALL(tags, num_passed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, num_failed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
+      MAKE_TAG(apa);
+      EXPECT_CALL(apa, num_passed())
+        .WillRepeatedly(Return(2));
+
+      EXPECT_CALL(apa, num_failed())
+        .WillRepeatedly(Return(3));
+
+      EXPECT_CALL(apa, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
+      MAKE_TAG(katt);
+      EXPECT_CALL(katt, num_passed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(katt, num_failed())
+        .WillRepeatedly(Return(2));
+
+      EXPECT_CALL(katt, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      MAKE_TAG(a_tag_name);
+      EXPECT_CALL(a_tag_name, num_passed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(a_tag_name, num_failed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(a_tag_name, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
         StrictMock<stream_buffer> test_buffer;
@@ -188,27 +380,65 @@ TESTSUITE(output)
                                              "one",
                                              1,
                                              vec,
+                                             tags,
                                              test_modifier);
-          obj.tag_summary(s(""), 0, 0, true);
-          obj.tag_summary(s("katt"), 0, 3, false);
-          obj.tag_summary(s("apa"), 0, 5, true);
-          obj.statistics(8, 8, 8, 8);
+          obj.statistics(10, 10, 10, 6);
         }
         static const char re[] =
-              "8 test cases selected\n"
-               " tag" _ "run" _ "passed" _ "failed\n"
-           "<F>!apa"  _ "5"   _ "0"      _ "5<>\n"
-          "<NF>?katt" _ "3"   _ "0"      _ "3<>\n\n"
+              "10 test cases selected\n"
+              " tag            run  passed  failed\n"
+           "<F>!apa              5       2       3<>\n"
+          "<NF>?katt             3       1       2<>\n"
+           "<F>!a_tag_name       2       1       1<>\n"
+          "\n"
               "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
-          "<FS>FAILED"   _ ":" _ "8"   _ "5"        _ "3<>\n$"
+          "<PS>PASSED"   _ ":" _ "4"   _ "3"        _ "1<>\n"
+          "<FS>FAILED"   _ ":" _ "6"   _ "4"        _ "2<>\n$"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
       }
     }
 
-    TEST(stats_with_mixed_crit_ncrit_fail_pass_only_shows_crit_sum)
+    TEST(stats_with_mixed_nconly_shows_nc_sum, fix)
     {
+      EXPECT_CALL(tags, longest_tag_name()).WillRepeatedly(Return(20));
+
+      EXPECT_CALL(tags, num_passed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, num_failed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
+      MAKE_TAG(apa);
+      EXPECT_CALL(apa, num_passed())
+        .WillRepeatedly(Return(2));
+
+      EXPECT_CALL(apa, num_failed())
+        .WillRepeatedly(Return(3));
+
+      EXPECT_CALL(apa, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      MAKE_TAG(katt);
+      EXPECT_CALL(katt, num_passed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(katt, num_failed())
+        .WillRepeatedly(Return(2));
+
+      EXPECT_CALL(katt, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      MAKE_TAG(a_very_long_tag_name);
+      EXPECT_CALL(a_very_long_tag_name, num_passed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(a_very_long_tag_name, num_failed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(a_very_long_tag_name, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
         StrictMock<stream_buffer> test_buffer;
@@ -217,64 +447,36 @@ TESTSUITE(output)
                                              "one",
                                              1,
                                              vec,
+                                             tags,
                                              test_modifier);
-          obj.tag_summary(s(""), 0, 0, true);
-          obj.tag_summary(s("katt"), 1, 2, false);
-          obj.tag_summary(s("apa"), 2, 3, true);
-          obj.statistics(8, 8, 8, 5);
+          obj.statistics(10, 10, 10, 6);
         }
         static const char re[] =
-              "8 test cases selected\n"
-               " tag" _ "run" _ "passed" _ "failed\n"
-           "<F>!apa"  _ "5"   _ "2"      _ "3<>\n"
-          "<NF>?katt" _ "3"   _ "1"      _ "2<>\n\n"
+              "10 test cases selected\n"
+              " tag                      run  passed  failed\n"
+          "<NF>?apa                        5       2       3<>\n"
+          "<NF>?katt                       3       1       2<>\n"
+          "<NF>?a_very_long_tag_name       2       1       1<>\n"
+          "\n"
               "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
-          "<PS>PASSED"   _ ":" _ "3"   _ "2"        _ "1<>\n"
-          "<FS>FAILED"   _ ":" _ "5"   _ "3"        _ "2<>\n$"
+          "<NPS>PASSED"   _ ":" _ "4"   _ "0"        _ "4<>\n"
+          "<NFS>FAILED"   _ ":" _ "6"   _ "0"        _ "6<>\n$"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
       }
     }
 
-    TEST(stats_with_mixed_nconly_shows_nc_sum)
+    TEST(passed_critical_has_correct_decoration, fix)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
         StrictMock<stream_buffer> test_buffer;
-        {
-          crpcut::output::text_formatter obj(test_buffer,
-                                             "one",
-                                             1,
-                                             vec,
-                                             test_modifier);
-          obj.tag_summary(s(""), 0, 0, true);
-          obj.tag_summary(s("katt"), 1, 2, false);
-          obj.tag_summary(s("apa"), 2, 3, false);
-          obj.statistics(8, 8, 8, 5);
-        }
-        static const char re[] =
-              "8 test cases selected\n"
-               " tag" _ "run" _ "passed" _ "failed\n"
-          "<NF>?apa"  _ "5"   _ "2"      _ "3<>\n"
-          "<NF>?katt" _ "3"   _ "1"      _ "2<>\n\n"
-              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
-          "<NPS>PASSED"   _ ":" _ "3"   _ "0"        _ "3<>\n"
-          "<NFS>FAILED"   _ ":" _ "5"   _ "0"        _ "5<>\n$"
-          ;
-        ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
-                    test_buffer.os.str());
-      }
-    }
-
-    TEST(passed_critical_has_correct_decoration)
-    {
-      StrictMock<stream_buffer> test_buffer;
-      {
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
                                            vec,
+                                           tags,
                                            test_modifier);
         obj.begin_case(s("apa"), true, true);
         obj.end_case();
@@ -283,14 +485,16 @@ TESTSUITE(output)
       }
     }
 
-    TEST(passed_noncritical_has_correct_decoration)
+    TEST(passed_noncritical_has_correct_decoration, fix)
     {
-      StrictMock<stream_buffer> test_buffer;
+      ASSERT_SCOPE_HEAP_LEAK_FREE
       {
+        StrictMock<stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
                                            vec,
+                                           tags,
                                            test_modifier);
         obj.begin_case(s("apa"), true, false);
         obj.end_case();
@@ -299,14 +503,16 @@ TESTSUITE(output)
       }
     }
 
-    TEST(failed_critical_has_correct_decoration)
+    TEST(failed_critical_has_correct_decoration, fix)
     {
-      StrictMock<stream_buffer> test_buffer;
+      ASSERT_SCOPE_HEAP_LEAK_FREE
       {
+        StrictMock<stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
                                            vec,
+                                           tags,
                                            test_modifier);
         obj.begin_case(s("apa"), false, true);
         obj.end_case();
@@ -315,14 +521,16 @@ TESTSUITE(output)
       }
     }
 
-    TEST(failed_noncritical_has_correct_decoration)
+    TEST(failed_noncritical_has_correct_decoration, fix)
     {
-      StrictMock<stream_buffer> test_buffer;
+      ASSERT_SCOPE_HEAP_LEAK_FREE
       {
+        StrictMock<stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
                                            vec,
+                                           tags,
                                            test_modifier);
         obj.begin_case(s("apa"), false, false);
         obj.end_case();
@@ -331,14 +539,16 @@ TESTSUITE(output)
       }
     }
 
-    TEST(terminate_without_files_with_correct_phase_and_format)
+    TEST(terminate_without_files_with_correct_phase_and_format, fix)
     {
-      StrictMock<stream_buffer> test_buffer;
+      ASSERT_SCOPE_HEAP_LEAK_FREE
       {
+        StrictMock<stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
                                            vec,
+                                           tags,
                                            test_modifier);
         obj.begin_case(s("apa"), false, false);
         obj.terminate(crpcut::destroying, s("katt"), s(""));
@@ -354,14 +564,16 @@ TESTSUITE(output)
       }
     }
 
-    TEST(terminate_with_files_with_correct_phase_and_format)
+    TEST(terminate_with_files_with_correct_phase_and_format, fix)
     {
-      StrictMock<stream_buffer> test_buffer;
+      ASSERT_SCOPE_HEAP_LEAK_FREE
       {
+        StrictMock<stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
                                            vec,
+                                           tags,
                                            test_modifier);
         obj.begin_case(s("apa"), false, false);
         obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpfile"));
@@ -378,14 +590,16 @@ TESTSUITE(output)
       }
     }
 
-    TEST(multiple_prints_are_shown_in_sequence)
+    TEST(multiple_prints_are_shown_in_sequence, fix)
     {
-      StrictMock<stream_buffer> test_buffer;
+      ASSERT_SCOPE_HEAP_LEAK_FREE
       {
+        StrictMock<stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
                                            vec,
+                                           tags,
                                            test_modifier);
         obj.begin_case(s("apa"), false, false);
         obj.print(s("type"),
@@ -413,19 +627,28 @@ TESTSUITE(output)
       }
     }
 
-    TEST(full_report_with_non_empty_dir)
+    TEST(full_report_with_non_empty_dir, fix)
     {
-      StrictMock<stream_buffer> test_buffer;
+      EXPECT_CALL(tags, longest_tag_name()).WillOnce(Return(0));
+      EXPECT_CALL(tags, get_importance())
+        .WillRepeatedly(Return(crpcut::tag::critical));
+      EXPECT_CALL(tags, num_passed())
+        .WillRepeatedly(Return(29));
+      EXPECT_CALL(tags, num_failed())
+        .WillRepeatedly(Return(1));
+      ASSERT_SCOPE_HEAP_LEAK_FREE
       {
+        StrictMock<stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
                                            vec,
+                                           tags,
                                            test_modifier);
         obj.begin_case(s("apa"), false, false);
         obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpdir/hoppla"));
         obj.end_case();
-        obj.tag_summary(s(""), 30, 1, true);
+
         obj.nonempty_dir("/tmp/tmpdir");
         obj.blocked_test(s("ko"));
         obj.blocked_test(s("tupp"));

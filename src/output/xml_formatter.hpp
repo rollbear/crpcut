@@ -41,7 +41,8 @@ namespace crpcut {
       xml_formatter(output::buffer &buffer,
                     const char     *id,
                     int             argc,
-                    const char     *argv[]);
+                    const char     *argv[],
+                    const tag_list_root &tags);
       virtual ~xml_formatter();
       virtual void begin_case(datatypes::fixed_string name,
                               bool                    result,
@@ -58,18 +59,16 @@ namespace crpcut {
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);
       virtual void blocked_test(datatypes::fixed_string name);
-      virtual void tag_summary(datatypes::fixed_string tag_name,
-                               std::size_t             num_passed,
-                               std::size_t             num_failed,
-                               bool                    critical);
     private:
+      void tag_summary(const tag& t);
       virtual datatypes::fixed_string escape(char c) const;
       void make_closed();
 
-      std::size_t non_critical_fail_sum;
-      bool        last_closed_;
-      bool        blocked_tests_;
-      bool        tag_summary_;
+      std::size_t          non_critical_fail_sum;
+      bool                 last_closed_;
+      bool                 blocked_tests_;
+      bool                 tag_summary_;
+      const tag_list_root &tags_;
     };
   }
 }

@@ -38,13 +38,12 @@ namespace crpcut {
     class text_formatter : public formatter,
                            private writer
     {
-      struct tag_result;
-      std::vector<tag_result> tag_results;
     public:
       text_formatter(output::buffer &buffer,
                      const char *,
                      int,
                      const char**,
+                     const tag_list_root &tags,
                      const text_modifier& = default_text_modifier());
       ~text_formatter();
       virtual void begin_case(datatypes::fixed_string name,
@@ -62,17 +61,15 @@ namespace crpcut {
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);
       virtual void blocked_test(datatypes::fixed_string name);
-      virtual void tag_summary(datatypes::fixed_string tag_name,
-                               std::size_t             num_passed,
-                               std::size_t             num_failed,
-                               bool                    critical);
     private:
+      void tag_summary(const tag& t) const;
       static const text_modifier& default_text_modifier();
       void display_tag_list_header();
 
       bool                 did_output_;
       bool                 blocked_tests_;
       writer::type         conversion_type_;
+      const tag_list_root &tags_;
       const text_modifier &modifier_;
     };
   }

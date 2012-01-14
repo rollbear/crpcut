@@ -62,6 +62,7 @@ namespace {
 namespace crpcut {
   namespace output {
     using datatypes::fixed_string;
+#if 0
     struct text_formatter::tag_result
     {
       tag_result(fixed_string n, std::size_t p, std::size_t f, bool c)
@@ -71,11 +72,13 @@ namespace crpcut {
       std::size_t failed;
       bool        critical;
     };
+#endif
     text_formatter
     ::text_formatter(buffer              &buff,
                      const char          *,
                      int,
                      const char         **,
+                     const tag_list_root &tags,
                      const text_modifier &m)
       : writer(buff,
                output_charset(test_case_factory::get_output_charset()),
@@ -85,6 +88,7 @@ namespace crpcut {
         conversion_type_(test_case_factory::get_output_charset()
                          ? translated
                          : verbatim),
+        tags_(tags),
         modifier_(m)
     {
     }
@@ -173,7 +177,7 @@ namespace crpcut {
     {
       std::ostringstream os;
       os << " "
-         << std::setw(tag_list::longest_name_len())
+         << std::setw(tags_.longest_tag_name())
          << std::setiosflags(std::ios::left) << "tag"
          << std::resetiosflags(std::ios::left)
          << std::setw(8) << "run"
@@ -194,45 +198,46 @@ namespace crpcut {
       write(" test cases selected\n", conversion_type_);
       std::size_t sum_passed[] = { 0, 0 };
       std::size_t sum_failed[] = { 0, 0 };
-      if (tag_results.size() > 0)
-        {
-          bool header_displayed = false;
-          const std::size_t tag_space = size_t(tag_list::longest_name_len());
-          const std::size_t dec_space = modifier_.longest_decorator_len()*2U;
-          const std::size_t ws_len = 1 + 8 + 8 + 8 + 1 + 2;
-          const std::size_t buff_len = tag_space + dec_space + ws_len;
-          char *buffer = static_cast<char*>(alloca(buff_len));
-          while (!tag_results.empty())
-            {
-              tag_result &t = tag_results.back();
-              if (t.name)
-                {
-                  if (!header_displayed)
-                    {
-                      display_tag_list_header();
-                      header_displayed = true;
-                    }
-                  stream::oastream os(buffer, buff_len);
-                  const bool result = t.failed == 0;
-                  modifier_.write_to(os,
-                                     violation_mods[result][t.critical]);
-                  os << (t.critical ? '!' : '?')
-                     << std::string(t.name.str, t.name.len)
-                     << std::setw(int(tag_space - t.name.len + 1))
-                     << ' '
-                     << std::setw(7) << t.passed + t.failed
-                     << std::setw(8) << t.passed
-                     << std::setw(8) << t.failed;
-                  modifier_.write_to(os, text_modifier::NORMAL);
-                  os << '\n';
-                  write(os, conversion_type_);
-                }
-              sum_passed[t.critical] += t.passed;
-              sum_failed[t.critical] += t.failed;
-              tag_results.pop_back();
-            }
 
-        }
+      bool header_displayed = false;
+      const std::size_t tag_space = size_t(tags_.longest_tag_name());
+      const std::size_t dec_space = modifier_.longest_decorator_len()*2U;
+      const std::size_t ws_len = 1 + 8 + 8 + 8 + 1 + 2;
+      const std::size_t buff_len = tag_space + dec_space + ws_len;
+      char *buffer = static_cast<char*>(alloca(buff_len));
+      tag_list_root::const_iterator i = tags_.begin();
+      tag_list_root::const_iterator const end = tags_.end();
+      do {
+        const tag &t = *i;
+        const bool critical = t.get_importance() == tag::critical;
+
+        sum_passed[critical] += t.num_passed();
+        sum_failed[critical] += t.num_failed();
+
+        datatypes::fixed_string name = t.get_name();
+        if (!name) continue;
+
+        if (!header_displayed)
+          {
+            display_tag_list_header();
+            header_displayed = true;
+          }
+        stream::oastream os(buffer, buff_len);
+        const bool result = t.num_failed() == 0;
+        modifier_.write_to(os,
+                           violation_mods[result][critical]);
+        os << (critical ? '!' : '?')
+           << std::string(name.str, name.len)
+           << std::setw(int(tag_space - name.len + 1))
+           << ' '
+           << std::setw(7) << t.num_passed() + t.num_failed()
+           << std::setw(8) << t.num_passed()
+           << std::setw(8) << t.num_failed();
+        modifier_.write_to(os, text_modifier::NORMAL);
+        os << '\n';
+        write(os, conversion_type_);
+      } while (i++ != end);
+
       write("\nTotal    :     Sum   Critical   Non-critical");
       if (num_run != num_failed)
         {
@@ -298,7 +303,7 @@ namespace crpcut {
       modifier_.write_to(*this, text_modifier::NORMAL);
       write("\n");
     }
-
+#if 0
     void
     text_formatter
     ::tag_summary(fixed_string tag_name,
@@ -311,7 +316,7 @@ namespace crpcut {
                                        num_failed,
                                        critical));
     }
-
+#endif
     const text_modifier&
     text_formatter
     ::default_text_modifier()

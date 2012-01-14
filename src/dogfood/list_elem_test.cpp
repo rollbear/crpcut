@@ -25,7 +25,6 @@
  */
 
 #include <crpcut.hpp>
-#include "../list_elem.hpp"
 
 template <typename T, size_t N>
 size_t size(T (&)[N])
@@ -35,7 +34,7 @@ size_t size(T (&)[N])
 
 TESTSUITE(list_elem)
 {
-  class C : public crpcut::list_elem<C> {};
+  class C : public crpcut::datatypes::list_elem<C> {};
   TEST(a_default_constructed_list_is_empty)
   {
     C c;

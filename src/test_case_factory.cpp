@@ -57,10 +57,12 @@ namespace {
   {
     if (use_xml)
       {
-        static crpcut::output::xml_formatter xo(buffer, id, argc, argv);
+        static crpcut::output::xml_formatter xo(buffer, id, argc, argv,
+                                                crpcut::tag_list::obj());
         return xo;
       }
-    static crpcut::output::text_formatter to(buffer, id, argc, argv);
+    static crpcut::output::text_formatter to(buffer, id, argc, argv,
+                                             crpcut::tag_list::obj());
     return to;
   }
 
@@ -1194,6 +1196,7 @@ namespace crpcut {
                 }
             }
         }
+#if 0
       {
         tag_list::iterator i = tag_list::begin();
         tag_list::iterator end = tag_list::end();
@@ -1208,6 +1211,7 @@ namespace crpcut {
             }
         } while (i++ != end);
       }
+#endif
       fmt.statistics(num_registered_tests,
                      num_selected_tests,
                      num_tests_run,

@@ -28,31 +28,23 @@
 #include <crpcut.hpp>
 namespace crpcut {
   tag::tag()
-    : next_(this),
-      prev_(this),
-      failed_(0),
+    : failed_(0),
       passed_(0),
       importance_(critical)
   {
   }
 
-  tag::tag(int len, tag *n)
-    : next_(n),
-      prev_(n->prev_),
-      failed_(0),
+  tag::tag(int len, tag_list_root *list)
+    : failed_(0),
       passed_(0),
       importance_(critical)
   {
-    n->prev_ = this;
-    prev_->next_ = this;
-    if (len > longest_name_len_) longest_name_len_ = len;
+    link_before(*list);
+    list->store_name_length(len);
   }
 
   tag::~tag()
   {
-    tag *p = prev_;
-    next_->prev_ = prev_;
-    p->next_ = next_;
   }
 
   void tag::fail()
@@ -75,15 +67,6 @@ namespace crpcut {
     return passed_;
   }
 
-  tag *tag::get_next() const
-  {
-    return next_;
-  }
-
-  tag *tag::get_prev() const
-  {
-    return prev_;
-  }
 
   void tag::set_importance(tag::importance i)
   {
@@ -95,5 +78,4 @@ namespace crpcut {
     return importance_;
   }
 
-  int tag::longest_name_len_;
 }

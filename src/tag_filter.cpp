@@ -29,17 +29,17 @@
 namespace {
 
   void
-  assert_name_list(const char *begin, const char*end, crpcut::tag_list &l)
+  assert_name_list(const char *begin, const char*end, crpcut::tag_list_root &l)
   {
     const char *p = begin;
     while (p)
       {
         if (*p == ',' || p == end)
           {
-            using crpcut::tag_list;
+            using crpcut::tag_list_root;
             bool found = false;
-            tag_list::iterator e = tag_list::iterator(&l);
-            tag_list::iterator i = e;
+            tag_list_root::iterator e = tag_list_root::iterator(&l);
+            tag_list_root::iterator i = e;
             do
               {
                 crpcut::datatypes::fixed_string name = i->get_name();
@@ -132,7 +132,7 @@ namespace crpcut {
 
   void
   tag_filter
-  ::assert_names(tag_list &l) const
+  ::assert_names(tag_list_root &l) const
   {
     assert_name_list(begin_select,      end_select,      l);
     assert_name_list(begin_noncritical, end_noncritical, l);

@@ -36,7 +36,7 @@ namespace crpcut {
   public:
     class spec_error;
     tag_filter(const char * p = 0);
-    void assert_names(tag_list& l) const;
+    void assert_names(tag_list_root& l) const;
     tag::importance lookup(datatypes::fixed_string name) const;
   private:
     const char *begin_select;

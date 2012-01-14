@@ -850,6 +850,75 @@ namespace crpcut {
       static const char *get_c_str(const char *s) { return s; }
     };
 
+    template <typename T>
+    class list_elem
+    {
+    public:
+      list_elem();
+      virtual ~list_elem();
+      void link_after(list_elem& r);
+      void link_before(list_elem &r);
+      T *next() { return next_; }
+      T *prev() { return prev_; }
+      const T *next() const { return next_; }
+      const T *prev() const { return prev_; }
+      bool is_empty() const;
+    private:
+      void unlink();
+      list_elem(const list_elem&);
+      list_elem& operator=(const list_elem&);
+      T *next_;
+      T *prev_;
+    };
+
+    template <typename T>
+    inline list_elem<T>::list_elem()
+      : next_(static_cast<T*>(this)),
+        prev_(static_cast<T*>(this))
+    {
+    }
+
+    template <typename T>
+    inline list_elem<T>::~list_elem()
+    {
+      unlink();
+    }
+
+    template <typename T>
+    inline void list_elem<T>::link_after(list_elem& r)
+    {
+      next_ = r.next_;
+      prev_ = static_cast<T*>(&r);
+      next_->prev_ = static_cast<T*>(this);
+      r.next_ = static_cast<T*>(this);
+    }
+
+    template <typename T>
+    inline void list_elem<T>::link_before(list_elem &r)
+    {
+      prev_ = r.prev_;
+      next_ = static_cast<T*>(&r);
+      prev_->next_ = static_cast<T*>(this);
+      r.prev_ = static_cast<T*>(this);
+    }
+
+    template <typename T>
+    inline bool list_elem<T>::is_empty() const
+    {
+      return next_ == static_cast<const T*>(this);
+    }
+
+    template <typename T>
+    inline void list_elem<T>::unlink()
+    {
+      T *n = next_;
+      T *p = prev_;
+      n->prev_ = p;
+      p->next_ = n;
+      prev_ = static_cast<T*>(this);
+      next_ = static_cast<T*>(this);
+    }
+
   } // namespace datatypes
 
 #ifdef CRPCUT_SUPPORTS_VTEMPLATES
@@ -881,63 +950,75 @@ namespace crpcut {
 
   typedef enum { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) } test_phase;
 
-  template <typename T>
-  class crpcut_tag_info;
-  class tag
+  class tag_list_root;
+  class tag : public datatypes::list_elem<tag>
   {
-    friend class crpcut_tag_info<crpcut_none>;
+    friend class tag_list_root;
     tag();
   protected:
-    tag(int len, tag *n);
+    tag(int len, tag_list_root *list);
     ~tag();
   public:
     typedef enum { ignored, critical, non_critical } importance;
-    void fail();
-    void pass();
-    size_t num_failed() const;
-    size_t num_passed() const;
+    virtual void fail();
+    virtual void pass();
+    virtual size_t num_failed() const;
+    virtual size_t num_passed() const;
     virtual datatypes::fixed_string get_name() const = 0;
-    tag *get_next() const;
-    tag *get_prev() const;
-    void set_importance(importance i);
-    importance get_importance() const;
+    virtual void set_importance(importance i);
+    virtual importance get_importance() const;
   private:
-    tag *next_;
-    tag *prev_;
     size_t failed_;
     size_t passed_;
     importance importance_;
-    static int longest_name_len_;
   };
 
+  class tag_list_root : public tag
+  {
+  public:
+    tag_list_root() : tag(), longest_tag_name_(0) {}
+    virtual int longest_tag_name() const { return longest_tag_name_; }
+    void store_name_length(int n) { longest_tag_name_ = n; }
+    template <typename T>
+    class iterator_t
+    {
+    public:
+      iterator_t(T *p) : p_(p) {};
+      iterator_t& operator++() { p_ = p_->next(); return *this; }
+      iterator_t operator++(int) { iterator_t rv(*this); ++(*this); return rv;}
+      T *operator->() { return p_; }
+      T& operator*() { return *p_; }
+      bool operator==(const iterator_t &i) const { return p_ == i.p_; }
+      bool operator!=(const iterator_t &i) const { return !(operator==(i)); }
+    private:
+      T *p_;
+    };
+    typedef iterator_t<tag> iterator;
+    typedef iterator_t<const tag> const_iterator;
+    const_iterator begin() const { return const_iterator(next()); }
+    const_iterator end() const { return const_iterator(this); }
+    iterator begin() { return iterator(next()); }
+    iterator end() { return iterator(this); }
+  private:
+    int longest_tag_name_;
+  };
+
+  template <typename T>
+  class crpcut_tag_info;
+
   template <>
-  class crpcut_tag_info<crpcut_none> : public crpcut::tag
+  class crpcut_tag_info<crpcut_none> : public tag_list_root
   {
     crpcut_tag_info();
     virtual datatypes::fixed_string get_name() const;
   public:
-    class crpcut_test_tag;
-    static crpcut_tag_info& obj();
-    class iterator
-    {
-    public:
-      iterator(crpcut::tag *p_);
-      iterator& operator++();
-      iterator operator++(int);
-      crpcut::tag *operator->();
-      crpcut::tag& operator&();
-      bool operator==(const iterator &i) const;
-      bool operator!=(const iterator &i) const;
-    private:
-      crpcut::tag *p;
-    };
+    static tag_list_root& obj();
     static iterator begin();
     static iterator end();
     static int longest_name_len();
   };
 
   typedef crpcut_tag_info<crpcut_none> tag_list;
-
   template <typename T>
   class crpcut_tag_info : public tag
   {
@@ -948,7 +1029,11 @@ namespace crpcut {
       return t;
     }
   private:
-    crpcut_tag_info() : tag(get_name_len(), &tag_list::obj()) {}
+    crpcut_tag_info()
+      : tag(get_name_len(),
+            &crpcut_tag_info<crpcut_none>::obj())
+    {
+    }
     int get_name_len() const;
     virtual datatypes::fixed_string get_name() const;
   };

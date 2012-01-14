@@ -52,13 +52,15 @@ namespace crpcut {
     ::xml_formatter(output::buffer &buffer,
                     const char     *id,
                     int             argc,
-                    const char *argv[])
+                    const char *argv[],
+                    const tag_list_root &tags)
       : writer(buffer,
                "UTF-8",
                xml_replacement(test_case_factory::get_illegal_rep())),
         last_closed_(false),
         blocked_tests_(false),
-        tag_summary_(false)
+        tag_summary_(false),
+        tags_(tags)
     {
       write("<?xml version=\"1.0\"?>\n\n"
             "<crpcut xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
@@ -228,6 +230,12 @@ namespace crpcut {
                  unsigned num_run,
                  unsigned num_failed)
     {
+      for (tag_list_root::const_iterator i = tags_.begin();
+           i != tags_.end();
+           ++i)
+        {
+          tag_summary(*i);
+        }
       if (tag_summary_)
         {
           write("  </tag_summary>\n");
@@ -281,31 +289,32 @@ namespace crpcut {
 
     void
     xml_formatter
-    ::tag_summary(datatypes::fixed_string tag_name,
-                  std::size_t             num_passed,
-                  std::size_t             num_failed,
-                  bool                    critical)
+    ::tag_summary(const tag &t)
     {
       if (blocked_tests_)
         {
           write("  </blocked_tests>\n");
           blocked_tests_ = false;
         }
-      if (!critical) non_critical_fail_sum+= num_failed;
-      if (!tag_name) return;
+      if (t.get_importance() != tag::critical)
+        {
+          non_critical_fail_sum+= t.num_failed();
+        }
+      datatypes::fixed_string name = t.get_name();
+      if (!name) return;
       if (!tag_summary_)
         {
           write("  <tag_summary>\n");
           tag_summary_ = true;
         }
       write("    <tag name=\"");
-      write(tag_name);
+      write(name);
       write("\" passed=\"");
-      write(num_passed);
+      write(t.num_passed());
       write("\" failed=\"");
-      write(num_failed);
+      write(t.num_failed());
       write("\" critical=\"");
-      write(critical ? "true" : "false");
+      write(t.get_importance() == tag::critical ? "true" : "false");
       write("\"/>\n");
     }
 

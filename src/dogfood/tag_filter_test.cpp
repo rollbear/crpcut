@@ -33,17 +33,21 @@ std::ostream &operator<<(std::ostream &os, crpcut::tag::importance i)
   return os << id[i];
 }
 
-namespace crpcut {
-  class tag_list::crpcut_test_tag : public crpcut::tag_list
-  {
-  };
-}
 namespace {
+  class test_tag_list_root : public crpcut::tag_list_root
+  {
+    crpcut::datatypes::fixed_string get_name() const
+    {
+      static crpcut::datatypes::fixed_string n = { "", 0 };
+      return n;
+    }
+  };
+
   class test_tag : public crpcut::tag
   {
   public:
     template <std::size_t N>
-    test_tag(const char (&f)[N], crpcut::tag* root)
+    test_tag(const char (&f)[N], crpcut::tag_list_root* root)
       : crpcut::tag(int(N-1), root)
     {
       name_.str = f;
@@ -65,11 +69,11 @@ namespace {
         ko("ko", &root),
         lemur("lemur", &root)
     {}
-    crpcut::tag_list::crpcut_test_tag root;
-    test_tag                          apa;
-    test_tag                          katt;
-    test_tag                          ko;
-    test_tag                          lemur;
+    test_tag_list_root root;
+    test_tag           apa;
+    test_tag           katt;
+    test_tag           ko;
+    test_tag           lemur;
   };
 
   template <std::size_t N>

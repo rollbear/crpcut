@@ -29,7 +29,6 @@
 namespace crpcut {
   crpcut_tag_info<crpcut::crpcut_none>
   ::crpcut_tag_info()
-    : tag()
   {
   }
 
@@ -41,83 +40,33 @@ namespace crpcut {
     return empty;
   }
 
-  crpcut_tag_info<crpcut_none>&
+  tag_list_root&
   crpcut_tag_info<crpcut_none>::obj()
   {
     static crpcut_tag_info<crpcut_none> t;
     return t;
   }
 
-  crpcut_tag_info<crpcut_none>::iterator
-  ::iterator(crpcut::tag *p_)
-    : p(p_)
-  {
-  }
 
-  crpcut_tag_info<crpcut_none>::iterator&
-  crpcut_tag_info<crpcut_none>::iterator
-  ::operator++()
-  {
-    p = p->get_next();
-    return *this;
-  }
-
-  crpcut_tag_info<crpcut_none>::iterator
-  crpcut_tag_info<crpcut_none>::iterator
-  ::operator++(int)
-  {
-    iterator rv(*this);
-    ++(*this);
-    return rv;
-  }
-
-  crpcut::tag *
-  crpcut_tag_info<crpcut_none>::iterator
-  ::operator->()
-  {
-    return p;
-  }
-
-  crpcut::tag&
-  crpcut_tag_info<crpcut_none>::iterator
-  ::operator&()
-  {
-    return *p;
-  }
-
-  bool
-  crpcut_tag_info<crpcut_none>::iterator
-  ::operator==(const iterator &i) const
-  {
-    return p == i.p;
-  }
-
-  bool
-  crpcut_tag_info<crpcut_none>::iterator
-  ::operator!=(const iterator &i) const
-  {
-    return p != i.p;
-  }
-
-  crpcut_tag_info<crpcut_none>::iterator
+  tag_list_root::iterator
   crpcut_tag_info<crpcut_none>
   ::begin()
   {
-    return iterator(obj().get_next());
+    return obj().begin();
   }
 
-  crpcut_tag_info<crpcut_none>::iterator
+  tag_list_root::iterator
   crpcut_tag_info<crpcut_none>
   ::end()
   {
-    return iterator(&obj());
+    return obj().end();
   }
 
   int
   crpcut_tag_info<crpcut_none>::
   longest_name_len()
   {
-    return tag::longest_name_len_;
+    return obj().longest_tag_name();
   }
 
 }

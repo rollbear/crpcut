@@ -53,10 +53,7 @@ namespace crpcut {
                               unsigned num_failed) = 0;
       virtual void nonempty_dir(const  char*)  = 0;
       virtual void blocked_test(datatypes::fixed_string name)  = 0;
-      virtual void tag_summary(datatypes::fixed_string tag_name,
-                               std::size_t             num_passed,
-                               std::size_t             num_failed,
-                               bool                    critical) = 0;
+      //      virtual void tag_summary(const tag_list_root *tags) = 0;
       virtual ~formatter();
     protected:
       static const datatypes::fixed_string &phase_str(test_phase);
