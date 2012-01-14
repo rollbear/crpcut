@@ -27,7 +27,6 @@
 #ifndef PRESENTATION_READER_HPP
 #define PRESENTATION_READER_HPP
 
-#include "list_elem.hpp"
 #include "test_case_result.hpp"
 #include "io.hpp"
 namespace crpcut {
@@ -49,11 +48,11 @@ namespace crpcut {
     virtual bool write();
     virtual void exception();
   private:
-    list_elem<test_case_result>  messages;
-    poll<io>                    &poller;
-    int                          fd;
-    output::formatter           &fmt;
-    bool                         verbose;
+    datatypes::list_elem<test_case_result>  messages;
+    poll<io>                               &poller;
+    int                                     fd;
+    output::formatter                      &fmt;
+    bool                                    verbose;
 
     presentation_reader();
     presentation_reader(const presentation_reader&);

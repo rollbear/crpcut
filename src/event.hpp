@@ -27,11 +27,10 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
 
-#include "list_elem.hpp"
 #include <crpcut.hpp>
 namespace crpcut {
 
-  struct event : public list_elem<event>
+  struct event : public datatypes::list_elem<event>
   {
     event(comm::type t, const char *b, std::size_t b_len);
     ~event();

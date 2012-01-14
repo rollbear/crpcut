@@ -27,23 +27,22 @@
 #ifndef TEST_CASE_RESULT_HPP
 #define TEST_CASE_RESULT_HPP
 
-#include "list_elem.hpp"
 #include "event.hpp"
 namespace crpcut {
 
-  struct test_case_result : public list_elem<test_case_result>
+  struct test_case_result : public datatypes::list_elem<test_case_result>
   {
     test_case_result(pid_t pid);
     ~test_case_result();
     void *operator new(size_t);
     void operator delete(void *p);
-    pid_t                   id;
-    bool                    explicit_fail;
-    bool                    success;
-    bool                    nonempty_dir;
-    datatypes::fixed_string name;
-    datatypes::fixed_string termination;
-    list_elem<event>        history;
+    pid_t                       id;
+    bool                        explicit_fail;
+    bool                        success;
+    bool                        nonempty_dir;
+    datatypes::fixed_string     name;
+    datatypes::fixed_string     termination;
+    datatypes::list_elem<event> history;
   private:
     test_case_result(const test_case_result& r);
     test_case_result& operator=(const test_case_result&r);
