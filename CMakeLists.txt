@@ -49,6 +49,9 @@ else (CRPCUT_LIB_ALIAS_VERSION)
   set(CRPCUT_PRINT_VERSION "${CRPCUT_LIB_VERSION}")
 endif (CRPCUT_LIB_ALIAS_VERSION)
 set(SHAREDIR "share/crpcut-${CRPCUT_LIB_VERSION}")
+if ("${BUILD_SHARED_LIBS}" STREQUAL "")
+  set(BUILD_SHARED_LIBS ON)
+endif ()
 file(GLOB LIB_SRCS
      src/check_name.cpp
      src/clocks/clocks.cpp
@@ -307,10 +310,10 @@ endif (WITH_GOOGLE_MOCK)
 
 include_directories(include)
 
-add_library(crpcut SHARED ${LIB_SRCS})
+add_library(crpcut ${LIB_SRCS})
 set_target_properties(crpcut PROPERTIES
- VERSION ${CRPCUT_LIB_VERSION}
- SOVERSION ${CRPCUT_LIB_SOVERSION})
+  VERSION ${CRPCUT_LIB_VERSION}
+  SOVERSION ${CRPCUT_LIB_SOVERSION})
 
 if(GMOCK_LIBS)
   file(GLOB GMOCK_TEST_SRCS   test-src/gmock.cpp)
@@ -342,8 +345,11 @@ file(GLOB TEST_SRCS
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FEATURE_SELECTION}")
 add_executable(testprog EXCLUDE_FROM_ALL ${TEST_SRCS})
+add_executable(testprog_s EXCLUDE_FROM_ALL ${TEST_SRCS})
 if (GMOCK_LIBS)
+  add_custom_target(dogfood_test dogfood DEPENDS dogfood VERBATIM)
   add_executable(dogfood EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
+  add_executable(dogfood_s EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
   target_link_libraries(dogfood crpcut ${EXTRA_LIBS} ${GMOCK_LIBS})
   target_link_libraries(testprog crpcut ${GMOCK_LIBS} ${EXTRA_LIBS})
 else (GMOCK_LIBS)
@@ -355,7 +361,6 @@ find_program(BASH "bash")
 find_program(XMLLINT "xmllint")
 
 if (WITH_HTML_DOCS)
-  add_custom_target(dogfood_test dogfood DEPENDS dogfood VERBATIM)
   add_custom_target(can_dump_core
     ulimit -c | egrep -q "\\(Unlimited\\)\\|\\[1-9\\]" && touch can_dump_core)
   find_program(XSLTPROC "xsltproc")
