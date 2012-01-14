@@ -956,6 +956,7 @@ namespace crpcut {
   namespace policies {
 
     class crpcut_exception_translator
+      : public datatypes::list_elem<crpcut_exception_translator>
     {
     public:
       static std::string try_all();
@@ -968,9 +969,6 @@ namespace crpcut {
       crpcut_exception_translator(const crpcut_exception_translator&);
       crpcut_exception_translator& operator=(const crpcut_exception_translator&);
       virtual std::string crpcut_translate() const;
-
-      crpcut_exception_translator *next;
-      crpcut_exception_translator *prev;
     };
 
 

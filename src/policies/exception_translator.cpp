@@ -31,35 +31,27 @@ namespace crpcut {
 
     crpcut_exception_translator
     ::crpcut_exception_translator(int)
-      : next(this),
-        prev(this)
     {
     }
 
     crpcut_exception_translator
     ::crpcut_exception_translator()
-      : next(&root_object()),
-        prev(root_object().prev)
     {
-      root_object().prev = this;
-      prev->next = this;
+      link_before(root_object());
     }
 
     crpcut_exception_translator
     ::~crpcut_exception_translator()
     {
-      crpcut_exception_translator *p = prev;
-      p->next = next;
-      next->prev = p;
     }
 
     std::string
     crpcut_exception_translator
     ::try_all()
     {
-      for (crpcut_exception_translator *p = root_object().next;
+      for (crpcut_exception_translator *p = root_object().next();
            p != &root_object();
-           p = p->next)
+           p = p->next())
         {
           try {
             return p->crpcut_translate();
