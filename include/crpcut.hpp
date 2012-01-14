@@ -957,7 +957,7 @@ namespace crpcut {
     tag();
   protected:
     tag(int len, tag_list_root *list);
-    ~tag();
+    virtual ~tag(); // make eclipse happy
   public:
     typedef enum { ignored, critical, non_critical } importance;
     virtual void fail();
