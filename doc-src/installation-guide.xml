@@ -257,6 +257,14 @@
       line when <link xref="building">building</link>.
     </para>
   </simplesect>
+  <simplesect><title>Static or shared library?</title>
+  <para>By default &crpcut; builds as a shared library. Should you
+  want to build a static library (<symbol>libcrpcut.a</symbol>) instead,
+  add the command line parameter
+  <constant>-&#xfeff;DBUILD_SHARED_LIBS</constant>&#xfeff;=&#xfeff;false
+  to the CMake line when <link xref="building">building</link>.
+  </para>
+  </simplesect>
   <simplesect><title>Self test after build?</title>
     <para>Running a self test after build is a good way to verify
       that &crpcut; functions correctly. To run a self test, you

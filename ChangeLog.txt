@@ -1,3 +1,8 @@
+         * Added option to build libcrpcut as either a static or shared
+           library. Shared library is the default. To build crpcut with
+           a static library, add the flag -DBUILD_SHARED_LIBS=false to
+           the CMake command line.
+
          * Fixed a heap init bug which in some cases could cause a deadlock
            at start up.
 
