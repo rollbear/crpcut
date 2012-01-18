@@ -45,8 +45,11 @@ namespace {
 
   inline const char *nullindex(const char* str, char needle)
   {
-    while (*str && *str != needle)
-      ++str;
+    if (str)
+      {
+        while (*str && *str != needle)
+          ++str;
+      }
     return str;
   }
 
@@ -895,7 +898,7 @@ namespace crpcut {
             // just make a syntax check here. What follows must be a name=value.
             {
               const char *n = nullindex(value, '=');
-              if (*n == 0)
+              if (!n || *n == 0)
                 {
                   err_os << "-p must be followed by a name and =\n";
                   return -1;
