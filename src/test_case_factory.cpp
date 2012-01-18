@@ -1199,22 +1199,7 @@ namespace crpcut {
                 }
             }
         }
-#if 0
-      {
-        tag_list::iterator i = tag_list::begin();
-        tag_list::iterator end = tag_list::end();
-        do {
-          if (i->get_importance() != tag::ignored &&
-              i->num_passed() + i->num_failed() != 0)
-            {
-              fmt.tag_summary(i->get_name(),
-                              i->num_passed(),
-                              i->num_failed(),
-                              i->get_importance() == tag::critical);
-            }
-        } while (i++ != end);
-      }
-#endif
+
       fmt.statistics(num_registered_tests,
                      num_selected_tests,
                      num_tests_run,

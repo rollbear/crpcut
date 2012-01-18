@@ -62,17 +62,6 @@ namespace {
 namespace crpcut {
   namespace output {
     using datatypes::fixed_string;
-#if 0
-    struct text_formatter::tag_result
-    {
-      tag_result(fixed_string n, std::size_t p, std::size_t f, bool c)
-        : name(n), passed(p), failed(f), critical(c) {}
-      fixed_string name;
-      std::size_t passed;
-      std::size_t failed;
-      bool        critical;
-    };
-#endif
     text_formatter
     ::text_formatter(buffer              &buff,
                      const char          *,
@@ -303,20 +292,7 @@ namespace crpcut {
       modifier_.write_to(*this, text_modifier::NORMAL);
       write("\n");
     }
-#if 0
-    void
-    text_formatter
-    ::tag_summary(fixed_string tag_name,
-                  std::size_t  num_passed,
-                  std::size_t  num_failed,
-                  bool         critical)
-    {
-      tag_results.push_back(tag_result(tag_name,
-                                       num_passed,
-                                       num_failed,
-                                       critical));
-    }
-#endif
+
     const text_modifier&
     text_formatter
     ::default_text_modifier()
