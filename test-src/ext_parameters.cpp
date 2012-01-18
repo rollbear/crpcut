@@ -26,6 +26,8 @@
 
 #include <crpcut.hpp>
 
+DEFINE_TEST_TAG(istream_ext_parameter);
+
 TESTSUITE(ext_parameters)
 {
   TEST(should_succeed_expected_value)
@@ -61,5 +63,94 @@ TESTSUITE(ext_parameters)
   TEST(should_fail_no_value_interpret)
   {
     crpcut::get_parameter<std::string>("orm");
+  }
+
+  TEST(should_fail_istream_nonexisting_parameter,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    std::string s;
+    crpcut::get_parameter<std::istream>("orm") >> s;
+  }
+
+  TEST(should_succeed_istream_string_value,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    std::string s;
+    crpcut::get_parameter<std::istream>("apa") >> s;
+    ASSERT_TRUE(s == "katt");
+  }
+
+  TEST(should_fail_istream_parameter_with_wrong_type,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    double d;
+    crpcut::get_parameter<std::istream>("apa") >> d;
+  }
+
+  TEST(should_succeed_reading_multiple_values,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    char b[5] = { 0, 0, 0, 0, 0 };
+    crpcut::get_parameter<std::istream>("apa") >> b[0] >> b[1] >> b[2] >> b[3];
+    ASSERT_TRUE(b == std::string("katt"));
+  }
+
+  TEST(should_fail_reading_too_many_values,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    std::string s1, s2;
+    crpcut::get_parameter<std::istream>("apa") >> s1 >> s2;
+  }
+
+  TEST(should_succeed_reading_stream_as_hex_value,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    int n;
+    crpcut::get_parameter<std::istream>("numeric") >> std::hex >> n;
+    ASSERT_TRUE(n == 16);
+  }
+
+  TEST(should_succeed_reading_stream_as_octal_value,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    int n;
+    crpcut::get_parameter<std::istream>("numeric") >> std::oct >> n;
+    ASSERT_TRUE(n == 8);
+  }
+
+  TEST(should_succeed_reading_stream_as_decimal_value,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    int n;
+    crpcut::get_parameter<std::istream>("numeric") >> std::dec >> n;
+    ASSERT_TRUE(n == 10);
+  }
+
+  TEST(should_succeed_reading_stream_as_interpreted_base_value,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    int n;
+    crpcut::get_parameter<std::istream>("numeric") >> std::setbase(0) >> n;
+    ASSERT_TRUE(n == 8);
+  }
+
+  TEST(should_fail_reading_relaxed_stream_value_of_wrong_type,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    int n = 5;
+    if (!(crpcut::get_parameter<crpcut::relaxed<std::istream> >("apa") >> n))
+      {
+        FAIL << "reading apa as int failed";
+      }
+  }
+
+  TEST(should_succeed_reading_relaxed_stream_value_of_right_type,
+       WITH_TEST_TAG(istream_ext_parameter))
+  {
+    int n = 5;
+    if (!(crpcut::get_parameter<crpcut::relaxed<std::istream> >("numeric") >> n))
+      {
+        FAIL << "reading numeric as int failed";
+      }
   }
 }
