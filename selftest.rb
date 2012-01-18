@@ -836,6 +836,58 @@ TESTS = {
   log('violation',
       /Parameter orm with no value cannot be interpreted/),
 
+  'ext_parameters::should_fail_istream_nonexisting_parameter' =>
+  FailedTest.new('running').
+  tag('istream_ext_parameter').
+  log('violation',
+      /^No parameter named \"orm\"/),
+
+  'ext_parameters::should_succeed_istream_string_value' =>
+  PassedTest.new().
+  tag('istream_ext_parameter'),
+
+  'ext_parameters::should_fail_istream_parameter_with_wrong_type' =>
+  FailedTest.new('running').
+  tag('istream_ext_parameter').
+  log('violation',
+      /Extract value from stream failed/me),
+
+  'ext_parameters::should_succeed_reading_multiple_values' =>
+  PassedTest.new().
+  tag('istream_ext_parameter'),
+
+  'ext_parameters::should_fail_reading_too_many_values' =>
+  FailedTest.new('running').
+  tag('istream_ext_parameter').
+  log('violation',
+      /Extract value from stream failed/me),
+
+  'ext_parameters::should_succeed_reading_stream_as_hex_value' =>
+  PassedTest.new().
+  tag('istream_ext_parameter'),
+
+  'ext_parameters::should_succeed_reading_stream_as_octal_value' =>
+  PassedTest.new().
+  tag('istream_ext_parameter'),
+
+  'ext_parameters::should_succeed_reading_stream_as_decimal_value' =>
+  PassedTest.new().
+  tag('istream_ext_parameter'),
+
+  'ext_parameters::should_succeed_reading_stream_as_interpreted_base_value' =>
+  PassedTest.new().
+  tag('istream_ext_parameter'),
+
+  'ext_parameters::should_fail_reading_relaxed_stream_value_of_wrong_type' =>
+  FailedTest.new('running').
+  tag('istream_ext_parameter').
+  log('violation',
+      /reading apa as int failed/),
+
+  'ext_parameters::should_succeed_reading_relaxed_stream_value_of_right_type' =>
+  PassedTest.new().
+  tag('istream_ext_parameter'),
+
   'fp::abs::should_succeed_add_epsilon_float' =>
   PassedTest.new(),
 
@@ -1771,7 +1823,7 @@ RUNS.each do | names, verbosity, blocking, slowliness, specials |
     | name, test |
     !filter(names, tags, name, test) || !test.expected_result?(verbosity[1])
   }
-  check_run("./test/testprog -p apa=katt #{params}", selection)
+  check_run("./test/testprog -p apa=katt --param=numeric=010 #{params}", selection)
 end
 
 dirname = "/tmp/crpcut_selftest_dir_#{$$}"
