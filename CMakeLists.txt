@@ -63,6 +63,7 @@ file(GLOB LIB_SRCS
      src/fdreader.cpp
      src/fsfuncs.cpp
      src/heap.cpp
+     src/istream_wrapper.cpp
      src/namespace_info.cpp
      src/output/formatter.cpp
      src/output/heap_buffer.cpp
@@ -70,6 +71,7 @@ file(GLOB LIB_SRCS
      src/output/text_modifier.cpp
      src/output/writer.cpp
      src/output/xml_formatter.cpp
+     src/parameter_stream_traits.cpp
      src/pipe_pair.cpp
      src/policies/deaths/no_action.cpp
      src/policies/deaths/none.cpp

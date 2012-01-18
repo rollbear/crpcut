@@ -1392,15 +1392,12 @@ namespace crpcut {
   class test_case_factory;
 
   namespace stream {
-    template <typename charT, class traits = std::char_traits<charT> >
+    template <typename charT, typename traits = std::char_traits<charT> >
     class oabuf : public std::basic_streambuf<charT, traits>
     {
       typedef std::basic_streambuf<charT, traits> parent;
     public:
-      oabuf(charT *begin_, charT *end_)
-      {
-        parent::setp(begin_, end_);
-      }
+      oabuf(charT *begin_, charT *end_);
       const charT *begin() const { return parent::pbase(); }
       const charT *end() const { return parent::pptr(); }
     };
@@ -1410,60 +1407,33 @@ namespace crpcut {
                            public  std::basic_ostream<charT, traits>
     {
     public:
-      basic_oastream(charT *begin_, charT *end_)
-        : oabuf<charT, traits>(begin_, end_),
-          std::basic_ostream<charT, traits>(this)
-      {
-      }
-      basic_oastream(charT *begin_, size_t size_)
-        : oabuf<charT, traits>(begin_, begin_ + size_),
-          std::basic_ostream<charT, traits>(this)
-      {
-      }
+      basic_oastream(charT *begin_, charT *end_);
+      basic_oastream(charT *begin_, size_t size_);
       template <size_t N>
-      basic_oastream(charT (&buff)[N])
-        : oabuf<charT, traits>(buff, buff + N),
-          std::basic_ostream<charT, traits>(this)
-      {
-      }
+      basic_oastream(charT (&buff)[N]);
       using oabuf<charT, traits>::begin;
       using oabuf<charT, traits>::end;
       std::size_t size() const { return size_t(end() - begin()); }
-      operator datatypes::fixed_string() const
-      {
-        datatypes::fixed_string rv = { begin(), size() };
-        return rv;
-      }
+      operator datatypes::fixed_string() const;
     };
 
     template <typename charT, class traits = std::char_traits<charT> >
     class iabuf : public std::basic_streambuf<charT, traits>
     {
     public:
-      iabuf(const charT *begin, const charT *end)
-      {
-        std::basic_streambuf<charT, traits>::setbuf(const_cast<charT *>(begin),
-                                                    end - begin);
-        std::basic_streambuf<charT, traits>::setg(const_cast<charT *>(begin),
-                                                  const_cast<charT *>(begin),
-                                                  const_cast<charT *>(end));
-      }
+      iabuf(const charT *begin, const charT *end);
+      iabuf(const iabuf& b);
     };
 
+
     template <typename charT, typename traits = std::char_traits<charT> >
-    class basic_iastream : private iabuf<charT, traits>, public std::basic_istream<charT, traits>
+    class basic_iastream : private iabuf<charT, traits>,
+                           public std::basic_istream<charT, traits>
     {
     public:
-      basic_iastream(const charT *begin, const charT *end)
-        : iabuf<charT, traits>(begin, end),
-          std::basic_istream<charT, traits>(this)
-      {
-      }
-      basic_iastream(const charT *begin)
-        : iabuf<charT, traits>(begin, begin + wrapped::strlen(begin)),
-          std::basic_istream<charT, traits>(this)
-      {
-      }
+      basic_iastream(const charT *begin, const charT *end);
+      basic_iastream(const charT *begin);
+      basic_iastream(const basic_iastream& i);
     };
 
     template <size_t N,
@@ -2963,7 +2933,67 @@ namespace crpcut {
   };
 
 
+
+  class istream_wrapper
+  {
+  public:
+    istream_wrapper(const char *p) : is_(p) {}
+    template <typename T>
+    istream_wrapper& operator>>(T& t)
+    {
+      return assert_stream_extraction(is_ >> t,
+                                      "Extract value from stream failed");
+    }
+    template <typename T>
+    istream_wrapper& operator>>(const T &t)
+    {
+      return assert_stream_extraction(is_ >> t,
+                                      "Stream manipulator failed");
+    }
+    template <typename T>
+    istream_wrapper&operator>>(T (&t)(T))
+    {
+      return assert_stream_extraction(is_ >> t,
+                                      "Stream manipulator failed");
+    }
+  private:
+    istream_wrapper
+    &assert_stream_extraction(std::istream &is, const char *msg);
+    stream::iastream is_;
+  };
+
+  template <typename T>
+  struct parameter_stream_traits
+  {
+    typedef T type;
+    static T make_value(const char *n);
+  };
+
+  template <>
+  struct parameter_stream_traits<std::istream>
+  {
+    typedef istream_wrapper type;
+    static type make_value(const char *n);
+  };
+
+  template <typename T>
+  class relaxed;
+
+  template <>
+  struct parameter_stream_traits<relaxed<std::istream> >
+  {
+    typedef stream::iastream type;
+    static type make_value(const char *n);
+  };
+
+
   //// template and inline func implementations
+
+  template <typename T>
+  T parameter_stream_traits<T>::make_value(const char *n)
+  {
+    return test_case_factory::get_parameter<T>(n);
+  }
 
   namespace datatypes {
 
@@ -3085,6 +3115,95 @@ namespace crpcut {
 
   } // namespace datatypes
 
+  namespace stream {
+
+    template <typename charT, typename traits>
+    oabuf<charT, traits>
+    ::oabuf(charT *begin_, charT *end_)
+    {
+      parent::setp(begin_, end_);
+    }
+
+    template <typename charT, typename traits>
+    basic_oastream<charT, traits>
+    ::basic_oastream(charT *begin_, charT *end_)
+      : oabuf<charT, traits>(begin_, end_),
+        std::basic_ostream<charT, traits>(this)
+    {
+    }
+
+    template <typename charT, typename traits>
+    basic_oastream<charT, traits>
+    ::basic_oastream(charT *begin_, size_t size_)
+      : oabuf<charT, traits>(begin_, begin_ + size_),
+        std::basic_ostream<charT, traits>(this)
+    {
+    }
+
+    template <typename charT, typename traits>  template <size_t N>
+    basic_oastream<charT, traits>
+    ::basic_oastream(charT (&buff)[N])
+      : oabuf<charT, traits>(buff, buff + N),
+        std::basic_ostream<charT, traits>(this)
+    {
+    }
+
+    template <typename charT, typename traits>
+    basic_oastream<charT, traits>
+    ::operator datatypes::fixed_string() const
+    {
+      datatypes::fixed_string rv = { begin(), size() };
+      return rv;
+    }
+
+    template <typename charT, class traits>
+    iabuf<charT, traits>::iabuf(const charT *begin, const charT *end)
+    {
+      std::basic_streambuf<charT, traits>::setbuf(const_cast<charT *>(begin),
+                                                  end - begin);
+      std::basic_streambuf<charT, traits>::setg(const_cast<charT *>(begin),
+                                                const_cast<charT *>(begin),
+                                                const_cast<charT *>(end));
+    }
+
+    template <typename charT, typename traits>
+    iabuf<charT, traits>::iabuf(const iabuf& b)
+      : std::basic_streambuf<charT, traits>()
+    {
+      const charT *begin = b.eback();
+      const charT *end = b.egptr();
+      this->setbuf(const_cast<charT*>(begin), end - begin);
+      this->setg(const_cast<charT*>(begin),
+                 const_cast<charT*>(begin),
+                 const_cast<charT*>(end));
+    }
+
+    template <typename charT, typename traits>
+    basic_iastream<charT, traits>
+    ::basic_iastream(const charT *begin, const charT *end)
+      : iabuf<charT, traits>(begin, end),
+        std::basic_istream<charT, traits>(this)
+    {
+    }
+
+    template <typename charT, typename traits>
+    basic_iastream<charT, traits>
+    ::basic_iastream(const charT *begin)
+      : iabuf<charT, traits>(begin, begin + wrapped::strlen(begin)),
+        std::basic_istream<charT, traits>(this)
+    {
+    }
+
+    template <typename charT, typename traits>
+    basic_iastream<charT, traits>
+    ::basic_iastream(const basic_iastream& i)
+      : std::basic_ios<charT>(this),
+        iabuf<charT, traits>(i),
+        std::basic_istream<charT, traits>(this)
+    {
+    }
+
+  }
 
   namespace policies {
 
@@ -3710,12 +3829,12 @@ namespace crpcut {
   }
 
   template <typename T>
-  inline T get_parameter(const char *name)
+  inline
+  typename parameter_stream_traits<T>::type
+  get_parameter(const char *name)
   {
-    return test_case_factory::get_parameter<T>(name);
+    return parameter_stream_traits<T>::make_value(name);
   }
-
-
 
 #define CRPCUT_BINOP(name, opexpr)                                      \
   namespace expr {                                                      \
