@@ -1,3 +1,14 @@
+         * Added two more flavours of crpcut::get_parameter().
+
+           crpcut::get_parameter<std::istream>(name) and
+           crpcut::get_parameter<crpcut::relaxed<std::istream> >(name).
+
+           Both can be used to extract values, possibly using stream
+           manipulators, from the named parameter. The difference is that
+           the former of the two will fail the test if stream extraction
+           fails, whereas the latter will just set the stream state for you
+           to check.
+
          * Added option to build libcrpcut as either a static or shared
            library. Shared library is the default. To build crpcut with
            a static library, add the flag -DBUILD_SHARED_LIBS=false to

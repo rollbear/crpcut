@@ -2579,7 +2579,7 @@
         See <xref linkend="TEST" xrefstyle="select:title"/>.</para>
     </formalpara>
     <para><type>crpcut::</type><function>get_parameter()</function> exists
-      in three flavours.
+      in no less than five flavours.
       <variablelist><title>Flavour</title>
         <varlistentry><term><type>const char *</type><type>crpcut::</type><function>get_parameter</function>(<type>const char *</type><parameter>name</parameter>)</term>
           <listitem>
@@ -2588,6 +2588,7 @@
               provided name.</para>
           </listitem>
         </varlistentry>
+
         <varlistentry><term><symbol>template &lt;typename T&gt;</symbol> <type>void</type> <type>crpcut::</type><function>get_parameter</function>(<type>const char *</type><parameter>name</parameter>, <type>T&amp;</type> <parameter>t</parameter>)</term>
           <listitem>
             <para>Convert the raw value to type <type>T</type> by means of
@@ -2602,6 +2603,28 @@
               <function>operator&gt;&gt;</function>(<type>std::istream&amp;</type>, <type>T&amp;</type>). If no parameter was defined with the provided name,
               or if the input streaming failed, the test will fail.</para>
           </listitem>
+        </varlistentry>
+
+        <varlistentry><term><type>crpcut::istream_wrapper</type> <type>crpcut::</type><function>get_parameter</function>&lt;std::istream&gt;(<type>const char *</type><parameter>name</parameter>)</term>
+        <listitem>
+          <para>Get an <type>istream</type> from the parameter to extract
+          values from, possibly with the use of stream manipulators. The
+          <type>crpcut::istream_wrapper</type> checks the
+          results of the extractions and fails the test if the extraction
+          fails.
+          </para>
+        </listitem>
+        </varlistentry>
+
+        <varlistentry><term><type>crpcut::iastream</type> <type>crpcut::</type><function>get_parameter</function>&lt;crpcut::relaxed&lt;std::istream&gt; &gt;(<type>const char *</type><parameter>name</parameter>)</term>
+        <listitem>
+          <para>Get an <type>istream</type> from the parameter to extract
+          values from, possibly with the use of stream manipulators. The
+          <type>crpcut::iastream</type> is a pure <type>std::istream</type>
+          implementation, which will set the stream status bits for you to
+          check.
+          </para>
+        </listitem>
         </varlistentry>
       </variablelist>
     </para>
