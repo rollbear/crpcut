@@ -56,10 +56,10 @@ namespace {
     typedef std::pair<const char*, std::size_t> buff;
     MOCK_CONST_METHOD0(get_buffer, buff());
     MOCK_METHOD0(advance, void());
-    virtual ssize_t write(const char *buff, std::size_t len)
+    virtual ssize_t write(const char *buffer, std::size_t len)
     {
-      os.write(buff, len);
-      return len;
+      os.write(buffer, std::streamsize(len));
+      return ssize_t(len);
     }
     MOCK_CONST_METHOD0(is_empty, bool());
     std::ostringstream os;
