@@ -829,25 +829,11 @@ namespace crpcut {
 
 
 
-    template <typename T>
-    struct string_traits;
-
-    template <>
-    struct string_traits<std::string>
+    struct string_traits
     {
       static const char *get_c_str(const std::string &s) { return s.c_str(); }
-    };
-
-    template <>
-    struct string_traits<const char*>
-    {
       static const char *get_c_str(const char *s) { return s; }
-    };
-
-    template <>
-    struct string_traits<char*>
-    {
-      static const char *get_c_str(const char *s) { return s; }
+      static const char *get_c_str(const std::exception& e) { return e.what(); }
     };
 
     template <typename T>
@@ -920,6 +906,85 @@ namespace crpcut {
     }
 
   } // namespace datatypes
+
+  class regex
+  {
+    class type
+    {
+    public:
+      template <typename T>
+      type(T t, int flags)
+        : errmsg(0)
+      {
+        int i = wrapped::regcomp(&r,
+                                 datatypes::string_traits::get_c_str(t),
+                                 flags | REG_NOSUB);
+        if (i != 0)
+          {
+            size_t n = wrapped::regerror(i, &r, 0, 0);
+            errmsg = new char[n];
+            wrapped::regerror(i, &r, errmsg, n);
+          }
+      }
+      template <typename T>
+      bool operator()(const T &t)
+      {
+        if (errmsg) return false;
+        const char *s = datatypes::string_traits::get_c_str(t);
+        int i = wrapped::regexec(&r, s, 0, 0, 0);
+        if (i != 0 && i != REG_NOMATCH)
+          {
+            size_t n = wrapped::regerror(i, &r, 0, 0);
+            errmsg = new char[n];
+            wrapped::regerror(i, &r, errmsg, n);
+          }
+        return !i;
+      }
+      friend std::ostream& operator<<(std::ostream &os, const type &obj)
+      {
+        if (obj.errmsg)
+          return os << obj.errmsg;
+        return os << "did not match";
+      }
+      ~type()
+      {
+        wrapped::regfree(&r);
+        delete[] errmsg;
+      }
+    private:
+      regex_t r;
+      char *errmsg;
+    };
+  public:
+    typedef enum {
+      e = REG_EXTENDED,
+      i = REG_ICASE,
+      m = REG_NEWLINE
+    } regflag;
+    template <typename T>
+    regex(T t,
+          regflag f1 = regflag(),
+          regflag f2 = regflag(),
+          regflag f3 = regflag())
+      : p(new type(t, f1 | f2 | f3))
+    {
+    }
+    regex(const regex& r)
+      : p(r.p)
+    {
+    }
+    template <typename T>
+    bool operator()(const T &t)
+    {
+      return (*p)(t);
+    }
+    friend std::ostream& operator<<(std::ostream &os, const regex &r)
+    {
+      return os << *r.p;
+    }
+  private:
+    mutable std::auto_ptr<type> p; // Yeach! Ugly
+  };
 
 #ifdef CRPCUT_SUPPORTS_VTEMPLATES
   template <typename D, typename ...T>
@@ -1037,6 +1102,156 @@ namespace crpcut {
     int get_name_len() const;
     virtual datatypes::fixed_string get_name() const;
   };
+
+  namespace stream {
+    template <typename charT, typename traits = std::char_traits<charT> >
+    class oabuf : public std::basic_streambuf<charT, traits>
+    {
+      typedef std::basic_streambuf<charT, traits> parent;
+    public:
+      oabuf(charT *begin_, charT *end_);
+      const charT *begin() const { return parent::pbase(); }
+      const charT *end() const { return parent::pptr(); }
+    };
+
+    template <typename charT, typename traits = std::char_traits<charT> >
+    class basic_oastream : private oabuf<charT, traits>,
+                           public  std::basic_ostream<charT, traits>
+    {
+    public:
+      basic_oastream(charT *begin_, charT *end_);
+      basic_oastream(charT *begin_, size_t size_);
+      template <size_t N>
+      basic_oastream(charT (&buff)[N]);
+      using oabuf<charT, traits>::begin;
+      using oabuf<charT, traits>::end;
+      std::size_t size() const { return size_t(end() - begin()); }
+      operator datatypes::fixed_string() const;
+    };
+
+    template <typename charT, class traits = std::char_traits<charT> >
+    class iabuf : public std::basic_streambuf<charT, traits>
+    {
+    public:
+      iabuf(const charT *begin, const charT *end);
+      iabuf(const iabuf& b);
+    };
+
+
+    template <typename charT, typename traits = std::char_traits<charT> >
+    class basic_iastream : private iabuf<charT, traits>,
+                           public std::basic_istream<charT, traits>
+    {
+    public:
+      basic_iastream(const charT *begin, const charT *end);
+      basic_iastream(const charT *begin);
+      basic_iastream(const basic_iastream& i);
+    };
+
+    template <size_t N,
+              typename charT = char,
+              typename traits = std::char_traits<charT> >
+    class toastream : public basic_oastream<charT, traits>
+    {
+    public:
+      toastream() : basic_oastream<charT, traits>(buffer, N) {}
+    private:
+      charT buffer[N];
+    };
+
+    typedef basic_oastream<char> oastream;
+    typedef basic_iastream<char> iastream;
+
+  } // stream
+
+  namespace comm {
+
+#define CRPCUT_COMM_MSGS(translator)             \
+    translator(stdout),           /*  1 */       \
+      translator(stderr),         /*  2 */       \
+      translator(info),           /*  3 */       \
+      translator(exit_ok),        /*  4 */       \
+      translator(exit_fail),      /*  5 */       \
+      translator(fail),           /*  6 */       \
+      translator(dir),            /*  7 */       \
+      translator(set_timeout),    /*  8 */       \
+      translator(cancel_timeout), /*  9 */       \
+      translator(begin_test),     /* 10 */       \
+      translator(end_test)        /* 11 */
+
+    typedef enum {
+      CRPCUT_COMM_MSGS(CRPCUT_VERBATIM),
+      kill_me = 0x100
+    } type;
+
+
+    // protocol is type -> size_t(length) -> char[length]. length may be 0.
+    // reader acknowledges with length.
+
+    class reporter
+    {
+      int write_fd;
+      int read_fd;
+    public:
+      reporter();
+      void set_fds(int read, int write);
+      void operator()(type t, const std::ostringstream &os) const;
+      template <size_t N>
+      void operator()(type t, const stream::toastream<N> &os) const;
+      void operator()(type t, const stream::oastream &os) const;
+      void operator()(type t, const char *msg) const;
+      void operator()(type t, const char *msg, size_t len) const;
+      template <size_t N>
+      void operator()(type t, const char (&msg)[N]) const
+      {
+        operator()(t, msg, N - 1);
+      }
+      template <typename T>
+      void operator()(type t, const T& data) const;
+    private:
+      template <typename T>
+      void write(const T& t) const;
+
+      template <typename T>
+      void read(T& t) const;
+    };
+
+    extern reporter report;
+
+    template <type t>
+    class direct_reporter
+    {
+    public:
+      direct_reporter();
+      template <typename V>
+      direct_reporter& operator<<(V& v);
+      template <typename V>
+      direct_reporter& operator<<(const V& v);
+      template <typename V>
+      direct_reporter& operator<<(V (&p)(V)){ os << p; return *this; }
+      template <typename V>
+      direct_reporter& operator<<(V& (&p)(V&)){ os << p; return *this; }
+      direct_reporter& operator<<(std::ostream& (&p)(std::ostream&))
+      {
+        os << p; return *this;
+      }
+      direct_reporter& operator<<(std::ios& (&p)(std::ios&))
+      {
+        os << p; return *this;
+      }
+      direct_reporter& operator<<(std::ios_base& (&p)(std::ios_base&))
+      {
+        os << p; return *this;
+      }
+      ~direct_reporter();
+    private:
+      direct_reporter(const direct_reporter &);
+      direct_reporter& operator=(const direct_reporter&);
+      size_t heap_limit;
+      std::ostringstream os;
+    };
+
+  } // namespace comm
 
   namespace policies {
 
@@ -1206,6 +1421,20 @@ namespace crpcut {
     {
     public:
       typedef exception_wrapper<T> crpcut_run_wrapper;
+      template <comm::type action>
+      static void check_match(const char *, const char *,crpcut_none) { }
+
+      template <comm::type action>
+      static void check_match(const char *location,
+                              const char *param_string,
+                              const char *p,
+                              crpcut_none);
+
+      template <comm::type action, typename M>
+      static void check_match(const char *location,
+                              const char *param_string,
+                              M           m,
+                              crpcut_none);
     };
 
     template <>
@@ -1213,6 +1442,8 @@ namespace crpcut {
     {
     public:
       typedef any_exception_wrapper crpcut_run_wrapper;
+      template <comm::type>
+      static void check_match(...) {}
     };
 
     class no_core_file : protected virtual default_policy
@@ -1391,155 +1622,6 @@ namespace crpcut {
 
   class test_case_factory;
 
-  namespace stream {
-    template <typename charT, typename traits = std::char_traits<charT> >
-    class oabuf : public std::basic_streambuf<charT, traits>
-    {
-      typedef std::basic_streambuf<charT, traits> parent;
-    public:
-      oabuf(charT *begin_, charT *end_);
-      const charT *begin() const { return parent::pbase(); }
-      const charT *end() const { return parent::pptr(); }
-    };
-
-    template <typename charT, typename traits = std::char_traits<charT> >
-    class basic_oastream : private oabuf<charT, traits>,
-                           public  std::basic_ostream<charT, traits>
-    {
-    public:
-      basic_oastream(charT *begin_, charT *end_);
-      basic_oastream(charT *begin_, size_t size_);
-      template <size_t N>
-      basic_oastream(charT (&buff)[N]);
-      using oabuf<charT, traits>::begin;
-      using oabuf<charT, traits>::end;
-      std::size_t size() const { return size_t(end() - begin()); }
-      operator datatypes::fixed_string() const;
-    };
-
-    template <typename charT, class traits = std::char_traits<charT> >
-    class iabuf : public std::basic_streambuf<charT, traits>
-    {
-    public:
-      iabuf(const charT *begin, const charT *end);
-      iabuf(const iabuf& b);
-    };
-
-
-    template <typename charT, typename traits = std::char_traits<charT> >
-    class basic_iastream : private iabuf<charT, traits>,
-                           public std::basic_istream<charT, traits>
-    {
-    public:
-      basic_iastream(const charT *begin, const charT *end);
-      basic_iastream(const charT *begin);
-      basic_iastream(const basic_iastream& i);
-    };
-
-    template <size_t N,
-              typename charT = char,
-              typename traits = std::char_traits<charT> >
-    class toastream : public basic_oastream<charT, traits>
-    {
-    public:
-      toastream() : basic_oastream<charT, traits>(buffer, N) {}
-    private:
-      charT buffer[N];
-    };
-
-    typedef basic_oastream<char> oastream;
-    typedef basic_iastream<char> iastream;
-
-  } // stream
-
-  namespace comm {
-
-#define CRPCUT_COMM_MSGS(translator)             \
-    translator(stdout),           /*  1 */       \
-      translator(stderr),         /*  2 */       \
-      translator(info),           /*  3 */       \
-      translator(exit_ok),        /*  4 */       \
-      translator(exit_fail),      /*  5 */       \
-      translator(fail),           /*  6 */       \
-      translator(dir),            /*  7 */       \
-      translator(set_timeout),    /*  8 */       \
-      translator(cancel_timeout), /*  9 */       \
-      translator(begin_test),     /* 10 */       \
-      translator(end_test)        /* 11 */
-
-    typedef enum {
-      CRPCUT_COMM_MSGS(CRPCUT_VERBATIM),
-      kill_me = 0x100
-    } type;
-
-
-    // protocol is type -> size_t(length) -> char[length]. length may be 0.
-    // reader acknowledges with length.
-
-    class reporter
-    {
-      int write_fd;
-      int read_fd;
-    public:
-      reporter();
-      void set_fds(int read, int write);
-      void operator()(type t, const std::ostringstream &os) const;
-      template <size_t N>
-      void operator()(type t, const stream::toastream<N> &os) const;
-      void operator()(type t, const stream::oastream &os) const;
-      void operator()(type t, const char *msg) const;
-      void operator()(type t, const char *msg, size_t len) const;
-      template <size_t N>
-      void operator()(type t, const char (&msg)[N]) const
-      {
-        operator()(t, msg, N - 1);
-      }
-      template <typename T>
-      void operator()(type t, const T& data) const;
-    private:
-      template <typename T>
-      void write(const T& t) const;
-
-      template <typename T>
-      void read(T& t) const;
-    };
-
-    extern reporter report;
-
-    template <type t>
-    class direct_reporter
-    {
-    public:
-      direct_reporter();
-      template <typename V>
-      direct_reporter& operator<<(V& v);
-      template <typename V>
-      direct_reporter& operator<<(const V& v);
-      template <typename V>
-      direct_reporter& operator<<(V (&p)(V)){ os << p; return *this; }
-      template <typename V>
-      direct_reporter& operator<<(V& (&p)(V&)){ os << p; return *this; }
-      direct_reporter& operator<<(std::ostream& (&p)(std::ostream&))
-      {
-        os << p; return *this;
-      }
-      direct_reporter& operator<<(std::ios& (&p)(std::ios&))
-      {
-        os << p; return *this;
-      }
-      direct_reporter& operator<<(std::ios_base& (&p)(std::ios_base&))
-      {
-        os << p; return *this;
-      }
-      ~direct_reporter();
-    private:
-      direct_reporter(const direct_reporter &);
-      direct_reporter& operator=(const direct_reporter&);
-      size_t heap_limit;
-      std::ostringstream os;
-    };
-
-  } // namespace comm
 
   namespace heap {
     const size_t system = ~size_t();
@@ -3205,7 +3287,72 @@ namespace crpcut {
 
   }
 
+
   namespace policies {
+
+    template <typename T> template <comm::type action>
+    void
+    exception_specifier<void (T)>
+    ::check_match(const char *location,
+                  const char *param_string,
+                  const char *pattern,
+                  crpcut_none)
+    {
+      try {
+        throw;
+      }
+      catch (T& t)
+        {
+          const char *what = t.what();
+          if (wrapped::strcmp(what, pattern) != 0)
+            {
+              std::size_t old_size = heap::set_limit(heap::system);
+              {
+                comm::direct_reporter<action>()
+                  << location << "\n"
+                  << crpcut_check_name<action>::string()
+                  << "_THROW("
+                  << param_string
+                  << ")\nwhat() == \""
+                  << what
+                  << "\" does not match string \""
+                  << pattern
+                  << "\"";
+              }
+              heap::set_limit(old_size);
+            }
+        }
+    }
+
+    template <typename T> template <comm::type action, typename M>
+    void
+    exception_specifier<void (T)>
+    ::check_match(const char *location,
+                  const char *param_string,
+                  M           m,
+                  crpcut_none)
+    {
+      try {
+        throw;
+      }
+      catch (T& t)
+        {
+          if (!m(t))
+            {
+              std::size_t old_size = heap::set_limit(heap::system);
+              {
+                comm::direct_reporter<action>()
+                  << location << "\n"
+                  << crpcut_check_name<action>::string()
+                  << "_THROW("
+                  << param_string
+                  << ")\n"
+                  << m;
+              }
+              heap::set_limit(old_size);
+            }
+        }
+    }
 
     namespace deaths{
 
@@ -3692,87 +3839,6 @@ namespace crpcut {
     typedef typename relative_diff::template type<T> type;
   };
 
-  class regex
-  {
-    class type
-    {
-    public:
-      template <typename T>
-      type(T t, int flags)
-        : errmsg(0)
-      {
-        int i = wrapped::regcomp(&r,
-                                 datatypes::string_traits<T>::get_c_str(t),
-                                 flags | REG_NOSUB);
-        if (i != 0)
-          {
-            size_t n = wrapped::regerror(i, &r, 0, 0);
-            errmsg = new char[n];
-            wrapped::regerror(i, &r, errmsg, n);
-          }
-      }
-      template <typename U>
-      bool operator()(U t)
-      {
-        if (errmsg) return false;
-        int i = wrapped::regexec(&r,
-                                 datatypes::string_traits<U>::get_c_str(t),
-                                 0,
-                                 0,
-                                 0);
-        if (i != 0 && i != REG_NOMATCH)
-          {
-            size_t n = wrapped::regerror(i, &r, 0, 0);
-            errmsg = new char[n];
-            wrapped::regerror(i, &r, errmsg, n);
-          }
-        return !i;
-      }
-      friend std::ostream& operator<<(std::ostream &os, const type &obj)
-      {
-        if (obj.errmsg)
-          return os << obj.errmsg;
-        return os << "did not match";
-      }
-      ~type()
-      {
-        wrapped::regfree(&r);
-        delete[] errmsg;
-      }
-    private:
-      regex_t r;
-      char *errmsg;
-    };
-  public:
-    typedef enum {
-      e = REG_EXTENDED,
-      i = REG_ICASE,
-      m = REG_NEWLINE
-    } regflag;
-    template <typename T>
-    regex(T t,
-          regflag f1 = regflag(),
-          regflag f2 = regflag(),
-          regflag f3 = regflag())
-      : p(new type(t, f1 | f2 | f3))
-    {
-    }
-    regex(const regex& r)
-      : p(r.p)
-    {
-    }
-    template <typename T>
-    bool operator()(T t)
-    {
-      return (*p)(t);
-    }
-    friend std::ostream& operator<<(std::ostream &os, const regex &r)
-    {
-      return os << *r.p;
-    }
-  private:
-    mutable std::auto_ptr<type> p; // Yeach! Ugly
-  };
 
 
   inline
@@ -4136,8 +4202,8 @@ extern crpcut::namespace_info crpcut_current_namespace;
 #define CRPCUT_LOCAL_NAME(prefix) \
   CRPCUT_CONCAT_(crpcut_local_  ## prefix ## _, __LINE__)
 
-#define CRPCUT_STRINGIZE(a) #a
-#define CRPCUT_STRINGIZE_(a) CRPCUT_STRINGIZE(a)
+#define CRPCUT_STRINGIZE(...) #__VA_ARGS__
+#define CRPCUT_STRINGIZE_(...) CRPCUT_STRINGIZE(__VA_ARGS__)
 
 #ifndef CRPCUT_EXPERIMENTAL_CXX0X
 #define CRPCUT_REFTYPE(expr) \
@@ -4332,17 +4398,29 @@ namespace crpcut {
 
 #define VERIFY_LE(lh, rh)  CRPCUT_BINARY_CHECK(fail, LE, lh, rh)
 
+namespace crpcut
+{
+  template <typename Exception>
+  void assert_exception_match(Exception, crpcut_none)
+  {
+  }
+}
+
 #ifndef CRPCUT_NO_EXCEPTION_SUPPORT
-#define CRPCUT_CHECK_THROW(action, expr, exc)                           \
+#define CRPCUT_CHECK_THROW(action, str, expr, exc, ...)                  \
   do {                                                                  \
     try {                                                               \
       try {                                                             \
         expr;                                                           \
         CRPCUT_CHECK_REPORT_HEAD(action) <<                             \
-          "_THROW(" #expr ", " #exc ")\n"                         \
+          "_THROW(" #expr ", " #exc ")\n"                               \
           "  Did not throw";                                            \
       }                                                                 \
       catch (exc) {                                                     \
+        crpcut::policies::exception_specifier<void(exc)>                \
+          ::check_match<crpcut::comm::action>(__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__), \
+                                              str,                      \
+                                              __VA_ARGS__);             \
         break;                                                          \
       }                                                                 \
     }                                                                   \
@@ -4350,17 +4428,17 @@ namespace crpcut {
         std::string CRPCUT_LOCAL_NAME(s)                                \
           = crpcut::policies::crpcut_exception_translator::try_all();   \
         CRPCUT_CHECK_REPORT_HEAD(action) << "_THROW"                    \
-          "(" #expr ", " #exc  ")\n"                                    \
-          "  caught "                                                 \
+          "(" str  ")\n"                                                \
+          "  caught "                                                   \
                                          << CRPCUT_LOCAL_NAME(s);       \
       })                                                                \
   } while (0)
 
-#define ASSERT_THROW(expr, exc)                                         \
-  CRPCUT_CHECK_THROW(exit_fail, expr, exc)
+#define ASSERT_THROW(expr, ...)                 \
+  CRPCUT_CHECK_THROW(exit_fail, CRPCUT_STRINGIZE(expr, __VA_ARGS__), expr, __VA_ARGS__, crpcut::crpcut_none())
 
-#define VERIFY_THROW(expr, exc)                                         \
-  CRPCUT_CHECK_THROW(fail, expr, exc)
+#define VERIFY_THROW(expr, ...)                                         \
+  CRPCUT_CHECK_THROW(fail,  CRPCUT_STRINGIZE(expr, __VA_ARGS__), expr, __VA_ARGS__, crpcut::crpcut_none())
 #endif
 
 #ifndef CRPCUT_NO_EXCEPTION_SUPPORT
@@ -4397,10 +4475,10 @@ namespace crpcut {
     static const char CRPCUT_LOCAL_NAME(sep)[][3] = { ", ", "" };       \
     try {                                                               \
       std::string CRPCUT_LOCAL_NAME(m);                                 \
-      if (!crpcut::match_pred(CRPCUT_LOCAL_NAME(m),     \
-                                              #pred,                    \
-                                              pred,                     \
-                                              crpcut::params(__VA_ARGS__))) \
+      if (!crpcut::match_pred(CRPCUT_LOCAL_NAME(m),                     \
+                              #pred,                                    \
+                              pred,                                     \
+                              crpcut::params(__VA_ARGS__)))             \
         {                                                               \
           size_t CRPCUT_LOCAL_NAME(len) = CRPCUT_LOCAL_NAME(m).length(); \
           char *CRPCUT_LOCAL_NAME(p)                                    \
