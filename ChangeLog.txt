@@ -1,3 +1,5 @@
+2012-01-19 1.6.0
+
          * Added an optional third parameter to ASSERT_THROW()
            and VERIFY_THROW(). The extra parameter is used to
            match the contents of the exception. By default
