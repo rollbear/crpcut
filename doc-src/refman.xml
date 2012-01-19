@@ -591,7 +591,7 @@
 
 
   <section id="ASSERT_THROW">
-    <title><function>ASSERT_THROW(expr, exc_type)</function></title>
+    <title><function>ASSERT_THROW(expr, exc_type, matcher?)</function></title>
     <para>Assert that an expression throws the desired exception.</para>
     <formalpara><title>Used in:</title>
       <para>A test function body, the constructor or destructor of a
@@ -607,10 +607,30 @@
       <para><type>exc_type</type> is either a type, or
         <type>...</type>.</para>
     </formalpara>
+    <formalpara><title>Requirement:</title>
+    <para><type>matcher?</type> is an optional parameter. If present it
+    must be one of
+    <itemizedlist>
+      <listitem>a C-string which is compared with the
+      <function>what</function>() string of exceptions derived from
+      <type>std::exception</type>
+      </listitem>
+      <listitem>a functor that is callable with an
+    <type>exc_type&amp;</type> and preferably has an output stream
+    operator. <xref linkend="regex" xrefstyle="select:title"/> intantiated
+    through <xref linkend="match" xrefstyle="select:title"/> matches the
+    regular expression to the <function>what</function>() string of
+    exceptions derived from <type>std::exception</type>.
+      </listitem>
+    </itemizedlist>
+    </para>
+    </formalpara>
     <para>The assertion succeeds if, and only if,
       the statement <parameter>expr;</parameter>
       throws an exception that can be caught using
-      <type>catch(exc_type&amp;)</type>.
+      <type>catch(exc_type&amp;)</type>, and the caught object matches the
+      <parameter>matcher?</parameter> argument. The default matcher, if
+      none is given, matches all exceptions.
     </para>
     <para>On success the test function continues without side effects.</para>
     <para>On failure the test is terminated with an error report. The
@@ -625,7 +645,7 @@
       <programlisting language="c++">
 <xi:include href="../stripped-src/assert_throw_fails.cpp" parse="text"/>
       </programlisting>
-      reports one failed test:
+      reports two failed tests:
       <screen>
 
 <xi:include href="../sample-output/assert_throw_fails.out" parse="text"/>
@@ -2297,7 +2317,7 @@
 
 
   <section id="VERIFY_THROW">
-    <title><function>VERIFY_THROW(expr, exc_type)</function></title>
+    <title><function>VERIFY_THROW(expr, exc_type, matcher?)</function></title>
     <para>Verify that an expression throws the desired exception.</para>
     <formalpara><title>Used in:</title>
       <para>A test function body, the constructor or destructor of a
@@ -2313,6 +2333,24 @@
       <para><type>exc_type</type> is either a type, or
         <type>...</type>.</para>
     </formalpara>
+    <formalpara><title>Requirement:</title>
+    <para><type>matcher?</type> is an optional parameter. If present it
+    must be one of
+    <itemizedlist>
+      <listitem>a C-string which is compared with the
+      <function>what</function>() string of exceptions derived from
+      <type>std::exception</type>.
+      </listitem>
+      <listitem>a functor that is callable with an
+    <type>exc_type&amp;</type> and preferably has an output stream
+    operator. <xref linkend="regex" xrefstyle="select:title"/> intantiated
+    through <xref linkend="match" xrefstyle="select:title"/> matches the
+    regular expression to the <function>what</function>() string of
+    exceptions derived from <type>std::exception</type>.
+      </listitem>
+    </itemizedlist>
+    </para>
+  </formalpara>
     <para>The check succeeds if, and only if,
     the statement <parameter>expr;</parameter>
       throws an exception that can be caught using
@@ -2332,7 +2370,7 @@
       <programlisting language="c++">
 <xi:include href="../stripped-src/verify_throw_fails.cpp" parse="text"/>
       </programlisting>
-      reports one failed test with two violated
+      reports one failed test with three violated
       <function>VERIFY_THROW</function>() checks.
       <screen>
 
@@ -2783,8 +2821,11 @@
     <para>Match a string against a regular expression.</para>
     <formalpara><title>Used in:</title>
       <para>Template parameter to
-        <xref linkend="match" xrefstyle="select:title"/> in an
-        <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> check.</para>
+        <xref linkend="match" xrefstyle="select:title"/> in either an
+        <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> check
+        or as matcher argument to <xref linkend="ASSERT_THROW"
+        xrefstyle="select:title"/> or <xref linkend="VERIFY_THROW"
+        xrefstyle="select:title"/>.</para>
       <para>The predicate accepts either a C-string or a <type>std::string</type>
         as value to match against the regular expression.</para>
     </formalpara>

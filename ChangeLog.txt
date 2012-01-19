@@ -1,3 +1,11 @@
+         * Added an optional third parameter to ASSERT_THROW()
+           and VERIFY_THROW(). The extra parameter is used to
+           match the contents of the exception. By default
+           C-strings and crpcut::match<crpcut::regex>() are
+           supported, for exceptions derived from std::exception,
+           and the what() string is matched as equal to the
+           C-string or matching the regular expression.
+
          * Added two more flavours of crpcut::get_parameter().
 
            crpcut::get_parameter<std::istream>(name) and

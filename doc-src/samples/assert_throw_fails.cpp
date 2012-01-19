@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,17 @@
 #include <crpcut.hpp>
 #include <vector>
 
+class int_matcher
+{
+  int n_, memory_;
+ public:
+  int_matcher(int n) : n_(n) {}
+  bool operator()(int val) { memory_ = val; return val == n_; }
+  friend std::ostream& operator<<(std::ostream &os, const int_matcher &m)
+  {
+    return os << m.memory_ << " does not match the expected " << m.n_;
+  }
+};
 TEST(assert_throw_succeeds)
 {
   std::vector<int> v;
@@ -38,6 +49,11 @@ TEST(assert_throw_fails)
 {
   std::vector<int> v;
   ASSERT_THROW(v.at(3), std::domain_error);
+}
+
+TEST(assert_throw_with_matcher_fails)
+{
+  ASSERT_THROW(throw 5, int, int_matcher(3));
 }
 
 int main(int argc, char *argv[])
