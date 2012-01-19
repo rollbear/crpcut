@@ -77,7 +77,7 @@ while [ $n -lt ${#tests[*]} ]
 do
     param="${tests[$n]}"
     expect="${tests[$(($n+1))]}"
-    printf "./test/testprog -x -p apa=katt -p numeric=010 %-34s: " "$param"
+    printf "./test/testprog -x -p apa=katt -p numeric=010 %-27s: " "$param"
     filename=/tmp/crpcut_sanity$$_$(($n/2+1)).xml
     reportfile=/tmp/crpcut_sanity_report$$_$(($n/2+1))
     ./test/testprog -x -p apa=katt -p numeric=010 $param > $filename
@@ -96,7 +96,7 @@ do
         echo "The test report is in $filename"
         exit 1
     }
-    echo "OK"
+    echo  $'\E[32mOK\E[0m'
     rm $filename
     rm $reportfile
     n=$(($n+2))
