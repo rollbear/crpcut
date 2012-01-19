@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ struct fixture
 DEFINE_TEST_TAG(slow);
 DEFINE_TEST_TAG(filesystem);
 DEFINE_TEST_TAG(blocked);
-
+DEFINE_TEST_TAG(exception_content_match);
 TEST(default_success)
 {
 }
@@ -109,6 +109,60 @@ TESTSUITE(asserts)
   TEST(should_fail_assert_no_throw_with_std_exception_string_apa)
   {
     ASSERT_NO_THROW(throw std::range_error("apa"));
+  }
+
+  TEST(should_succeed_assert_throw_with_exact_string_match,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    ASSERT_THROW(throw std::range_error("apa"), std::exception, "apa");
+  }
+
+  TEST(should_fail_assert_throw_with_mismatching_string,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    ASSERT_THROW(throw std::range_error("apa"), std::exception, "katt");
+  }
+
+  TEST(should_succeed_assert_throw_with_regexp_match,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    ASSERT_THROW(throw std::range_error("en liten apa"),
+                 std::exception,
+                 crpcut::match<crpcut::regex>("liten"));
+  }
+
+  TEST(should_fail_assert_throw_with_mismatching_regexp,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    ASSERT_THROW(throw std::range_error("en liten apa"),
+                 std::exception,
+                 crpcut::match<crpcut::regex>(".*x.*"));
+  }
+
+  class int_matcher
+  {
+  public:
+    int_matcher(int i) : i_(i) {}
+    bool operator()(int n) { mem_ = n; return n == i_; }
+    friend std::ostream& operator<<(std::ostream &os, const int_matcher& m)
+    {
+      return os << m.mem_ << " does not match the expected " << m.i_;
+    }
+  private:
+    int i_;
+    int mem_;
+  };
+
+  TEST(should_succeed_assert_throw_with_custom_matcher,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    ASSERT_THROW(throw 5, int, int_matcher(5));
+  }
+
+  TEST(should_fail_assert_throw_with_custom_matcher,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    ASSERT_THROW(throw 5, int, int_matcher(3));
   }
   #endif
   TEST(should_succeed_on_assert_eq_with_fixture, fixture<3>)

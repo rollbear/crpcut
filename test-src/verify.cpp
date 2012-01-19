@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
 
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,9 @@
 #include <fstream>
 #include <ostream>
 #include <crpcut.hpp>
+
+DEFINE_TEST_TAG(exception_content_match);
+
 template <int N>
 struct fixture
 {
@@ -84,6 +87,7 @@ TESTSUITE(verify)
     VERIFY_THROW(i=1, ...);
     INFO << "after i=" << i;
   }
+
   TEST(should_succeed_throw_any_with_int_exception)
   {
     VERIFY_THROW(throw 1, ...);
@@ -113,7 +117,61 @@ TESTSUITE(verify)
     VERIFY_NO_THROW(throw std::invalid_argument("apa"));
     INFO << "after";
   }
-  #endif
+
+  TEST(should_succeed_verify_throw_with_exact_string_match,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    VERIFY_THROW(throw std::range_error("apa"), std::exception, "apa");
+  }
+
+  TEST(should_fail_verify_throw_with_mismatching_string,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    VERIFY_THROW(throw std::range_error("apa"), std::exception, "katt");
+  }
+
+  TEST(should_succeed_verify_throw_with_regexp_match,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    VERIFY_THROW(throw std::range_error("en liten apa"),
+                 std::exception,
+                 crpcut::match<crpcut::regex>("liten"));
+  }
+
+  TEST(should_fail_verify_throw_with_mismatching_regexp,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    VERIFY_THROW(throw std::range_error("en liten apa"),
+                 std::exception,
+                 crpcut::match<crpcut::regex>(".*x.*"));
+  }
+  class int_matcher
+  {
+  public:
+    int_matcher(int i) : i_(i) {}
+    bool operator()(int n) { mem_ = n; return n == i_; }
+    friend std::ostream& operator<<(std::ostream &os, const int_matcher& m)
+    {
+      return os << m.mem_ << " does not match the expected " << m.i_;
+    }
+  private:
+    int i_;
+    int mem_;
+  };
+
+  TEST(should_succeed_verify_throw_with_custom_matcher,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    VERIFY_THROW(throw 5, int, int_matcher(5));
+  }
+
+  TEST(should_fail_verify_throw_with_custom_matcher,
+       WITH_TEST_TAG(exception_content_match))
+  {
+    VERIFY_THROW(throw 5, int, int_matcher(3));
+  }
+
+#endif
   TEST(should_succeed_on_verify_eq_with_fixture, fixture<3>)
   {
     VERIFY_EQ(num, 3);
