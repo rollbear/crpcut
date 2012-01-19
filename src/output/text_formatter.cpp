@@ -205,7 +205,7 @@ namespace crpcut {
 
         datatypes::fixed_string name = t.get_name();
         if (!name) continue;
-
+        if (t.num_passed() + t.num_failed() == 0) continue;
         if (!header_displayed)
           {
             display_tag_list_header();
@@ -217,9 +217,8 @@ namespace crpcut {
                            violation_mods[result][critical]);
         os << (critical ? '!' : '?')
            << std::string(name.str, name.len)
-           << std::setw(int(tag_space - name.len + 1))
-           << ' '
-           << std::setw(7) << t.num_passed() + t.num_failed()
+           << std::setw(int(tag_space - name.len + 8))
+            << t.num_passed() + t.num_failed()
            << std::setw(8) << t.num_passed()
            << std::setw(8) << t.num_failed();
         modifier_.write_to(os, text_modifier::NORMAL);

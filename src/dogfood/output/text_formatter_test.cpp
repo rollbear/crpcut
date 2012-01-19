@@ -296,14 +296,14 @@ TESTSUITE(output)
       EXPECT_CALL(katt, get_importance())
         .WillOnce(Return(crpcut::tag::non_critical));
 
-      MAKE_TAG(a_very_long_tag_name);
-      EXPECT_CALL(a_very_long_tag_name, num_passed())
+      MAKE_TAG(a_very_long_tag_name_);
+      EXPECT_CALL(a_very_long_tag_name_, num_passed())
         .WillRepeatedly(Return(0));
 
-      EXPECT_CALL(a_very_long_tag_name, num_failed())
+      EXPECT_CALL(a_very_long_tag_name_, num_failed())
         .WillRepeatedly(Return(1));
 
-      EXPECT_CALL(a_very_long_tag_name, get_importance())
+      EXPECT_CALL(a_very_long_tag_name_, get_importance())
         .WillOnce(Return(crpcut::tag::critical));
 
       ASSERT_SCOPE_HEAP_LEAK_FREE
@@ -323,11 +323,12 @@ TESTSUITE(output)
               " tag                      run  passed  failed\n"
            "<F>!apa                        5       0       5<>\n"
           "<NF>?katt                       3       0       3<>\n"
-           "<F>!a_very_long_tag_name       1       0       1<>\n"
+           "<F>!a_very_long_tag_name_      1       0       1<>\n"
           "\n"
               "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
           "<FS>FAILED"   _ ":" _ "9"   _ "6"        _ "3<>\n$"
           ;
+
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
                     test_buffer.os.str());
       }
@@ -466,6 +467,74 @@ TESTSUITE(output)
                     test_buffer.os.str());
       }
     }
+
+
+    TEST(tags_that_are_not_run_are_not_displayed_in_tag_result_summary, fix)
+    {
+      EXPECT_CALL(tags, longest_tag_name()).WillRepeatedly(Return(20));
+
+      EXPECT_CALL(tags, num_passed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, num_failed()).WillOnce(Return(0));
+      EXPECT_CALL(tags, get_importance())
+        .WillOnce(Return(crpcut::tag::critical));
+
+      MAKE_TAG(apa);
+      EXPECT_CALL(apa, num_passed())
+        .WillRepeatedly(Return(2));
+
+      EXPECT_CALL(apa, num_failed())
+        .WillRepeatedly(Return(3));
+
+      EXPECT_CALL(apa, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      MAKE_TAG(katt);
+      EXPECT_CALL(katt, num_passed())
+        .WillRepeatedly(Return(1));
+
+      EXPECT_CALL(katt, num_failed())
+        .WillRepeatedly(Return(2));
+
+      EXPECT_CALL(katt, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      MAKE_TAG(a_very_long_tag_name);
+      EXPECT_CALL(a_very_long_tag_name, num_passed())
+        .WillRepeatedly(Return(0));
+
+      EXPECT_CALL(a_very_long_tag_name, num_failed())
+        .WillRepeatedly(Return(0));
+
+      EXPECT_CALL(a_very_long_tag_name, get_importance())
+        .WillOnce(Return(crpcut::tag::non_critical));
+
+      ASSERT_SCOPE_HEAP_LEAK_FREE
+      {
+        StrictMock<stream_buffer> test_buffer;
+        {
+          crpcut::output::text_formatter obj(test_buffer,
+                                             "one",
+                                             1,
+                                             vec,
+                                             tags,
+                                             test_modifier);
+          obj.statistics(8, 8, 8, 5);
+        }
+        static const char re[] =
+              "8 test cases selected\n"
+              " tag                      run  passed  failed\n"
+          "<NF>?apa                        5       2       3<>\n"
+          "<NF>?katt                       3       1       2<>\n"
+          "\n"
+              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+          "<NPS>PASSED"   _ ":" _ "3"   _ "0"        _ "3<>\n"
+          "<NFS>FAILED"   _ ":" _ "5"   _ "0"        _ "5<>\n$"
+          ;
+        ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
+                    test_buffer.os.str());
+      }
+    }
+
 
     TEST(passed_critical_has_correct_decoration, fix)
     {
