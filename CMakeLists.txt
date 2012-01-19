@@ -88,6 +88,7 @@ file(GLOB LIB_SRCS
      src/presentation_output.cpp
      src/presentation_reader.cpp
      src/printer.cpp
+     src/regex.cpp
      src/report_reader.cpp
      src/scope/time_base.cpp
      src/tag.cpp

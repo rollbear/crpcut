@@ -913,49 +913,19 @@ namespace crpcut {
     {
     public:
       template <typename T>
-      type(T t, int flags)
-        : errmsg(0)
-      {
-        int i = wrapped::regcomp(&r,
-                                 datatypes::string_traits::get_c_str(t),
-                                 flags | REG_NOSUB);
-        if (i != 0)
-          {
-            size_t n = wrapped::regerror(i, &r, 0, 0);
-            errmsg = new char[n];
-            wrapped::regerror(i, &r, errmsg, n);
-          }
-      }
+      type(T t, int flags);
       template <typename T>
-      bool operator()(const T &t)
-      {
-        if (errmsg) return false;
-        const char *s = datatypes::string_traits::get_c_str(t);
-        int i = wrapped::regexec(&r, s, 0, 0, 0);
-        if (i != 0 && i != REG_NOMATCH)
-          {
-            size_t n = wrapped::regerror(i, &r, 0, 0);
-            errmsg = new char[n];
-            wrapped::regerror(i, &r, errmsg, n);
-          }
-        return !i;
-      }
-      friend std::ostream& operator<<(std::ostream &os, const type &obj)
-      {
-        if (obj.errmsg)
-          return os << obj.errmsg;
-        return os << "did not match";
-      }
-      ~type()
-      {
-        wrapped::regfree(&r);
-        delete[] errmsg;
-      }
+      bool operator()(const T &t);
+      friend std::ostream& operator<<(std::ostream &os, const type &obj);
+      ~type();
     private:
+      void init(const char*, int flags);
+      bool match(const char*);
       regex_t r;
       char *errmsg;
     };
   public:
+    friend std::ostream& operator<<(std::ostream &os, const type &obj);
     typedef enum {
       e = REG_EXTENDED,
       i = REG_ICASE,
@@ -969,19 +939,13 @@ namespace crpcut {
       : p(new type(t, f1 | f2 | f3))
     {
     }
-    regex(const regex& r)
-      : p(r.p)
-    {
-    }
+    regex(const regex& r);
     template <typename T>
     bool operator()(const T &t)
     {
       return (*p)(t);
     }
-    friend std::ostream& operator<<(std::ostream &os, const regex &r)
-    {
-      return os << *r.p;
-    }
+    friend std::ostream& operator<<(std::ostream &os, const regex &r);
   private:
     mutable std::auto_ptr<type> p; // Yeach! Ugly
   };
@@ -3070,6 +3034,20 @@ namespace crpcut {
 
 
   //// template and inline func implementations
+
+  template <typename T>
+  regex::type::type(T t, int flags)
+    : errmsg(0)
+  {
+    init(datatypes::string_traits::get_c_str(t), flags);
+  }
+
+  template <typename T>
+  bool regex::type::operator()(const T& t)
+  {
+    return match(datatypes::string_traits::get_c_str(t));
+  }
+
 
   template <typename T>
   T parameter_stream_traits<T>::make_value(const char *n)
