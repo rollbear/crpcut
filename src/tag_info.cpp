@@ -46,27 +46,4 @@ namespace crpcut {
     static crpcut_tag_info<crpcut_none> t;
     return t;
   }
-
-
-  tag_list_root::iterator
-  crpcut_tag_info<crpcut_none>
-  ::begin()
-  {
-    return obj().begin();
-  }
-
-  tag_list_root::iterator
-  crpcut_tag_info<crpcut_none>
-  ::end()
-  {
-    return obj().end();
-  }
-
-  int
-  crpcut_tag_info<crpcut_none>::
-  longest_name_len()
-  {
-    return obj().longest_tag_name();
-  }
-
 }

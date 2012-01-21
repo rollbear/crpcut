@@ -1042,9 +1042,6 @@ namespace crpcut {
     virtual datatypes::fixed_string get_name() const;
   public:
     static tag_list_root& obj();
-    static iterator begin();
-    static iterator end();
-    static int longest_name_len();
   };
 
   typedef crpcut_tag_info<crpcut_none> tag_list;
@@ -1848,7 +1845,7 @@ namespace crpcut {
     void manage_children(unsigned max_pending_children, poll<fdreader> &poller);
     void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
 
-    int do_run(int argc, const char *argv[], std::ostream &os);
+    int do_run(int argc, const char *argv[], std::ostream &os, tag_list_root &tags);
     void do_present(pid_t pid, comm::type t, test_phase phase,
                     size_t len, const char *buff);
     void do_introduce_name(pid_t pid, const char *name, size_t len);

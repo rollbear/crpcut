@@ -53,19 +53,20 @@ namespace {
     return str;
   }
 
-  crpcut::output::formatter &output_formatter(crpcut::output::buffer &buffer,
-                                              bool use_xml,
-                                              const char *id,
-                                              int argc, const char *argv[])
+  crpcut::output::formatter
+  &select_output_formatter(crpcut::output::buffer &buffer,
+                           bool                    use_xml,
+                           const char             *id,
+                           int                     argc,
+                           const char             *argv[],
+                           crpcut::tag_list_root  &tags)
   {
     if (use_xml)
       {
-        static crpcut::output::xml_formatter xo(buffer, id, argc, argv,
-                                                crpcut::tag_list::obj());
+        static crpcut::output::xml_formatter xo(buffer, id, argc, argv, tags);
         return xo;
       }
-    static crpcut::output::text_formatter to(buffer, id, argc, argv,
-                                             crpcut::tag_list::obj());
+    static crpcut::output::text_formatter to(buffer, id, argc, argv, tags);
     return to;
   }
 
@@ -317,14 +318,16 @@ namespace crpcut {
   test_case_factory
   ::run_test(int argc, char *argv[], std::ostream &os)
   {
-    return obj().do_run(argc, const_cast<const char**>(argv), os);
+    return obj().do_run(argc, const_cast<const char**>(argv),
+                        os,
+                        tag_list::obj());
   }
 
   int
   test_case_factory
   ::run_test(int argc, const char *argv[], std::ostream &os)
   {
-    return obj().do_run(argc, argv, os);
+    return obj().do_run(argc, argv, os, tag_list::obj());
   }
 
 
@@ -598,7 +601,8 @@ namespace crpcut {
   int
   test_case_factory
   ::do_run(int argc, const char *argv_[],
-           std::ostream &err_os)
+           std::ostream  &err_os,
+           tag_list_root &tags)
   {
     argv = argv_;
     const char  *working_dir       = 0;
@@ -610,7 +614,6 @@ namespace crpcut {
     const char **p                 = argv+1;
 
     try {
-
       while (const char *param = *p)
         {
           if (param[0] != '-') break;
@@ -783,8 +786,8 @@ namespace crpcut {
             break;
           case 'L':
             {
-              for (tag_list::iterator i = tag_list::begin();
-                   i != tag_list::end();
+              for (tag_list::iterator i = tags.begin();
+                   i != tags.end();
                    ++i)
                 {
                   std::cout << i->get_name().str << "\n";
@@ -794,11 +797,11 @@ namespace crpcut {
           case 'T':
             {
               tag_filter filter(value);
-              filter.assert_names(tag_list::obj());
-              // tag_list::end refers to the defaulted nameless tag which
+              filter.assert_names(tags);
+              // tag.end() refers to the defaulted nameless tag which
               // we want to include in this loop, hence the odd appearence
-              tag_list::iterator ti = tag_list::begin();
-              tag_list::iterator end = tag_list::end();
+              tag_list::iterator ti = tags.begin();
+              tag_list::iterator end = tags.end();
               do
                 {
                   tag::importance i = filter.lookup(ti->get_name());
@@ -816,7 +819,7 @@ namespace crpcut {
                     "\n";
                   return -1;
                 }
-              int longest_tag_len = tag_list::longest_name_len();
+              int longest_tag_len = tags.longest_tag_name();
               if (longest_tag_len > 0)
                 {
                   std::cout
@@ -1083,10 +1086,11 @@ namespace crpcut {
       c_string_translator c_string_obj;
 
       output::heap_buffer buffer;
-      output::formatter &fmt = output_formatter(buffer,
-                                                xml,
-                                                identity,
-                                                argc, argv);
+      output::formatter &fmt = select_output_formatter(buffer,
+                                                       xml,
+                                                       identity,
+                                                       argc, argv,
+                                                       tags);
 
       if (tests_as_child_procs())
         {
@@ -1213,8 +1217,8 @@ namespace crpcut {
           size_t sum_crit_fail = 0;
           std::cout << num_selected_tests
                     << " test cases selected\n";
-          const tag_list::iterator begin(tag_list::begin());
-          const tag_list::iterator end(tag_list::end());
+          const tag_list::iterator begin(tags.begin());
+          const tag_list::iterator end(tags.end());
           if (begin != end)
             {
               bool header_displayed = false;
@@ -1226,7 +1230,7 @@ namespace crpcut {
                     {
                       std::cout
                         << ' '
-                        << std::setw(tag_list::longest_name_len()) << "tag"
+                        << std::setw(tags.longest_tag_name()) << "tag"
                         << std::setw(8) << "total"
                         << std::setw(8) << "passed"
                         << std::setw(8) << "failed" << '\n';
@@ -1241,7 +1245,7 @@ namespace crpcut {
                   char flag = i->get_importance() == tag::critical ? '!' : '?';
                   std::cout
                     << flag
-                    << std::setw(tag_list::longest_name_len()) << i->get_name()
+                    << std::setw(tags.longest_tag_name()) << i->get_name()
                     << std::setw(8) << i->num_failed() + i->num_passed()
                     << std::setw(8) << i->num_failed()
                     << std::setw(8) << i->num_passed() << '\n';
