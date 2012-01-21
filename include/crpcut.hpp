@@ -2323,7 +2323,12 @@ namespace crpcut {
       heap::set_limit(heap::system);
       std::ostringstream os;
 
-      conditionally_stream<8>(prepare(os, loc_, crpcut_check_name<action>::string(), name, vn), v);
+      conditionally_stream<8>(prepare(os,
+                                      loc_,
+                                      crpcut_check_name<action>::string(),
+                                      name,
+                                      vn),
+                              v);
       comm::report(action, os);
     }
   };
