@@ -33,11 +33,6 @@
 extern "C" void perror(const char*);
 #include <cassert>
 #include <algorithm>
-namespace crpcut {
-  namespace wrapped {
-    int close(int fd);
-  }
-}
 
 extern "C"
 {
@@ -90,7 +85,7 @@ namespace crpcut {
     typedef typename poll<T>::descriptor descriptor;
     typedef typename poll<T>::polltype   polltype;
     poll_fixed_array();
-    ~poll_fixed_array();
+    virtual ~poll_fixed_array();
   private:
     virtual void do_add_fd(int fd, T* data, int flags = polltype::r);
     virtual void do_del_fd(int fd);
@@ -170,7 +165,7 @@ namespace crpcut {
                                      &this->xset,
                                      timeout_ms == -1 ? 0 : &tv);
             if (rv == -1 && errno == EINTR) continue;
-            assert(rv >= 0);
+            if (rv < 0) throw posix_error(errno, "select");
             if (rv == 0) return descriptor(0,0); // timeout
             this->pending_fds = size_t(rv);
             break;

@@ -1125,25 +1125,66 @@ namespace crpcut {
 
   } // stream
 
+  template <typename T>
+  class poll;
+
   namespace comm {
 
 #define CRPCUT_COMM_MSGS(translator)             \
-    translator(stdout),           /*  1 */       \
-      translator(stderr),         /*  2 */       \
-      translator(info),           /*  3 */       \
-      translator(exit_ok),        /*  4 */       \
-      translator(exit_fail),      /*  5 */       \
-      translator(fail),           /*  6 */       \
-      translator(dir),            /*  7 */       \
-      translator(set_timeout),    /*  8 */       \
-      translator(cancel_timeout), /*  9 */       \
-      translator(begin_test),     /* 10 */       \
-      translator(end_test)        /* 11 */
+    translator(stdout),           /*  0 */       \
+      translator(stderr),         /*  1 */       \
+      translator(info),           /*  2 */       \
+      translator(exit_ok),        /*  3 */       \
+      translator(exit_fail),      /*  4 */       \
+      translator(fail),           /*  5 */       \
+      translator(dir),            /*  6 */       \
+      translator(set_timeout),    /*  7 */       \
+      translator(cancel_timeout), /*  8 */       \
+      translator(begin_test),     /*  9 */       \
+      translator(end_test)        /* 10 */
 
     typedef enum {
       CRPCUT_COMM_MSGS(CRPCUT_VERBATIM),
       kill_me = 0x100
     } type;
+
+    class file_descriptor
+    {
+      template <typename T>
+      friend class crpcut::poll;
+      virtual void close();
+    public:
+      void swap(file_descriptor &f)
+      {
+        std::swap(fd_, f.fd_);
+      }
+    protected:
+      int get_fd() const { return fd_; }
+      file_descriptor();
+      file_descriptor(int fd);
+      virtual ~file_descriptor();
+      int fd_;
+    };
+
+    class rfile_descriptor : public file_descriptor
+    {
+    public:
+      rfile_descriptor();
+      rfile_descriptor(int fd);
+      virtual ssize_t read(void *buff, size_t len) const;
+      virtual void read_loop(void *buff, size_t len,
+                             const char *context = "read_loop") const;
+    };
+
+    class wfile_descriptor : public file_descriptor
+    {
+    public:
+      wfile_descriptor();
+      wfile_descriptor(int fd);
+      virtual ssize_t write(const void *buff, size_t len) const;
+      virtual void write_loop(const void *buff, size_t len,
+                              const char *context = "write_loop") const;
+    };
 
 
     // protocol is type -> size_t(length) -> char[length]. length may be 0.
@@ -1151,8 +1192,8 @@ namespace crpcut {
 
     class reporter
     {
-      int write_fd;
-      int read_fd;
+      wfile_descriptor write_fd;
+      rfile_descriptor read_fd;
     public:
       reporter();
       void set_fds(int read, int write);
@@ -1669,10 +1710,7 @@ namespace crpcut {
     namespace_info *parent;
   };
 
-  template <typename T>
-  class poll;
-
-  class fdreader
+  class fdreader : public comm::rfile_descriptor
   {
   public:
     bool read(bool do_reply);
@@ -1681,12 +1719,11 @@ namespace crpcut {
     void unregister();
     virtual ~fdreader() { }
   protected:
-    fdreader(crpcut_test_case_registrator *r, int fd = 0);
+    fdreader(crpcut_test_case_registrator *r, int fd = -1);
     void set_fd(int fd, poll<fdreader> *poller);
     crpcut_test_case_registrator *const reg_;
   private:
-    virtual bool do_read(int fd, bool do_reply) = 0;
-    int fd_;
+    virtual bool do_read(bool do_reply) = 0;
     poll<fdreader> *poller_;
   };
 
@@ -1694,10 +1731,10 @@ namespace crpcut {
   class reader : public fdreader
   {
   public:
-    reader(crpcut_test_case_registrator *r, int fd = 0);
+    reader(crpcut_test_case_registrator *r, int fd = -1);
     using fdreader::set_fd;
   private:
-    virtual bool do_read(int fd, bool do_reply);
+    virtual bool do_read(bool do_reply);
   };
 
   class report_reader : public fdreader
@@ -1707,8 +1744,8 @@ namespace crpcut {
     virtual void close();
     void set_fds(int in_fd, int out_fd, poll<fdreader> *read_poller);
   private:
-    virtual bool do_read(int fd, bool do_reply);
-    int response_fd;
+    virtual bool do_read(bool do_reply);
+    comm::wfile_descriptor response_fd;
   };
 
   class test_suite_base;
@@ -3414,7 +3451,6 @@ namespace crpcut {
 
   namespace comm {
 
-
     template <size_t N>
     void
     reporter::operator()(type t, const stream::toastream<N> &os) const
@@ -3427,18 +3463,8 @@ namespace crpcut {
     void
     reporter::write(const T& t) const
     {
-      const size_t len = sizeof(T);
-      size_t bytes_written = 0;
       const char *p = static_cast<const char*>(static_cast<const void*>(&t));
-      while (bytes_written < len)
-        {
-          ssize_t rv = wrapped::write(write_fd,
-                                      p + bytes_written,
-                                      len - bytes_written);
-          if (rv == -1 && errno == EINTR) continue;
-          if (rv <= 0) throw "write failed";
-          bytes_written += size_t(rv);
-        }
+      write_fd.write_loop(p, sizeof(T));
     }
 
     template <typename T>
@@ -3458,20 +3484,8 @@ namespace crpcut {
     void
     reporter::read(T& t) const
     {
-      const size_t len = sizeof(T);
-      size_t bytes_read = 0;
-      char *p = static_cast<char*>(static_cast<void*>(&t));
-      while (bytes_read < len)
-        {
-          ssize_t rv = wrapped::read(read_fd,
-                                     p + bytes_read,
-                                     len - bytes_read);
-          if (rv == -1 && errno == EINTR) continue;
-          if (rv <= 0) {
-            throw "read failed";
-          }
-          bytes_read += size_t(rv);
-        }
+      void *p = static_cast<void*>(&t);
+      read_fd.read_loop(p, sizeof(T));
     }
 
     template <comm::type type>
@@ -3518,25 +3532,24 @@ namespace crpcut {
   {
   }
   template <comm::type t>
-  bool reader<t>::do_read(int fd, bool)
+  bool reader<t>::do_read(bool)
   {
     static char buff[1024];
     for (;;)
       {
-        ssize_t rv = wrapped::read(fd, buff, sizeof(buff));
+        ssize_t rv = rfile_descriptor::read(buff, sizeof(buff));
         if (rv == 0) return false;
-        if (rv == -1)
+        if(rv == -1)
           {
-            int n = errno;
-            assert(n == EINTR);
-            (void)n; // silence warning
+            assert(errno == EINTR);
+            continue;
           }
-
         test_case_factory::present(reg_->crpcut_get_pid(), t,
                                    reg_->crpcut_get_phase(),
                                    size_t(rv), buff);
-        return true;
+        break;
       }
+    return true;
   }
 
   template <typename T, case_convert_type type>

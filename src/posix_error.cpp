@@ -30,7 +30,10 @@
 namespace crpcut {
   posix_error
   ::posix_error(int e, const char *msg)
+  : msg_(0),
+    e_(e)
   {
+    if (e_ == 0) return;
     const size_t mlen = wrapped::strlen(msg);
     const char *errstr = wrapped::strerror(e);
     const size_t elen = wrapped::strlen(errstr);
@@ -52,7 +55,8 @@ namespace crpcut {
   posix_error
   ::posix_error(const posix_error &e) :
     std::exception(*this),
-    msg_(e.msg_)
+    msg_(e.msg_),
+    e_(e.e_)
   {
     e.msg_ = 0; // move
   }

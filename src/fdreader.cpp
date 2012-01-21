@@ -34,7 +34,7 @@ namespace crpcut {
   fdreader::
   read(bool do_reply)
   {
-    return do_read(fd_, do_reply);
+    return do_read(do_reply);
   }
 
   crpcut_test_case_registrator *
@@ -48,41 +48,35 @@ namespace crpcut {
   fdreader
   ::close()
   {
-    if (fd_)
-      {
-        wrapped::close(fd_);
-      }
     unregister();
   }
 
   fdreader
   ::fdreader(crpcut_test_case_registrator *r, int fd)
-    : reg_(r),
-      fd_(fd),
+    : rfile_descriptor(fd),
+      reg_(r),
       poller_(0)
   {
   }
 
   void fdreader::set_fd(int fd, poll<fdreader> *poller)
   {
-    assert(fd_ == 0);
     assert(reg_ != 0);
     assert(!poller_);
     assert(poller);
-    fd_ = fd;
+    rfile_descriptor(fd).swap(*this);
     poller_ = poller;
-    poller_->add_fd(fd_, this);
+    poller_->add_fd(this);
     reg_->crpcut_activate_reader();
   }
 
   void fdreader::unregister()
   {
     assert(poller_);
-    assert(fd_ != 0);
     assert(reg_ != 0);
     reg_->crpcut_deactivate_reader();
-    poller_->del_fd(fd_);
-    fd_ = 0;
+    poller_->del_fd(this);
+    rfile_descriptor().swap(*this);;
     poller_ = 0;
   }
 }

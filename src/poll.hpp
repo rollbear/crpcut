@@ -44,7 +44,22 @@ namespace crpcut {
     {
       do_add_fd(fd, data, flags);
     }
-    void del_fd(int fd) { do_del_fd(fd); }
+    template <typename U>
+    void add_fd(U* data, int flags = polltype::r)
+    {
+      comm::file_descriptor *fd = data;
+      int fd_n = fd->get_fd();
+      add_fd(fd_n, data, flags);
+    }
+    void del_fd(comm::file_descriptor *fd)
+    {
+      int fd_n = fd->get_fd();
+      del_fd(fd_n);
+    }
+    void del_fd(int fd)
+    {
+      do_del_fd(fd);
+    }
     descriptor wait(int timeout_ms = -1) { return do_wait(timeout_ms); }
     std::size_t num_fds() const { return do_num_fds(); }
   private:

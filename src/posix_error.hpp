@@ -37,10 +37,12 @@ namespace crpcut {
     posix_error(const posix_error &e);
     ~posix_error() throw ();
     virtual const char *what() const throw ();
+    int get_errno() const { return e_; }
   private:
     posix_error();
     typedef const char *cstr;
     mutable cstr msg_;
+    int e_;
   };
 }
 

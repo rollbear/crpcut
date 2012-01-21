@@ -63,21 +63,12 @@ namespace crpcut {
       p+= sizeof(len);
       wrapped::memcpy(p, msg, len);
       len+= header_size;
-      size_t bytes_written = 0;
-      p = static_cast<char*>(report_addr);
-      while (bytes_written < len)
-        {
-          ssize_t rv = wrapped::write(write_fd,
-                                      p + bytes_written,
-                                      len - bytes_written);
-          if (rv == -1 && errno == EINTR) continue;
-          if (rv <= 0) throw "report failed";
-          bytes_written += size_t(rv);
-        }
+      write_fd.write_loop(report_addr, len);
       while (mask) // infinite
         {
           wrapped::select(0, 0, 0, 0, 0);
         }
+      size_t bytes_written;
       read(bytes_written);
       assert(len - header_size == bytes_written);
       if (t == comm::exit_fail)
@@ -87,16 +78,16 @@ namespace crpcut {
     }
 
     reporter::reporter()
-      : write_fd(0),
-        read_fd(0)
+      : write_fd(),
+        read_fd()
     {
     }
 
     void
     reporter::set_fds(int rfd, int wfd)
     {
-      write_fd = wfd;
-      read_fd = rfd;
+      wfile_descriptor(wfd).swap(write_fd);
+      rfile_descriptor(rfd).swap(read_fd);;
     }
 
     void

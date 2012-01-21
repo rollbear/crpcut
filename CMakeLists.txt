@@ -56,6 +56,7 @@ file(GLOB LIB_SRCS
      src/check_name.cpp
      src/clocks/clocks.cpp
      src/collate_result.cpp
+     src/comm/file_descriptor.cpp
      src/comm/reporter.cpp
      src/convert_traits.cpp
      src/crpcut.cpp
@@ -106,6 +107,7 @@ file(GLOB LIB_SRCS
 )
 include_directories(include)
 file(GLOB DOGFOOD_SRCS
+     src/dogfood/comm/file_descriptor_test.cpp
      src/dogfood/dogfood.cpp
      src/dogfood/failed_check_reporter_test.cpp
      src/dogfood/fixed_string_test.cpp
