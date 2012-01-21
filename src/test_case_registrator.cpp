@@ -271,7 +271,7 @@ namespace crpcut {
         comm::report(comm::begin_test, cputime);
       }
     try {
-      p->run();
+      p->crpcut_run();
     }
     catch (...)
       {

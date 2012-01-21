@@ -1584,11 +1584,11 @@ namespace crpcut {
   public:
     virtual crpcut_test_case_registrator& crpcut_get_reg() const = 0;
     virtual void test() = 0;
-    void run();
+    void crpcut_run();
     void crpcut_test_finished();
   private:
 
-    bool finished;
+    bool crpcut_finished;
   };
 
   class test_case_factory;

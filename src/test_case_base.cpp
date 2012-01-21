@@ -31,7 +31,7 @@ namespace crpcut {
   crpcut_test_case_base
   ::crpcut_test_case_base()
     :
-    finished(false)
+    crpcut_finished(false)
   {
   }
 
@@ -39,14 +39,14 @@ namespace crpcut {
   crpcut_test_case_base
   ::crpcut_test_finished()
   {
-    finished = true;
+    crpcut_finished = true;
     comm::report(comm::end_test, 0, 0);
   }
 
   crpcut_test_case_base
   ::~crpcut_test_case_base()
   {
-    if (finished)
+    if (crpcut_finished)
       {
         comm::report(comm::exit_ok, 0, 0);
       }
