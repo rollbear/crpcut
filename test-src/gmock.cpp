@@ -33,6 +33,7 @@ TESTSUITE(google_mock)
   class iface_base
   {
   public:
+    virtual ~iface_base() {}
     virtual void func(T n) = 0;
   };
 

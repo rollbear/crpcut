@@ -151,15 +151,23 @@ namespace crpcut {
 
   crpcut_test_case_registrator
   ::crpcut_test_case_registrator()
-    : crpcut_next(this),
+    : crpcut_name_(0),
+      crpcut_ns_info(0),
+      crpcut_next(this),
       crpcut_prev(this),
+      crpcut_suite_list(0),
       crpcut_active_readers(0),
       crpcut_killed(false),
       crpcut_death_note(false),
       crpcut_deadline_set(false),
+      crpcut_pid_(0),
+      crpcut_absolute_deadline_ms(0),
+      crpcut_cpu_time_at_start(),
+      crpcut_dirnum(~0U),
       crpcut_rep_reader(0),
       crpcut_stdout_reader(0),
       crpcut_stderr_reader(0),
+      crpcut_phase(creating),
       crpcut_cputime_limit_ms(0)
   {
   }
@@ -172,7 +180,15 @@ namespace crpcut {
       crpcut_ns_info(&ns),
       crpcut_next(&test_case_factory::obj().reg),
       crpcut_prev(test_case_factory::obj().reg.crpcut_prev),
+      crpcut_suite_list(0),
+      crpcut_active_readers(0),
+      crpcut_killed(false),
       crpcut_death_note(false),
+      crpcut_deadline_set(false),
+      crpcut_pid_(0),
+      crpcut_absolute_deadline_ms(0),
+      crpcut_cpu_time_at_start(),
+      crpcut_dirnum(~0U),
       crpcut_rep_reader(this),
       crpcut_stdout_reader(this),
       crpcut_stderr_reader(this),
@@ -446,6 +462,7 @@ namespace crpcut {
             out << "Died for unknown reason, code=" << info.si_code;
             crpcut_register_success(false);
             t = comm::exit_fail;
+            break;
           }
         crpcut_death_note = true;
       }

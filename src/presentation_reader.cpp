@@ -204,8 +204,10 @@ namespace crpcut {
       case comm::fail:
       case comm::exit_fail:
         s->explicit_fail = true;
+                                           /* no break */
       case comm::exit_ok:
-        s->success &= t == comm::exit_ok; // fallthrough
+        s->success &= t == comm::exit_ok;
+                                           /* no break */
       case comm::stdout:
       case comm::stderr:
       case comm::info:
@@ -233,6 +235,7 @@ namespace crpcut {
         break;
       default:
         assert("unreachable code reached" == 0);
+        /* no break */
       }
     return false;
   }

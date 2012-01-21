@@ -86,7 +86,8 @@ namespace {
 namespace crpcut {
   test_case_factory
   ::test_case_factory()
-    : pending_children(0),
+    : current_pid(0),
+      pending_children(0),
       verbose_mode(false),
       enable_timeouts(true),
       nodeps(false),
@@ -96,10 +97,12 @@ namespace crpcut {
       num_selected_tests(0),
       num_tests_run(0),
       num_successful_tests(0),
+      presenter_pipe(-1),
       first_free_working_dir(0),
       charset("UTF-8"),
       output_charset(0),
-      illegal_rep(0)
+      illegal_rep(0),
+      argv(0)
   {
     lib::strcpy(dirbase, "/tmp/crpcutXXXXXX");
     for (unsigned n = 0; n < max_parallel; ++n)

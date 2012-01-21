@@ -144,6 +144,7 @@ namespace crpcut {
           out << "&#x" << std::hex << unsigned(c) << ';';
           esc.str = out.begin();
           esc.len = std::size_t(out.end() - out.begin());
+          break;
         }
       return esc;
     }

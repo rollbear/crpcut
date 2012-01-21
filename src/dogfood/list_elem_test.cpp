@@ -166,56 +166,56 @@ TESTSUITE(list_elem)
       C el1;
       el1.link_after(root);
       {
-	C el2;
-	el2.link_after(el1);
-	{
-	  C el3;
-	  el3.link_after(el2);
-	  {
-	    C el4;
-	    el4.link_after(el1);
+        C el2;
+        el2.link_after(el1);
+        {
+          C el3;
+          el3.link_after(el2);
+          {
+            C el4;
+            el4.link_after(el1);
 
-	    ASSERT_FALSE(root.is_empty());
-	    ASSERT_FALSE(el1.is_empty());
-	    ASSERT_FALSE(el2.is_empty());
-	    ASSERT_FALSE(el3.is_empty());
-	    ASSERT_FALSE(el4.is_empty());
+            ASSERT_FALSE(root.is_empty());
+            ASSERT_FALSE(el1.is_empty());
+            ASSERT_FALSE(el2.is_empty());
+            ASSERT_FALSE(el3.is_empty());
+            ASSERT_FALSE(el4.is_empty());
 
-	    ASSERT_TRUE(root.next() == &el1);
-	    ASSERT_TRUE(el1.next() == &el4);
-	    ASSERT_TRUE(el4.next() == &el2);
-	    ASSERT_TRUE(el2.next() == &el3);
-	    ASSERT_TRUE(el3.next() == &root);
-	    ASSERT_TRUE(root.prev() == &el3);
-	    ASSERT_TRUE(el3.prev() == &el2);
-	    ASSERT_TRUE(el2.prev() == &el4);
-	    ASSERT_TRUE(el4.prev() == &el1);
-	    ASSERT_TRUE(el1.prev() == &root);
-	  }
-	  ASSERT_FALSE(root.is_empty());
-	  ASSERT_FALSE(el1.is_empty());
-	  ASSERT_FALSE(el2.is_empty());
-	  ASSERT_FALSE(el3.is_empty());
+            ASSERT_TRUE(root.next() == &el1);
+            ASSERT_TRUE(el1.next() == &el4);
+            ASSERT_TRUE(el4.next() == &el2);
+            ASSERT_TRUE(el2.next() == &el3);
+            ASSERT_TRUE(el3.next() == &root);
+            ASSERT_TRUE(root.prev() == &el3);
+            ASSERT_TRUE(el3.prev() == &el2);
+            ASSERT_TRUE(el2.prev() == &el4);
+            ASSERT_TRUE(el4.prev() == &el1);
+            ASSERT_TRUE(el1.prev() == &root);
+          }
+          ASSERT_FALSE(root.is_empty());
+          ASSERT_FALSE(el1.is_empty());
+          ASSERT_FALSE(el2.is_empty());
+          ASSERT_FALSE(el3.is_empty());
 
-	  ASSERT_TRUE(root.next() == &el1);
-	  ASSERT_TRUE(el1.next() == &el2);
-	  ASSERT_TRUE(el2.next() == &el3);
-	  ASSERT_TRUE(el3.next() == &root);
-	  ASSERT_TRUE(root.prev() == &el3);
-	  ASSERT_TRUE(el3.prev() == &el2);
-	  ASSERT_TRUE(el2.prev() == &el1);
-	  ASSERT_TRUE(el1.prev() == &root);
-	}
-	ASSERT_FALSE(root.is_empty());
-	ASSERT_FALSE(el1.is_empty());
-	ASSERT_FALSE(el2.is_empty());
+          ASSERT_TRUE(root.next() == &el1);
+          ASSERT_TRUE(el1.next() == &el2);
+          ASSERT_TRUE(el2.next() == &el3);
+          ASSERT_TRUE(el3.next() == &root);
+          ASSERT_TRUE(root.prev() == &el3);
+          ASSERT_TRUE(el3.prev() == &el2);
+          ASSERT_TRUE(el2.prev() == &el1);
+          ASSERT_TRUE(el1.prev() == &root);
+        }
+        ASSERT_FALSE(root.is_empty());
+        ASSERT_FALSE(el1.is_empty());
+        ASSERT_FALSE(el2.is_empty());
 
-	ASSERT_TRUE(root.next() == &el1);
-	ASSERT_TRUE(el1.next() == &el2);
-	ASSERT_TRUE(el2.next() == &root);
-	ASSERT_TRUE(root.prev() == &el2);
-	ASSERT_TRUE(el2.prev() == &el1);
-	ASSERT_TRUE(el1.prev() == &root);
+        ASSERT_TRUE(root.next() == &el1);
+        ASSERT_TRUE(el1.next() == &el2);
+        ASSERT_TRUE(el2.next() == &root);
+        ASSERT_TRUE(root.prev() == &el2);
+        ASSERT_TRUE(el2.prev() == &el1);
+        ASSERT_TRUE(el1.prev() == &root);
       }
       ASSERT_FALSE(root.is_empty());
       ASSERT_FALSE(el1.is_empty());

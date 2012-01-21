@@ -1287,7 +1287,7 @@ namespace crpcut {
       class crpcut_none
       {
       public:
-        ~crpcut_none() {}
+        virtual ~crpcut_none() {}
         virtual bool crpcut_is_expected_exit(int) const;
         virtual bool crpcut_is_expected_signal(int) const;
         virtual void crpcut_expected_death(std::ostream &os) const;
@@ -1336,12 +1336,14 @@ namespace crpcut {
       class no_action
       {
       public:
+        virtual ~no_action() {}
         virtual void crpcut_on_ok_action(const char *) const;
       };
 
       class wipe_working_dir
       {
       public:
+        virtual ~wipe_working_dir() {}
         virtual void crpcut_on_ok_action(const char *wd_name) const;
       private:
       };
@@ -1424,7 +1426,7 @@ namespace crpcut {
       protected:
       public:
         void crpcut_inc();
-        ~crpcut_base();
+        virtual ~crpcut_base();
         crpcut_base();
         void crpcut_add(basic_enforcer * other);
         bool crpcut_can_run() const;
@@ -1573,7 +1575,7 @@ namespace crpcut {
     virtual void crpcut_run_test() = 0;
   protected:
     test_case_base();
-    ~test_case_base();
+    virtual ~test_case_base();
   public:
     virtual crpcut_test_case_registrator& crpcut_get_reg() const = 0;
     virtual void test() = 0;
@@ -1672,7 +1674,7 @@ namespace crpcut {
     crpcut_test_case_registrator *get_registrator() const;
     virtual void close();
     void unregister();
-    ~fdreader() { }
+    virtual ~fdreader() { }
   protected:
     fdreader(crpcut_test_case_registrator *r, int fd = 0);
     void set_fd(int fd, poll<fdreader> *poller);
@@ -1883,7 +1885,6 @@ namespace crpcut {
     bool             enable_timeouts;
     bool             nodeps;
     unsigned         num_parallel;
-    bool             single_process;
     bool             backtrace_enabled;
     unsigned         num_registered_tests;
     unsigned         num_selected_tests;
@@ -3767,7 +3768,8 @@ namespace crpcut {
   public:
     ulps_diff(unsigned max, inf_in_ulps_diff inf_val= exclude_inf)
       : max_diff(max),
-        inf(inf_val)
+        inf(inf_val),
+        diff()
     {
     }
     template <typename T>
@@ -3850,6 +3852,7 @@ namespace crpcut {
   {
   public:
     test_suite() {}
+    virtual ~test_suite() {}
     static test_suite& crpcut_reg()
     {
       static test_suite object;
@@ -4231,7 +4234,7 @@ namespace crpcut {
       try {                                                             \
         throw;                                                          \
       }                                                                 \
-      catch(U u)                                                        \
+      catch(U &u)                                                        \
         {                                                               \
           return crpcut_do_translate(u);                                \
         }                                                               \
@@ -4293,7 +4296,7 @@ namespace crpcut {
 #define CRPCUT_BINARY_CHECK(action, name, lh, rh)                       \
   do {                                                                  \
     try {                                                               \
-      crpcut::tester                                    \
+      crpcut::tester                                                    \
         <crpcut::comm::action,                                          \
          CRPCUT_IS_ZERO_LIT(lh), CRPCUT_DECLTYPE(lh),                   \
          CRPCUT_IS_ZERO_LIT(rh), CRPCUT_DECLTYPE(rh)>                   \
@@ -4305,9 +4308,9 @@ namespace crpcut {
           = crpcut::policies::crpcut_exception_translator::try_all();   \
         CRPCUT_CHECK_REPORT_HEAD(action) <<                             \
           "_" #name "(" #lh ", " #rh ")\n"                              \
-          "  caught "                                                 \
+          "  caught "                                                   \
                                          << CRPCUT_LOCAL_NAME(s);       \
-    })                                                                \
+    })                                                                  \
   } while(0)
 
 
@@ -4315,7 +4318,7 @@ namespace crpcut {
 #define CRPCUT_CHECK_TRUE(action, a)                                    \
   do {                                                                  \
     try {                                                               \
-      crpcut::bool_tester<crpcut::comm::action>         \
+      crpcut::bool_tester<crpcut::comm::action>                         \
         (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
         .check_true((crpcut::expr::hook()->*a), #a);                    \
     }                                                                   \
@@ -4324,7 +4327,7 @@ namespace crpcut {
           = crpcut::policies::crpcut_exception_translator::try_all();   \
         CRPCUT_CHECK_REPORT_HEAD(action) << "_TRUE"                     \
           "(" #a ")\n"                                                  \
-          "  caught "                                                 \
+          "  caught "                                                   \
                                          << CRPCUT_LOCAL_NAME(s);       \
       })                                                                \
   } while(0)
@@ -4335,7 +4338,7 @@ namespace crpcut {
 #define CRPCUT_CHECK_FALSE(action, a)                                   \
   do {                                                                  \
     try {                                                               \
-      crpcut::bool_tester<crpcut::comm::action>         \
+      crpcut::bool_tester<crpcut::comm::action>                         \
         (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
         .assert_false((crpcut::expr::hook()->*a), #a);                  \
     }                                                                   \
@@ -4344,7 +4347,7 @@ namespace crpcut {
           = crpcut::policies::crpcut_exception_translator::try_all();   \
         CRPCUT_CHECK_REPORT_HEAD(action) << "_FALSE"                    \
           "(" #a ")\n"                                                  \
-          "  caught "                                                 \
+          "  caught "                                                   \
                                          << CRPCUT_LOCAL_NAME(s);       \
       })                                                                \
   } while(0)
@@ -4479,7 +4482,7 @@ namespace crpcut
           "(" #pred                                                     \
         << CRPCUT_LOCAL_NAME(sep)[!*#__VA_ARGS__]                       \
         << #__VA_ARGS__ ")\n"                                           \
-          "  caught "                                                 \
+          "  caught "                                                   \
                                          << CRPCUT_LOCAL_NAME(s);       \
       })                                                                \
   } while (0)

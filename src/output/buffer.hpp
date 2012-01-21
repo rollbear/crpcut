@@ -37,6 +37,7 @@ namespace crpcut {
     class buffer
     {
     public:
+      virtual ~buffer() {}
       virtual std::pair<const char*, std::size_t> get_buffer() const = 0;
       virtual void advance() = 0;
       virtual ssize_t write(const char *buff, std::size_t len) = 0;

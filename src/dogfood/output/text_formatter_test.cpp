@@ -49,7 +49,55 @@ namespace {
 
   using namespace testing;
 
-  crpcut::datatypes::fixed_string empty_string = { "", 0 };
+  struct stream_buffer : public crpcut::output::buffer
+  {
+  public:
+    typedef std::pair<const char*, std::size_t> buff;
+    MOCK_CONST_METHOD0(get_buffer, buff());
+    MOCK_METHOD0(advance, void());
+    virtual ssize_t write(const char *data, std::size_t len)
+    {
+      os.write(data, std::streamsize(len));
+      return ssize_t(len);
+    }
+    MOCK_CONST_METHOD0(is_empty, bool());
+    std::ostringstream os;
+  };
+
+  class tag_list : public crpcut::tag_list_root
+  {
+  public:
+    MOCK_METHOD0(fail, void());
+    MOCK_METHOD0(pass, void());
+    MOCK_CONST_METHOD0(num_failed, size_t());
+    MOCK_CONST_METHOD0(num_passed, size_t());
+    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
+    MOCK_CONST_METHOD0(longest_tag_name, int());
+    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
+    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
+  };
+
+  class test_tag : public crpcut::tag
+  {
+  public:
+    template <size_t N>
+    test_tag(const char (&f)[N], tag_list *root)
+      : crpcut::tag(N, root),
+        name_(crpcut::datatypes::fixed_string::make(f))
+    {
+      EXPECT_CALL(*this, get_name()).WillOnce(Return(name_));
+    }
+    MOCK_METHOD0(fail, void());
+    MOCK_METHOD0(pass, void());
+    MOCK_CONST_METHOD0(num_failed, size_t());
+    MOCK_CONST_METHOD0(num_passed, size_t());
+    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
+    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
+    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
+    crpcut::datatypes::fixed_string name_;
+  };
+  static crpcut::datatypes::fixed_string empty_string = { "", 0 };
+
 
   class fix
   {

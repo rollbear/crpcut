@@ -150,6 +150,7 @@ namespace crpcut {
               break;
             default:
               wrapped::abort();
+              /* no break */
             }
         }
       return len;

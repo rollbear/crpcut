@@ -142,7 +142,7 @@ TESTSUITE(asserts)
   class int_matcher
   {
   public:
-    int_matcher(int i) : i_(i) {}
+    int_matcher(int i) : i_(i), mem_(0) {}
     bool operator()(int n) { mem_ = n; return n == i_; }
     friend std::ostream& operator<<(std::ostream &os, const int_matcher& m)
     {

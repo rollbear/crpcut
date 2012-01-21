@@ -509,14 +509,16 @@ namespace crpcut
 
     void *alloc_new_mem(size_t s, alloc_type type) throw (std::bad_alloc)
     {
+      void *p = 0;
       for (;;)
         {
           new_handler_caller handler;
-          void *p = crpcut::heap::alloc_mem(s, type);
-          if (p) return p;
+          p = crpcut::heap::alloc_mem(s, type);
+          if (p) break;
           if (!handler) throw bad_alloc_exc;
           handler();
         }
+      return p;
     }
 
     size_t set_limit(size_t n)
