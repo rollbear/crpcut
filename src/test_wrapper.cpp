@@ -28,13 +28,13 @@
 
 namespace crpcut {
   template <>
-  void test_wrapper<void>::run(test_case_base *t)
+  void test_wrapper<void>::run(crpcut_test_case_base *t)
   {
     t->test();
   }
 
   template <>
-  void test_wrapper<policies::deaths::wrapper>::run(test_case_base *t)
+  void test_wrapper<policies::deaths::wrapper>::run(crpcut_test_case_base *t)
   {
     t->test();
     stream::toastream<128> os;
@@ -44,7 +44,7 @@ namespace crpcut {
   }
 
   template <>
-  void test_wrapper<policies::deaths::timeout_wrapper>::run(test_case_base *t)
+  void test_wrapper<policies::deaths::timeout_wrapper>::run(crpcut_test_case_base *t)
   {
     t->test();
     if (!test_case_factory::timeouts_enabled()) return;
@@ -57,7 +57,7 @@ namespace crpcut {
   template <>
   void
   test_wrapper<policies::exception_wrapper<std::exception> >
-  ::run(test_case_base* t)
+  ::run(crpcut_test_case_base* t)
   {
     try {
       t->test();
@@ -77,7 +77,7 @@ namespace crpcut {
 
   template <>
   void
-  test_wrapper<policies::any_exception_wrapper>::run(test_case_base *t)
+  test_wrapper<policies::any_exception_wrapper>::run(crpcut_test_case_base *t)
   {
     try {
       t->test();

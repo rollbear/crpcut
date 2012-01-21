@@ -259,7 +259,7 @@ namespace crpcut {
 
   void
   crpcut_test_case_registrator
-  ::crpcut_manage_test_case_execution(test_case_base* p)
+  ::crpcut_manage_test_case_execution(crpcut_test_case_base* p)
   {
     if (test_case_factory::tests_as_child_procs())
       {

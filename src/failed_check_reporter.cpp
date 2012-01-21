@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,34 +28,25 @@
 
 namespace crpcut {
 
-  crpcut_test_case_base
-  ::crpcut_test_case_base()
-    :
-    finished(false)
+  std::ostringstream&
+  failed_check_reporter
+  ::prepare(std::ostringstream &os,
+            const char *location,
+            const char *check_type,
+            const char *check_name,
+            const char *expr_string)
   {
+     os << location
+        << "\n" << check_type << "_" << check_name << '('
+        << expr_string << ")\n  is evaluated as:\n    ";
+     return os;
   }
 
-  void
-  crpcut_test_case_base
-  ::crpcut_test_finished()
-  {
-    finished = true;
-    comm::report(comm::end_test, 0, 0);
-  }
-
-  crpcut_test_case_base
-  ::~crpcut_test_case_base()
-  {
-    if (finished)
-      {
-        comm::report(comm::exit_ok, 0, 0);
-      }
-  }
-
-  void
-  crpcut_test_case_base
-  ::crpcut_run()
-  {
-    crpcut_run_test();
-  }
 }
+
+
+
+
+
+
+

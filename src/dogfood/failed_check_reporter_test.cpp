@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,32 @@
 
 #include <crpcut.hpp>
 
-namespace crpcut {
-
-  crpcut_test_case_base
-  ::crpcut_test_case_base()
-    :
-    finished(false)
+namespace {
+  class access : crpcut::failed_check_reporter
   {
-  }
+  public:
+    using failed_check_reporter::prepare;
+  };
+}
 
-  void
-  crpcut_test_case_base
-  ::crpcut_test_finished()
+TESTSUITE(failed_check_reporter)
+{
+  TEST(report_string_is_correct)
   {
-    finished = true;
-    comm::report(comm::end_test, 0, 0);
-  }
-
-  crpcut_test_case_base
-  ::~crpcut_test_case_base()
-  {
-    if (finished)
-      {
-        comm::report(comm::exit_ok, 0, 0);
-      }
-  }
-
-  void
-  crpcut_test_case_base
-  ::crpcut_run()
-  {
-    crpcut_run_test();
+    std::ostringstream os;
+    access::prepare(os, "apa.cpp:32", "ASSERT", "TRUE", "a==b") << "42";
+    static const char truth[] =
+        "apa.cpp:32\n"
+        "ASSERT_TRUE(a==b)\n"
+        "  is evaluated as:\n    "
+        "42";
+    ASSERT_TRUE(os.str() == truth);
   }
 }
+
+
+
+
+
+
+

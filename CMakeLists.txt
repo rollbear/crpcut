@@ -60,6 +60,7 @@ file(GLOB LIB_SRCS
      src/convert_traits.cpp
      src/crpcut.cpp
      src/event.cpp
+     src/failed_check_reporter.cpp
      src/fdreader.cpp
      src/fsfuncs.cpp
      src/heap.cpp
@@ -106,6 +107,7 @@ file(GLOB LIB_SRCS
 include_directories(include)
 file(GLOB DOGFOOD_SRCS
      src/dogfood/dogfood.cpp
+     src/dogfood/failed_check_reporter_test.cpp
      src/dogfood/fixed_string_test.cpp
      src/dogfood/list_elem_test.cpp
      src/dogfood/output/heap_buffer_test.cpp

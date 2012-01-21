@@ -1232,6 +1232,13 @@ namespace crpcut {
       virtual std::string crpcut_translate() const;
     };
 
+    void
+    report_unexpected_exception(comm::type action,
+                                const char *location,
+                                const char *check_name,
+                                const char *check_type,
+                                const char *params);
+
 
     namespace deaths {
       class crpcut_none;
@@ -1260,7 +1267,7 @@ namespace crpcut {
       };
 
     }
-    class default_policy
+    class crpcut_default_policy
     {
     protected:
       typedef crpcut_none crpcut_test_tag;
@@ -1347,7 +1354,7 @@ namespace crpcut {
     } // namespace deaths
 
     template <int N, typename action = deaths::no_action>
-    class signal_death : protected virtual default_policy
+    class signal_death : protected virtual crpcut_default_policy
     {
     public:
       typedef deaths::wrapper crpcut_run_wrapper;
@@ -1355,7 +1362,7 @@ namespace crpcut {
     };
 
     template <int N, typename action = deaths::no_action>
-    class exit_death : protected virtual default_policy
+    class exit_death : protected virtual crpcut_default_policy
     {
     public:
       typedef deaths::wrapper  crpcut_run_wrapper;
@@ -1363,7 +1370,7 @@ namespace crpcut {
     };
 
     template <unsigned long N>
-    class realtime_timeout_death : protected virtual default_policy
+    class realtime_timeout_death : protected virtual crpcut_default_policy
     {
     public:
       typedef deaths::timeout_wrapper crpcut_run_wrapper;
@@ -1380,7 +1387,7 @@ namespace crpcut {
     class exception_specifier;
 
     template <typename T>
-    class exception_specifier<void (T)> : protected virtual default_policy
+    class exception_specifier<void (T)> : protected virtual crpcut_default_policy
     {
     public:
       typedef exception_wrapper<T> crpcut_run_wrapper;
@@ -1401,7 +1408,7 @@ namespace crpcut {
     };
 
     template <>
-    class exception_specifier<void (...)> : protected virtual default_policy
+    class exception_specifier<void (...)> : protected virtual crpcut_default_policy
     {
     public:
       typedef any_exception_wrapper crpcut_run_wrapper;
@@ -1409,7 +1416,7 @@ namespace crpcut {
       static void check_match(...) {}
     };
 
-    class no_core_file : protected virtual default_policy
+    class no_core_file : protected virtual crpcut_default_policy
     {
     protected:
       no_core_file();
@@ -1470,7 +1477,7 @@ namespace crpcut {
     } // namespace dependencies
 
     template <typename T>
-    class dependency_policy : protected virtual default_policy
+    class dependency_policy : protected virtual crpcut_default_policy
     {
     public:
       typedef typename datatypes::wrap<dependencies::enforcer,
@@ -1527,7 +1534,7 @@ namespace crpcut {
 
     template <unsigned long timeout_ms>
     class timeout_policy<timeout::realtime, timeout_ms>
-      : protected virtual default_policy
+      : protected virtual crpcut_default_policy
     {
     public:
       typedef timeout::enforcer<timeout::realtime, timeout_ms>
@@ -1536,7 +1543,7 @@ namespace crpcut {
 
     template <unsigned long timeout_ms>
     class timeout_policy<timeout::cputime, timeout_ms>
-      : protected virtual default_policy
+      : protected virtual crpcut_default_policy
     {
     public:
       typedef timeout::enforcer<timeout::cputime, timeout_ms>
@@ -1545,21 +1552,21 @@ namespace crpcut {
 
 
     template <unsigned long ms>
-    struct constructor_timeout_policy : public virtual default_policy
+    struct constructor_timeout_policy : public virtual crpcut_default_policy
     {
       typedef timeout::constructor_enforcer<ms>
       crpcut_constructor_timeout_enforcer;
     };
 
     template <unsigned long ms>
-    struct destructor_timeout_policy : public virtual default_policy
+    struct destructor_timeout_policy : public virtual crpcut_default_policy
     {
       typedef timeout::destructor_enforcer<ms>
       crpcut_destructor_timeout_enforcer;
     };
 
     template <typename T>
-    struct tag_policy : public virtual policies::default_policy
+    struct tag_policy : public virtual policies::crpcut_default_policy
     {
       typedef T crpcut_test_tag;
     };
@@ -1567,12 +1574,13 @@ namespace crpcut {
 
   class crpcut_test_case_registrator;
 
-  class test_case_base : protected virtual policies::default_policy
+  class crpcut_test_case_base
+  : protected virtual policies::crpcut_default_policy
   {
     virtual void crpcut_run_test() = 0;
   protected:
-    test_case_base();
-    virtual ~test_case_base();
+    crpcut_test_case_base();
+    virtual ~crpcut_test_case_base();
   public:
     virtual crpcut_test_case_registrator& crpcut_get_reg() const = 0;
     virtual void test() = 0;
@@ -1748,7 +1756,7 @@ namespace crpcut {
   protected:
     virtual void crpcut_do_run_test_case() = 0;
     crpcut_test_case_registrator();
-    void crpcut_manage_test_case_execution(test_case_base*);
+    void crpcut_manage_test_case_execution(crpcut_test_case_base*);
     void crpcut_prepare_destruction(unsigned long ms);
     void crpcut_prepare_construction(unsigned long ms);
   private:
@@ -1899,38 +1907,16 @@ namespace crpcut {
     const char **    argv;
   };
 
-  template <comm::type t>
-  bool reader<t>::do_read(int fd, bool)
-  {
-    static char buff[1024];
-    for (;;)
-      {
-        ssize_t rv = wrapped::read(fd, buff, sizeof(buff));
-        if (rv == 0) return false;
-        if (rv == -1)
-          {
-            int n = errno;
-            assert(n == EINTR);
-            (void)n; // silence warning
-          }
-
-        test_case_factory::present(reg_->crpcut_get_pid(), t,
-                                   reg_->crpcut_get_phase(),
-                                   size_t(rv), buff);
-        return true;
-      }
-  }
-
   template <typename C>
   struct test_wrapper
   {
-    static void run(test_case_base *t);
+    static void run(crpcut_test_case_base *t);
   };
 
   template <typename exc>
   struct test_wrapper<policies::exception_wrapper<exc> >
   {
-    static void run(test_case_base* t)
+    static void run(crpcut_test_case_base* t)
     {
       try {
         t->test();
@@ -2304,8 +2290,18 @@ namespace crpcut {
     return v;
   }
 
+  class failed_check_reporter
+  {
+  public:
+    static std::ostringstream& prepare(std::ostringstream &os,
+                                       const char *location,
+                                       const char *check_type,
+                                       const char *check_name,
+                                       const char *expr_string);
+  };
+
   template <comm::type action>
-  class bool_tester
+  class bool_tester : failed_check_reporter
   {
     const char *loc_;
   public:
@@ -2313,34 +2309,22 @@ namespace crpcut {
     template <typename T>
     void check_true(const T& v, const char *vn) const
     {
-      if (eval(v)) {} else { report("_TRUE", v, vn); }
+      if (eval(v)) {} else { report("TRUE", v, vn); }
     }
     template <typename T>
     void assert_false(const T& v, const char *vn) const
     {
-      if (eval(v)) { report("_FALSE", v, vn); }
+      if (eval(v)) { report("FALSE", v, vn); }
     }
   private:
     template <typename T>
     void report(const char *name, const T& v, const char *vn) const
     {
       heap::set_limit(heap::system);
-      using std::ostringstream;
-      using std::stringbuf;
-      ostringstream os;
+      std::ostringstream os;
 
-      os << loc_ << "\n" << crpcut_check_name<action>::string()
-         << name << "(" << vn << ")\n"
-        "  is evaluated as:\n    ";
-      conditionally_stream<8>(os, v);
-      std::string s(os.str());
-      os.~ostringstream();
-      new (&os) ostringstream();
-      size_t len = s.length();
-      char *p = static_cast<char*>(alloca(len));
-      s.copy(p, len);
-      std::string().swap(s);
-      comm::report(action, p, len);
+      conditionally_stream<8>(prepare(os, loc_, crpcut_check_name<action>::string(), name, vn), v);
+      comm::report(action, os);
     }
   };
 
@@ -3528,6 +3512,27 @@ namespace crpcut {
     : fdreader(r, fd)
   {
   }
+  template <comm::type t>
+  bool reader<t>::do_read(int fd, bool)
+  {
+    static char buff[1024];
+    for (;;)
+      {
+        ssize_t rv = wrapped::read(fd, buff, sizeof(buff));
+        if (rv == 0) return false;
+        if (rv == -1)
+          {
+            int n = errno;
+            assert(n == EINTR);
+            (void)n; // silence warning
+          }
+
+        test_case_factory::present(reg_->crpcut_get_pid(), t,
+                                   reg_->crpcut_get_phase(),
+                                   size_t(rv), buff);
+        return true;
+      }
+  }
 
   template <typename T, case_convert_type type>
   collate_result operator==(T r, const collate_t<type> &c)
@@ -4083,19 +4088,18 @@ namespace crpcut {
 
 extern crpcut::namespace_info crpcut_current_namespace;
 
-// Note, the order of inheritance below is important. test_case_base
+// Note, the order of inheritance below is important. crpcut_test_case_base
 // destructor signals ending of test case, so it must be listed as the
 // first base class so that its instance is destroyed last
 
 #define CRPCUT_TEST_CASE_DEF(test_case_name, ...)                       \
   class test_case_name                                                  \
-    : crpcut::test_case_base, __VA_ARGS__                               \
+    : crpcut::crpcut_test_case_base, __VA_ARGS__                        \
   {                                                                     \
     friend struct crpcut::test_wrapper<crpcut_run_wrapper>;              \
     friend class crpcut::policies::dependencies::enforcer<test_case_name>; \
     friend class crpcut::crpcut_test_case_registrator;  \
     test_case_name() {}                                                 \
-    ~test_case_name() {}                                                \
     virtual void crpcut_run_test()                                      \
     {                                                                   \
       crpcut_realtime_enforcer rt;                                      \
@@ -4289,7 +4293,6 @@ namespace crpcut {
 
 #define CRPCUT_IS_ZERO_LIT(x) (sizeof(crpcut::null_cmp::func(x)) == 1)
 
-
 #define CRPCUT_BINARY_CHECK(action, name, lh, rh)                       \
   do {                                                                  \
     try {                                                               \
@@ -4301,12 +4304,12 @@ namespace crpcut {
         .name(lh, #lh, rh, #rh);                                        \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
-        std::string CRPCUT_LOCAL_NAME(s)                                \
-          = crpcut::policies::crpcut_exception_translator::try_all();   \
-        CRPCUT_CHECK_REPORT_HEAD(action) <<                             \
-          "_" #name "(" #lh ", " #rh ")\n"                              \
-          "  caught "                                                   \
-                                         << CRPCUT_LOCAL_NAME(s);       \
+      using crpcut::policies::report_unexpected_exception;              \
+      report_unexpected_exception(crpcut::comm::action,                 \
+                                  __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__), \
+                                  crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
+                                  #name,                                \
+                                  #lh ", " #rh);                        \
     })                                                                  \
   } while(0)
 
@@ -4320,12 +4323,12 @@ namespace crpcut {
         .check_true((crpcut::expr::hook()->*a), #a);                    \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
-        std::string CRPCUT_LOCAL_NAME(s)                                \
-          = crpcut::policies::crpcut_exception_translator::try_all();   \
-        CRPCUT_CHECK_REPORT_HEAD(action) << "_TRUE"                     \
-          "(" #a ")\n"                                                  \
-          "  caught "                                                   \
-                                         << CRPCUT_LOCAL_NAME(s);       \
+        using crpcut::policies::report_unexpected_exception;            \
+        report_unexpected_exception(crpcut::comm::action,               \
+                                     __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                     crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
+                                     "TRUE",                            \
+                                     #a);                               \
       })                                                                \
   } while(0)
 
@@ -4340,12 +4343,12 @@ namespace crpcut {
         .assert_false((crpcut::expr::hook()->*a), #a);                  \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
-        std::string CRPCUT_LOCAL_NAME(s)                                \
-          = crpcut::policies::crpcut_exception_translator::try_all();   \
-        CRPCUT_CHECK_REPORT_HEAD(action) << "_FALSE"                    \
-          "(" #a ")\n"                                                  \
-          "  caught "                                                   \
-                                         << CRPCUT_LOCAL_NAME(s);       \
+        using crpcut::policies::report_unexpected_exception;            \
+        report_unexpected_exception(crpcut::comm::action,               \
+                                            __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                            crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
+                                            "FALSE",                    \
+                                            #a);                        \
       })                                                                \
   } while(0)
 
@@ -4385,7 +4388,7 @@ namespace crpcut
 }
 
 #ifndef CRPCUT_NO_EXCEPTION_SUPPORT
-#define CRPCUT_CHECK_THROW(action, str, expr, exc, ...)                  \
+#define CRPCUT_CHECK_THROW(action, str, expr, exc, ...)                 \
   do {                                                                  \
     try {                                                               \
       try {                                                             \
@@ -4403,12 +4406,12 @@ namespace crpcut
       }                                                                 \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
-        std::string CRPCUT_LOCAL_NAME(s)                                \
-          = crpcut::policies::crpcut_exception_translator::try_all();   \
-        CRPCUT_CHECK_REPORT_HEAD(action) << "_THROW"                    \
-          "(" str  ")\n"                                                \
-          "  caught "                                                   \
-                                         << CRPCUT_LOCAL_NAME(s);       \
+        using crpcut::policies::report_unexpected_exception;            \
+        report_unexpected_exception(crpcut::comm::action,               \
+                                    __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                    crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
+                                    "THROW",                            \
+                                    str);                               \
       })                                                                \
   } while (0)
 
@@ -4426,12 +4429,12 @@ namespace crpcut
       expr;                                                             \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
-        std::string CRPCUT_LOCAL_NAME(s)                                \
-          = crpcut::policies::crpcut_exception_translator::try_all();   \
-        CRPCUT_CHECK_REPORT_HEAD(action) << "_NO_THROW"                 \
-          "(" #expr ")\n"                                               \
-          "  caught "                                                   \
-                                         << CRPCUT_LOCAL_NAME(s);       \
+        using crpcut::policies::report_unexpected_exception;            \
+        report_unexpected_exception(crpcut::comm::action,               \
+                                    __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                    crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
+                                    "NO_THROW",                         \
+                                    #expr);                             \
       })                                                                \
   } while (0)
 
@@ -4473,14 +4476,12 @@ namespace crpcut
         }                                                               \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
-        std::string CRPCUT_LOCAL_NAME(s)                                \
-          = crpcut::policies::crpcut_exception_translator::try_all();   \
-        CRPCUT_CHECK_REPORT_HEAD(action) << "PRED("                     \
-          "(" #pred                                                     \
-        << CRPCUT_LOCAL_NAME(sep)[!*#__VA_ARGS__]                       \
-        << #__VA_ARGS__ ")\n"                                           \
-          "  caught "                                                   \
-                                         << CRPCUT_LOCAL_NAME(s);       \
+        using crpcut::policies::report_unexpected_exception;            \
+        report_unexpected_exception(crpcut::comm::action,               \
+                                    __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                    crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
+                                    "PRED",                             \
+                                    CRPCUT_STRINGIZE(pred, __VA_ARGS__)); \
       })                                                                \
   } while (0)
 

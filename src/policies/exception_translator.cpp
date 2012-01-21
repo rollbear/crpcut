@@ -29,6 +29,24 @@
 namespace crpcut {
   namespace policies {
 
+
+    void
+    report_unexpected_exception(comm::type action,
+                                const char *location,
+                                const char *check_name,
+                                const char *check_type,
+                                const char *params)
+    {
+      std::string exc = policies::crpcut_exception_translator::try_all();
+      std::ostringstream os;
+
+      os << location << "\n"
+         << check_name << "_" << check_type << '(' << params << ")\n"
+         << "  caught " << exc;
+      comm::report(action, os);
+
+    }
+
     crpcut_exception_translator
     ::crpcut_exception_translator(int)
     {
