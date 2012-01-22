@@ -116,18 +116,12 @@ TESTSUITE(output)
       size_t const      size_;
     };
 
-    TEST(illegal_to_charset_throws, EXPECT_EXCEPTION(std::runtime_error))
+    TEST(illegal_to_charset_throws)
     {
       buffer b(0, "");
-      try {
-        empty_writer f(b, "tjolahopp!", "apa");
-      }
-      catch (std::runtime_error &e)
-      {
-        static const char m[] = "Can't convert from \"UTF-8\" to \"tjolahopp!\"";
-        ASSERT_TRUE(std::string(e.what()) == m);
-        throw;
-      }
+      ASSERT_THROW(empty_writer(b, "tjolahopp!", "apa"),
+                   std::runtime_error,
+                   "Can't convert from \"UTF-8\" to \"tjolahopp!\"");
     }
 
     std::string str(crpcut::datatypes::fixed_string s)
