@@ -27,6 +27,7 @@
 #ifndef OUTPUT_BUFFER_HPP
 #define OUTPUT_BUFFER_HPP
 
+#include <cstddef>
 #include <utility>
 extern "C" {
 #  include <sys/types.h>
