@@ -230,12 +230,13 @@ namespace crpcut {
                  unsigned num_run,
                  unsigned num_failed)
     {
-      for (tag_list_root::const_iterator i = tags_.begin();
-           i != tags_.end();
-           ++i)
+      tag_list_root::const_iterator i = tags_.begin();
+      tag_list_root::const_iterator const end = tags_.end();
+      do
         {
           tag_summary(*i);
         }
+      while (i++ != end);
       if (tag_summary_)
         {
           write("  </tag_summary>\n");
