@@ -27,10 +27,9 @@
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
 #include "../../output/text_formatter.hpp"
-#include "../../output/buffer.hpp"
 #include "../../output/text_modifier.hpp"
-#include <sstream>
-
+#include "stream_buffer_mock.hpp"
+#include "tag_mocks.hpp"
 namespace {
   static const char rules[] =
     "|"
@@ -50,54 +49,7 @@ namespace {
 
   using namespace testing;
 
-  struct stream_buffer : public crpcut::output::buffer
-  {
-  public:
-    typedef std::pair<const char*, std::size_t> buff;
-    MOCK_CONST_METHOD0(get_buffer, buff());
-    MOCK_METHOD0(advance, void());
-    virtual ssize_t write(const char *buffer, std::size_t len)
-    {
-      os.write(buffer, std::streamsize(len));
-      return ssize_t(len);
-    }
-    MOCK_CONST_METHOD0(is_empty, bool());
-    std::ostringstream os;
-  };
-
-  class tag_list : public crpcut::tag_list_root
-  {
-  public:
-    MOCK_METHOD0(fail, void());
-    MOCK_METHOD0(pass, void());
-    MOCK_CONST_METHOD0(num_failed, size_t());
-    MOCK_CONST_METHOD0(num_passed, size_t());
-    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
-    MOCK_CONST_METHOD0(longest_tag_name, int());
-    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
-    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
-  };
-
-  class test_tag : public crpcut::tag
-  {
-  public:
-    template <size_t N>
-    test_tag(const char (&f)[N], tag_list *root)
-      : crpcut::tag(N, root),
-        name_(crpcut::datatypes::fixed_string::make(f))
-    {
-      EXPECT_CALL(*this, get_name()).WillOnce(Return(name_));
-    }
-    MOCK_METHOD0(fail, void());
-    MOCK_METHOD0(pass, void());
-    MOCK_CONST_METHOD0(num_failed, size_t());
-    MOCK_CONST_METHOD0(num_passed, size_t());
-    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
-    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
-    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
-    crpcut::datatypes::fixed_string name_;
-  };
-  static crpcut::datatypes::fixed_string empty_string = { "", 0 };
+  crpcut::datatypes::fixed_string empty_string = { "", 0 };
 
   class fix
   {
@@ -107,7 +59,7 @@ namespace {
       EXPECT_CALL(tags, get_name()).WillRepeatedly(Return(empty_string));
       EXPECT_CALL(tags, longest_tag_name()).WillRepeatedly(Return(0));
     }
-    StrictMock<tag_list> tags;
+    StrictMock<mock::tag_list> tags;
   };
 
 }
@@ -127,7 +79,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
@@ -149,7 +101,7 @@ TESTSUITE(output)
 
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
@@ -180,7 +132,7 @@ TESTSUITE(output)
 
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
@@ -200,7 +152,7 @@ TESTSUITE(output)
       }
     }
 
-#define MAKE_TAG(n) test_tag n(#n, &tags)
+#define MAKE_TAG(n) mock::test_tag n(#n, &tags)
 
     TEST(stats_with_mixed_crit_ncrit_pass_only_shows_pass_sum,
          fix)
@@ -243,7 +195,7 @@ TESTSUITE(output)
 
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
@@ -308,7 +260,7 @@ TESTSUITE(output)
 
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
@@ -375,7 +327,7 @@ TESTSUITE(output)
 
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
@@ -442,7 +394,7 @@ TESTSUITE(output)
 
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
@@ -510,7 +462,7 @@ TESTSUITE(output)
 
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
@@ -540,7 +492,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
@@ -558,7 +510,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
@@ -576,7 +528,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
@@ -594,7 +546,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
@@ -612,7 +564,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
@@ -637,7 +589,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
@@ -663,7 +615,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
@@ -707,7 +659,7 @@ TESTSUITE(output)
         .WillRepeatedly(Return(1));
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        StrictMock<stream_buffer> test_buffer;
+        StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
                                            1,
