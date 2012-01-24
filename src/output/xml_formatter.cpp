@@ -57,6 +57,7 @@ namespace crpcut {
       : writer(buffer,
                "UTF-8",
                xml_replacement(test_case_factory::get_illegal_rep())),
+        non_critical_fail_sum_(0),
         last_closed_(false),
         blocked_tests_(false),
         tag_summary_(false),
@@ -259,7 +260,7 @@ namespace crpcut {
       write(num_failed);
       write("</failed_test_cases>\n"
             "    <failed_non_critical_test_cases>");
-      write(non_critical_fail_sum);
+      write(non_critical_fail_sum_);
       write("</failed_non_critical_test_cases>\n"
             "  </statistics>\n"
             "</crpcut>\n");
@@ -299,7 +300,7 @@ namespace crpcut {
         }
       if (t.get_importance() != tag::critical)
         {
-          non_critical_fail_sum+= t.num_failed();
+          non_critical_fail_sum_+= t.num_failed();
         }
       datatypes::fixed_string name = t.get_name();
       if (!name) return;

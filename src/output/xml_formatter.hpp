@@ -64,7 +64,7 @@ namespace crpcut {
       virtual datatypes::fixed_string escape(char c) const;
       void make_closed();
 
-      std::size_t          non_critical_fail_sum;
+      std::size_t          non_critical_fail_sum_;
       bool                 last_closed_;
       bool                 blocked_tests_;
       bool                 tag_summary_;
