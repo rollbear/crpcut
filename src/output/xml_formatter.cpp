@@ -215,14 +215,11 @@ namespace crpcut {
     ::print(datatypes::fixed_string label,
             datatypes::fixed_string data)
     {
+      assert(label);
+      assert(data);
       make_closed();
       write("    <");
       write(label);
-      if (!label)
-        {
-          write("/>\n");
-          return;
-        }
       write(">");
       write(data, translated);
       write("</");
