@@ -26,6 +26,7 @@
 
 #include "xml_formatter.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
+#include "../posix_error.hpp"
 
 namespace {
   inline const char *xml_replacement(const char *p)
@@ -63,17 +64,17 @@ namespace crpcut {
         tag_summary_(false),
         tags_(tags)
     {
-      write("<?xml version=\"1.0\"?>\n\n"
-            "<crpcut xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-            "\n        xsi:noNamespaceSchemaLocation="
-            "\"http://crpcut.sourceforge.net/crpcut-"
-            CRPCUT_VERSION_STRING
-            ".xsd\""
-            "\n        starttime=\"");
+      char machine_string[HOST_NAME_MAX + 1];
+      int rv = wrapped::gethostname(machine_string, sizeof(machine_string));
+      assert(rv == 0);
+      (void)rv; // silense warning if built with NDEBUG
+      time_t now = wrapped::time(0);
+      assert(now != time_t(-1));
+
+      struct tm *tmdata = wrapped::gmtime(&now);
+      assert(tmdata);
 
       char time_string[sizeof("2009-01-09T23:59:59Z")];
-      time_t now = wrapped::time(0);
-      struct tm *tmdata = wrapped::gmtime(&now);
       int len = wrapped::snprintf(time_string, sizeof(time_string),
                                   "%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2dZ",
                                   tmdata->tm_year + 1900,
@@ -84,13 +85,16 @@ namespace crpcut {
                                   tmdata->tm_sec);
       assert(len < int(sizeof(time_string)));
       assert(time_string[len] == 0);
+
+      write("<?xml version=\"1.0\"?>\n\n"
+            "<crpcut xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+            "\n        xsi:noNamespaceSchemaLocation="
+            "\"http://crpcut.sourceforge.net/crpcut-"
+            CRPCUT_VERSION_STRING
+            ".xsd\""
+            "\n        starttime=\"");
       write(time_string);
 
-      char machine_string[PATH_MAX];
-      if (wrapped::gethostname(machine_string, sizeof(machine_string)))
-        {
-          machine_string[0] = 0;
-        }
       write("\"\n        host=\"");
       write(machine_string, wrapped::strlen(machine_string), translated);
 
@@ -185,6 +189,7 @@ namespace crpcut {
                 datatypes::fixed_string msg,
                 datatypes::fixed_string dirname)
     {
+      assert(dirname || msg);
       make_closed();
       write("      <violation phase=");
       const datatypes::fixed_string &ps = phase_str(phase);
