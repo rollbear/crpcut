@@ -89,7 +89,7 @@ namespace crpcut {
           if (!esc) continue;
           do_write_converted(str + prev_n, n - prev_n);
           prev_n = n + 1;
-          if (esc) do_write(esc.str, esc.len);
+          do_write(esc.str, esc.len);
         }
       do_write_converted(str + prev_n, len - prev_n);
       return len;
