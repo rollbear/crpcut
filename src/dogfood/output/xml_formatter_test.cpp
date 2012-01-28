@@ -50,7 +50,7 @@ namespace {
   };
 }
 
-#define s(x) crpcut::datatypes::fixed_string::make(#x)
+#define s(...) crpcut::datatypes::fixed_string::make(#__VA_ARGS__)
 
 #define _ "[[:space:]]*"
 #define S "[[:space:]]+"
@@ -490,6 +490,46 @@ TESTSUITE(output)
                                                crpcut::regex::m),
                   test_buffer.os.str());
 
+
+    }
+
+    TEST(non_empty_directory_is_displayed, fix)
+    {
+      StrictMock<mock::stream_buffer> test_buffer;
+      {
+        crpcut::output::xml_formatter obj(test_buffer,
+                                          "one",
+                                          1,
+                                          vec,
+                                          tags);
+        obj.begin_case(s(tupp), false, true);
+        obj.terminate(crpcut::post_mortem,
+                      s(),
+                      s(/tmp/crpcut02342/tests::tupp));
+        obj.end_case();
+        obj.nonempty_dir("/tmp/crpcut02342");
+        obj.statistics(0,0,0,0);
+      }
+
+#define IL "&#xfffd;"
+
+      static const char re[] =
+        XML_HEADER
+        XML_OPEN_TEST(tupp, true, FAILED)
+        _ "<log>"
+        _ "<violation" S "phase" _ "=" _ "\"post_mortem\""
+        S "nonempty_dir" _ "=" _ "\"/tmp/crpcut02342/tests::tupp\"" _ "/>"
+        _ "</log>"
+        _ "</test>"
+        _ "<remaining_files" S "nonempty_dir" _ "=" _ "\"/tmp/crpcut02342\"" _ "/>"
+        XML_STATISTICS(0,0,0,0,0,0)
+        XML_TRAILER
+        ;
+      INFO << re;
+      ASSERT_PRED(crpcut::match<crpcut::regex>(re,
+                                               crpcut::regex::e,
+                                               crpcut::regex::m),
+                  test_buffer.os.str());
 
     }
   }
