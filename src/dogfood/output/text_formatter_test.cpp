@@ -110,6 +110,7 @@ namespace {
     StrictMock<mock::tag_list> tags;
   };
 
+  const char *const no_char_conversion = 0;
 }
 
 #define _ "[[:space:]]*"
@@ -134,7 +135,8 @@ TESTSUITE(output)
                                              1,
                                              vec,
                                              tags,
-                                             test_modifier);
+                                             test_modifier,
+                                             no_char_conversion);
         }
         ASSERT_TRUE(test_buffer.os.str() == "");
       }
@@ -156,7 +158,8 @@ TESTSUITE(output)
                                              1,
                                              vec,
                                              tags,
-                                             test_modifier);
+                                             test_modifier,
+                                             no_char_conversion);
           obj.statistics(15, 14, 13, 0);
         }
 
@@ -187,7 +190,8 @@ TESTSUITE(output)
                                              1,
                                              vec,
                                              tags,
-                                             test_modifier);
+                                             test_modifier,
+                                             no_char_conversion);
           obj.statistics(15, 13, 13, 13);
         }
         static const char re[] =
@@ -248,9 +252,10 @@ TESTSUITE(output)
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
                                              1,
-                                            vec,
+                                             vec,
                                              tags,
-                                             test_modifier);
+                                             test_modifier,
+                                             no_char_conversion);
           obj.statistics(9, 9, 9, 0);
         }
         static const char re[] =
@@ -315,7 +320,8 @@ TESTSUITE(output)
                                              1,
                                              vec,
                                              tags,
-                                             test_modifier);
+                                             test_modifier,
+                                             no_char_conversion);
           obj.statistics(9, 9, 9, 9);
         }
         static const char re[] =
@@ -382,7 +388,8 @@ TESTSUITE(output)
                                              1,
                                              vec,
                                              tags,
-                                             test_modifier);
+                                             test_modifier,
+                                             no_char_conversion);
           obj.statistics(10, 10, 10, 6);
         }
         static const char re[] =
@@ -449,7 +456,8 @@ TESTSUITE(output)
                                              1,
                                              vec,
                                              tags,
-                                             test_modifier);
+                                             test_modifier,
+                                             no_char_conversion);
           obj.statistics(10, 10, 10, 6);
         }
         static const char re[] =
@@ -517,7 +525,8 @@ TESTSUITE(output)
                                              1,
                                              vec,
                                              tags,
-                                             test_modifier);
+                                             test_modifier,
+                                             no_char_conversion);
           obj.statistics(8, 8, 8, 5);
         }
         static const char re[] =
@@ -546,7 +555,8 @@ TESTSUITE(output)
                                            1,
                                            vec,
                                            tags,
-                                           test_modifier);
+                                           test_modifier,
+                                           no_char_conversion);
         obj.begin_case(s("apa"), true, true);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<P>PASSED!: apa\n<>=*\n"),
@@ -564,7 +574,8 @@ TESTSUITE(output)
                                            1,
                                            vec,
                                            tags,
-                                           test_modifier);
+                                           test_modifier,
+                                           no_char_conversion);
         obj.begin_case(s("apa"), true, false);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<NP>PASSED?: apa\n<>=*\n"),
@@ -582,7 +593,8 @@ TESTSUITE(output)
                                            1,
                                            vec,
                                            tags,
-                                           test_modifier);
+                                           test_modifier,
+                                           no_char_conversion);
         obj.begin_case(s("apa"), false, true);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<F>FAILED!: apa\n<>=*\n"),
@@ -600,7 +612,8 @@ TESTSUITE(output)
                                            1,
                                            vec,
                                            tags,
-                                           test_modifier);
+                                           test_modifier,
+                                           no_char_conversion);
         obj.begin_case(s("apa"), false, false);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<NF>FAILED?: apa\n<>=*\n"),
@@ -618,7 +631,8 @@ TESTSUITE(output)
                                            1,
                                            vec,
                                            tags,
-                                           test_modifier);
+                                           test_modifier,
+                                           no_char_conversion);
         obj.begin_case(s("apa"), false, false);
         obj.terminate(crpcut::destroying, s("katt"), s(""));
         obj.end_case();
@@ -643,7 +657,8 @@ TESTSUITE(output)
                                            1,
                                            vec,
                                            tags,
-                                           test_modifier);
+                                           test_modifier,
+                                           no_char_conversion);
         obj.begin_case(s("apa"), false, false);
         obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpfile"));
         obj.end_case();
@@ -669,7 +684,8 @@ TESTSUITE(output)
                                            1,
                                            vec,
                                            tags,
-                                           test_modifier);
+                                           test_modifier,
+                                           no_char_conversion);
         obj.begin_case(s("apa"), false, false);
         obj.print(s("type"),
                   s("the quick brown fox jumps over the lazy dog"));
@@ -713,7 +729,8 @@ TESTSUITE(output)
                                            1,
                                            vec,
                                            tags,
-                                           test_modifier);
+                                           test_modifier,
+                                           no_char_conversion);
         obj.begin_case(s("apa"), false, false);
         obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpdir/hoppla"));
         obj.end_case();

@@ -44,7 +44,8 @@ namespace crpcut {
                      int,
                      const char**,
                      const tag_list_root &tags,
-                     const text_modifier& = default_text_modifier());
+                     const text_modifier &mod = default_text_modifier(),
+                     const char          *os = test_case_factory::get_output_charset());
       ~text_formatter();
       virtual void begin_case(datatypes::fixed_string name,
                               bool                    result,

@@ -68,17 +68,16 @@ namespace crpcut {
                      int,
                      const char         **,
                      const tag_list_root &tags,
-                     const text_modifier &m)
+                     const text_modifier &mod,
+                     const char         *os)
       : writer(buff,
-               output_charset(test_case_factory::get_output_charset()),
+               output_charset(os),
                illegal_replacement(test_case_factory::get_illegal_rep())),
         did_output_(false),
         blocked_tests_(false),
-        conversion_type_(test_case_factory::get_output_charset()
-                         ? translated
-                         : verbatim),
+        conversion_type_(os ? translated : verbatim),
         tags_(tags),
-        modifier_(m)
+        modifier_(mod)
     {
     }
 
