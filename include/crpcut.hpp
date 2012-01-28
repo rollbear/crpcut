@@ -1887,6 +1887,10 @@ namespace crpcut {
   private:
     static test_case_factory& obj();
     test_case_factory();
+    const char** parse_cli_params(const char **p, bool &quiet, std::ostream &err_os,
+        const char *&identity, int &output_fd, bool &xml,
+        tag_list_root &tags, const char *&working_dir);
+    void list_tests(const char **names, tag_list_root &tags, std::ostream &os);
     void kill_presenter_process();
     void manage_children(unsigned max_pending_children, poll<fdreader> &poller);
     void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
