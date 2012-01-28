@@ -32,7 +32,7 @@ class int_matcher
 {
   int n_, memory_;
  public:
-  int_matcher(int n) : n_(n) {}
+  int_matcher(int n) : n_(n), memory_(0) {}
   bool operator()(int val) { memory_ = val; return val == n_; }
   friend std::ostream& operator<<(std::ostream &os, const int_matcher &m)
   {

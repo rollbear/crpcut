@@ -29,7 +29,7 @@
 class to_be_tested
 {
 public:
-  to_be_tested() { buffer.at(1) = 0; /* init */ }
+  to_be_tested() : index(0) { buffer.at(1) = 0; /* init */ }
   char &next_char() { return buffer[index++]; }
   size_t used_chars() const { return index; }
 private:

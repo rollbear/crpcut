@@ -30,10 +30,12 @@
 
 
 struct iface1 {
+  virtual ~iface1() {}
   virtual void f1(int) = 0;
 };
 
 struct iface2 {
+  virtual ~iface2() {}
   virtual void f1(const char *) = 0;
 };
 

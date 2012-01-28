@@ -26,7 +26,6 @@
 
 #include <crpcut.hpp>
 
-namespace crpcut { namespace heap { void show_objects(); } }
 TESTSUITE(heap)
 {
   TEST(should_succeed_allocation_leak)

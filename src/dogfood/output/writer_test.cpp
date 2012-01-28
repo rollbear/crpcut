@@ -93,7 +93,11 @@ TESTSUITE(output)
       {
       }
       virtual ~buffer() { ASSERT_TRUE(offset_ == size_); }
-      std::pair<const char*, std::size_t> get_buffer() const { abort(); }
+      std::pair<const char*, std::size_t> get_buffer() const
+      {
+        abort();
+        return std::make_pair("", 0); /* makes eclipse happy */
+      }
       void advance() { abort(); }
       ssize_t write(const char *buff, std::size_t len)
       {
@@ -108,7 +112,7 @@ TESTSUITE(output)
         offset_ += chunk_size;
         return ssize_t(chunk_size);
       }
-      bool is_empty() const { abort(); }
+      bool is_empty() const { abort(); return false; /* makes eclipse happy */}
     private:
       size_t block_size_;
       size_t offset_;

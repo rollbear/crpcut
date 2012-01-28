@@ -34,7 +34,7 @@ public:
   class type
   {
   public:
-    type(T* refp) : rp(refp) {}
+    type(T* refp) : rp(refp), cp(0) {}
     type(const type<T>& t) : rp(t.rp), cp(t.cp) {}
     bool operator()(T* compp)
     {

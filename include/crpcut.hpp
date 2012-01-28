@@ -27,7 +27,7 @@
 #ifndef CRPCUT_HPP
 #define CRPCUT_HPP
 
-#ifdef GMOCK_INCLUDE_GMOCK_GMOCK_H_
+#if defined(GMOCK_INCLUDE_GMOCK_GMOCK_H_) || defined(CRPCUT_GMOCK_IN_ECLIPSE)
 #undef ADD_FAILURE
 #undef ASSERT_ANY_THROW
 #undef ASSERT_DEATH
@@ -287,6 +287,7 @@ extern "C"
 #include <dirent.h>
 #include <regex.h>
 #include <stdint.h>
+#include <errno.h>
 }
 
 namespace std {
@@ -3178,6 +3179,14 @@ namespace crpcut {
     template <std::size_t N>
     struct fp_rep;
 
+#ifdef __CDT_PARSER__
+    template <std::size_t N>
+    struct fp_rep
+    {
+      typedef void type;
+    };
+#endif // __CDT_PARSER__
+
 #define CRPCUT_MAKE_FP_REP(x)                   \
     template <>                                 \
     struct fp_rep<sizeof(x)>                    \
@@ -4333,6 +4342,25 @@ namespace crpcut {
 
 
 
+
+
+#ifdef __CDT_PARSER__
+#define CRPCUT_CHECK_FALSE(action, a)           \
+  do {                                          \
+    crpcut::bool_tester<crpcut::comm::action>   \
+    (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))  \
+    .assert_false((a), #a);                     \
+  } while (0)
+
+#define CRPCUT_CHECK_TRUE(action, a)           \
+  do {                                          \
+    crpcut::bool_tester<crpcut::comm::action>   \
+    (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))  \
+    .check_true((a), #a);                     \
+  } while (0)
+
+
+#else
 #define CRPCUT_CHECK_TRUE(action, a)                                    \
   do {                                                                  \
     try {                                                               \
@@ -4350,9 +4378,6 @@ namespace crpcut {
       })                                                                \
   } while(0)
 
-#define ASSERT_TRUE(a) CRPCUT_CHECK_TRUE(exit_fail, a)
-#define VERIFY_TRUE(a) CRPCUT_CHECK_TRUE(fail, a)
-
 #define CRPCUT_CHECK_FALSE(action, a)                                   \
   do {                                                                  \
     try {                                                               \
@@ -4369,6 +4394,9 @@ namespace crpcut {
                                             #a);                        \
       })                                                                \
   } while(0)
+#endif // __CDT_PARSER__
+#define ASSERT_TRUE(a) CRPCUT_CHECK_TRUE(exit_fail, a)
+#define VERIFY_TRUE(a) CRPCUT_CHECK_TRUE(fail, a)
 
 #define ASSERT_FALSE(a) CRPCUT_CHECK_FALSE(exit_fail, a)
 #define VERIFY_FALSE(a) CRPCUT_CHECK_FALSE(fail, a)

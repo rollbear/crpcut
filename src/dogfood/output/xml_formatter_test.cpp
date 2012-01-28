@@ -409,7 +409,7 @@ TESTSUITE(output)
                                   "{|}~";
         obj.begin_case(s(tupp), true, true);
         obj.print(s(info),
-                  crpcut::datatypes::fixed_string::make(msg));
+                  crpcut::datatypes::fixed_string::make(msg, sizeof(msg) - 1));
         obj.end_case();
         obj.statistics(0,0,0,0);
       }
