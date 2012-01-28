@@ -393,5 +393,104 @@ TESTSUITE(output)
                                                crpcut::regex::m),
                   test_buffer.os.str());
     }
+
+    TEST(only_lt_gt_amp_apos_quot_are_escaped, fix)
+    {
+      StrictMock<mock::stream_buffer> test_buffer;
+      {
+        crpcut::output::xml_formatter obj(test_buffer,
+                                          "one",
+                                          1,
+                                          vec,
+                                          tags);
+        static const char msg[] = "\t\n\r!\"#$%&'()*+,-./0123456789"
+                                  ":;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                  "[\\]^_` abcdefghijklmnopqrstuvwxyz"
+                                  "{|}~";
+        obj.begin_case(s(tupp), true, true);
+        obj.print(s(info),
+                  crpcut::datatypes::fixed_string::make(msg));
+        obj.end_case();
+        obj.statistics(0,0,0,0);
+      }
+      static const char re[] =
+        XML_HEADER
+        XML_OPEN_TEST(tupp, true, PASSED)
+        _ "<log>"
+        _ "<info>"
+        "\t\n\r!&quot;#\\$%&amp;&apos;\\(\\)\\*\\+,-\\./0123456789"
+        ":;&lt;=&gt;\\?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "\\[\\\\]\\^_` abcdefghijklmnopqrstuvwxyz"
+        "\\{\\|\\}~"
+        "</info>"
+        _ "</log>"
+        _ "</test>"
+        XML_STATISTICS(0,0,0,0,0,0)
+        XML_TRAILER
+        ;
+      INFO << re;
+      ASSERT_PRED(crpcut::match<crpcut::regex>(re,
+                                               crpcut::regex::e,
+                                               crpcut::regex::m),
+                  test_buffer.os.str());
+
+    }
+
+    TEST(illegal_characters_are_replaced, fix)
+    {
+      StrictMock<mock::stream_buffer> test_buffer;
+      {
+        crpcut::output::xml_formatter obj(test_buffer,
+                                          "one",
+                                          1,
+                                          vec,
+                                          tags);
+        char msg[256];
+        for (size_t i = 0; i < sizeof(msg); ++i)
+          {
+            msg[i] = char(i);
+          }
+        obj.begin_case(s(tupp), true, true);
+        obj.print(s(info),
+                  crpcut::datatypes::fixed_string::make(msg));
+        obj.end_case();
+        obj.statistics(0,0,0,0);
+      }
+
+#define IL "&#xfffd;"
+
+      static const char re[] =
+        XML_HEADER
+        XML_OPEN_TEST(tupp, true, PASSED)
+        _ "<log>"
+        _ "<info>"
+        IL IL IL IL IL IL IL IL IL "\t\n" IL IL "\r" IL IL IL IL IL IL IL IL IL
+        IL IL IL IL IL IL IL IL IL
+        " !&quot;#\\$%&amp;&apos;\\(\\)\\*\\+,-\\./0123456789"
+        ":;&lt;=&gt;\\?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "\\[\\\\]\\^_`abcdefghijklmnopqrstuvwxyz"
+        "\\{\\|\\}~" "&#x7f;"
+        IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL
+        IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL
+        IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL
+        IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL
+        IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL
+        IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL
+        IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL
+        IL IL IL IL IL IL IL IL IL IL IL IL IL IL IL
+        "</info>"
+        _ "</log>"
+        _ "</test>"
+        XML_STATISTICS(0,0,0,0,0,0)
+        XML_TRAILER
+        ;
+      INFO << re;
+      ASSERT_PRED(crpcut::match<crpcut::regex>(re,
+                                               crpcut::regex::e,
+                                               crpcut::regex::m),
+                  test_buffer.os.str());
+
+
+    }
   }
 }
