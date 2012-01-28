@@ -163,7 +163,7 @@ namespace crpcut {
         bool read_failed = false;
         if (desc.read())
           {
-            read_failed = !desc->read(!desc.hup());
+            read_failed = !desc->read_data(!desc.hup());
           }
         if (read_failed || desc.hup())
           {

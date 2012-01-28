@@ -1713,7 +1713,7 @@ namespace crpcut {
   class fdreader : public comm::rfile_descriptor
   {
   public:
-    bool read(bool do_reply);
+    bool read_data(bool do_reply);
     crpcut_test_case_registrator *get_registrator() const;
     virtual void close();
     void unregister();
@@ -1723,7 +1723,7 @@ namespace crpcut {
     void set_fd(int fd, poll<fdreader> *poller);
     crpcut_test_case_registrator *const reg_;
   private:
-    virtual bool do_read(bool do_reply) = 0;
+    virtual bool do_read_data(bool do_reply) = 0;
     poll<fdreader> *poller_;
   };
 
@@ -1734,7 +1734,7 @@ namespace crpcut {
     reader(crpcut_test_case_registrator *r, int fd = -1);
     using fdreader::set_fd;
   private:
-    virtual bool do_read(bool do_reply);
+    virtual bool do_read_data(bool do_reply);
   };
 
   class report_reader : public fdreader
@@ -1744,7 +1744,7 @@ namespace crpcut {
     virtual void close();
     void set_fds(int in_fd, int out_fd, poll<fdreader> *read_poller);
   private:
-    virtual bool do_read(bool do_reply);
+    virtual bool do_read_data(bool do_reply);
     comm::wfile_descriptor response_fd;
   };
 
@@ -3532,7 +3532,7 @@ namespace crpcut {
   {
   }
   template <comm::type t>
-  bool reader<t>::do_read(bool)
+  bool reader<t>::do_read_data(bool)
   {
     static char buff[1024];
     for (;;)

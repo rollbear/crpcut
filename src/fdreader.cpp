@@ -32,9 +32,9 @@ namespace crpcut {
 
   bool
   fdreader::
-  read(bool do_reply)
+  read_data(bool do_reply)
   {
-    return do_read(do_reply);
+    return do_read_data(do_reply);
   }
 
   crpcut_test_case_registrator *

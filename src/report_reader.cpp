@@ -55,7 +55,7 @@ namespace crpcut {
 
   bool
   report_reader
-  ::do_read(bool do_reply)
+  ::do_read_data(bool do_reply)
   {
     comm::type t;
     int kill_mask;
