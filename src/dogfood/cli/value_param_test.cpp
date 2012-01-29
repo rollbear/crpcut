@@ -31,7 +31,8 @@
 
 TESTSUITE(cli)
 {
-  TESTSUITE(value_param)
+  TESTSUITE(param) {}
+  TESTSUITE(value_param, DEPENDS_ON(ALL_TESTS(cli::param)))
   {
     template <typename T>
     struct fix

@@ -25,58 +25,42 @@
  */
 
 
-#include "../../cli/activation_param.hpp"
-#include <crpcut.hpp>
 
-TESTSUITE(cli)
-{
-  TESTSUITE(param) {}
-  TESTSUITE(activation_param, DEPENDS_ON(ALL_TESTS(param)))
-  {
-    struct fix
+#ifndef BOOLEAN_FLIP_HPP_
+#define BOOLEAN_FLIP_HPP_
+
+#include "param.hpp"
+
+namespace crpcut {
+  namespace cli {
+    class boolean_flip : public param
     {
-      fix()
-      : param('v', "verbose",
-              "verbose mode, print results from passed tests")
-      {
-      }
-      crpcut::cli::activation_param param;
+    public:
+      template <size_t N>
+      boolean_flip(char short_form, const char (&long_form)[N],
+                   const char *value_description,
+                   const char *param_description);
+      bool get_value(bool b) const;
+    protected:
+      virtual bool match_value(const char *, bool);
+    private:
+      enum { uninitialized, flipped, set_false, set_true  } value_;
     };
-    TEST(non_matched_parameter_is_false, fix)
-    {
-      ASSERT_FALSE(param);
-    }
 
-    TEST(mismatched_parameter_is_false, fix)
+    template <size_t N>
+    boolean_flip::boolean_flip(char short_form, const char (&long_form)[N],
+                               const char *value_description,
+                               const char *param_description)
+    : param(short_form, long_form, value_description, param_description),
+      value_(uninitialized)
     {
-      static const char *cli[] = { "--debug", 0 };
-      const char * const *p = param.match(cli);
-      ASSERT_FALSE(p);
-      ASSERT_FALSE(param);
-    }
-
-    TEST(matched_parameter_is_true, fix)
-    {
-      static const char *cli[] = { "--verbose", 0 };
-      const char *const *p = param.match(cli);
-      ASSERT_TRUE(p == cli + 1);
-      ASSERT_TRUE(param);
-    }
-
-    TEST(double_matched_paratemer_throws, fix)
-    {
-      static const char *cli[] = { "--verbose", "-v", 0 };
-      const char *const *p = param.match(cli);
-      ASSERT_THROW(param.match(p), crpcut::cli::param::exception,
-                   "-v / --verbose can only be used once");
     }
 
   }
-
 }
 
 
 
 
 
-
+#endif // BOOLEAN_FLIP_HPP_
