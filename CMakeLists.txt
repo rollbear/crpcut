@@ -54,7 +54,8 @@ if ("${BUILD_SHARED_LIBS}" STREQUAL "")
 endif ()
 file(GLOB LIB_SRCS
      src/check_name.cpp
-     src/cli_param.cpp
+     src/cli/activation_param.cpp
+     src/cli/param.cpp
      src/clocks/clocks.cpp
      src/collate_result.cpp
      src/comm/file_descriptor.cpp
@@ -108,7 +109,8 @@ file(GLOB LIB_SRCS
 )
 include_directories(include)
 file(GLOB DOGFOOD_SRCS
-     src/dogfood/cli_param_test.cpp
+     src/dogfood/cli/activation_param_test.cpp
+     src/dogfood/cli/param_test.cpp
      src/dogfood/comm/file_descriptor_test.cpp
      src/dogfood/dogfood.cpp
      src/dogfood/failed_check_reporter_test.cpp
