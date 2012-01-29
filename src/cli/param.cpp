@@ -30,12 +30,6 @@
 #include <cassert>
 #include <sstream>
 namespace {
-  const char *match_or_end(const char *p, char c)
-  {
-    assert(p);
-    while (*p && *p != c) ++p;
-    return p;
-  }
 }
 
 namespace crpcut {
@@ -116,6 +110,16 @@ namespace crpcut {
         }
       return os;
     }
+
+    const char *
+    param
+    ::match_or_end(const char *p, char c)
+    {
+      assert(p);
+      while (*p && *p != c) ++p;
+      return p;
+    }
+
   }
 }
 

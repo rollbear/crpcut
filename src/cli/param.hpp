@@ -53,6 +53,7 @@ namespace crpcut {
     protected:
       std::ostream &syntax(std::ostream &) const;
       virtual bool match_value(const char *, bool is_short);
+      static const char *match_or_end(const char *p, char c);
     private:
       std::ostream &print_to(std::ostream &) const;
       const char *const long_form_;
