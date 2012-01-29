@@ -111,6 +111,7 @@ include_directories(include)
 file(GLOB DOGFOOD_SRCS
      src/dogfood/cli/activation_param_test.cpp
      src/dogfood/cli/param_test.cpp
+     src/dogfood/cli/value_param_test.cpp
      src/dogfood/comm/file_descriptor_test.cpp
      src/dogfood/dogfood.cpp
      src/dogfood/failed_check_reporter_test.cpp

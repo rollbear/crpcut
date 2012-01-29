@@ -69,7 +69,9 @@ TESTSUITE(cli)
       ASSERT_THROW(param.match(p), crpcut::cli::param::exception,
                    "-v / --verbose can only be used once");
     }
+
   }
+
 }
 
 
