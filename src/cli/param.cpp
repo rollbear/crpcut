@@ -34,6 +34,7 @@ namespace {
 
 namespace crpcut {
   namespace cli {
+
     const char *const *
     param
     ::match(const char *const *p)
@@ -120,6 +121,32 @@ namespace crpcut {
       return p;
     }
 
+    param_list::param_list()
+    {
+    }
+
+    const char *const *
+    param_list
+    ::match_all(const char *const *cli_arg)
+    {
+      assert(cli_arg);
+      while (*cli_arg)
+        {
+          param *p = next();
+          while (!is_this(p))
+            {
+              const char *const *arg = p->match(cli_arg);
+              if (arg)
+                {
+                  cli_arg = arg;
+                  break;
+                }
+              p = p->next();
+            }
+          if (is_this(p)) break;
+        }
+      return cli_arg;
+    }
   }
 }
 

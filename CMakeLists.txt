@@ -114,6 +114,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/cli/activation_param_test.cpp
      src/dogfood/cli/boolean_flip_test.cpp
      src/dogfood/cli/named_param_test.cpp
+     src/dogfood/cli/param_list_test.cpp
      src/dogfood/cli/param_test.cpp
      src/dogfood/cli/value_param_test.cpp
      src/dogfood/comm/file_descriptor_test.cpp

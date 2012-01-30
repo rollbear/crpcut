@@ -39,7 +39,8 @@ namespace crpcut {
     public:
       template <size_t N>
       activation_param(char short_form, const char (&long_form)[N],
-                       const char *param_description);
+                       const char *param_description,
+                       param_list &root);
       operator bool_type() const;
     protected:
       virtual bool match_value(const char *, bool is_short);
@@ -50,8 +51,9 @@ namespace crpcut {
     template <size_t N>
     activation_param
     ::activation_param(char short_form, const char (&long_form)[N],
-                       const char *param_description)
-      : param(short_form, long_form, param_description),
+                       const char *param_description,
+                       param_list &root)
+      : param(short_form, long_form, param_description, root),
         active_(false)
     {
     }

@@ -38,12 +38,15 @@ TESTSUITE(cli)
     struct fix
     {
       fix()
-      : param('i', "identity",
+      : root(),
+        param('i', "identity",
               "\"id value\"",
               "nonsense parameter used to test that values are interpreted\n"
-              "correctly")
+              "correctly",
+              root)
       {
       }
+      crpcut::cli::param_list     root;
       crpcut::cli::value_param<T> param;
     };
 

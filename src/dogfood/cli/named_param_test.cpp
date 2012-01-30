@@ -35,10 +35,13 @@ TESTSUITE(cli)
     struct fix
     {
       fix()
-      : param('p', "parameter", "name=value",
-              "well, a bit of this and that")
+      : root(),
+        param('p', "parameter", "name=value",
+              "well, a bit of this and that",
+              root)
       {
       }
+      crpcut::cli::param_list  root;
       crpcut::cli::named_param param;
     };
 
@@ -54,28 +57,28 @@ TESTSUITE(cli)
     {
       static const char *cli[] = { "--parameter", 0 };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
-                   ID " expects a parameter name and a value");
+                   ID " missing a parameter name and a value");
     }
 
     TEST(long_form_syntax_validation_throws_with_missing_name, fix)
     {
       static const char *cli[] = { "--parameter=", 0 };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
-                   ID " expects a parameter name and a value");
+                   ID " missing a parameter name and a value");
     }
 
     TEST(long_form_syntax_validation_throws_with_missing_assign_after_name, fix)
     {
       static const char *cli[] = { "--parameter=apa", 0 };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
-                   ID " expects a value after \"apa\"");
+                   ID " missing a value after \"apa\"");
     }
 
     TEST(long_form_syntax_validation_throws_with_missing_value, fix)
     {
       static const char *cli[] = { "--parameter=apa=", 0 };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
-                   ID " expects a value after \"apa\"");
+                   ID " missing a value after \"apa\"");
     }
 
     TEST(short_form_syntax_validation_passes_correct_syntax, fix)
@@ -89,21 +92,21 @@ TESTSUITE(cli)
     {
       static const char *cli[] = { "-p", 0 };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
-                   ID " expects a parameter name and a value");
+                   ID " missing a parameter name and a value");
     }
 
     TEST(short_form_syntax_validation_throws_with_missing_assign_after_name, fix)
     {
       static const char *cli[] = { "-p", "apa", 0 };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
-                   ID " expects a value after \"apa\"");
+                   ID " missing a value after \"apa\"");
     }
 
     TEST(short_form_syntax_validation_throws_with_missing_value, fix)
     {
       static const char *cli[] = { "-p", "apa=", 0 };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
-                   ID " expects a value after \"apa\"");
+                   ID " missing a value after \"apa\"");
     }
 
     TEST(long_form_lone_value_is_found, fix)

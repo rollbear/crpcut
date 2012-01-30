@@ -36,10 +36,13 @@ TESTSUITE(cli)
     struct fix
     {
       fix()
-      : param('v', "verbose",
-              "verbose mode, print results from passed tests")
+      : root(),
+        param('v', "verbose",
+              "verbose mode, print results from passed tests",
+              root)
       {
       }
+      crpcut::cli::param_list       root;
       crpcut::cli::activation_param param;
     };
     TEST(non_matched_parameter_is_false, fix)

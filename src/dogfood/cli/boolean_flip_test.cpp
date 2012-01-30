@@ -38,11 +38,14 @@ TESTSUITE(cli)
      struct fix
      {
        fix()
-       : param('x', "xml", "{boolean value}",
+       : root(),
+         param('x', "xml", "{boolean value}",
                "Test parameter used to check the functionality of optional\n"
-               "boolean parameter")
+               "boolean parameter",
+               root)
        {
        }
+       crpcut::cli::param_list   root;
        crpcut::cli::boolean_flip param;
      };
 

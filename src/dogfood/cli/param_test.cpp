@@ -34,11 +34,16 @@ TESTSUITE(cli)
     struct check
     {
       check()
-      : param('c', "check",
+      : root(),
+        param('c', "check",
             "a toy parameter without values with the express purpose of testing"
             "\nvarious relatively basic aspects of command line parameter"
-            "\nparsing") {}
-      crpcut::cli::param param;
+            "\nparsing",
+            root)
+      {
+      }
+      crpcut::cli::param_list root;
+      crpcut::cli::param      param;
     };
 
     TEST(empty_list_does_not_match, check)
@@ -154,10 +159,12 @@ TESTSUITE(cli)
 
     TEST(description_of_a_parameter_with_value_has_correct_format)
     {
+      crpcut::cli::param_list list;
       typedef crpcut::cli::param P;
       P param('v', "verbose", "level",
               "Another toy parameter intended to show how values are added to the"
-              "\nsyntax description of the parameter in the list");
+              "\nsyntax description of the parameter in the list",
+              list);
       std::ostringstream os;
       os << param;
       static const char pattern[] =

@@ -43,7 +43,8 @@ namespace crpcut {
       template <size_t N>
       value_param(char short_form, const char (&long_form)[N],
                   const char *value_description,
-                  const char *param_description);
+                  const char *param_description,
+                  param_list &root);
       operator bool_type() const;
       const T& get_value() const;
     protected:
@@ -57,8 +58,12 @@ namespace crpcut {
     template <typename T> template <size_t N>
     value_param<T>::value_param(char short_form, const char (&long_form)[N],
                                 const char *value_description,
-                                const char *param_description)
-      : param(short_form, long_form, value_description, param_description),
+                                const char *param_description,
+                                param_list &root)
+      : param(short_form, long_form,
+              value_description,
+              param_description,
+              root),
         value_(),
         active_(false)
     {
@@ -106,6 +111,7 @@ namespace crpcut {
     }
 
     template <>
+    inline
     void
     value_param<const char*>::read_value(const char *p)
     {

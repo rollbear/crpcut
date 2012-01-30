@@ -31,19 +31,24 @@
 
 #include <exception>
 #include <string>
+#include <crpcut.hpp>
 
 namespace crpcut {
   namespace cli {
-    class param
+    class param_list;
+    class param : public datatypes::list_elem<param>
     {
     public:
       class exception;
       template <size_t N>
       param(char short_form, const char (&long_form)[N],
-            const char *param_description);
+            const char *param_description,
+            param_list &root);
       template <size_t N>
       param(char short_form, const char (&long_form)[N],
-            const char *value_description, const char *param_description);
+            const char *value_description,
+            const char *param_description,
+            param_list &root);
       virtual ~param();
       const char *const *match(const char *const *);
       friend std::ostream &operator<<(std::ostream &os, const param &p)
@@ -72,27 +77,38 @@ namespace crpcut {
       std::string s_;
     };
 
+    class param_list : public datatypes::list_elem<param>
+    {
+    public:
+      param_list();
+      const char *const *match_all(const char *const *p);
+    };
+
     template <size_t N>
     param::param(char short_form, const char (&long_form)[N],
-                 const char *param_description)
+                 const char *param_description,
+                 param_list &root)
       : long_form_(long_form),
         long_form_len_(N - 1),
         short_form_(short_form),
         value_description_(0),
         param_description_(param_description)
     {
+      link_after(root);
     }
 
     template <size_t N>
     param::param(char short_form, const char (&long_form)[N],
                  const char *value_description,
-                 const char *param_description)
+                 const char *param_description,
+                 param_list &root)
       : long_form_(long_form),
         long_form_len_(N - 1),
         short_form_(short_form),
         value_description_(value_description),
         param_description_(param_description)
     {
+      link_after(root);
     }
   }
 }

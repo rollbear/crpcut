@@ -850,6 +850,7 @@ namespace crpcut {
       const T *next() const { return next_; }
       const T *prev() const { return prev_; }
       bool is_empty() const;
+      bool is_this(const T *p) const;
     private:
       void unlink();
       list_elem(const list_elem&);
@@ -893,6 +894,12 @@ namespace crpcut {
     inline bool list_elem<T>::is_empty() const
     {
       return next_ == static_cast<const T*>(this);
+    }
+
+    template <typename T>
+    inline bool list_elem<T>::is_this(const T* p) const
+    {
+      return static_cast<const T*>(this) == p;
     }
 
     template <typename T>

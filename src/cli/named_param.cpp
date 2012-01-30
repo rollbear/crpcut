@@ -37,14 +37,14 @@ namespace crpcut {
       if (!p || *p == 0)
         {
           std::ostringstream os;
-          syntax(os) << " expects a parameter name and a value";
+          syntax(os) << " missing a parameter name and a value";
           throw exception(os.str());
         }
       const char *name_end = match_or_end(p, '=');
       if (name_end[0] == 0 || name_end[1] == 0)
         {
           std::ostringstream os;
-          syntax(os) << " expects a value after \"";
+          syntax(os) << " missing a value after \"";
           os.write(p, name_end - p);
           os << "\"";
           throw exception(os.str());
