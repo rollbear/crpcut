@@ -71,12 +71,17 @@ namespace crpcut {
       os << '-' << short_form_;
       if (value_description_)
         {
-          os << " " << value_description_;
+          os << " ";
+          if (req_ == optional) os << "{";
+          os << value_description_;
+          if (req_ == optional) os << "}";
         }
       os << " / --" << long_form_;
       if (value_description_)
         {
+          if (req_ == optional) os << "{";
           os << '=' << value_description_;
+          if (req_ == optional) os << "}";
         }
       return os;
     }

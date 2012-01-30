@@ -41,8 +41,8 @@ TESTSUITE(cli)
       : list(),
         verbose('v', "verbose", "show results from passed tests", list),
         single_shot('s', "single-shot", "run one test without forking", list),
-        xml('x', "xml", "{boolean value}", "control XML mode", list),
-        named('p', "param", "name=value", "set a named parameter", list),
+        xml('x', "xml", "control XML mode", list),
+        named('p', "param", "set a named parameter", list),
         children('c', "children", "int", "number of test processes in paralll", list),
         working_directory('d', "directory", "path", "where to run", list)
       {

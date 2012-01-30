@@ -161,7 +161,8 @@ TESTSUITE(cli)
     {
       crpcut::cli::param_list list;
       typedef crpcut::cli::param P;
-      P param('v', "verbose", "level",
+      P param('v', "verbose",
+              "level", crpcut::cli::param::mandatory,
               "Another toy parameter intended to show how values are added to the"
               "\nsyntax description of the parameter in the list",
               list);

@@ -39,6 +39,7 @@ namespace crpcut {
     class param : public datatypes::list_elem<param>
     {
     public:
+      typedef enum { mandatory, optional } value_requirement;
       class exception;
       template <size_t N>
       param(char short_form, const char (&long_form)[N],
@@ -46,8 +47,9 @@ namespace crpcut {
             param_list &root);
       template <size_t N>
       param(char short_form, const char (&long_form)[N],
-            const char *value_description,
-            const char *param_description,
+            const char        *value_description,
+            value_requirement  req,
+            const char        *param_description,
             param_list &root);
       virtual ~param();
       const char *const *match(const char *const *);
@@ -61,11 +63,12 @@ namespace crpcut {
       static const char *match_or_end(const char *p, char c);
     private:
       std::ostream &print_to(std::ostream &) const;
-      const char *const long_form_;
-      const size_t      long_form_len_;
-      const char        short_form_;
-      const char *const value_description_;
-      const char *const param_description_;
+      const char *const       long_form_;
+      const size_t            long_form_len_;
+      const char              short_form_;
+      const char *const       value_description_;
+      const char *const       param_description_;
+      const value_requirement req_;
     };
 
     class param::exception : public std::exception
@@ -92,21 +95,24 @@ namespace crpcut {
         long_form_len_(N - 1),
         short_form_(short_form),
         value_description_(0),
-        param_description_(param_description)
+        param_description_(param_description),
+        req_(optional)
     {
       link_after(root);
     }
 
     template <size_t N>
     param::param(char short_form, const char (&long_form)[N],
-                 const char *value_description,
-                 const char *param_description,
+                 const char        *value_description,
+                 value_requirement  req,
+                 const char         *param_description,
                  param_list &root)
       : long_form_(long_form),
         long_form_len_(N - 1),
         short_form_(short_form),
         value_description_(value_description),
-        param_description_(param_description)
+        param_description_(param_description),
+        req_(req)
     {
       link_after(root);
     }

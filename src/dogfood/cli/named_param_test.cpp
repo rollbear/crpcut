@@ -36,7 +36,7 @@ TESTSUITE(cli)
     {
       fix()
       : root(),
-        param('p', "parameter", "name=value",
+        param('p', "parameter",
               "well, a bit of this and that",
               root)
       {

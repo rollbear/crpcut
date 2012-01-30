@@ -61,7 +61,7 @@ namespace crpcut {
                                 const char *param_description,
                                 param_list &root)
       : param(short_form, long_form,
-              value_description,
+              value_description, param::mandatory,
               param_description,
               root),
         value_(),

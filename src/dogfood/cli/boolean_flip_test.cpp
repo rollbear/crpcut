@@ -39,7 +39,7 @@ TESTSUITE(cli)
      {
        fix()
        : root(),
-         param('x', "xml", "{boolean value}",
+         param('x', "xml",
                "Test parameter used to check the functionality of optional\n"
                "boolean parameter",
                root)
@@ -49,7 +49,7 @@ TESTSUITE(cli)
        crpcut::cli::boolean_flip param;
      };
 
-#define ID "-x {boolean value} / --xml={boolean value}"
+#define ID "-x {boolean value} / --xml{=boolean value}"
      TEST(uninitialized_parameter_mirrors_truth_value, fix)
      {
        ASSERT_TRUE(param.get_value(true));

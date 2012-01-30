@@ -39,7 +39,6 @@ namespace crpcut {
     public:
       template <size_t N>
       named_param(char short_form, const char (&long_form)[N],
-                  const char *value_description,
                   const char *param_description,
                   param_list &root);
       const char *value_for(const char*const *arg_list, const char *name);
@@ -53,10 +52,11 @@ namespace crpcut {
 
     template <size_t N>
     named_param::named_param(char short_form, const char (&long_form)[N],
-                             const char *value_description,
                              const char *param_description,
                              param_list &root)
-    : param(short_form, long_form, value_description, param_description, root)
+    : param(short_form, long_form,
+            "name=value", param::mandatory,
+            param_description, root)
     {
     }
   }
