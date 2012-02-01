@@ -806,7 +806,7 @@ if (WITH_HTML_DOCS)
      )
    add_custom_target(
      changelog-${CRPCUT_LIB_VERSION}.html
-     ${AWK} "-f" ${DOC_SRC_LIB}/mkchangelog.awk "-v" version=${CRPCUT_LIB_VERSION} < ${CMAKE_SOURCE_DIR}/ChangeLog.txt > changelog-${CRPCUT_LIB_VERSION}.html
+     ${SED} 's/&/\\&amp\;/g\;s/</\\&lt\;/g\;s/>/\\&gt\;/g' < ${CMAKE_SOURCE_DIR}/ChangeLog.txt | ${AWK} "-f" ${DOC_SRC_LIB}/mkchangelog.awk "-v" version=${CRPCUT_LIB_VERSION} > changelog-${CRPCUT_LIB_VERSION}.html
      DEPENDS ${CMAKE_SOURCE_DIR}/ChangeLog.txt ${DOC_SRC_LIB}/mkchangelog.awk
      )
    add_custom_target(
