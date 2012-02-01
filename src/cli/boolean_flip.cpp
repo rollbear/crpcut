@@ -65,6 +65,11 @@ namespace crpcut {
       return b == (value_ == uninitialized);
     }
 
+    boolean_flip
+    ::operator boolean_flip::bool_type() const
+    {
+      return seen_ ? &boolean_flip::match_value : 0;
+    }
     bool
     boolean_flip::match_value(const char *p, bool short_form)
     {
@@ -84,6 +89,7 @@ namespace crpcut {
                   if (wrapped::strcmp((*t)[i], p) == 0)
                     {
                       value_ = i ? set_true : set_false;
+                      seen_ = true;
                       return true;
                     }
                 }
@@ -96,6 +102,7 @@ namespace crpcut {
             }
         }
       value_ = (value_ == uninitialized ? flipped : uninitialized);
+      seen_ = true;
       return false;
     }
   }
