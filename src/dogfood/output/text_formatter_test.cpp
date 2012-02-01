@@ -132,7 +132,6 @@ TESTSUITE(output)
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
-                                             1,
                                              vec,
                                              tags,
                                              test_modifier,
@@ -155,7 +154,6 @@ TESTSUITE(output)
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
-                                             1,
                                              vec,
                                              tags,
                                              test_modifier,
@@ -187,7 +185,6 @@ TESTSUITE(output)
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
-                                             1,
                                              vec,
                                              tags,
                                              test_modifier,
@@ -251,7 +248,6 @@ TESTSUITE(output)
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
-                                             1,
                                              vec,
                                              tags,
                                              test_modifier,
@@ -317,7 +313,6 @@ TESTSUITE(output)
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
-                                             1,
                                              vec,
                                              tags,
                                              test_modifier,
@@ -385,7 +380,6 @@ TESTSUITE(output)
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
-                                             1,
                                              vec,
                                              tags,
                                              test_modifier,
@@ -453,7 +447,6 @@ TESTSUITE(output)
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
-                                             1,
                                              vec,
                                              tags,
                                              test_modifier,
@@ -522,7 +515,6 @@ TESTSUITE(output)
         {
           crpcut::output::text_formatter obj(test_buffer,
                                              "one",
-                                             1,
                                              vec,
                                              tags,
                                              test_modifier,
@@ -552,7 +544,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -571,7 +562,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -590,7 +580,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -609,7 +598,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -628,7 +616,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -654,7 +641,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -681,7 +667,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -726,7 +711,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -767,7 +751,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,
@@ -833,7 +816,6 @@ TESTSUITE(output)
         StrictMock<mock::stream_buffer> test_buffer;
         crpcut::output::text_formatter obj(test_buffer,
                                            "one",
-                                           1,
                                            vec,
                                            tags,
                                            test_modifier,

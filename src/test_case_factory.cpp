@@ -36,6 +36,7 @@
 #include "presentation.hpp"
 #include "output/xml_formatter.hpp"
 #include "output/text_formatter.hpp"
+#include "cli/interpreter.hpp"
 extern "C" {
 #  include <sys/time.h>
 #  include <fcntl.h>
@@ -76,16 +77,15 @@ namespace {
   &select_output_formatter(crpcut::output::buffer &buffer,
                            bool                    use_xml,
                            const char             *id,
-                           int                     argc,
-                           const char             *argv[],
+                           const char * const      argv[],
                            crpcut::tag_list_root  &tags)
   {
     if (use_xml)
       {
-        static crpcut::output::xml_formatter xo(buffer, id, argc, argv, tags);
+        static crpcut::output::xml_formatter xo(buffer, id, argv, tags);
         return xo;
       }
-    static crpcut::output::text_formatter to(buffer, id, argc, argv, tags);
+    static crpcut::output::text_formatter to(buffer, id, argv, tags);
     return to;
   }
 
@@ -113,13 +113,9 @@ namespace {
 
   int open_report_file(const char *name, std::ostream &err_os)
   {
-    if (!name)
-      {
-        err_os << "-o must be followed by a filename\n";
-        throw cli_exception();
-      }
+    if (!name) return 1;
     int fd = crpcut::wrapped::open(name, O_CREAT | O_WRONLY | O_TRUNC,
-                           0666);
+                                   0666);
     if (fd <      0)
       {
         err_os << "Failed to open " << name << " for writing\n";
@@ -142,23 +138,16 @@ namespace {
 namespace crpcut {
   test_case_factory
   ::test_case_factory()
-    : current_pid(0),
+    : cli_(0),
+      current_pid(0),
       pending_children(0),
-      verbose_mode(false),
-      enable_timeouts(true),
-      nodeps(false),
-      num_parallel(1),
-      backtrace_enabled(false),
       num_registered_tests(0),
       num_selected_tests(0),
       num_tests_run(0),
       num_successful_tests(0),
       presenter_pipe(-1),
       first_free_working_dir(0),
-      charset("UTF-8"),
-      output_charset(0),
-      illegal_rep(0),
-      argv(0)
+      charset("UTF-8")
   {
     lib::strcpy(dirbase, "/tmp/crpcutXXXXXX");
     for (unsigned n = 0; n < max_parallel; ++n)
@@ -187,7 +176,7 @@ namespace crpcut {
   test_case_factory
   ::get_output_charset()
   {
-    return obj().do_get_output_charset();
+    return obj().cli_->output_charset();
   }
 
 
@@ -290,7 +279,7 @@ namespace crpcut {
                     p2c.for_writing(pipe_pair::release_ownership),
                     stdout.for_reading(pipe_pair::release_ownership),
                     stderr.for_reading(pipe_pair::release_ownership));
-    manage_children(num_parallel, poller);
+    manage_children(cli_->num_parallel_tests(), poller);
   }
 
   void
@@ -366,16 +355,22 @@ namespace crpcut {
   test_case_factory
   ::run_test(int argc, char *argv[], std::ostream &os)
   {
-    return obj().do_run(argc, const_cast<const char**>(argv),
-                        os,
-                        tag_list::obj());
+    return run_test(argc, const_cast<const char**>(argv), os);
   }
 
   int
   test_case_factory
-  ::run_test(int argc, const char *argv[], std::ostream &os)
+  ::run_test(int, const char *argv[], std::ostream &os)
   {
-    return obj().do_run(argc, argv, os, tag_list::obj());
+    try {
+      static cli::interpreter params(argv);
+      return obj().do_run(&params, os, tag_list::obj());
+    }
+    catch (cli::param::exception &e)
+    {
+        os << e.what() << '\n';
+    }
+    return -1;
   }
 
   void
@@ -397,21 +392,25 @@ namespace crpcut {
   test_case_factory
   ::tests_as_child_procs()
   {
-    return obj().num_parallel > 0;
+    return !obj().cli_->single_shot_mode();
   }
 
   bool
   test_case_factory
   ::timeouts_enabled()
   {
-    return obj().enable_timeouts;
+    return obj().cli_->honour_timeouts();
   }
 
   bool
   test_case_factory
   ::is_backtrace_enabled()
   {
-    return obj().backtrace_enabled;
+#ifdef USE_BACKTRACE
+    return obj().cli_->backtrace_enabled();
+#else
+    return 0;
+#endif
   }
 
   void
@@ -453,14 +452,14 @@ namespace crpcut {
   test_case_factory
   ::get_parameter(const char *name)
   {
-    return obj().do_get_parameter(name);
+    return obj().cli_->named_parameter(name);
   }
 
   const char*
   test_case_factory
   ::get_illegal_rep()
   {
-    return obj().do_get_illegal_rep();
+    return obj().cli_->illegal_representation();
   }
 
   void
@@ -564,61 +563,6 @@ namespace crpcut {
     return charset;
   }
 
-  const char*
-  test_case_factory
-  ::do_get_output_charset() const
-  {
-    return output_charset;
-  }
-
-  const char*
-  test_case_factory
-  ::do_get_illegal_rep() const
-  {
-    return illegal_rep;
-  }
-
-  const char*
-  test_case_factory
-  ::do_get_parameter(const char* name) const
-  {
-    for (const char **p = argv; *p; ++p)
-      {
-        const char *pstart = 0;
-        if ((*p)[0] == '-')
-          {
-            if ((*p)[1] == 'p')
-              {
-                pstart = *++p;
-              }
-            else if ((*p)[1] == '-')
-              {
-                const char *pb = (*p) + 2;
-                const char *n = nullindex(pb, '=');
-                if (strequal("param", pb, size_t(n - pb)))
-                  {
-                    pstart = n + 1;
-                  }
-              }
-          }
-
-        if (pstart)
-          {
-            const char *v = pstart;
-            const char *n = name;
-            while (*n && *v == *n)
-              {
-                ++v;
-                ++n;
-              }
-            if (*n == 0 && *v++ == '=')
-              {
-                return v;
-              }
-          }
-      }
-    return 0;
-  }
 
   void
   test_case_factory
@@ -644,73 +588,12 @@ namespace crpcut {
       }
   }
 
-  namespace {
-    struct param_conversion
-    {
-      template <size_t N>
-      param_conversion(char ch, const char (&param)[N])
-      : c(ch), p(param), len(N-1)
-        {
-        }
-      char c;
-      const char *p; size_t len;
-    };
-
-#   define P(c, p) param_conversion(*#c, #p)
-    static const param_conversion cli_params[] =
-    {
-#ifdef USE_BACKTRACE
-     P(b, backtrace-heap),
-#endif
-     P(C, output-charset),
-     P(l, list),
-     P(L, list-tags),
-     P(T, tags),
-     P(I, illegal-char),
-     P(i, identity),
-     P(t, disable-timeouts),
-     P(v, verbose),
-     P(c, children),
-     P(x, xml),
-     P(n, nodeps),
-     P(q, quiet),
-     P(o, output),
-     P(s, single-shot),
-     P(d, working-dir),
-     P(p, param),
-    };
-#undef P
-  }
-  char
-  short_param_from_long_name(const char* parameter, const char*& value)
-  {
-
-
-    value = nullindex(parameter, '=');
-    size_t len = size_t(value - parameter);
-
-    if (*value)
-      {
-        ++value;
-      }
-    else
-      {
-        value = 0;
-      }
-
-    for (const param_conversion *p = begin(cli_params); p != end(cli_params); ++p)
-      {
-        if (p->len == len && wrapped::strncmp(p->p, parameter, len) == 0)
-          {
-            return p->c;
-          }
-      }
-    return 0;
-  }
 
   void
   test_case_factory
-  ::list_tests(const char **names, tag_list_root &tags, std::ostream &err_os)
+  ::list_tests(const char *const*names,
+                 tag_list_root &tags,
+                   std::ostream &err_os)
   {
     if (*names && **names == '-')
       {
@@ -740,7 +623,7 @@ namespace crpcut {
 
         const char prefix = importance == tag::critical ? '!' : '?';
         bool matched = !*names;
-        for (const char **name = names; !matched && *name; ++name)
+        for (const char *const*name = names; !matched && *name; ++name)
           {
             matched = i->crpcut_match_name(*name);
           }
@@ -761,6 +644,7 @@ namespace crpcut {
 
   void configure_tags(const char *specification, crpcut::tag_list_root &tags)
   {
+    if (specification == 0) return;
     tag_filter filter(specification);
     filter.assert_names(tags);
     // tag.end() refers to the defaulted nameless tag which
@@ -775,275 +659,25 @@ namespace crpcut {
     while (ti++ != end);
   }
 
-  void set_id_string(const char*& id_holder, const char *id_value, std::ostream &err_os)
-  {
-    if (!id_value)
-      {
-        err_os << "-i must be followed by a string\n";
-        throw cli_exception();
-    }
-    if (id_holder)
-      {
-        err_os << "-i may only be used once\n";
-        throw cli_exception();
-      }
-    id_holder = id_value;
-  }
-
-  const char**
-  test_case_factory::parse_cli_params(const char** p, bool& quiet,
-                                      std::ostream& err_os,
-                                      const char*& identity, int& output_fd,
-                                      bool& xml, tag_list_root& tags,
-                                      const char*& working_dir)
-  {
-    char process_limit_set = 0;
-    while (const char *param = *p)
-      {
-        if (param[0] != '-') break;
-
-        const char *value = *(p + 1);
-        char cmd = param[1];
-        unsigned pcount = 2;
-
-        if (cmd == '-')
-          {
-            pcount = 1;
-            param += 2;
-            cmd = short_param_from_long_name(param, value);
-          }
-        switch (cmd)
-          {
-          case 'q':
-            quiet = true;
-            pcount = 1;
-            break;
-          case 'i':
-            set_id_string(identity, value, err_os);
-            break;
-          case 'o':
-            output_fd = open_report_file(value, err_os);
-            xml = !xml;
-            break;
-          case 'v':
-            verbose_mode = true;
-            pcount = 1;
-            break;
-          case 'c':
-            if (process_limit_set)
-              {
-                err_os
-                << "The number of child processes is already limited with the -"
-                << process_limit_set
-                << "flag\n";
-                throw cli_exception();
-              }
-            if (value)
-              {
-                stream::iastream i(value);
-                unsigned l;
-                if ((i >> l) && l <= max_parallel && l > 0)
-                  {
-                    num_parallel = l;
-                    process_limit_set = 'c';
-                    pcount = 2;
-                    break;
-                  }
-              }
-            err_os
-            << "num child processes must be a positive integer no greater than "
-            << max_parallel
-            << "\n";
-            throw cli_exception();
-          case 's':
-            if (process_limit_set)
-              {
-                err_os
-                << "The number of child processes is already limited with the -"
-                << process_limit_set
-                << "flag\n";
-                throw cli_exception();
-              }
-            pcount = 1;
-            num_parallel = 0;
-            nodeps = true;
-            enable_timeouts = false;
-            process_limit_set = 's';
-            break;
-          case 'L':
-            list_tags(tags);
-            break;
-          case 'T':
-            configure_tags(value, tags);
-            break;
-          case 'l':
-            list_tests(p + 1, tags, err_os);
-            break;
-          case 'd':
-            working_dir = value;
-            if (!working_dir)
-              {
-                err_os << "-d must be followed by a directory name\n";
-                throw cli_exception();
-              }
-            lib::strcpy(dirbase, working_dir);
-            break;
-          case 'n':
-            nodeps = true;
-            pcount = 1;
-            break;
-          case 't':
-            enable_timeouts = false;
-            pcount = 1;
-            break;
-          case 'x':
-            if (value && value[0] != '-')
-              {
-                if (wrapped::strcmp(value, "yes") == 0
-                    || wrapped::strcmp(value, "Yes") == 0
-                    || wrapped::strcmp(value, "YES") == 0)
-                  {
-                    xml = true;
-                  }
-                else if (wrapped::strcmp(value, "no") == 0
-                         || wrapped::strcmp(value, "No") == 0
-                         || wrapped::strcmp(value, "NO") == 0)
-                  {
-                    xml = false;
-                  }
-                else
-                  {
-                    err_os << "expected boolean value for --xml\n";
-                    throw cli_exception();
-                  }
-              }
-            else
-              {
-                pcount = 1;
-                xml = !xml;
-              }
-            break;
-          case 'p':
-            // just make a syntax check here. What follows must be a name=value.
-            {
-              const char *n = nullindex(value, '=');
-
-              if (!n || *n == 0)
-                {
-                  err_os << "-p must be followed by a name and =\n";
-                  throw cli_exception();
-                }
-              break;
-            }
-#ifdef USE_BACKTRACE
-            case 'b':
-              {
-                backtrace_enabled = true;
-                pcount = 1;
-                break;
-              }
-#endif // USE_BACKTRACE
-          case 'C':
-            {
-              output_charset = value;
-              break;
-            }
-          case 'I':
-            {
-              illegal_rep = value;
-              break;
-            }
-          case 'V':
-            {
-              err_os << "crpcut-" << CRPCUT_VERSION_STRING << "\n";
-              throw cli_exception();
-            }
-          default:
-            err_os << "Usage: " << argv[0] << " [flags] {testcases}\n"
-            "  where flags can be:\n"
-#ifdef USE_BACKTRACE
-            "   -b, --backtrace-heap\n"
-            "        store stack backtrace for all heap objects for\n"
-            "        better error pinpointing of heap violations (slow)\n\n"
-#endif // USE_BACKTRACE
-            "   -c number, --children=number\n"
-            "        control number of concurrently running test processes\n"
-            "        number must be >= 1 and <= "
-            << max_parallel
-            << "\n\n"
-            "   -C charset, --output-charset=charset\n"
-            "        specify the output character set to convert text-output\n"
-            "        to. Does not apply for XML-output\n\n"
-            "   -d dir, --working-dir=dir\n"
-            "        specify working directory (must exist)\n\n"
-            "   -i \"id string\", --identity=\"id string\"\n"
-            "        specify an identity string for the XML-header\n\n"
-            "   -I string, --illegal-char=string\n"
-            "        specify how characters that are illegal for the chosen\n"
-            "        output character set are to be represented\n\n"
-            "   -l, --list\n"
-            "        list test cases\n\n"
-            "   -L, --list-tags\n"
-            "        list all tags used by tests in the test program\n\n"
-            "   -n, --nodeps\n"
-            "        ignore dependencies\n\n"
-            "   -o file, --output=file\n"
-            "        direct XML output to named file. A brief summary will be\n"
-            "        displayed on stdout\n\n"
-            "   -p name=val, --param=name=val\n"
-            "        define a named variable for the test cases to pick up\n\n"
-            "   -q, --quiet\n"
-            "        don't display the -o brief summary\n\n"
-            "   -s, --single-shot\n"
-            "        run only one test case, and run it in the main process\n\n"
-            "   -t, --disable-timeouts\n"
-            "        never fail a test due to time consumption\n\n"
-            "   -T {select}{/non-critical}, --tags={select}{/non-critical}\n"
-            "        Select tests to run based on their tag, and which\n"
-            "        tags represent non-critical tests. Both \"select\"\n"
-            "        and \"non-critical\" are comma separated lists of tags.\n"
-            "        Both lists can be empty. If a list begin with \"-\",\n"
-            "        the list is subtractive from the full set.\n"
-            "        Untagged tests cannot be made non-critical.\n\n"
-            "   -v, --verbose\n"
-            "        verbose mode, print result from passed tests\n\n"
-            "   -V, --version\n"
-            "        print version string and exit\n\n"
-            "   -x, --xml\n"
-            "        XML output on std-out or non-XML output on file\n";
-
-            throw cli_exception();
-          }
-        p += pcount;
-      }
-    if (output_charset && xml)
-      {
-        err_os
-        << "-C / --output-charset cannot be used with XML output, since the\noutput charset is always UTF-8 in crpcut XML reports.\n";
-        throw cli_exception();
-      }
-    return p;
-  }
 
   int
-  test_case_factory::do_run(int argc, const char* argv_[], std::ostream& err_os,
+  test_case_factory::do_run(cli::interpreter *cli,
+                            std::ostream& err_os,
                             tag_list_root& tags)
   {
-    argv = argv_;
-    const char* working_dir = 0;
-    bool quiet = false;
-    int output_fd = 1;
-    bool xml = false;
-    const char* identity = 0;
+    cli_ = cli;
     try
       {
-        const char **p = parse_cli_params(argv + 1, quiet, err_os,
-                                          identity,
-                                          output_fd, xml,
-                                          tags,
-                                          working_dir);
+        const char *const*p = cli_->get_test_list();
 
+        if (cli_->list_tags()) list_tags(tags);
+        configure_tags(cli_->tag_specification(), tags);
+        if (cli_->list_tests()) list_tests(p, tags, err_os);
         wrapped::getcwd(homedir, sizeof(homedir));
+        if (cli_->working_dir())
+          {
+            lib::strcpy(dirbase, cli_->working_dir());
+          }
         registrator_list tentative;
           {
             crpcut_test_case_registrator *i = reg.crpcut_get_next();
@@ -1074,7 +708,7 @@ namespace crpcut {
           }
         else
           {
-            for (const char **name = p; *name; ++name)
+            for (const char *const*name = p; *name; ++name)
               {
                 crpcut_test_case_registrator *i = tentative.crpcut_get_next();
                 unsigned matches = 0;
@@ -1109,7 +743,7 @@ namespace crpcut {
             << " not match any test names\n";
             return -1;
           }
-        if (num_parallel == 0 && num_selected_tests != 1)
+        if (cli_->single_shot_mode() && num_selected_tests != 1)
           {
             err_os << "Single shot requires exactly one test selected\n";
             return -1;
@@ -1128,20 +762,26 @@ namespace crpcut {
         c_string_translator c_string_obj;
 
         output::heap_buffer buffer;
-        output::formatter &fmt = select_output_formatter(buffer, xml, identity,
-                                                         argc,
-                                                         argv, tags);
+        using output::formatter;
+        formatter &fmt = select_output_formatter(buffer,
+                                                 cli_->xml_output(),
+                                                 cli_->identity_string(),
+                                                 cli_->argv(),
+                                                 tags);
 
+        int output_fd = open_report_file(cli_->report_file(), err_os);
         if (tests_as_child_procs())
           {
-            if (!working_dir && !wrapped::mkdtemp(dirbase))
+            if (!cli_->working_dir() && !wrapped::mkdtemp(dirbase))
               {
-                err_os << argv[0] << ": failed to create working directory\n";
+                err_os << cli_->program_name()
+                       << ": failed to create working directory\n";
                 return 1;
               }
             if (wrapped::chdir(dirbase) != 0)
               {
-                err_os << argv[0] << ": couldn't move to working directoryy\n";
+                err_os << cli_->program_name()
+                       << ": couldn't move to working directoryy\n";
                 wrapped::rmdir (dirbase);
                 return 1;
               }
@@ -1159,8 +799,10 @@ namespace crpcut {
                   }
                 buffer.advance();
               }
-            presenter_pipe = start_presenter_process(buffer, output_fd, fmt,
-                                                     verbose_mode);
+            presenter_pipe = start_presenter_process(buffer,
+                                                     output_fd,
+                                                     fmt,
+                                                     cli_->verbose_mode());
           }
         poll_fixed_array < fdreader, max_parallel * 3 > poller;
         for (;;)
@@ -1169,7 +811,7 @@ namespace crpcut {
             crpcut_test_case_registrator *i = reg.crpcut_get_next();
             while (i != &reg)
               {
-                if (!nodeps && !i->crpcut_can_run())
+                if (cli_->honour_dependencies() && !i->crpcut_can_run())
                   {
                     i = i->crpcut_get_next();
                     continue;
@@ -1207,12 +849,12 @@ namespace crpcut {
             if (!is_dir_empty("."))
               {
                 fmt.nonempty_dir(dirbase);
-                if (output_fd != 1 && !quiet)
+                if (output_fd != 1 && cli_->quiet())
                   {
                     std::cout << "Files remain in " << dirbase << '\n';
                   }
               }
-            else if (working_dir == 0)
+            else if (cli_->working_dir() == 0)
               {
                 if (wrapped::chdir("..") < 0)
                   {
@@ -1225,7 +867,7 @@ namespace crpcut {
 
         if (reg.crpcut_get_next() != &reg)
           {
-            if (output_fd != 1 && !quiet)
+            if (output_fd != 1 && !cli_->quiet())
               {
                 std::cout << "Blocked tests:\n";
               }
@@ -1238,7 +880,7 @@ namespace crpcut {
                 stream::oastream os(buff, name_len);
                 os << *i;
                 fmt.blocked_test(os);
-                if (output_fd != 1 && !quiet)
+                if (output_fd != 1 && !cli_->quiet())
                   {
                     std::cout << "  " << *i << '\n';
                   }
@@ -1247,7 +889,7 @@ namespace crpcut {
 
         fmt.statistics(num_registered_tests, num_selected_tests, num_tests_run,
                        num_tests_run - num_successful_tests);
-        if (output_fd != 1 && !quiet)
+        if (output_fd != 1 && !cli_->quiet())
           {
             size_t sum_crit_pass = 0;
             size_t sum_crit_fail = 0;
@@ -1339,17 +981,17 @@ namespace crpcut {
         return int(num_tests_run - num_successful_tests);
       }
     catch (cli_exception &e)
-      {
-        return e.return_code();
-      }
+    {
+      return e.return_code();
+    }
     catch (std::runtime_error &e)
-      {
-        err_os << "Error: " << e.what() << "\nCan't continue\n";
-      }
+    {
+      err_os << "Error: " << e.what() << "\nCan't continue\n";
+    }
     catch (posix_error &e)
-      {
-        err_os << "Fatal error:" << e.what() << "\nCan't continue\n";
-      }
+    {
+      err_os << "Fatal error:" << e.what() << "\nCan't continue\n";
+    }
     return -1;
   }
 

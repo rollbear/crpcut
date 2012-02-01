@@ -50,10 +50,9 @@ namespace crpcut {
   namespace output {
 
     xml_formatter
-    ::xml_formatter(output::buffer &buffer,
-                    const char     *id,
-                    int             argc,
-                    const char *argv[],
+    ::xml_formatter(output::buffer      &buffer,
+                    const char          *id,
+                    const char * const   argv[],
                     const tag_list_root &tags)
       : writer(buffer,
                "UTF-8",
@@ -99,7 +98,7 @@ namespace crpcut {
       write(machine_string, wrapped::strlen(machine_string), translated);
 
       write("\"\n        command=\"");
-      for (int i = 0; i < argc; ++i)
+      for (int i = 0; argv[i]; ++i)
         {
           if (i > 0) write(" ", 1);
           write(argv[i], translated);

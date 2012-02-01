@@ -38,10 +38,9 @@ namespace crpcut {
                           private writer
     {
     public:
-      xml_formatter(output::buffer &buffer,
-                    const char     *id,
-                    int             argc,
-                    const char     *argv[],
+      xml_formatter(output::buffer      &buffer,
+                    const char          *id,
+                    const char * const   argv[],
                     const tag_list_root &tags);
       virtual ~xml_formatter();
       virtual void begin_case(datatypes::fixed_string name,

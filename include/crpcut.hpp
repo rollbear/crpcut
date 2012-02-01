@@ -1829,6 +1829,9 @@ namespace crpcut {
     friend class report_reader;
   };
 
+  namespace cli {
+    class interpreter;
+  }
   class test_case_factory
   {
   public:
@@ -1897,12 +1900,14 @@ namespace crpcut {
     const char** parse_cli_params(const char **p, bool &quiet, std::ostream &err_os,
         const char *&identity, int &output_fd, bool &xml,
         tag_list_root &tags, const char *&working_dir);
-    void list_tests(const char **names, tag_list_root &tags, std::ostream &os);
+    void list_tests(const char *const *names,
+                    tag_list_root     &tags,
+                    std::ostream      &os);
     void kill_presenter_process();
     void manage_children(unsigned max_pending_children, poll<fdreader> &poller);
     void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
 
-    int do_run(int argc, const char *argv[], std::ostream &os, tag_list_root &tags);
+    int do_run(cli::interpreter *cli, std::ostream &os, tag_list_root &tags);
     void do_present(pid_t pid, comm::type t, test_phase phase,
                     size_t len, const char *buff);
     void do_introduce_name(pid_t pid, const char *name, size_t len);
@@ -1911,11 +1916,8 @@ namespace crpcut {
     void do_return_dir(unsigned num);
     const char *do_get_working_dir() const;
     const char *do_get_start_dir() const;
-    const char *do_get_parameter(const char *name) const;
     void do_set_charset(const char *set_name);
     const char *do_get_charset() const;
-    const char *do_get_output_charset() const;
-    const char *do_get_illegal_rep() const;
     unsigned long do_calc_cputime(const struct timeval&);
     friend class crpcut_test_case_registrator;
 
@@ -1930,30 +1932,22 @@ namespace crpcut {
     typedef datatypes::array_v<crpcut_test_case_registrator*,
                                max_parallel> timeout_queue;
 
-
-    struct timeval   accumulated_cputime;
-    pid_t            current_pid;
-    registrator_list reg;
-    unsigned         pending_children;
-    bool             verbose_mode;
-    bool             enable_timeouts;
-    bool             nodeps;
-    unsigned         num_parallel;
-    bool             backtrace_enabled;
-    unsigned         num_registered_tests;
-    unsigned         num_selected_tests;
-    unsigned         num_tests_run;
-    unsigned         num_successful_tests;
-    int              presenter_pipe;
-    timeout_queue    deadlines;
-    unsigned         working_dirs[max_parallel];
-    unsigned         first_free_working_dir;
-    char             dirbase[PATH_MAX];
-    char             homedir[PATH_MAX];
-    const char *     charset;
-    const char *     output_charset;
-    const char *     illegal_rep;
-    const char **    argv;
+    cli::interpreter *cli_;
+    struct timeval    accumulated_cputime;
+    pid_t             current_pid;
+    registrator_list  reg;
+    unsigned          pending_children;
+    unsigned          num_registered_tests;
+    unsigned          num_selected_tests;
+    unsigned          num_tests_run;
+    unsigned          num_successful_tests;
+    int               presenter_pipe;
+    timeout_queue     deadlines;
+    unsigned          working_dirs[max_parallel];
+    unsigned          first_free_working_dir;
+    char              dirbase[PATH_MAX];
+    char              homedir[PATH_MAX];
+    const char *      charset;
   };
 
   template <typename C>

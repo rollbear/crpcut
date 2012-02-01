@@ -65,8 +65,7 @@ namespace crpcut {
     text_formatter
     ::text_formatter(buffer              &buff,
                      const char          *,
-                     int,
-                     const char         **,
+                     const char   *const *,
                      const tag_list_root &tags,
                      const text_modifier &mod,
                      const char         *os)

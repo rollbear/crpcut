@@ -65,7 +65,7 @@ namespace {
           CRPCUT_VERSION_STRING ".xsd\"" S                   \
           "starttime" _ "=" _ "\"[0-9T:-]+Z\"" S             \
           "host" _ "=" _ "\"[[:alnum:].]+\"" S               \
-          "command" _ "=" _ "\"apa\"" S                      \
+          "command" _ "=" _ "\"apa katt orm\"" S                      \
           "id" _ "=" _ "\"one\"" _ ">"
 
 #define XML_TRAILER _ "</crpcut>"
@@ -171,7 +171,6 @@ TESTSUITE(output)
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
-                                          1,
                                           vec,
                                           tags);
 
@@ -193,7 +192,6 @@ TESTSUITE(output)
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
-                                          1,
                                           vec,
                                           tags);
         obj.statistics(0,0,0,0);
@@ -216,7 +214,6 @@ TESTSUITE(output)
       StrictMock<mock::stream_buffer> test_buffer;
       crpcut::output::xml_formatter obj(test_buffer,
                                         "one",
-                                        1,
                                         vec,
                                         tags);
       obj.statistics(0,0,0,0);
@@ -237,7 +234,6 @@ TESTSUITE(output)
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
-                                          1,
                                           vec,
                                           tags);
         obj.blocked_test(s(apa));
@@ -291,7 +287,6 @@ TESTSUITE(output)
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
-                                          1,
                                           vec,
                                           tags);
         obj.statistics(9,9,9,6);
@@ -349,7 +344,6 @@ TESTSUITE(output)
         using crpcut::datatypes::fixed_string;
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
-                                          1,
                                           vec,
                                           tags);
 
@@ -400,7 +394,6 @@ TESTSUITE(output)
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
-                                          1,
                                           vec,
                                           tags);
         static const char msg[] = "\t\n\r!\"#$%&'()*+,-./0123456789"
@@ -442,7 +435,6 @@ TESTSUITE(output)
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
-                                          1,
                                           vec,
                                           tags);
         char msg[256];
@@ -499,7 +491,6 @@ TESTSUITE(output)
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
-                                          1,
                                           vec,
                                           tags);
         obj.begin_case(s(tupp), false, true);

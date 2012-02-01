@@ -39,7 +39,7 @@ namespace crpcut {
   int start_presenter_process(output::buffer    &buffer,
                               int                fd,
                               output::formatter &fmt,
-                              int                verbose)
+                              bool               verbose)
   {
     pipe_pair p("communication pipe for presenter process");
 

@@ -41,8 +41,7 @@ namespace crpcut {
     public:
       text_formatter(output::buffer &buffer,
                      const char *,
-                     int,
-                     const char**,
+                     const char*const*,
                      const tag_list_root &tags,
                      const text_modifier &mod = default_text_modifier(),
                      const char          *os = test_case_factory::get_output_charset());
