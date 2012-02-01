@@ -41,17 +41,18 @@ namespace crpcut {
     {
       assert(p);
       if (*p == 0) return 0;
-      const char *param = *p++;
-      if (*param != '-') return 0;
-      if (param[1] == short_form_ && param[2] == 0)
+      const char *parameter_name = *p++;
+      if (*parameter_name != '-') return 0;
+      if (parameter_name[1] == short_form_ && parameter_name[2] == 0)
         {
           return p + match_value(*p, true);
         }
-      if (param[1] != '-') return 0;
-      param+= 2;
-      const char *value = match_or_end(param, '=');
-      size_t len = size_t(value - param);
-      if (len != long_form_len_ || wrapped::strncmp(long_form_, param, len) != 0)
+      if (parameter_name[1] != '-') return 0;
+      parameter_name+= 2;
+      const char *value = match_or_end(parameter_name, '=');
+      size_t len = size_t(value - parameter_name);
+      if (len != long_form_len_
+          || wrapped::strncmp(long_form_, parameter_name, len) != 0)
         {
           return 0;
         }

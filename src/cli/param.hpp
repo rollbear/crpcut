@@ -57,8 +57,8 @@ namespace crpcut {
       {
         return p.print_to(os);
       }
-    protected:
       std::ostream &syntax(std::ostream &) const;
+    protected:
       virtual bool match_value(const char *, bool is_short);
       static const char *match_or_end(const char *p, char c);
     private:
@@ -75,6 +75,7 @@ namespace crpcut {
     {
     public:
       exception(std::string s) : s_(s) {}
+      ~exception() throw () {}
       const char *what() const throw () { return s_.c_str(); }
     private:
       std::string s_;
@@ -98,7 +99,7 @@ namespace crpcut {
         param_description_(param_description),
         req_(optional)
     {
-      link_after(root);
+      link_before(root);
     }
 
     template <size_t N>
@@ -114,7 +115,7 @@ namespace crpcut {
         param_description_(param_description),
         req_(req)
     {
-      link_after(root);
+      link_before(root);
     }
   }
 }
