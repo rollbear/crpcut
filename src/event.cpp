@@ -25,11 +25,8 @@
  */
 
 #include "event.hpp"
-#include "fix_allocator.hpp"
 
 namespace crpcut {
-  typedef fix_allocator<event,
-                        test_case_factory::max_parallel*3> allocator;
 
   event
   ::event(comm::type t, const char *b, std::size_t b_len)
@@ -44,19 +41,4 @@ namespace crpcut {
   {
     wrapped::free(body.str);
   }
-
-  void *
-  event
-  ::operator new(size_t)
-  {
-    return allocator::alloc();
-  }
-
-  void
-  event
-  ::operator delete(void *p)
-  {
-    allocator::release(p);
-  }
-
 }

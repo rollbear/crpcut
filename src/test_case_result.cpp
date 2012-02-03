@@ -26,10 +26,8 @@
 
 #include "wrapped/posix_encapsulation.hpp"
 #include "test_case_result.hpp"
-#include "fix_allocator.hpp"
+
 namespace crpcut {
-  typedef fix_allocator<test_case_result,
-                        test_case_factory::max_parallel*3> allocator;
 
   test_case_result
   ::test_case_result(pid_t pid)
@@ -53,19 +51,4 @@ namespace crpcut {
         delete e;
       }
   }
-
-  void *
-  test_case_result
-  ::operator new(size_t)
-  {
-    return allocator::alloc();
-  }
-
-  void
-  test_case_result
-  ::operator delete(void *p)
-  {
-    allocator::release(p);
-  }
-
 }

@@ -36,8 +36,6 @@ namespace crpcut {
     ~event();
     comm::type tag;
     datatypes::fixed_string body;
-    void *operator new(size_t);
-    void operator delete(void *p);
   private:
     event();
   };

@@ -34,8 +34,6 @@ namespace crpcut {
   {
     test_case_result(pid_t pid);
     ~test_case_result();
-    void *operator new(size_t);
-    void operator delete(void *p);
     pid_t                       id;
     bool                        explicit_fail;
     bool                        success;
