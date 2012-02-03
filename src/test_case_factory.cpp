@@ -28,7 +28,7 @@
 #include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
 #include "tag_filter.hpp"
-#include "poll_fixed_array.hpp"
+#include "poll_buffer_vector.hpp"
 #include "fsfuncs.hpp"
 #include "pipe_pair.hpp"
 #include "output/heap_buffer.hpp"
@@ -804,7 +804,10 @@ namespace crpcut {
                                                      fmt,
                                                      cli_->verbose_mode());
           }
-        poll_fixed_array < fdreader, max_parallel * 3 > poller;
+        std::size_t num = 3*cli_->num_parallel_tests();
+        typedef poll_buffer_vector<fdreader> poll_reader;
+        void *poll_memory = alloca(poll_reader::space_for(num));
+        poll_reader poller(poll_memory, num);
         for (;;)
           {
             bool progress = false;
