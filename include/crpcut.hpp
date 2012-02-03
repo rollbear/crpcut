@@ -629,46 +629,6 @@ namespace crpcut {
 
   namespace datatypes {
 
-
-    template <typename T, std::size_t N>
-    class array_v : private std::array<T, N>
-    {
-      typedef std::array<T, N> array;
-    public:
-      typedef typename array::value_type             value_type;
-      typedef typename array::reference              reference;
-      typedef typename array::const_reference        const_reference;
-      typedef typename array::iterator               iterator;
-      typedef typename array::const_iterator         const_iterator;
-      typedef typename array::size_type              size_type;
-      typedef typename array::difference_type        difference_type;
-      typedef typename array::reverse_iterator       reverse_iterator;
-      typedef typename array::const_reverse_iterator const_reverse_iterator;
-
-      array_v();
-      using array::begin;
-      iterator end();
-      const_iterator end() const;
-      reverse_iterator rbegin();
-      const_reverse_iterator rbegin() const;
-      using array::rend;
-      size_type size() const;
-      using array::max_size;
-      bool empty() const;
-
-      using array::operator[];
-      reference at(size_type n);
-      const_reference at(size_type n) const;
-      using array::front;
-      reference back();
-      const_reference back() const;
-      using array::data;
-      void push_back(const value_type &x);
-      void pop_back();
-    private:
-      size_t num_elements;
-    };
-
     class crpcut_none {};
 
     template <typename T1 = crpcut_none, typename T2 = crpcut_none>
@@ -1832,6 +1792,8 @@ namespace crpcut {
   namespace cli {
     class interpreter;
   }
+  template <typename T>
+  class buffer_vector;
   class test_case_factory
   {
   public:
@@ -1895,11 +1857,9 @@ namespace crpcut {
       return rv;
     }
   private:
+    typedef buffer_vector<crpcut_test_case_registrator*> timeout_queue;
     static test_case_factory& obj();
     test_case_factory();
-    const char** parse_cli_params(const char **p, bool &quiet, std::ostream &err_os,
-        const char *&identity, int &output_fd, bool &xml,
-        tag_list_root &tags, const char *&working_dir);
     void list_tests(const char *const *names,
                     tag_list_root     &tags,
                     std::ostream      &os);
@@ -1929,8 +1889,6 @@ namespace crpcut {
       virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
     };
 
-    typedef datatypes::array_v<crpcut_test_case_registrator*,
-                               max_parallel> timeout_queue;
 
     cli::interpreter *cli_;
     struct timeval    accumulated_cputime;
@@ -1942,7 +1900,7 @@ namespace crpcut {
     unsigned          num_tests_run;
     unsigned          num_successful_tests;
     int               presenter_pipe;
-    timeout_queue     deadlines;
+    timeout_queue    *deadlines_;
     unsigned          working_dirs[max_parallel];
     unsigned          first_free_working_dir;
     char              dirbase[PATH_MAX];
@@ -3086,101 +3044,6 @@ namespace crpcut {
   }
 
   namespace datatypes {
-
-    template <typename T, std::size_t N>
-    array_v<T, N>::array_v()
-      : num_elements(0)
-    {
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::iterator
-    array_v<T, N>::end()
-    {
-      return iterator(&operator[](size() - 1) + 1);
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::const_iterator
-    array_v<T, N>::end() const
-    {
-      return iterator(&operator[](size() - 1) + 1);
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::reverse_iterator
-    array_v<T, N>::rbegin()
-    {
-      return reverse_iterator(end());
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::const_reverse_iterator
-    array_v<T, N>::rbegin() const
-    {
-      return reverse_iterator(end());
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::size_type
-    array_v<T, N>::size() const
-    {
-      return num_elements;
-    }
-
-    template <typename T, std::size_t N>
-    bool
-    array_v<T, N>::empty() const
-    {
-      return size() == 0;
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::reference
-    array_v<T, N>::at(size_type n)
-    {
-      if (n >= num_elements) throw std::out_of_range("array_v::at");
-      return operator[](n);
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::const_reference
-    array_v<T, N>::at(size_type n) const
-    {
-      if (n >= num_elements) throw std::out_of_range("array_v::at");
-      return operator[](n);
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::reference
-    array_v<T, N>::back()
-    {
-      return *(end() - !empty());
-    }
-
-    template <typename T, std::size_t N>
-    typename array_v<T, N>::const_reference
-    array_v<T, N>::back() const
-    {
-      return *(end() - !empty());
-    }
-
-    template <typename T, std::size_t N>
-    void
-    array_v<T, N>::push_back(const value_type &x)
-    {
-      assert(num_elements <= N);
-      operator[](num_elements++) = x;
-    }
-
-    template <typename T, std::size_t N>
-    void
-    array_v<T, N>::pop_back()
-    {
-      assert(num_elements);
-      --num_elements;
-    }
-
     template <std::size_t N>
     struct fp_rep;
 

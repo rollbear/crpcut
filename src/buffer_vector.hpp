@@ -43,9 +43,16 @@ namespace crpcut {
     const T& at(std::size_t idx) const;
     T& push_back(const T&);
     void pop_back();
+    T& front();
+    const T& front() const;
     T& back();
     const T& back() const;
     size_t size() const;
+
+    T* begin();
+    const T* begin() const;
+    T* end();
+    const T* end() const;
   private:
     buffer_vector();
     buffer_vector(const buffer_vector &);
@@ -116,6 +123,19 @@ namespace crpcut {
   }
 
   template <typename T>
+  T& buffer_vector<T>::front()
+  {
+    assert(size_ > 0U);
+    return at(0U);
+  }
+
+  template <typename T>
+  const T& buffer_vector<T>::front() const
+  {
+    assert(size_ > 0U);
+    return at(0U);
+  }
+  template <typename T>
   T& buffer_vector<T>::back()
   {
     assert(size_ > 0U);
@@ -127,6 +147,33 @@ namespace crpcut {
   {
     assert(size_ > 0U);
     return at(size_ - 1U);
+  }
+
+
+  template <typename T>
+  T* buffer_vector<T>::begin()
+  {
+    assert(size_ > 0U);
+    return &at(0U);
+  }
+
+  template <typename T>
+  const T* buffer_vector<T>::begin() const
+  {
+    assert(size_ > 0U);
+    return &at(0U);
+  }
+
+  template <typename T>
+  T* buffer_vector<T>::end()
+  {
+    return static_cast<T*>(address(size_));
+  }
+
+  template <typename T>
+  const T* buffer_vector<T>::end() const
+  {
+    return static_cast<const T*>(address(size_));
   }
 
   template <typename T>

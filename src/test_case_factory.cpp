@@ -37,6 +37,7 @@
 #include "output/xml_formatter.hpp"
 #include "output/text_formatter.hpp"
 #include "cli/interpreter.hpp"
+#include "buffer_vector.hpp"
 extern "C" {
 #  include <sys/time.h>
 #  include <fcntl.h>
@@ -146,6 +147,7 @@ namespace crpcut {
       num_tests_run(0),
       num_successful_tests(0),
       presenter_pipe(-1),
+      deadlines_(0),
       first_free_working_dir(0),
       charset("UTF-8")
   {
@@ -187,20 +189,20 @@ namespace crpcut {
   {
     while (pending_children >= max_pending_children)
       {
-        int timeout_ms = timeouts_enabled() && deadlines.size()
-          ? int(deadlines.front()->crpcut_ms_until_deadline())
+        int timeout_ms = timeouts_enabled() && deadlines_->size()
+          ? int(deadlines_->front()->crpcut_ms_until_deadline())
           : -1;
 
         poll<fdreader>::descriptor desc = poller.wait(timeout_ms);
 
         if (desc.timeout())
           {
-            assert(deadlines.size());
-            crpcut_test_case_registrator *i = deadlines.front();
-            std::pop_heap(deadlines.begin(), deadlines.end(),
+            assert(deadlines_->size());
+            crpcut_test_case_registrator *i = deadlines_->front();
+            std::pop_heap(deadlines_->begin(), deadlines_->end(),
                           &crpcut_test_case_registrator
                           ::crpcut_timeout_compare);
-            deadlines.pop_back();
+            deadlines_->pop_back();
             i->crpcut_kill();
             continue;
           }
@@ -279,7 +281,6 @@ namespace crpcut {
                     p2c.for_writing(pipe_pair::release_ownership),
                     stdout.for_reading(pipe_pair::release_ownership),
                     stderr.for_reading(pipe_pair::release_ownership));
-    manage_children(cli_->num_parallel_tests(), poller);
   }
 
   void
@@ -482,8 +483,8 @@ namespace crpcut {
   ::do_set_deadline(crpcut_test_case_registrator *i)
   {
     assert(i->crpcut_deadline_is_set());
-    deadlines.push_back(i);
-    std::push_heap(deadlines.begin(), deadlines.end(),
+    deadlines_->push_back(i);
+    std::push_heap(deadlines_->begin(), deadlines_->end(),
                    &crpcut_test_case_registrator::crpcut_timeout_compare);
   }
 
@@ -493,35 +494,35 @@ namespace crpcut {
   {
     assert(i->crpcut_deadline_is_set());
     typedef crpcut_test_case_registrator tcr;
-    tcr **found = std::find(deadlines.begin(), deadlines.end(), i);
-    assert(found != deadlines.end() && "clear deadline when none was ordered");
+    tcr **found = std::find(deadlines_->begin(), deadlines_->end(), i);
+    assert(found != deadlines_->end() && "clear deadline when none was ordered");
 
-    size_t n = size_t(found - deadlines.begin());
+    size_t n = size_t(found - deadlines_->begin());
 
     for (;;)
       {
         size_t m = (n + 1) * 2 - 1;
-        if (m >= deadlines.size() - 1) break;
+        if (m >= deadlines_->size() - 1) break;
 
-        if (tcr::crpcut_timeout_compare(deadlines[m + 1], deadlines[m]))
+        if (tcr::crpcut_timeout_compare(deadlines_->at(m + 1), deadlines_->at(m)))
           {
-            deadlines[n] = deadlines[m];
+            deadlines_->at(n) = deadlines_->at(m);
           }
         else
           {
-            deadlines[n] = deadlines[++m];
+            deadlines_->at(n) = deadlines_->at(++m);
           }
         n = m;
       }
 
-    deadlines[n] = deadlines.back();
-    deadlines.pop_back();
-    if (n != deadlines.size())
+    deadlines_->at(n) = deadlines_->back();
+    deadlines_->pop_back();
+    if (n != deadlines_->size())
       {
-        while (n && !tcr::crpcut_timeout_compare(deadlines[n],
-                                                 deadlines[(n - 1) / 2]))
+        while (n && !tcr::crpcut_timeout_compare(deadlines_->at(n),
+                                                 deadlines_->at((n - 1) / 2)))
           {
-            std::swap(deadlines[n], deadlines[(n - 1) / 2]);
+            std::swap(deadlines_->at(n), deadlines_->at((n - 1) / 2));
             n = (n - 1) / 2;
           }
       }
@@ -808,6 +809,10 @@ namespace crpcut {
         typedef poll_buffer_vector<fdreader> poll_reader;
         void *poll_memory = alloca(poll_reader::space_for(num));
         poll_reader poller(poll_memory, num);
+
+        void *deadline_space = alloca(timeout_queue::space_for(cli_->num_parallel_tests()));
+        timeout_queue deadlines(deadline_space, cli_->num_parallel_tests());
+        deadlines_ = &deadlines;
         for (;;)
           {
             bool progress = false;
@@ -821,6 +826,7 @@ namespace crpcut {
                   }
                 progress = true;
                 start_test(i, poller);
+                manage_children(cli_->num_parallel_tests(), poller);
                 i = i->crpcut_unlink();
                 if (!tests_as_child_procs())
                   {
