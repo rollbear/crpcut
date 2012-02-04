@@ -1600,8 +1600,6 @@ namespace crpcut {
     bool crpcut_finished;
   };
 
-  class test_case_factory;
-
 
   namespace heap {
     const size_t system = ~size_t();
@@ -1821,40 +1819,6 @@ namespace crpcut {
     static const char *get_parameter(const char *name);
     static bool is_naughty_child();
     static unsigned long calc_cputime(const struct timeval&);
-    template <typename T>
-    static void get_parameter(const char *name, T& t)
-    {
-      const char *v = get_parameter(name);
-      if (v)
-        {
-          stream::iastream is(v);
-          if (is >> t)
-            {
-              return;
-            }
-        }
-      size_t len = 80 + wrapped::strlen(name) + (v ? wrapped::strlen(v) : 0);
-      char *msg_str = static_cast<char*>(alloca(len));
-      stream::oastream msg(msg_str, msg_str + len);
-      msg << "Parameter " << name << " with ";
-      if (v)
-        {
-          msg << "value \"" << v << "\"";
-        }
-      else
-        {
-          msg << "no value";
-        }
-      msg << " cannot be interpreted as desired type";
-      comm::report(comm::exit_fail, msg);
-    }
-    template <typename T>
-    static T get_parameter(const char *name)
-    {
-      T rv;
-      get_parameter<T>(name, rv);
-      return rv;
-    }
   private:
     static test_case_factory& obj();
     test_case_factory();
@@ -3021,6 +2985,13 @@ namespace crpcut {
 
   bool timeouts_are_enabled();
 
+  void set_charset(const char *set_name);
+  const char *get_start_dir();
+  const char *get_parameter(const char *name);
+
+  int  run(int argc, char *argv[], std::ostream &os = std::cerr);
+  int  run(int argc, const char *argv[], std::ostream &os = std::cerr);
+
   //// template and inline func implementations
 
   template <typename T>
@@ -3037,11 +3008,6 @@ namespace crpcut {
   }
 
 
-  template <typename T>
-  T parameter_stream_traits<T>::make_value(const char *n)
-  {
-    return test_case_factory::get_parameter<T>(n);
-  }
 
   namespace datatypes {
     template <std::size_t N>
@@ -3763,11 +3729,35 @@ namespace crpcut {
     }
   };
 
+
   template <typename T>
-  inline void get_parameter(const char *name, T& t)
+  static void get_parameter(const char *name, T& t)
   {
-    return test_case_factory::get_parameter(name, t);
+    const char *v = get_parameter(name);
+    if (v)
+      {
+        stream::iastream is(v);
+        if (is >> t)
+          {
+            return;
+          }
+      }
+    size_t len = 80 + wrapped::strlen(name) + (v ? wrapped::strlen(v) : 0);
+    char *msg_str = static_cast<char*>(alloca(len));
+    stream::oastream msg(msg_str, msg_str + len);
+    msg << "Parameter " << name << " with ";
+    if (v)
+      {
+        msg << "value \"" << v << "\"";
+      }
+    else
+      {
+        msg << "no value";
+      }
+    msg << " cannot be interpreted as desired type";
+    comm::report(comm::exit_fail, msg);
   }
+
 
   template <typename T>
   inline
@@ -3775,6 +3765,14 @@ namespace crpcut {
   get_parameter(const char *name)
   {
     return parameter_stream_traits<T>::make_value(name);
+  }
+
+  template <typename T>
+  T parameter_stream_traits<T>::make_value(const char *n)
+  {
+    T rv;
+    get_parameter(n, rv);
+    return rv;
   }
 
 #define CRPCUT_BINOP(name, opexpr)                                      \
@@ -3968,12 +3966,6 @@ namespace crpcut {
       unsigned long mutable limit_;
     };
   }
-  void set_charset(const char *set_name);
-  const char *get_start_dir();
-  const char *get_parameter(const char *name);
-
-  int  run(int argc, char *argv[], std::ostream &os = std::cerr);
-  int  run(int argc, const char *argv[], std::ostream &os = std::cerr);
 
 } // namespace crpcut
 
