@@ -740,6 +740,215 @@ namespace crpcut {
     return std::make_pair(num_selected_tests, num_registered_tests);
   }
 
+  void flush_output_buffer(int output_fd, output::buffer &buffer)
+  {
+    while (!buffer.is_empty())
+      {
+        std::pair<const char *, size_t> data = buffer.get_buffer();
+        size_t bytes_written = 0;
+        while (bytes_written < data.second)
+          {
+            ssize_t n = wrapped::write(output_fd,
+                                       data.first + bytes_written,
+                                       data.second - bytes_written);
+            assert(n >= 0);
+            bytes_written += size_t(n);
+          }
+        buffer.advance();
+      }
+  }
+
+  void setup_dirbase(const char   *program_name,
+                     const char   *working_dir,
+                     char         *dirbase,
+                     std::ostream &err_os)
+  {
+    if (!working_dir && !wrapped::mkdtemp(dirbase))
+      {
+        err_os << program_name
+               << ": failed to create working directory\n";
+        throw cli_exception(-1);
+      }
+    if (wrapped::chdir(dirbase) != 0)
+      {
+        err_os << program_name
+               << ": couldn't move to working directoryy\n";
+        wrapped::rmdir (dirbase);
+        throw cli_exception(-1);
+      }
+  }
+
+  void
+  test_case_factory
+  ::show_summary(unsigned num_selected_tests,
+                 tag_list_root &tags) const
+  {
+    size_t sum_crit_pass = 0;
+    size_t sum_crit_fail = 0;
+    std::cout << num_selected_tests << " test cases selected\n";
+    const tag_list::iterator begin(tags.begin());
+    const tag_list::iterator end(tags.end());
+    if (begin != end)
+      {
+        bool header_displayed = false;
+        for (tag_list::iterator i = begin; i != end; ++i)
+          {
+            if (!i->get_name()) continue;
+            if (i->num_passed() + i->num_failed() == 0) continue;
+            if (!header_displayed)
+              {
+                std::cout << ' ' << std::setw(tags.longest_tag_name())
+                << "tag"
+                << std::setw(8)
+                << "total"
+                << std::setw(8)
+                << "passed"
+                << std::setw(8)
+                << "failed"
+                << '\n';
+
+                header_displayed = true;
+              }
+            if (i->get_importance() == tag::critical)
+              {
+                sum_crit_pass += i->num_passed();
+                sum_crit_fail += i->num_failed();
+              }
+            char flag = i->get_importance() == tag::critical
+                      ? '!'
+                      : '?';
+            std::cout << flag << std::setw(tags.longest_tag_name())
+                      <<  i->get_name()
+                      << std::setw(8)
+                      << i->num_failed() + i->num_passed()
+                      << std::setw(8)
+                      << i->num_failed()
+                      << std::setw(8)
+                      << i->num_passed()
+                      << '\n';
+          }
+      }
+
+    std::cout << "\n           " << std::setw(8) << "Sum"
+              << std::setw(11)
+              << "Critical"
+              << std::setw(15)
+              << "Non-critical";
+    std::cout << "\nPASSED   : " << std::setw(8) << num_successful_tests
+              << std::setw(11)
+              << sum_crit_pass
+              << std::setw(15)
+              << num_successful_tests - sum_crit_pass
+              << "\nFAILED   : "
+              << std::setw(8)
+              << num_tests_run - num_successful_tests
+              << std::setw(11)
+              << sum_crit_fail
+              << std::setw(15)
+              << num_tests_run - num_successful_tests - sum_crit_fail
+              << '\n';
+    if (num_selected_tests != num_tests_run)
+      {
+        std::cout << "UNTESTED : " << std::setw(8)
+        << num_selected_tests - num_tests_run
+        << '\n';
+      }
+  }
+
+
+  bool cleanup_directories(std::size_t        num_parallel,
+                           const char        *working_dir,
+                           const char        *dirbase,
+                           output::formatter &fmt)
+  {
+    bool rv = true;
+    for (unsigned n = 0; n < num_parallel; ++n)
+      {
+        stream::toastream
+        < std::numeric_limits<unsigned>::digits / 3 + 1
+        > name;
+        name << n << '\0';
+        (void)wrapped::rmdir(name.begin());
+        // failure above is taken care of as error elsewhere
+      }
+
+    if (!is_dir_empty("."))
+      {
+        fmt.nonempty_dir(dirbase);
+        rv = false;
+      }
+    else if (working_dir == 0)
+      {
+        if (wrapped::chdir("..") < 0)
+          {
+            throw posix_error(errno,
+                              "chdir back from testcase working dir");
+          }
+        (void)wrapped::rmdir(dirbase); // ignore, taken care of as error
+      }
+    return rv;
+  }
+
+  void report_blocked_tests(int output_fd, bool quiet,
+                            test_case_factory::registrator_list &reg,
+                            output::formatter                   &fmt)
+  {
+    if (reg.crpcut_get_next() != &reg)
+      {
+        if (output_fd != 1 && !quiet)
+          {
+            std::cout << "Blocked tests:\n";
+          }
+        for (crpcut_test_case_registrator *i = reg.crpcut_get_next();
+            i != &reg;
+            i = i->crpcut_get_next())
+          {
+            std::size_t name_len = i->crpcut_full_name_len();
+            char *buff = static_cast<char*>(alloca(name_len));
+            stream::oastream os(buff, name_len);
+            os << *i;
+            fmt.blocked_test(os);
+            if (output_fd != 1 && !quiet)
+              {
+                std::cout << "  " << *i << '\n';
+              }
+          }
+      }
+  }
+
+  bool test_case_factory
+  ::schedule_tests(std::size_t num_parallel, poll<fdreader> &poller)
+  {
+    for (;;)
+      {
+        bool progress = false;
+        crpcut_test_case_registrator *i = reg.crpcut_get_next();
+        while (i != &reg)
+          {
+            if (cli_->honour_dependencies() && !i->crpcut_can_run())
+              {
+                i = i->crpcut_get_next();
+                continue;
+              }
+            progress = true;
+            start_test(i, poller);
+            manage_children(num_parallel, poller);
+            i = i->crpcut_unlink();
+            if (!tests_as_child_procs())
+              {
+                return false;
+              }
+          }
+        if (!progress)
+          {
+            if (pending_children == 0) break;
+            manage_children(1, poller);
+          }
+      }
+    if (pending_children) manage_children(1, poller);
+    return true;
+  }
+
   int
   test_case_factory::do_run(cli::interpreter *cli,
                             std::ostream& err_os,
@@ -784,230 +993,56 @@ namespace crpcut {
         int output_fd = open_report_file(cli_->report_file(), err_os);
         if (tests_as_child_procs())
           {
-            if (!cli_->working_dir() && !wrapped::mkdtemp(dirbase))
-              {
-                err_os << cli_->program_name()
-                       << ": failed to create working directory\n";
-                return 1;
-              }
-            if (wrapped::chdir(dirbase) != 0)
-              {
-                err_os << cli_->program_name()
-                       << ": couldn't move to working directoryy\n";
-                wrapped::rmdir (dirbase);
-                return 1;
-              }
-            while (!buffer.is_empty())
-              {
-                std::pair<const char *, size_t> data = buffer.get_buffer();
-                size_t bytes_written = 0;
-                while (bytes_written < data.second)
-                  {
-                    ssize_t n = wrapped::write(output_fd,
-                                               data.first + bytes_written,
-                                               data.second - bytes_written);
-                    assert(n >= 0);
-                    bytes_written += size_t(n);
-                  }
-                buffer.advance();
-              }
+            setup_dirbase(cli_->program_name(),
+                          cli_->working_dir(),
+                          dirbase,
+                          err_os);
+            flush_output_buffer(output_fd, buffer);
             presenter_pipe = start_presenter_process(buffer,
                                                      output_fd,
                                                      fmt,
                                                      cli_->verbose_mode(),
                                                      dirbase);
           }
-        std::size_t num = cli_->num_parallel_tests();
+        const std::size_t num_parallel = cli_->num_parallel_tests();
         typedef poll_buffer_vector<fdreader> poll_reader;
-        void *poll_memory = alloca(poll_reader::space_for(num*3U));
-        poll_reader poller(poll_memory, num*3U);
+        void *poll_memory = alloca(poll_reader::space_for(num_parallel*3U));
+        poll_reader poller(poll_memory, num_parallel*3U);
 
-        void *deadline_space = alloca(timeout_queue::space_for(num));
-        timeout_queue deadlines(deadline_space, num);
+        void *deadline_space = alloca(timeout_queue::space_for(num_parallel));
+        timeout_queue deadlines(deadline_space, num_parallel);
         deadlines_ = &deadlines;
 
-        void *wd_space = alloca(buffer_vector<unsigned>::space_for(num));
-        buffer_vector<unsigned> wd_vector(wd_space, num);
+        void *wd_space = alloca(dir_vector::space_for(num_parallel));
+        dir_vector wd_vector(wd_space, num_parallel);
         working_dirs_ = &wd_vector;
-        for (unsigned n = 0; n < num; ++n)
+        for (unsigned n = 0; n < num_parallel; ++n)
           {
             working_dirs_->push_back(n + 1U);
           }
 
-        for (;;)
-          {
-            bool progress = false;
-            crpcut_test_case_registrator *i = reg.crpcut_get_next();
-            while (i != &reg)
-              {
-                if (cli_->honour_dependencies() && !i->crpcut_can_run())
-                  {
-                    i = i->crpcut_get_next();
-                    continue;
-                  }
-                progress = true;
-                start_test(i, poller);
-                manage_children(num, poller);
-                i = i->crpcut_unlink();
-                if (!tests_as_child_procs())
-                  {
-                    return 0;
-                  }
-              }
-            if (!progress)
-              {
-                if (pending_children == 0) break;
-
-                manage_children(1, poller);
-              }
-          }
-        if (pending_children) manage_children(1, poller);
+        if (!schedule_tests(num_parallel, poller)) return 0;
 
         if (tests_as_child_procs())
           {
             kill_presenter_process();
-            for (unsigned n = 0; n < num; ++n)
-              {
-                stream::toastream
-                < std::numeric_limits<unsigned>::digits / 3 + 1
-                > name;
-                name << n << '\0';
-                (void)wrapped::rmdir(name.begin());
-                // failure above is taken care of as error elsewhere
-              }
-
-            if (!is_dir_empty("."))
-              {
-                fmt.nonempty_dir(dirbase);
-                if (output_fd != 1 && cli_->quiet())
-                  {
-                    std::cout << "Files remain in " << dirbase << '\n';
-                  }
-              }
-            else if (cli_->working_dir() == 0)
-              {
-                if (wrapped::chdir("..") < 0)
-                  {
-                    throw posix_error(errno,
-                                      "chdir back from testcase working dir");
-                  }
-                (void)wrapped::rmdir(dirbase); // ignore, taken care of as error
-              }
+            if (!cleanup_directories(num_parallel, cli_->working_dir(), dirbase, fmt)
+               && output_fd != 1
+               && cli_->quiet())
+            {
+              std::cout << "Files remain in " << dirbase << '\n';
+            }
           }
 
-        if (reg.crpcut_get_next() != &reg)
-          {
-            if (output_fd != 1 && !cli_->quiet())
-              {
-                std::cout << "Blocked tests:\n";
-              }
-            for (crpcut_test_case_registrator *i = reg.crpcut_get_next();
-                i != &reg;
-                i = i->crpcut_get_next())
-              {
-                std::size_t name_len = i->crpcut_full_name_len();
-                char *buff = static_cast<char*>(alloca(name_len));
-                stream::oastream os(buff, name_len);
-                os << *i;
-                fmt.blocked_test(os);
-                if (output_fd != 1 && !cli_->quiet())
-                  {
-                    std::cout << "  " << *i << '\n';
-                  }
-              }
-          }
+        report_blocked_tests(output_fd, cli_->quiet(), reg, fmt);
 
         fmt.statistics(num_registered_tests, num_selected_tests, num_tests_run,
                        num_tests_run - num_successful_tests);
         if (output_fd != 1 && !cli_->quiet())
           {
-            size_t sum_crit_pass = 0;
-            size_t sum_crit_fail = 0;
-            std::cout << num_selected_tests << " test cases selected\n";
-            const tag_list::iterator begin(tags.begin());
-            const tag_list::iterator end(tags.end());
-            if (begin != end)
-              {
-                bool header_displayed = false;
-                for (tag_list::iterator i = begin; i != end; ++i)
-                  {
-                    if (!i->get_name()) continue;
-                    if (i->num_passed() + i->num_failed() == 0) continue;
-                    if (!header_displayed)
-                      {
-                        std::cout << ' ' << std::setw(tags.longest_tag_name())
-                        << "tag"
-                        << std::setw(8)
-                        << "total"
-                        << std::setw(8)
-                        << "passed"
-                        << std::setw(8)
-                        << "failed"
-                        << '\n';
-
-                        header_displayed = true;
-                      }
-                    if (i->get_importance() == tag::critical)
-                      {
-                        sum_crit_pass += i->num_passed();
-                        sum_crit_fail += i->num_failed();
-                      }
-                    char flag = i->get_importance() == tag::critical
-                                ? '!'
-                                  :
-                                  '?';
-                    std::cout << flag << std::setw(tags.longest_tag_name())
-                    << i->get_name()
-                    << std::setw(8)
-                    << i->num_failed() + i->num_passed()
-                    << std::setw(8)
-                    << i->num_failed()
-                    << std::setw(8)
-                    << i->num_passed()
-                    << '\n';
-                  }
-              }
-
-            std::cout << "\n           " << std::setw(8) << "Sum"
-            << std::setw(11)
-            << "Critical"
-            << std::setw(15)
-            << "Non-critical";
-            std::cout << "\nPASSED   : " << std::setw(8) << num_successful_tests
-            << std::setw(11)
-            << sum_crit_pass
-            << std::setw(15)
-            << num_successful_tests - sum_crit_pass
-            << "\nFAILED   : "
-            << std::setw(8)
-            << num_tests_run - num_successful_tests
-            << std::setw(11)
-            << sum_crit_fail
-            << std::setw(15)
-            << num_tests_run - num_successful_tests - sum_crit_fail
-            << '\n';
-            if (num_selected_tests != num_tests_run)
-              {
-                std::cout << "UNTESTED : " << std::setw(8)
-                << num_selected_tests - num_tests_run
-                << '\n';
-              }
+            show_summary(num_selected_tests, tags);
           }
-        while (!buffer.is_empty())
-          {
-            std::pair<const char *, size_t> data = buffer.get_buffer();
-            const char *buff = data.first;
-            const size_t len = data.second;
-            size_t bytes_written = 0;
-            while (bytes_written < len)
-              {
-                ssize_t n = wrapped::write(output_fd, buff + bytes_written,
-                                           len - bytes_written);
-                assert(n >= 0);
-                bytes_written += size_t(n);
-              }
-            buffer.advance();
-          }
+        flush_output_buffer(output_fd, buffer);
         return int(num_tests_run - num_successful_tests);
       }
     catch (cli_exception &e)

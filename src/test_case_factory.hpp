@@ -71,6 +71,9 @@ namespace crpcut {
     void list_tests(const char *const *names,
                     tag_list_root     &tags,
                     std::ostream      &os);
+    bool schedule_tests(std::size_t num_parallel, poll<fdreader> &poller);
+    void show_summary(unsigned       num_selected_tests,
+                      tag_list_root &tags) const;
     void kill_presenter_process();
     void manage_children(std::size_t max_pending_children, poll<fdreader> &poller);
     void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
@@ -90,7 +93,7 @@ namespace crpcut {
 
 
     typedef buffer_vector<crpcut_test_case_registrator*> timeout_queue;
-
+    typedef buffer_vector<unsigned>                      dir_vector;
     cli::interpreter        *cli_;
     struct timeval           accumulated_cputime;
     pid_t                    current_pid;
@@ -100,7 +103,7 @@ namespace crpcut {
     unsigned                 num_successful_tests;
     int                      presenter_pipe;
     timeout_queue           *deadlines_;
-    buffer_vector<unsigned> *working_dirs_;
+    dir_vector              *working_dirs_;
     unsigned                 first_free_working_dir;
     char                     dirbase[PATH_MAX];
     char                     homedir[PATH_MAX];
