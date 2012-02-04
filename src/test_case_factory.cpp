@@ -142,8 +142,6 @@ namespace crpcut {
     : cli_(0),
       current_pid(0),
       pending_children(0),
-      num_registered_tests(0),
-      num_selected_tests(0),
       num_tests_run(0),
       num_successful_tests(0),
       presenter_pipe(-1),
@@ -644,6 +642,103 @@ namespace crpcut {
     while (ti++ != end);
   }
 
+  unsigned
+  make_tentative_test_list(test_case_factory::registrator_list &reg,
+                           test_case_factory::registrator_list *tentative)
+  {
+    unsigned num_registered_tests = 0U;
+    crpcut_test_case_registrator *next;
+    for (crpcut_test_case_registrator *i = reg.crpcut_get_next();
+        i != &reg;
+        i = next)
+      {
+        next = i->crpcut_get_next();
+        const tag& test_tag = i->crpcut_tag();
+        if (test_tag.get_importance() == tag::ignored)
+          {
+            i->crpcut_uninhibit_dependants();
+            i->crpcut_unlink();
+            continue;
+          }
+        ++num_registered_tests;
+        if (tentative)
+          {
+            i->crpcut_unlink();
+            i->crpcut_link_after(tentative);
+          }
+      }
+    return num_registered_tests;
+  }
+
+  unsigned
+  filter_out_tests_by_name(const char *const                   *names,
+                           test_case_factory::registrator_list &from,
+                           test_case_factory::registrator_list &to,
+                           std::ostream                        &err_os)
+  {
+    unsigned num_selected_tests = 0U;
+    unsigned mismatches = 0;
+    for (const char *const*name = names; *name; ++name)
+      {
+        crpcut_test_case_registrator *i = from.crpcut_get_next();
+        unsigned matches = 0;
+        while (i != &from)
+          {
+            if (i->crpcut_match_name(*name))
+              {
+                ++matches;
+                ++num_selected_tests;
+                crpcut_test_case_registrator *next = i->crpcut_unlink();
+                i->crpcut_link_after(&to);
+                i = next;
+              }
+            else
+              {
+                i = i->crpcut_get_next();
+              }
+          }
+        if (matches == 0)
+          {
+            if (mismatches++)
+              {
+                err_os << ", ";
+              }
+            err_os << *name;
+          }
+      }
+    if (mismatches)
+      {
+        err_os << (mismatches == 1 ? " does" : " do")
+               << " not match any test names\n";
+        throw cli_exception(-1);
+      }
+    crpcut_test_case_registrator *i = from.crpcut_get_next();
+    while (i != &from)
+      {
+        i->crpcut_uninhibit_dependants();
+        i = i->crpcut_get_next();
+      }
+    return num_selected_tests;
+  }
+
+  std::pair<unsigned, unsigned>
+  select_tests(const char *const *names,
+               test_case_factory::registrator_list &reg,
+               std::ostream &err_os)
+  {
+    test_case_factory::registrator_list tentative;
+    unsigned num_registered_tests = make_tentative_test_list(reg,
+                                                             *names
+                                                             ? &tentative
+                                                             : 0);
+    unsigned num_selected_tests = *names
+                                ? filter_out_tests_by_name(names,
+                                                      tentative,
+                                                      reg,
+                                                      err_os)
+                                : num_registered_tests;
+    return std::make_pair(num_selected_tests, num_registered_tests);
+  }
 
   int
   test_case_factory::do_run(cli::interpreter *cli,
@@ -653,94 +748,26 @@ namespace crpcut {
     cli_ = cli;
     try
       {
-        const char *const*p = cli_->get_test_list();
+        const char *const *test_names = cli_->get_test_list();
 
         if (cli_->list_tags()) list_tags(tags);
         configure_tags(cli_->tag_specification(), tags);
-        if (cli_->list_tests()) list_tests(p, tags, err_os);
+        if (cli_->list_tests()) list_tests(test_names, tags, err_os);
         wrapped::getcwd(homedir, sizeof(homedir));
         if (cli_->working_dir())
           {
             lib::strcpy(dirbase, cli_->working_dir());
           }
-        registrator_list tentative;
-          {
-            crpcut_test_case_registrator *i = reg.crpcut_get_next();
-            while (i != &reg)
-              {
-                const tag& test_tag = i->crpcut_tag();
-                crpcut_test_case_registrator *next = i->crpcut_get_next();
-                if (test_tag.get_importance() == tag::ignored)
-                  {
-                    i->crpcut_uninhibit_dependants();
-                    i->crpcut_unlink();
-                    i = next;
-                    continue;
-                  }
-                ++num_registered_tests;
-                if (*p)
-                  {
-                    i->crpcut_unlink();
-                    i->crpcut_link_after(&tentative);
-                  }
-                i = next;
-              }
-          }
-        unsigned mismatches = 0;
-        if (*p == 0)
-          {
-            num_selected_tests = num_registered_tests;
-          }
-        else
-          {
-            for (const char *const*name = p; *name; ++name)
-              {
-                crpcut_test_case_registrator *i = tentative.crpcut_get_next();
-                unsigned matches = 0;
-                while (i != &tentative)
-                  {
-                    if (i->crpcut_match_name(*name))
-                      {
-                        ++matches;
-                        ++num_selected_tests;
-                        crpcut_test_case_registrator *next = i->crpcut_unlink();
-                        i->crpcut_link_after(&reg);
-                        i = next;
-                      }
-                    else
-                      {
-                        i = i->crpcut_get_next();
-                      }
-                  }
-                if (matches == 0)
-                  {
-                    if (mismatches++)
-                      {
-                        err_os << ", ";
-                      }
-                    err_os << *name;
-                  }
-              }
-          }
-        if (mismatches)
-          {
-            err_os << (mismatches == 1 ? " does" : " do")
-            << " not match any test names\n";
-            return -1;
-          }
-        if (cli_->single_shot_mode() && num_selected_tests != 1)
+        std::pair<unsigned, unsigned> rv = select_tests(test_names,
+                                                        reg,
+                                                        err_os);
+        unsigned num_selected_tests = rv.first;
+        unsigned num_registered_tests = rv.second;
+
+        if (cli_->single_shot_mode() && num_selected_tests != 1U)
           {
             err_os << "Single shot requires exactly one test selected\n";
-            return -1;
-          }
-
-          {
-            crpcut_test_case_registrator *i = tentative.crpcut_get_next();
-            while (i != &tentative)
-              {
-                i->crpcut_uninhibit_dependants();
-                i = i->crpcut_get_next();
-              }
+            throw cli_exception(-1);
           }
 
         std_exception_translator std_except_obj;

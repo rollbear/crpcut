@@ -57,6 +57,14 @@ namespace crpcut {
     static const char *get_parameter(const char *name);
     static bool is_naughty_child();
     static unsigned long calc_cputime(const struct timeval&);
+
+    class registrator_list : public crpcut_test_case_registrator
+    {
+      virtual bool match_name(const char *) const { return false; }
+      virtual std::ostream& print_name(std::ostream &os) const { return os; }
+      virtual void crpcut_do_run_test_case() {}
+      virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
+    };
   private:
     static test_case_factory& obj();
     test_case_factory();
@@ -80,13 +88,6 @@ namespace crpcut {
     unsigned long do_calc_cputime(const struct timeval&);
     friend class crpcut_test_case_registrator;
 
-    class registrator_list : public crpcut_test_case_registrator
-    {
-      virtual bool match_name(const char *) const { return false; }
-      virtual std::ostream& print_name(std::ostream &os) const { return os; }
-      virtual void crpcut_do_run_test_case() {}
-      virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
-    };
 
     typedef buffer_vector<crpcut_test_case_registrator*> timeout_queue;
 
@@ -95,8 +96,6 @@ namespace crpcut {
     pid_t                    current_pid;
     registrator_list         reg;
     unsigned                 pending_children;
-    unsigned                 num_registered_tests;
-    unsigned                 num_selected_tests;
     unsigned                 num_tests_run;
     unsigned                 num_successful_tests;
     int                      presenter_pipe;
