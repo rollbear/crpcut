@@ -2984,6 +2984,7 @@ namespace crpcut {
   };
 
   bool timeouts_are_enabled();
+  bool tests_as_child_processes();
 
   void set_charset(const char *set_name);
   const char *get_start_dir();
@@ -3311,7 +3312,7 @@ namespace crpcut {
     void
     reporter::operator()(comm::type t, const T& data) const
     {
-      assert(test_case_factory::tests_as_child_procs());
+      assert(tests_as_child_processes());
       write(t);
       size_t len = sizeof(data);
       write(len);
@@ -3991,7 +3992,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
       (void)rt; /* silence warning */                                   \
       (void)ct; /* silence warning */                                   \
       crpcut::test_wrapper<crpcut_run_wrapper>::run(this);              \
-      if (crpcut::test_case_factory::tests_as_child_procs())            \
+      if (crpcut::tests_as_child_processes())                           \
         {                                                               \
           crpcut_test_finished(); /* tell destructor to report success */ \
         }                                                               \

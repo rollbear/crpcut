@@ -63,5 +63,10 @@ namespace crpcut {
     return test_case_factory::timeouts_enabled();
   }
 
+  bool tests_as_child_processes()
+  {
+    return test_case_factory::tests_as_child_procs();
+  }
+
 } // namespace crpcut
 
