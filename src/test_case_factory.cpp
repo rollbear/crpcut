@@ -57,15 +57,6 @@ namespace {
     return array + N;
   }
 
-  inline const char *nullindex(const char* str, char needle)
-  {
-    if (str)
-      {
-        while (*str && *str != needle)
-          ++str;
-      }
-    return str;
-  }
 
   template <size_t N>
   bool strequal(const char (&s)[N], const char *p, size_t n)
