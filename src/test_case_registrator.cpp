@@ -179,8 +179,8 @@ namespace crpcut {
                                  unsigned long cputime_timeout_ms)
     : crpcut_name_(name),
       crpcut_ns_info(&ns),
-      crpcut_next(&test_case_factory::obj().reg),
-      crpcut_prev(test_case_factory::obj().reg.crpcut_prev),
+      crpcut_next(&test_case_factory::obj().reg_),
+      crpcut_prev(test_case_factory::obj().reg_.crpcut_prev),
       crpcut_suite_list(0),
       crpcut_active_readers(0),
       crpcut_killed(false),
@@ -196,7 +196,7 @@ namespace crpcut {
       crpcut_phase(creating),
       crpcut_cputime_limit_ms(cputime_timeout_ms)
   {
-    test_case_factory::obj().reg.crpcut_prev = this;
+    test_case_factory::obj().reg_.crpcut_prev = this;
     crpcut_prev->crpcut_next = this;
   }
 

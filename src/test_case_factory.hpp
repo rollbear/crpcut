@@ -96,18 +96,18 @@ namespace crpcut {
 
     typedef buffer_vector<crpcut_test_case_registrator*> timeout_queue;
     cli::interpreter        *cli_;
-    struct timeval           accumulated_cputime;
-    pid_t                    current_pid;
-    registrator_list         reg;
-    unsigned                 pending_children;
-    unsigned                 num_tests_run;
-    unsigned                 num_successful_tests;
-    int                      presenter_pipe;
+    struct timeval           accumulated_cputime_;
+    pid_t                    current_pid_;
+    registrator_list         reg_;
+    unsigned                 num_pending_children_;
+    unsigned                 num_tests_run_;
+    unsigned                 num_successful_tests_;
+    int                      presenter_pipe_;
     timeout_queue           *deadlines_;
     working_dir_allocator   *working_dirs_;
-    char                     dirbase[PATH_MAX];
-    char                     homedir[PATH_MAX];
-    const char              *charset;
+    char                     dirbase_[PATH_MAX];
+    char                     homedir_[PATH_MAX];
+    const char              *charset_;
   };
 
 

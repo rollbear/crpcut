@@ -132,16 +132,16 @@ namespace crpcut {
   test_case_factory
   ::test_case_factory()
     : cli_(0),
-      current_pid(0),
-      pending_children(0),
-      num_tests_run(0),
-      num_successful_tests(0),
-      presenter_pipe(-1),
+      current_pid_(0),
+      num_pending_children_(0),
+      num_tests_run_(0),
+      num_successful_tests_(0),
+      presenter_pipe_(-1),
       deadlines_(0),
       working_dirs_(0),
-      charset("UTF-8")
+      charset_("UTF-8")
   {
-    lib::strcpy(dirbase, "/tmp/crpcutXXXXXX");
+    lib::strcpy(dirbase_, "/tmp/crpcutXXXXXX");
   }
 
 
@@ -173,7 +173,7 @@ namespace crpcut {
   test_case_factory
   ::manage_children(std::size_t max_pending_children, poll<fdreader> &poller)
   {
-    while (pending_children >= max_pending_children)
+    while (num_pending_children_ >= max_pending_children)
       {
         int timeout_ms = timeouts_enabled() && deadlines_->size()
           ? int(deadlines_->front()->crpcut_ms_until_deadline())
@@ -204,7 +204,7 @@ namespace crpcut {
             if (!r->crpcut_has_active_readers())
               {
                 r->crpcut_manage_death();
-                --pending_children;
+                --num_pending_children_;
               }
           }
       }
@@ -215,7 +215,7 @@ namespace crpcut {
   test_case_factory
   ::start_test(crpcut_test_case_registrator *i, poll<fdreader>& poller)
   {
-    ++num_tests_run;
+    ++num_tests_run_;
     if (!tests_as_child_procs())
       {
         std::cout << *i << " ";
@@ -252,14 +252,14 @@ namespace crpcut {
         stderr.close();
         p2c.close();
         c2p.close();
-        current_pid = wrapped::getpid();
+        current_pid_ = wrapped::getpid();
         i->crpcut_goto_wd();
         i->crpcut_run_test_case();
         wrapped::exit(0);
       }
 
     // parent
-    ++pending_children;
+    ++num_pending_children_;
     i->crpcut_setup(poller, pid,
                     c2p.for_reading(pipe_pair::release_ownership),
                     p2c.for_writing(pipe_pair::release_ownership),
@@ -271,7 +271,7 @@ namespace crpcut {
   test_case_factory
   ::do_introduce_name(pid_t pid, const char *name, size_t len)
   {
-    int pipe = presenter_pipe;
+    int pipe = presenter_pipe_;
     for (;;)
       {
         ssize_t rv = wrapped::write(pipe, &pid, sizeof(pid));
@@ -310,7 +310,7 @@ namespace crpcut {
   test_case_factory
   ::kill_presenter_process()
   {
-    int rc = wrapped::close(presenter_pipe);
+    int rc = wrapped::close(presenter_pipe_);
     assert(rc == 0);
     siginfo_t info;
     for (;;)
@@ -326,7 +326,7 @@ namespace crpcut {
   test_case_factory
   ::is_naughty_child()
   {
-    return obj().current_pid != wrapped::getpid();
+    return obj().current_pid_ != wrapped::getpid();
   }
 
   unsigned long
@@ -445,7 +445,7 @@ namespace crpcut {
   test_case_factory
   ::test_succeeded(crpcut_test_case_registrator*)
   {
-    ++obj().num_successful_tests;
+    ++obj().num_successful_tests_;
   }
 
   test_case_factory&
@@ -482,7 +482,8 @@ namespace crpcut {
         size_t m = (n + 1) * 2 - 1;
         if (m >= deadlines_->size() - 1) break;
 
-        if (tcr::crpcut_timeout_compare(deadlines_->at(m + 1), deadlines_->at(m)))
+        if (tcr::crpcut_timeout_compare(deadlines_->at(m + 1),
+                                        deadlines_->at(m)))
           {
             deadlines_->at(n) = deadlines_->at(m);
           }
@@ -510,7 +511,7 @@ namespace crpcut {
   test_case_factory
   ::do_get_start_dir() const
   {
-    return homedir;
+    return homedir_;
   }
 
   void
@@ -524,14 +525,14 @@ namespace crpcut {
   test_case_factory
   ::do_set_charset(const char* set_name)
   {
-    charset = set_name;
+    charset_ = set_name;
   }
 
   const char*
   test_case_factory
   ::do_get_charset() const
   {
-    return charset;
+    return charset_;
   }
 
 
@@ -543,7 +544,7 @@ namespace crpcut {
                size_t      len,
                const char *buff)
   {
-    int pipe = presenter_pipe;
+    int pipe = presenter_pipe_;
     ssize_t rv = wrapped::write(pipe, &pid, sizeof(pid));
     assert(rv == sizeof(pid));
     rv = wrapped::write(pipe, &t, sizeof(t));
@@ -584,8 +585,8 @@ namespace crpcut {
         << "============\n"
         << std::setfill(' ');
       }
-    for (crpcut_test_case_registrator *i = reg.crpcut_get_next();
-        i != &reg; i = i->crpcut_get_next())
+    for (crpcut_test_case_registrator *i = reg_.crpcut_get_next();
+        i != &reg_; i = i->crpcut_get_next())
       {
         tag &test_tag = i->crpcut_tag();
         tag::importance importance = test_tag.get_importance();
@@ -822,23 +823,23 @@ namespace crpcut {
               << "Critical"
               << std::setw(15)
               << "Non-critical";
-    std::cout << "\nPASSED   : " << std::setw(8) << num_successful_tests
+    std::cout << "\nPASSED   : " << std::setw(8) << num_successful_tests_
               << std::setw(11)
               << sum_crit_pass
               << std::setw(15)
-              << num_successful_tests - sum_crit_pass
+              << num_successful_tests_ - sum_crit_pass
               << "\nFAILED   : "
               << std::setw(8)
-              << num_tests_run - num_successful_tests
+              << num_tests_run_ - num_successful_tests_
               << std::setw(11)
               << sum_crit_fail
               << std::setw(15)
-              << num_tests_run - num_successful_tests - sum_crit_fail
+              << num_tests_run_ - num_successful_tests_ - sum_crit_fail
               << '\n';
-    if (num_selected_tests != num_tests_run)
+    if (num_selected_tests != num_tests_run_)
       {
         std::cout << "UNTESTED : " << std::setw(8)
-        << num_selected_tests - num_tests_run
+        << num_selected_tests - num_tests_run_
         << '\n';
       }
   }
@@ -910,8 +911,8 @@ namespace crpcut {
     for (;;)
       {
         bool progress = false;
-        crpcut_test_case_registrator *i = reg.crpcut_get_next();
-        while (i != &reg)
+        crpcut_test_case_registrator *i = reg_.crpcut_get_next();
+        while (i != &reg_)
           {
             if (cli_->honour_dependencies() && !i->crpcut_can_run())
               {
@@ -929,11 +930,11 @@ namespace crpcut {
           }
         if (!progress)
           {
-            if (pending_children == 0) break;
+            if (num_pending_children_ == 0) break;
             manage_children(1, poller);
           }
       }
-    if (pending_children) manage_children(1, poller);
+    if (num_pending_children_) manage_children(1, poller);
     return true;
   }
 
@@ -950,13 +951,13 @@ namespace crpcut {
         if (cli_->list_tags()) list_tags(tags);
         configure_tags(cli_->tag_specification(), tags);
         if (cli_->list_tests()) list_tests(test_names, tags, err_os);
-        wrapped::getcwd(homedir, sizeof(homedir));
+        wrapped::getcwd(homedir_, sizeof(homedir_));
         if (cli_->working_dir())
           {
-            lib::strcpy(dirbase, cli_->working_dir());
+            lib::strcpy(dirbase_, cli_->working_dir());
           }
         std::pair<unsigned, unsigned> rv = select_tests(test_names,
-                                                        reg,
+                                                        reg_,
                                                         err_os);
         unsigned num_selected_tests = rv.first;
         unsigned num_registered_tests = rv.second;
@@ -983,14 +984,14 @@ namespace crpcut {
           {
             setup_dirbase(cli_->program_name(),
                           cli_->working_dir(),
-                          dirbase,
+                          dirbase_,
                           err_os);
             flush_output_buffer(output_fd, buffer);
-            presenter_pipe = start_presenter_process(buffer,
+            presenter_pipe_ = start_presenter_process(buffer,
                                                      output_fd,
                                                      fmt,
                                                      cli_->verbose_mode(),
-                                                     dirbase);
+                                                     dirbase_);
           }
         const std::size_t num_parallel = cli_->num_parallel_tests();
         typedef poll_buffer_vector<fdreader> poll_reader;
@@ -1010,24 +1011,24 @@ namespace crpcut {
         if (tests_as_child_procs())
           {
             kill_presenter_process();
-            if (!cleanup_directories(num_parallel, cli_->working_dir(), dirbase, fmt)
+            if (!cleanup_directories(num_parallel, cli_->working_dir(), dirbase_, fmt)
                && output_fd != 1
                && cli_->quiet())
             {
-              std::cout << "Files remain in " << dirbase << '\n';
+              std::cout << "Files remain in " << dirbase_ << '\n';
             }
           }
 
-        report_blocked_tests(output_fd, cli_->quiet(), reg, fmt);
+        report_blocked_tests(output_fd, cli_->quiet(), reg_, fmt);
 
-        fmt.statistics(num_registered_tests, num_selected_tests, num_tests_run,
-                       num_tests_run - num_successful_tests);
+        fmt.statistics(num_registered_tests, num_selected_tests, num_tests_run_,
+                       num_tests_run_ - num_successful_tests_);
         if (output_fd != 1 && !cli_->quiet())
           {
             show_summary(num_selected_tests, tags);
           }
         flush_output_buffer(output_fd, buffer);
-        return int(num_tests_run - num_successful_tests);
+        return int(num_tests_run_ - num_successful_tests_);
       }
     catch (cli_exception &e)
     {
@@ -1050,10 +1051,10 @@ namespace crpcut {
     struct rusage usage;
     int rv = wrapped::getrusage(RUSAGE_CHILDREN, &usage);
     assert(rv == 0);
-    struct timeval prev = accumulated_cputime;
-    timeradd(&usage.ru_utime, &usage.ru_stime, &accumulated_cputime);
+    struct timeval prev = accumulated_cputime_;
+    timeradd(&usage.ru_utime, &usage.ru_stime, &accumulated_cputime_);
     struct timeval child_time;
-    timersub(&accumulated_cputime, &prev, &child_time);
+    timersub(&accumulated_cputime_, &prev, &child_time);
     struct timeval child_test_time;
     timersub(&child_time, &t, &child_test_time);
     return (unsigned long)(((child_test_time.tv_sec))) * 1000UL
