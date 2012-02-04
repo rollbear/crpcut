@@ -3122,8 +3122,7 @@ int main(int argc, char *argv[])
           <listitem>
             <para>Set number of parallel test case processes to
               <constant>number</constant>. <constant>number</constant>
-              must be a value in the range <literal>1</literal> to
-              <literal>8</literal> inclusively.
+              must be at least 1.
             </para>
             <para>&crpcut; defaults to one child process</para>
             <para>With a multi-core CPU, or with tests that spend a lot
