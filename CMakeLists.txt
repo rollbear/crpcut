@@ -32,6 +32,7 @@ endif(COMMAND cmake_policy)
 project(crpcut)
 include(CheckFunctionExists)
 include(CheckLibraryExists)
+include(ProcessorCount)
 
 set(CRPCUT_LIB_MAJOR_VERSION "1")
 set(CRPCUT_LIB_MINOR_VERSION "6")
@@ -52,6 +53,11 @@ set(SHAREDIR "share/crpcut-${CRPCUT_LIB_VERSION}")
 if ("${BUILD_SHARED_LIBS}" STREQUAL "")
   set(BUILD_SHARED_LIBS ON)
 endif ()
+ProcessorCount(NUM_CPUS)
+if (NUM_CPUS EQUAL 0)
+  set(NUM_CPUS 1)
+endif ()
+
 file(GLOB LIB_SRCS
      src/check_name.cpp
      src/cli/activation_param.cpp
@@ -368,7 +374,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FEATURE_SELECTION}")
 add_executable(testprog EXCLUDE_FROM_ALL ${TEST_SRCS})
 add_executable(testprog_s EXCLUDE_FROM_ALL ${TEST_SRCS})
 if (GMOCK_LIBS)
-  add_custom_target(dogfood_test dogfood DEPENDS dogfood VERBATIM)
+  add_custom_target(dogfood_test dogfood -c ${NUM_CPUS} DEPENDS dogfood VERBATIM)
   add_executable(dogfood EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
   add_executable(dogfood_s EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
   target_link_libraries(dogfood crpcut ${EXTRA_LIBS} ${GMOCK_LIBS})
