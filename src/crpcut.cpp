@@ -26,6 +26,7 @@
 
 
 #include <crpcut.hpp>
+#include "test_case_factory.hpp"
 
 namespace crpcut {
 
@@ -74,6 +75,24 @@ namespace crpcut {
     test_case_factory::present(pid, t, phase, len, buff);
   }
 
+  bool is_backtrace_enabled()
+  {
+    return test_case_factory::is_backtrace_enabled();
+  }
 
+  const char *get_output_charset()
+  {
+    return test_case_factory::get_output_charset();
+  }
+
+  const char *get_illegal_char_representation()
+  {
+    return test_case_factory::get_illegal_rep();
+  }
+
+  const char *get_program_charset()
+  {
+    return test_case_factory::get_charset();
+  }
 } // namespace crpcut
 

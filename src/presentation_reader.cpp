@@ -44,10 +44,12 @@ namespace crpcut {
   ::presentation_reader(poll<io>          &poller_,
                         int                fd_,
                         output::formatter &fmt_,
-                        bool               verbose_)
+                        bool               verbose_,
+                        const char        *working_dir)
     : poller(poller_),
       fd(fd_),
       fmt(fmt_),
+      working_dir_(working_dir),
       verbose(verbose_)
   {
     poller.add_fd(fd_, this);
@@ -169,13 +171,12 @@ namespace crpcut {
                 {
                   if (s->nonempty_dir)
                     {
-                      const char *wd  = test_case_factory::get_working_dir();
-                      const size_t dlen = wrapped::strlen(wd);
+                      const size_t dlen = wrapped::strlen(working_dir_);
                       len = dlen;
                       len+= 1;
                       len+= s->name.len;
                       char *dn = static_cast<char*>(alloca(len + 1));
-                      lib::strcpy(lib::strcpy(lib::strcpy(dn,  wd),
+                      lib::strcpy(lib::strcpy(lib::strcpy(dn,  working_dir_),
                                               "/"),
                                   s->name.str);
                       fmt.terminate(phase, s->termination,

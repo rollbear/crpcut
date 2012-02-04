@@ -25,6 +25,7 @@
  */
 
 #include <crpcut.hpp>
+#include "test_case_factory.hpp"
 #include "clocks/clocks.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
@@ -150,10 +151,10 @@ namespace crpcut {
           break; // silence warning
         }
 
-      test_case_factory::present(reg_->crpcut_get_pid(),
-                                 t,
-                                 reg_->crpcut_phase,
-                                 len, buff);
+      present_test_data(reg_->crpcut_get_pid(),
+                        t,
+                        reg_->crpcut_phase,
+                        len, buff);
       if (t == comm::exit_ok || t == comm::exit_fail)
         {
           if (!reg_->crpcut_death_note && reg_->crpcut_deadline_is_set())

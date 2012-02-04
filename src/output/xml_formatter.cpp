@@ -56,7 +56,7 @@ namespace crpcut {
                     const tag_list_root &tags)
       : writer(buffer,
                "UTF-8",
-               xml_replacement(test_case_factory::get_illegal_rep())),
+               xml_replacement(get_illegal_char_representation())),
         non_critical_fail_sum_(0),
         last_closed_(false),
         blocked_tests_(false),
@@ -121,7 +121,7 @@ namespace crpcut {
     xml_formatter
     ::escape(char c) const
     {
-      const char *illegal = xml_replacement(test_case_factory::get_illegal_rep());
+      const char *illegal = xml_replacement(get_illegal_char_representation());
       const std::size_t ill_len = wrapped::strlen(illegal);
       datatypes::fixed_string esc = { 0, 0 };
       switch (c)

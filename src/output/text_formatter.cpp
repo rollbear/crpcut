@@ -71,7 +71,7 @@ namespace crpcut {
                      const char         *os)
       : writer(buff,
                output_charset(os),
-               illegal_replacement(test_case_factory::get_illegal_rep())),
+               illegal_replacement(get_illegal_char_representation())),
         did_output_(false),
         blocked_tests_(false),
         conversion_type_(os ? translated : verbatim),

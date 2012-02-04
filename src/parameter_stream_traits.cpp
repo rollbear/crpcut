@@ -30,7 +30,7 @@ namespace {
   const char *get_parameter_string(const char *n)
   {
     using namespace crpcut;
-    const char *p = test_case_factory::get_parameter(n);
+    const char *p = get_parameter(n);
     if (!p)
       {
         static const char msg[] = "No parameter named \"";

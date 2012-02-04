@@ -37,7 +37,7 @@ namespace crpcut {
           start_timestamp_ms(clocks::monotonic::timestamp_ms_absolute())
       {
 
-        if (test_case_factory::tests_as_child_procs())
+        if (tests_as_child_processes())
           {
             clocks::monotonic::timestamp deadline = duration_ms;
             comm::report(comm::set_timeout, deadline);
@@ -47,7 +47,7 @@ namespace crpcut {
       monotonic_enforcer
       ::~monotonic_enforcer()
       {
-        if (!test_case_factory::timeouts_enabled()) return;
+        if (!timeouts_are_enabled()) return;
         typedef clocks::monotonic mono;
         mono::timestamp now  = mono::timestamp_ms_absolute();
         comm::report(comm::cancel_timeout, 0, 0);
@@ -58,7 +58,7 @@ namespace crpcut {
             os << "Realtime timeout " << duration_ms
                << "ms exceeded.\n  Actual time to completion was " << diff
                << "ms";
-            if (test_case_factory::tests_as_child_procs())
+            if (tests_as_child_processes())
               {
                 comm::report(comm::exit_fail, os.begin(), os.size());
               }

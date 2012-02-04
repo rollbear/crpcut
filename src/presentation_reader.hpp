@@ -42,7 +42,8 @@ namespace crpcut {
     presentation_reader(poll<io>          &poller_,
                         int                fd_,
                         output::formatter &fmt_,
-                        bool               verbose_);
+                        bool               verbose_,
+                        const char        *working_dir);
     virtual ~presentation_reader();
     virtual bool read();
     virtual bool write();
@@ -52,6 +53,7 @@ namespace crpcut {
     poll<io>                               &poller;
     int                                     fd;
     output::formatter                      &fmt;
+    const char                             *working_dir_;
     bool                                    verbose;
 
     presentation_reader();

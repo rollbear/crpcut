@@ -26,6 +26,7 @@
 
 
 #include <crpcut.hpp>
+#include "../test_case_factory.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
 
 namespace crpcut {
@@ -35,7 +36,7 @@ namespace crpcut {
 
     void reporter::operator()(type t, const char *msg, size_t len) const
     {
-      if (!test_case_factory::tests_as_child_procs())
+      if (!tests_as_child_processes())
         {
           if (len)
             {

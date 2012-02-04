@@ -25,6 +25,7 @@
  */
 
 #include <crpcut.hpp>
+#include "test_case_factory.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #include "clocks/clocks.hpp"
 #include "fsfuncs.hpp"

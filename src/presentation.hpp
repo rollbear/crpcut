@@ -35,6 +35,7 @@ namespace crpcut {
   int start_presenter_process(output::buffer    &buffer,
                               int                fd,
                               output::formatter &fmt,
-                              bool               verbose);
+                              bool               verbose,
+                              const char        *working_dir);
 }
 #endif // PRESENTATION_HPP

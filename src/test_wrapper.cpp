@@ -47,7 +47,7 @@ namespace crpcut {
   void test_wrapper<policies::deaths::timeout_wrapper>::run(crpcut_test_case_base *t)
   {
     t->test();
-    if (!test_case_factory::timeouts_enabled()) return;
+    if (!timeouts_are_enabled()) return;
     stream::toastream<128> os;
     os << "Unexpectedly survived\nExpected ";
     t->crpcut_get_reg().crpcut_expected_death(os);

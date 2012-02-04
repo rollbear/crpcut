@@ -159,7 +159,7 @@ namespace crpcut
                       size_t              size)
       {
 #ifdef USE_BACKTRACE
-        if (!test_case_factory::is_backtrace_enabled()) return;
+        if (!is_backtrace_enabled()) return;
         msg << header;
         void *stack_addr;
         if (stack) stack_addr = stack + 1;
@@ -205,7 +205,7 @@ namespace crpcut
 #ifdef USE_BACKTRACE
         if (control::is_enabled())
           {
-            if (test_case_factory::is_backtrace_enabled() && backtrace)
+            if (is_backtrace_enabled() && backtrace)
               {
                 static void* buffer[50];
                 size_t const elems  = size_t(backtrace.call<int>(buffer, 50));

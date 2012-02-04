@@ -46,14 +46,14 @@ namespace crpcut {
     ::writer(buffer &buff, const char *to_charset, const char *subst)
       : buffer_(buff),
         iconv_handle_(wrapped::iconv_open(to_charset,
-                                          test_case_factory::get_charset())),
+                                          get_program_charset())),
         illegal_substitute_(subst),
         illegal_substitute_len_(wrapped::strlen(subst))
     {
       if (iconv_handle_ == iconv_t(-1))
         {
           std::ostringstream oss;
-          oss << "Can't convert from \"" << test_case_factory::get_charset()
+          oss << "Can't convert from \"" << get_program_charset()
               << "\" to \"" << to_charset << "\"";
           throw std::runtime_error(oss.str());
         }

@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include <crpcut.hpp>
+#include "test_case_factory.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
 #include "tag_filter.hpp"
@@ -407,7 +407,7 @@ namespace crpcut {
 #ifdef USE_BACKTRACE
     return obj().cli_->backtrace_enabled();
 #else
-    return 0;
+    return false;
 #endif
   }
 
@@ -432,12 +432,6 @@ namespace crpcut {
     obj().do_return_dir(num);
   }
 
-  const char*
-  test_case_factory
-  ::get_working_dir()
-  {
-    return obj().do_get_working_dir();
-  }
 
   const char*
   test_case_factory
@@ -523,13 +517,6 @@ namespace crpcut {
             n = (n - 1) / 2;
           }
       }
-  }
-
-  const char*
-  test_case_factory
-  ::do_get_working_dir() const
-  {
-    return dirbase;
   }
 
   const char*
@@ -800,7 +787,8 @@ namespace crpcut {
             presenter_pipe = start_presenter_process(buffer,
                                                      output_fd,
                                                      fmt,
-                                                     cli_->verbose_mode());
+                                                     cli_->verbose_mode(),
+                                                     dirbase);
           }
         std::size_t num = cli_->num_parallel_tests();
         typedef poll_buffer_vector<fdreader> poll_reader;

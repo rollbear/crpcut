@@ -39,7 +39,8 @@ namespace crpcut {
   int start_presenter_process(output::buffer    &buffer,
                               int                fd,
                               output::formatter &fmt,
-                              bool               verbose)
+                              bool               verbose,
+                              const char        *working_dir)
   {
     pipe_pair p("communication pipe for presenter process");
 
@@ -56,7 +57,7 @@ namespace crpcut {
 
     void *poll_memory = alloca(poll_buffer_vector<io>::space_for(2));
     poll_buffer_vector<io> poller(poll_memory, 2);
-    presentation_reader r(poller, presenter_pipe, fmt, verbose);
+    presentation_reader r(poller, presenter_pipe, fmt, verbose, working_dir);
     presentation_output o(buffer, poller, fd);
     while (poller.num_fds() > 0)
       {

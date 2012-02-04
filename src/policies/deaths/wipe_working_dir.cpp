@@ -68,7 +68,7 @@ namespace crpcut {
       wipe_working_dir
       ::crpcut_on_ok_action(const char *wd_name) const
       {
-        if (test_case_factory::tests_as_child_procs())
+        if (tests_as_child_processes())
           {
             static char namebuff[PATH_MAX] = "";
             char *end = lib::strcpy(namebuff, wd_name);
