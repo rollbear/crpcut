@@ -40,7 +40,7 @@ namespace crpcut {
 #endif
         num_children_('c', "children", "number",
                       "Control number of concurrently running test processes\n"
-                      "number must be >=1 and <= 8",
+                      "number must be at least 1",
                       list_),
         charset_('C', "output-charset", "charset",
                  "Specify the output character set to convert text output\n"
@@ -196,6 +196,13 @@ namespace crpcut {
         {
           std::ostringstream os;
           charset_.syntax(os) << " cannot be used with XML reports";
+          throw param::exception(os.str());
+        }
+
+      if (num_children_ && num_children_.get_value() == 0)
+        {
+          std::ostringstream os;
+          num_children_.syntax(os) << " - number must be at least 1";
           throw param::exception(os.str());
         }
       return rv;

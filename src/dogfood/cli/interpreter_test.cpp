@@ -38,7 +38,7 @@ namespace {
 "\n"
 "   -c number / --children=number\n"
 "        Control number of concurrently running test processes\n"
-"        number must be >=1 and <= 8\n"
+"        number must be at least 1\n"
 "\n"
 "   -C charset / --output-charset=charset\n"
 "        Specify the output character set to convert text output\n"
@@ -159,10 +159,18 @@ TESTSUITE(cli)
 
     TEST(defined_number_of_test_process_are_returned_specified)
     {
-      ARGV("-x", "--children=7", "-I", "apa");
+      ARGV("-x", "--children=78931238", "-I", "apa");
       crpcut::cli::interpreter cli(argv);
-      ASSERT_TRUE(cli.num_parallel_tests() == 7U);
+      ASSERT_TRUE(cli.num_parallel_tests() == 78931238U);
       ASSERT_TRUE(cli.get_test_list() == argv + 5);
+    }
+
+    TEST(zero_test_processes_throws)
+    {
+      ARGV("-x", "-c", "0", "-I", "apa");
+      ASSERT_THROW(crpcut::cli::interpreter cli(argv),
+                   crpcut::cli::param::exception,
+                   "-c number / --children=number - number must be at least 1");
     }
 
     TEST(output_charset_is_null_if_not_specified_by_argv)

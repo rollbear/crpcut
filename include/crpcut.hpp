@@ -1801,7 +1801,6 @@ namespace crpcut {
     static const char *get_charset();
     static const char *get_output_charset();
     static const char *get_illegal_rep();
-    static const unsigned max_parallel = 8;
 
     static int run_test(int argc, char *argv[],
                         std::ostream &os = std::cerr);
@@ -1857,14 +1856,13 @@ namespace crpcut {
       return rv;
     }
   private:
-    typedef buffer_vector<crpcut_test_case_registrator*> timeout_queue;
     static test_case_factory& obj();
     test_case_factory();
     void list_tests(const char *const *names,
                     tag_list_root     &tags,
                     std::ostream      &os);
     void kill_presenter_process();
-    void manage_children(unsigned max_pending_children, poll<fdreader> &poller);
+    void manage_children(std::size_t max_pending_children, poll<fdreader> &poller);
     void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
 
     int do_run(cli::interpreter *cli, std::ostream &os, tag_list_root &tags);
@@ -1889,23 +1887,24 @@ namespace crpcut {
       virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
     };
 
+    typedef buffer_vector<crpcut_test_case_registrator*> timeout_queue;
 
-    cli::interpreter *cli_;
-    struct timeval    accumulated_cputime;
-    pid_t             current_pid;
-    registrator_list  reg;
-    unsigned          pending_children;
-    unsigned          num_registered_tests;
-    unsigned          num_selected_tests;
-    unsigned          num_tests_run;
-    unsigned          num_successful_tests;
-    int               presenter_pipe;
-    timeout_queue    *deadlines_;
-    unsigned          working_dirs[max_parallel];
-    unsigned          first_free_working_dir;
-    char              dirbase[PATH_MAX];
-    char              homedir[PATH_MAX];
-    const char *      charset;
+    cli::interpreter        *cli_;
+    struct timeval           accumulated_cputime;
+    pid_t                    current_pid;
+    registrator_list         reg;
+    unsigned                 pending_children;
+    unsigned                 num_registered_tests;
+    unsigned                 num_selected_tests;
+    unsigned                 num_tests_run;
+    unsigned                 num_successful_tests;
+    int                      presenter_pipe;
+    timeout_queue           *deadlines_;
+    buffer_vector<unsigned> *working_dirs_;
+    unsigned                 first_free_working_dir;
+    char                     dirbase[PATH_MAX];
+    char                     homedir[PATH_MAX];
+    const char              *charset;
   };
 
   template <typename C>

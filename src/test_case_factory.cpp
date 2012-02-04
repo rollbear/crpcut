@@ -148,14 +148,11 @@ namespace crpcut {
       num_successful_tests(0),
       presenter_pipe(-1),
       deadlines_(0),
+      working_dirs_(0),
       first_free_working_dir(0),
       charset("UTF-8")
   {
     lib::strcpy(dirbase, "/tmp/crpcutXXXXXX");
-    for (unsigned n = 0; n < max_parallel; ++n)
-      {
-        working_dirs[n] = n + 1;
-      }
   }
 
 
@@ -185,7 +182,7 @@ namespace crpcut {
 
   void
   test_case_factory
-  ::manage_children(unsigned max_pending_children, poll<fdreader> &poller)
+  ::manage_children(std::size_t max_pending_children, poll<fdreader> &poller)
   {
     while (pending_children >= max_pending_children)
       {
@@ -244,7 +241,7 @@ namespace crpcut {
     pipe_pair stdout("communication pipe for test-case stdout");
 
     unsigned wd = first_free_working_dir;
-    first_free_working_dir = working_dirs[wd];
+    first_free_working_dir = working_dirs_->at(wd);
     i->crpcut_set_wd(wd);
     pid_t pid;
     for (;;)
@@ -546,7 +543,7 @@ namespace crpcut {
   test_case_factory
   ::do_return_dir(unsigned num)
   {
-    working_dirs[num] = first_free_working_dir;
+    working_dirs_->at(num) = first_free_working_dir;
     first_free_working_dir = num;
   }
 
@@ -805,14 +802,23 @@ namespace crpcut {
                                                      fmt,
                                                      cli_->verbose_mode());
           }
-        std::size_t num = 3*cli_->num_parallel_tests();
+        std::size_t num = cli_->num_parallel_tests();
         typedef poll_buffer_vector<fdreader> poll_reader;
-        void *poll_memory = alloca(poll_reader::space_for(num));
-        poll_reader poller(poll_memory, num);
+        void *poll_memory = alloca(poll_reader::space_for(num*3U));
+        poll_reader poller(poll_memory, num*3U);
 
-        void *deadline_space = alloca(timeout_queue::space_for(cli_->num_parallel_tests()));
-        timeout_queue deadlines(deadline_space, cli_->num_parallel_tests());
+        void *deadline_space = alloca(timeout_queue::space_for(num));
+        timeout_queue deadlines(deadline_space, num);
         deadlines_ = &deadlines;
+
+        void *wd_space = alloca(buffer_vector<unsigned>::space_for(num));
+        buffer_vector<unsigned> wd_vector(wd_space, num);
+        working_dirs_ = &wd_vector;
+        for (unsigned n = 0; n < num; ++n)
+          {
+            working_dirs_->push_back(n + 1U);
+          }
+
         for (;;)
           {
             bool progress = false;
@@ -826,7 +832,7 @@ namespace crpcut {
                   }
                 progress = true;
                 start_test(i, poller);
-                manage_children(cli_->num_parallel_tests(), poller);
+                manage_children(num, poller);
                 i = i->crpcut_unlink();
                 if (!tests_as_child_procs())
                   {
@@ -845,7 +851,7 @@ namespace crpcut {
         if (tests_as_child_procs())
           {
             kill_presenter_process();
-            for (unsigned n = 0; n < max_parallel; ++n)
+            for (unsigned n = 0; n < num; ++n)
               {
                 stream::toastream
                 < std::numeric_limits<unsigned>::digits / 3 + 1
