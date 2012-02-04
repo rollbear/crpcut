@@ -31,6 +31,8 @@
 
 namespace crpcut {
 
+  class working_dir_allocator;
+
   class test_case_factory
   {
   public:
@@ -93,7 +95,6 @@ namespace crpcut {
 
 
     typedef buffer_vector<crpcut_test_case_registrator*> timeout_queue;
-    typedef buffer_vector<unsigned>                      dir_vector;
     cli::interpreter        *cli_;
     struct timeval           accumulated_cputime;
     pid_t                    current_pid;
@@ -103,8 +104,7 @@ namespace crpcut {
     unsigned                 num_successful_tests;
     int                      presenter_pipe;
     timeout_queue           *deadlines_;
-    dir_vector              *working_dirs_;
-    unsigned                 first_free_working_dir;
+    working_dir_allocator   *working_dirs_;
     char                     dirbase[PATH_MAX];
     char                     homedir[PATH_MAX];
     const char              *charset;

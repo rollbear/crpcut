@@ -114,6 +114,7 @@ file(GLOB LIB_SRCS
      src/test_suite_base.cpp
      src/test_wrapper.cpp
      src/text_writer.cpp
+     src/working_dir_allocator.cpp
      src/wrapped/posix_encapsulation.cpp
 )
 include_directories(include)
@@ -141,6 +142,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/presentation_output_test.cpp
      src/dogfood/printer_test.cpp
      src/dogfood/tag_filter_test.cpp
+     src/dogfood/working_dir_allocator_test.cpp
 )
 if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)

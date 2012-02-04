@@ -38,6 +38,7 @@
 #include "output/text_formatter.hpp"
 #include "cli/interpreter.hpp"
 #include "buffer_vector.hpp"
+#include "working_dir_allocator.hpp"
 extern "C" {
 #  include <sys/time.h>
 #  include <fcntl.h>
@@ -138,7 +139,6 @@ namespace crpcut {
       presenter_pipe(-1),
       deadlines_(0),
       working_dirs_(0),
-      first_free_working_dir(0),
       charset("UTF-8")
   {
     lib::strcpy(dirbase, "/tmp/crpcutXXXXXX");
@@ -229,9 +229,7 @@ namespace crpcut {
     pipe_pair stderr("communication pipe for test-case stderr");
     pipe_pair stdout("communication pipe for test-case stdout");
 
-    unsigned wd = first_free_working_dir;
-    first_free_working_dir = working_dirs_->at(wd);
-    i->crpcut_set_wd(wd);
+    i->crpcut_set_wd(working_dirs_->allocate());
     pid_t pid;
     for (;;)
       {
@@ -519,8 +517,7 @@ namespace crpcut {
   test_case_factory
   ::do_return_dir(unsigned num)
   {
-    working_dirs_->at(num) = first_free_working_dir;
-    first_free_working_dir = num;
+    working_dirs_->free(num);
   }
 
   void
@@ -1004,13 +1001,9 @@ namespace crpcut {
         timeout_queue deadlines(deadline_space, num_parallel);
         deadlines_ = &deadlines;
 
-        void *wd_space = alloca(dir_vector::space_for(num_parallel));
-        dir_vector wd_vector(wd_space, num_parallel);
-        working_dirs_ = &wd_vector;
-        for (unsigned n = 0; n < num_parallel; ++n)
-          {
-            working_dirs_->push_back(n + 1U);
-          }
+        void *wd_space = alloca(working_dir_allocator::space_for(num_parallel));
+        working_dir_allocator dir_allocator(wd_space, num_parallel);
+        working_dirs_ = &dir_allocator;
 
         if (!schedule_tests(num_parallel, poller)) return 0;
 
