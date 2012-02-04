@@ -57,5 +57,11 @@ namespace crpcut {
   {
     return test_case_factory::set_charset(charset);
   }
+
+  bool timeouts_are_enabled()
+  {
+    return test_case_factory::timeouts_enabled();
+  }
+
 } // namespace crpcut
 

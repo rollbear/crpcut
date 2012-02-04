@@ -3019,6 +3019,7 @@ namespace crpcut {
     static type make_value(const char *n);
   };
 
+  bool timeouts_are_enabled();
 
   //// template and inline func implementations
 
@@ -3282,10 +3283,7 @@ namespace crpcut {
       bool
       timeout<N>::crpcut_is_expected_signal(int code) const
       {
-        return
-          !test_case_factory::timeouts_enabled()
-          || code == SIGKILL
-          || code == SIGXCPU;
+        return !timeouts_are_enabled() || code == SIGKILL || code == SIGXCPU;
       }
 
       template <unsigned long N>
@@ -3946,8 +3944,7 @@ namespace crpcut {
         if (limit_ + 1) // wrap around to 0 signals disabled temporary
           {
             unsigned long t = clock::now();
-            if (test_case_factory::timeouts_enabled()
-                && cond::busted(t, deadline_))
+            if (timeouts_are_enabled() && cond::busted(t, deadline_))
               {
                 comm::direct_reporter<action>()
                   << filename_ << ":" << line_ << "\n"
