@@ -68,5 +68,12 @@ namespace crpcut {
     return test_case_factory::tests_as_child_procs();
   }
 
+  void present_test_data(pid_t pid, comm::type t, test_phase phase,
+                         size_t len, const char *buff)
+  {
+    test_case_factory::present(pid, t, phase, len, buff);
+  }
+
+
 } // namespace crpcut
 

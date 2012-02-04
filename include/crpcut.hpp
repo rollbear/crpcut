@@ -2983,6 +2983,9 @@ namespace crpcut {
     static type make_value(const char *n);
   };
 
+  void present_test_data(pid_t pid, comm::type t, test_phase phase,
+                         size_t len, const char *buff);
+
   bool timeouts_are_enabled();
   bool tests_as_child_processes();
 
@@ -3385,9 +3388,9 @@ namespace crpcut {
             assert(errno == EINTR);
             continue;
           }
-        test_case_factory::present(reg_->crpcut_get_pid(), t,
-                                   reg_->crpcut_get_phase(),
-                                   size_t(rv), buff);
+        present_test_data(reg_->crpcut_get_pid(), t,
+                          reg_->crpcut_get_phase(),
+                          size_t(rv), buff);
         break;
       }
     return true;
