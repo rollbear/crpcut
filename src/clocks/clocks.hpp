@@ -26,53 +26,58 @@
 
 #ifndef CLOCKS_HPP
 #define CLOCKS_HPP
-namespace clocks {
-  class monotonic
-  {
-  public:
-    typedef unsigned long timestamp;
-    static timestamp timestamp_ms_absolute() { return func(); }
-    static const char *get_name() { return name; }
-    typedef timestamp (*timestamp_func)();
-  private:
-    static timestamp_func func;
-    static const char    *name;
-
-    static timestamp_func try_mach_high_res_timer();
-    static timestamp_func try_clock_gettime_monotonic();
-    static timestamp_func try_getitimer_real();
-    static timestamp_func try_gettimeofday();
-    class initializer
+namespace crpcut {
+  namespace clocks {
+    class monotonic
     {
     public:
-      initializer();
+      static const monotonic &obj();
+      virtual ~monotonic();
+      typedef unsigned long timestamp;
+      virtual timestamp now() const;
+      static timestamp timestamp_ms_absolute() { return func(); }
+      static const char *get_name() { return name; }
+      typedef timestamp (*timestamp_func)();
+    private:
+      static timestamp_func func;
+      static const char    *name;
+
+      static timestamp_func try_mach_high_res_timer();
+      static timestamp_func try_clock_gettime_monotonic();
+      static timestamp_func try_getitimer_real();
+      static timestamp_func try_gettimeofday();
+      class initializer
+      {
+      public:
+        initializer();
+      };
+
+      static initializer bootstrap;
     };
 
-    static initializer bootstrap;
-  };
-
-  class cputime
-  {
-  public:
-    typedef unsigned long timestamp;
-    static timestamp timestamp_ms_absolute() { return func(); }
-    static const char *get_name() { return name; }
-    typedef timestamp (*timestamp_func)();
-  private:
-    static timestamp_func func;
-    static const char    *name;
-
-    static timestamp_func try_clock_gettime_cputime();
-    static timestamp_func try_getitimer_virtual();
-    static timestamp_func try_getitimer_prof();
-
-    class initializer
+    class cputime
     {
     public:
-      initializer();
-    };
+      typedef unsigned long timestamp;
+      static timestamp timestamp_ms_absolute() { return func(); }
+      static const char *get_name() { return name; }
+      typedef timestamp (*timestamp_func)();
+    private:
+      static timestamp_func func;
+      static const char    *name;
 
-    static initializer bootstrap;
-  };
+      static timestamp_func try_clock_gettime_cputime();
+      static timestamp_func try_getitimer_virtual();
+      static timestamp_func try_getitimer_prof();
+
+      class initializer
+      {
+      public:
+        initializer();
+      };
+
+      static initializer bootstrap;
+    };
+  }
 }
 #endif // CLOCKS_HPP

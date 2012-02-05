@@ -1714,10 +1714,29 @@ namespace crpcut {
     comm::wfile_descriptor response_fd;
   };
 
+  class crpcut_timeboxed
+  {
+  public:
+    virtual ~crpcut_timeboxed();
+    void crpcut_set_deadline(unsigned long absolute_ms);
+    void crpcut_clear_deadline();
+    bool crpcut_deadline_is_set() const;
+    virtual void crpcut_kill() = 0;
+    unsigned long crpcut_absolute_deadline() const;
+    static bool crpcut_compare(const crpcut_timeboxed *lh,
+                               const crpcut_timeboxed *rh);
+  protected:
+    crpcut_timeboxed();
+  private:
+    unsigned long crpcut_absolute_deadline_ms_;
+    bool          crpcut_deadline_set_;
+  };
+
   class test_suite_base;
   class crpcut_test_case_registrator
     : public virtual policies::deaths::crpcut_none,
-      public virtual policies::dependencies::crpcut_base
+      public virtual policies::dependencies::crpcut_base,
+      public crpcut_timeboxed
   {
     friend class test_suite_base;
   public:
@@ -1739,11 +1758,7 @@ namespace crpcut {
     crpcut_test_case_registrator *crpcut_unlink();
     void crpcut_link_after(crpcut_test_case_registrator*);
     void crpcut_kill();
-    unsigned long crpcut_ms_until_deadline() const;
     void crpcut_clear_deadline();
-    bool crpcut_deadline_is_set() const;
-    static bool crpcut_timeout_compare(const crpcut_test_case_registrator *lh,
-                                       const crpcut_test_case_registrator *rh);
     void crpcut_unregister_fds();
     crpcut_test_case_registrator *crpcut_get_next() const;
     void crpcut_set_wd(unsigned n);
@@ -1774,9 +1789,7 @@ namespace crpcut {
     unsigned                      crpcut_active_readers;
     bool                          crpcut_killed;
     bool                          crpcut_death_note;
-    bool                          crpcut_deadline_set;
     pid_t                         crpcut_pid_;
-    unsigned long                 crpcut_absolute_deadline_ms;
     struct timeval                crpcut_cpu_time_at_start;
     unsigned                      crpcut_dirnum;
     report_reader                 crpcut_rep_reader;

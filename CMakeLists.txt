@@ -71,6 +71,7 @@ file(GLOB LIB_SRCS
      src/comm/reporter.cpp
      src/convert_traits.cpp
      src/crpcut.cpp
+     src/deadline_monitor.cpp
      src/event.cpp
      src/failed_check_reporter.cpp
      src/fdreader.cpp
@@ -114,6 +115,7 @@ file(GLOB LIB_SRCS
      src/test_suite_base.cpp
      src/test_wrapper.cpp
      src/text_writer.cpp
+     src/timeboxed.cpp
      src/working_dir_allocator.cpp
      src/wrapped/posix_encapsulation.cpp
 )
@@ -128,6 +130,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/cli/param_test.cpp
      src/dogfood/cli/value_param_test.cpp
      src/dogfood/comm/file_descriptor_test.cpp
+     src/dogfood/deadline_monitor_test.cpp
      src/dogfood/dogfood.cpp
      src/dogfood/failed_check_reporter_test.cpp
      src/dogfood/fixed_string_test.cpp

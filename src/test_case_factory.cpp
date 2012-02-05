@@ -39,6 +39,7 @@
 #include "cli/interpreter.hpp"
 #include "buffer_vector.hpp"
 #include "working_dir_allocator.hpp"
+#include "deadline_monitor.hpp"
 extern "C" {
 #  include <sys/time.h>
 #  include <fcntl.h>
@@ -175,21 +176,14 @@ namespace crpcut {
   {
     while (num_pending_children_ >= max_pending_children)
       {
-        int timeout_ms = timeouts_enabled() && deadlines_->size()
-          ? int(deadlines_->front()->crpcut_ms_until_deadline())
-          : -1;
+        int timeout_ms = deadlines_->ms_until_deadline();
 
         poll<fdreader>::descriptor desc = poller.wait(timeout_ms);
 
         if (desc.timeout())
           {
-            assert(deadlines_->size());
-            crpcut_test_case_registrator *i = deadlines_->front();
-            std::pop_heap(deadlines_->begin(), deadlines_->end(),
-                          &crpcut_test_case_registrator
-                          ::crpcut_timeout_compare);
-            deadlines_->pop_back();
-            i->crpcut_kill();
+            crpcut_timeboxed *t = deadlines_->remove_first();
+            t->crpcut_kill();
             continue;
           }
         bool read_failed = false;
@@ -461,9 +455,7 @@ namespace crpcut {
   ::do_set_deadline(crpcut_test_case_registrator *i)
   {
     assert(i->crpcut_deadline_is_set());
-    deadlines_->push_back(i);
-    std::push_heap(deadlines_->begin(), deadlines_->end(),
-                   &crpcut_test_case_registrator::crpcut_timeout_compare);
+    deadlines_->insert(i);
   }
 
   void
@@ -471,40 +463,7 @@ namespace crpcut {
   ::do_clear_deadline(crpcut_test_case_registrator *i)
   {
     assert(i->crpcut_deadline_is_set());
-    typedef crpcut_test_case_registrator tcr;
-    tcr **found = std::find(deadlines_->begin(), deadlines_->end(), i);
-    assert(found != deadlines_->end() && "clear deadline when none was ordered");
-
-    size_t n = size_t(found - deadlines_->begin());
-
-    for (;;)
-      {
-        size_t m = (n + 1) * 2 - 1;
-        if (m >= deadlines_->size() - 1) break;
-
-        if (tcr::crpcut_timeout_compare(deadlines_->at(m + 1),
-                                        deadlines_->at(m)))
-          {
-            deadlines_->at(n) = deadlines_->at(m);
-          }
-        else
-          {
-            deadlines_->at(n) = deadlines_->at(++m);
-          }
-        n = m;
-      }
-
-    deadlines_->at(n) = deadlines_->back();
-    deadlines_->pop_back();
-    if (n != deadlines_->size())
-      {
-        while (n && !tcr::crpcut_timeout_compare(deadlines_->at(n),
-                                                 deadlines_->at((n - 1) / 2)))
-          {
-            std::swap(deadlines_->at(n), deadlines_->at((n - 1) / 2));
-            n = (n - 1) / 2;
-          }
-      }
+    deadlines_->remove(i);
   }
 
   const char*
@@ -998,8 +957,8 @@ namespace crpcut {
         void *poll_memory = alloca(poll_reader::space_for(num_parallel*3U));
         poll_reader poller(poll_memory, num_parallel*3U);
 
-        void *deadline_space = alloca(timeout_queue::space_for(num_parallel));
-        timeout_queue deadlines(deadline_space, num_parallel);
+        void *deadline_space = alloca(deadline_monitor::space_for(num_parallel));
+        deadline_monitor deadlines(deadline_space, num_parallel);
         deadlines_ = &deadlines;
 
         void *wd_space = alloca(working_dir_allocator::space_for(num_parallel));

@@ -1,0 +1,83 @@
+/*
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * All rights reserved
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+#include <crpcut.hpp>
+
+namespace crpcut {
+
+  crpcut_timeboxed::~crpcut_timeboxed()
+  {
+  }
+
+  crpcut_timeboxed::crpcut_timeboxed()
+    : crpcut_absolute_deadline_ms_(0U),
+      crpcut_deadline_set_(false)
+  {
+  }
+
+  void crpcut_timeboxed::crpcut_set_deadline(unsigned long absolute_ms)
+  {
+    assert(!crpcut_deadline_set_);
+    crpcut_absolute_deadline_ms_ = absolute_ms;
+    crpcut_deadline_set_ = true;
+  }
+
+  void crpcut_timeboxed::crpcut_clear_deadline()
+  {
+    assert(crpcut_deadline_set_);
+    crpcut_deadline_set_ = false;
+  }
+
+  bool crpcut_timeboxed::crpcut_deadline_is_set() const
+  {
+    return crpcut_deadline_set_;
+  }
+
+  unsigned long crpcut_timeboxed::crpcut_absolute_deadline() const
+  {
+    assert(crpcut_deadline_set_);
+    return crpcut_absolute_deadline_ms_;
+  }
+
+  bool crpcut_timeboxed::crpcut_compare(const crpcut_timeboxed *lh,
+                                        const crpcut_timeboxed *rh)
+  {
+    assert(lh->crpcut_deadline_set_);
+    assert(rh->crpcut_deadline_set_);
+
+    long diff
+      = long(lh->crpcut_absolute_deadline_ms_
+           - rh->crpcut_absolute_deadline_ms_);
+    return diff > 0;
+  }
+}
+
+
+
+
+
+
+

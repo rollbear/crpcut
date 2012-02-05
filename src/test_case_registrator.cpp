@@ -59,27 +59,6 @@ namespace crpcut {
     r->crpcut_next = this;
   }
 
-  bool
-  crpcut_test_case_registrator
-  ::crpcut_deadline_is_set() const
-  {
-    return crpcut_deadline_set;
-  }
-
-  bool
-  crpcut_test_case_registrator
-  ::crpcut_timeout_compare(const crpcut_test_case_registrator *lh,
-                           const crpcut_test_case_registrator *rh)
-  {
-    assert(lh->crpcut_deadline_set);
-    assert(rh->crpcut_deadline_set);
-
-    long diff
-      = long(lh->crpcut_absolute_deadline_ms
-             - rh->crpcut_absolute_deadline_ms);
-    return diff > 0;
-  }
-
   crpcut_test_case_registrator *
   crpcut_test_case_registrator
   ::crpcut_get_next() const
@@ -126,10 +105,9 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::crpcut_set_timeout(unsigned long ts)
   {
-    crpcut_absolute_deadline_ms = crpcut_phase == running
-      ? crpcut_calc_deadline(ts)
-      : ts;
-    crpcut_deadline_set = true;
+    crpcut_timeboxed::crpcut_set_deadline(crpcut_phase == running
+                                          ? crpcut_calc_deadline(ts)
+                                          : ts);
   }
 
   void
@@ -160,9 +138,7 @@ namespace crpcut {
       crpcut_active_readers(0),
       crpcut_killed(false),
       crpcut_death_note(false),
-      crpcut_deadline_set(false),
       crpcut_pid_(0),
-      crpcut_absolute_deadline_ms(0),
       crpcut_cpu_time_at_start(),
       crpcut_dirnum(~0U),
       crpcut_rep_reader(0),
@@ -185,9 +161,7 @@ namespace crpcut {
       crpcut_active_readers(0),
       crpcut_killed(false),
       crpcut_death_note(false),
-      crpcut_deadline_set(false),
       crpcut_pid_(0),
-      crpcut_absolute_deadline_ms(0),
       crpcut_cpu_time_at_start(),
       crpcut_dirnum(~0U),
       crpcut_rep_reader(this),
@@ -297,23 +271,12 @@ namespace crpcut {
     crpcut_killed = true;
   }
 
-  unsigned long
-  crpcut_test_case_registrator
-  ::crpcut_ms_until_deadline() const
-  {
-    clocks::monotonic::timestamp now
-      = clocks::monotonic::timestamp_ms_absolute();
-    unsigned long diff = crpcut_absolute_deadline_ms - now;
-    return long(diff) < 0 ? 0UL : diff;
-  }
-
   void
   crpcut_test_case_registrator
   ::crpcut_clear_deadline()
   {
-    assert(crpcut_deadline_is_set());
     test_case_factory::clear_deadline(this);
-    crpcut_deadline_set = false;
+    crpcut_timeboxed::crpcut_clear_deadline();
   }
 
   void
