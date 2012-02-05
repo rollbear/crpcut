@@ -29,6 +29,7 @@
 #include "printer.hpp"
 #include "output/formatter.hpp"
 #include "poll.hpp"
+#include "posix_error.hpp"
 #include <crpcut.hpp>
 
 namespace {
@@ -41,203 +42,204 @@ namespace {
 namespace crpcut {
 
   presentation_reader
-  ::presentation_reader(poll<io>          &poller_,
-                        int                fd_,
-                        output::formatter &fmt_,
-                        bool               verbose_,
-                        const char        *working_dir)
-    : poller(poller_),
-      fd(fd_),
-      fmt(fmt_),
+  ::presentation_reader(poll<io>               &poller,
+                        comm::rfile_descriptor &fd,
+                        output::formatter      &fmt,
+                        bool                    verbose,
+                        const char             *working_dir)
+    : poller_(poller),
+      fd_(fd),
+      fmt_(fmt),
       working_dir_(working_dir),
-      verbose(verbose_)
+      verbose_(verbose)
   {
-    poller.add_fd(fd_, this);
+    poller_.add_fd(fd_, this);
   }
 
   presentation_reader
   ::~presentation_reader()
   {
-    assert(fd >= 0);
   }
 
   void
   presentation_reader
   ::exception()
   {
-    poller.del_fd(fd);
-    fd = -1;
+    poller_.del_fd(&fd_);
+    comm::rfile_descriptor().swap(fd_);
+  }
+
+  test_case_result *
+  presentation_reader
+  ::find_result_for(pid_t id)
+  {
+    // a linear search isn't that great, but the
+    // amount of data is small.
+    for (test_case_result *i = messages_.next();
+         i != messages_.next()->prev();
+         i = i->next())
+      {
+        if (i->id == id)
+          {
+            return i;
+          }
+      }
+    return 0;
+  }
+
+  void
+  presentation_reader
+  ::begin_test(test_case_result *s)
+  {
+    assert(!s->name);
+    assert(s->history.is_empty());
+    // introduction to test case, name follows
+
+    size_t len = 0;
+    fd_.read_loop(&len, sizeof(len));
+    char *buff = static_cast<char *>(wrapped::malloc(len + 1));
+    fd_.read_loop(buff, len);
+    buff[len] = 0;
+    s->name.str = buff;
+    s->name.len = len;
+    s->success = true;
+    s->nonempty_dir = false;
+  }
+
+  void
+  presentation_reader
+  ::end_test(test_phase phase, test_case_result* s)
+  {
+    size_t len;
+    fd_.read_loop(&len, sizeof(len));
+    bool critical;
+    assert(len == sizeof(critical));
+    fd_.read_loop(&critical, len);
+
+    if (s->explicit_fail || !s->success || verbose_)
+      {
+        printer print(fmt_,
+                      s->name,
+                      s->success && !s->explicit_fail,
+                      critical);
+
+        for (event *i = s->history.next();
+            i != static_cast<event*>(&s->history);
+            i = i->next())
+          {
+
+            fmt_.print(tag_info[i->tag], i->body);
+          }
+        if (s->termination || s->nonempty_dir || s->explicit_fail)
+          {
+            if (s->nonempty_dir)
+              {
+                const size_t dlen = wrapped::strlen(working_dir_);
+                len = dlen;
+                len+= 1;
+                len+= s->name.len;
+                char *dn = static_cast<char*>(alloca(len + 1));
+                lib::strcpy(lib::strcpy(lib::strcpy(dn,  working_dir_),
+                                        "/"),
+                            s->name.str);
+                fmt_.terminate(phase, s->termination,
+                              datatypes::fixed_string::make(dn, len));
+              }
+            else
+              {
+                fmt_.terminate(phase, s->termination);
+              }
+          }
+      }
+    delete s;
+  }
+
+  void
+  presentation_reader
+  ::nonempty_dir(test_case_result *s)
+  {
+    size_t len;
+    fd_.read_loop(&len, sizeof(len));
+    assert(len == 0);
+    (void)len; // silense warning
+    s->success = false;
+    s->nonempty_dir = true;
+  }
+
+  void
+  presentation_reader
+  ::output_data(comm::type t, test_case_result *s)
+  {
+    size_t len;
+    fd_.read_loop(&len, sizeof(len));
+    if (len == 0) return;
+
+    char *buff = static_cast<char *>(wrapped::malloc(len));
+    fd_.read_loop(buff, len);
+
+    if (t == comm::exit_ok || t == comm::exit_fail)
+      {
+        s->termination = datatypes::fixed_string::make(buff, len);
+        return;
+      }
+    event *e = new event(t, buff, len);
+    e->link_before(s->history);
   }
 
   bool
   presentation_reader
   ::read()
   {
-    assert(fd >= 0);
-    pid_t test_case_id;
-
-    ssize_t rv = wrapped::read(fd, &test_case_id, sizeof(test_case_id));
-    if (rv == 0) return true;
-    assert(rv == sizeof(test_case_id));
-    test_case_result *s = 0;
-
-    // a linear search isn't that great, but the
-    // amount of data is small.
-    for (test_case_result *i = messages.next();
-         i != messages.next()->prev();
-         i = i->next())
-      {
-        if (i->id == test_case_id)
-          {
-            s = i;
-            break;
-          }
-      }
-    if (!s)
-      {
-        s = new test_case_result(test_case_id);
-        s->link_after(messages);
-      }
-    comm::type t;
-    rv = wrapped::read(fd, &t, sizeof(t));
-    assert(rv == sizeof(t));
-
-    test_phase phase;
-    rv = wrapped::read(fd, &phase, sizeof(phase));
-    assert(rv == sizeof(phase));
-    int mask = t & comm::kill_me;
-    t = static_cast<comm::type>(t & ~mask);
-    switch (t)
-      {
-      case comm::begin_test:
+    try {
+      pid_t test_case_id;
+      fd_.read_loop(&test_case_id, sizeof(test_case_id));
+      test_case_result *s = find_result_for(test_case_id);
+      if (!s)
         {
-          assert(!s->name);
-          assert(s->history.is_empty());
-          // introduction to test case, name follows
-
-          size_t len = 0;
-          char *ptr = static_cast<char*>(static_cast<void*>(&len));
-          size_t bytes_read = 0;
-          while (bytes_read < sizeof(len))
-            {
-              rv = wrapped::read(fd,
-                                 ptr + bytes_read,
-                                 sizeof(len) - bytes_read);
-              assert(rv > 0);
-              bytes_read += size_t(rv);
-            }
-          char *buff = static_cast<char *>(wrapped::malloc(len + 1));
-          bytes_read = 0;
-          while (bytes_read < len)
-            {
-              rv = wrapped::read(fd,
-                                 buff + bytes_read,
-                                 len - bytes_read);
-              assert(rv >= 0);
-              bytes_read += size_t(rv);
-            }
-          buff[len] = 0;
-          s->name.str = buff;
-          s->name.len = len;
-          s->success = true;
-          s->nonempty_dir = false;
+          s = new test_case_result(test_case_id);
+          s->link_after(messages_);
         }
-        break;
-      case comm::end_test:
+
+      comm::type t;
+      fd_.read_loop(&t, sizeof(t));
+
+      test_phase phase;
+      fd_.read_loop(&phase, sizeof(phase));
+
+      int mask = t & comm::kill_me;
+      t = static_cast<comm::type>(t & ~mask);
+      switch (t)
         {
-          size_t len;
-          rv = wrapped::read(fd, &len, sizeof(len));
-          assert(rv == sizeof(len));
-          bool critical;
-          assert(len == sizeof(critical));
-          rv = wrapped::read(fd, &critical, len);
-          assert(rv == sizeof(critical));
-
-          if (s->explicit_fail || !s->success || verbose)
-            {
-              printer print(fmt,
-                            s->name,
-                            s->success && !s->explicit_fail,
-                            critical);
-
-              for (event *i = s->history.next();
-                   i != static_cast<event*>(&s->history);
-                   i = i->next())
-                {
-
-                  fmt.print(tag_info[i->tag], i->body);
-                }
-              if (s->termination || s->nonempty_dir || s->explicit_fail)
-                {
-                  if (s->nonempty_dir)
-                    {
-                      const size_t dlen = wrapped::strlen(working_dir_);
-                      len = dlen;
-                      len+= 1;
-                      len+= s->name.len;
-                      char *dn = static_cast<char*>(alloca(len + 1));
-                      lib::strcpy(lib::strcpy(lib::strcpy(dn,  working_dir_),
-                                              "/"),
-                                  s->name.str);
-                      fmt.terminate(phase, s->termination,
-                                    datatypes::fixed_string::make(dn, len));
-                    }
-                  else
-                    {
-                      fmt.terminate(phase, s->termination);
-                    }
-                }
-            }
-        }
-        delete s;
-        break;
-      case comm::dir:
-        {
-          size_t len;
-          rv = wrapped::read(fd, &len, sizeof(len));
-          assert(rv == sizeof(len));
-          assert(len == 0);
-          (void)len; // silense warning
-          s->success = false;
-          s->nonempty_dir = true;
-        }
-        break;
-      case comm::fail:
-      case comm::exit_fail:
-        s->explicit_fail = true;
+        case comm::begin_test:
+          begin_test(s);
+          break;
+        case comm::end_test:
+          end_test(phase, s);
+          break;
+        case comm::dir:
+          nonempty_dir(s);
+          break;
+        case comm::fail:
+        case comm::exit_fail:
+          s->explicit_fail = true;
                                            /* no break */
-      case comm::exit_ok:
-        s->success &= t == comm::exit_ok;
+        case comm::exit_ok:
+          s->success &= t == comm::exit_ok;
                                            /* no break */
-      case comm::stdout:
-      case comm::stderr:
-      case comm::info:
-        {
-          size_t len;
-          rv = wrapped::read(fd, &len, sizeof(len));
-          assert(rv == sizeof(len));
-          if (len)
-            {
-              char *buff = static_cast<char *>(wrapped::malloc(len));
-              rv = wrapped::read(fd, buff, len);
-              assert(size_t(rv) == len);
-
-              if (t == comm::exit_ok || t == comm::exit_fail)
-                {
-                  s->termination = datatypes::fixed_string::make(buff, len);
-                }
-              else
-                {
-                  event *e = new event(t, buff, len);
-                  e->link_before(s->history);
-                }
-            }
+        case comm::stdout:
+        case comm::stderr:
+        case comm::info:
+          output_data(t, s);
+          break;
+        default:
+          assert("unreachable code reached" == 0);
+          /* no break */
         }
-        break;
-      default:
-        assert("unreachable code reached" == 0);
-        /* no break */
-      }
+    }
+    catch (posix_error &)
+    {
+        return true;
+    }
     return false;
   }
 

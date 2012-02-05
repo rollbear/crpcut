@@ -53,7 +53,7 @@ namespace crpcut {
       {
         return p.for_writing(pipe_pair::release_ownership);
       }
-    int presenter_pipe = p.for_reading();
+    comm::rfile_descriptor presenter_pipe(p.for_reading());
 
     void *poll_memory = alloca(poll_buffer_vector<io>::space_for(2));
     poll_buffer_vector<io> poller(poll_memory, 2);

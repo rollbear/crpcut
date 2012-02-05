@@ -28,6 +28,7 @@
 #define PRESENTATION_READER_HPP
 
 #include "test_case_result.hpp"
+
 #include "io.hpp"
 namespace crpcut {
   namespace output {
@@ -39,22 +40,27 @@ namespace crpcut {
   class presentation_reader : public io
   {
   public:
-    presentation_reader(poll<io>          &poller_,
-                        int                fd_,
-                        output::formatter &fmt_,
-                        bool               verbose_,
-                        const char        *working_dir);
+    presentation_reader(poll<io>               &poller,
+                        comm::rfile_descriptor &fd,
+                        output::formatter      &fmt,
+                        bool                    verbose,
+                        const char             *working_dir);
     virtual ~presentation_reader();
     virtual bool read();
     virtual bool write();
     virtual void exception();
   private:
-    datatypes::list_elem<test_case_result>  messages;
-    poll<io>                               &poller;
-    int                                     fd;
-    output::formatter                      &fmt;
+    test_case_result *find_result_for(pid_t);
+    void begin_test(test_case_result*);
+    void end_test(test_phase phase, test_case_result *);
+    void nonempty_dir(test_case_result *);
+    void output_data(comm::type t, test_case_result *);
+    datatypes::list_elem<test_case_result>  messages_;
+    poll<io>                               &poller_;
+    comm::rfile_descriptor                 &fd_;
+    output::formatter                      &fmt_;
     const char                             *working_dir_;
-    bool                                    verbose;
+    bool                                    verbose_;
 
     presentation_reader();
     presentation_reader(const presentation_reader&);

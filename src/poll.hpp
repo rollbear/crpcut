@@ -40,6 +40,12 @@ namespace crpcut {
     class descriptor;
     poll();
     virtual ~poll();
+    template <typename U>
+    void add_fd(comm::file_descriptor &fd, U *data, int flags = polltype::r)
+    {
+      int fd_n = fd.get_fd();
+      add_fd(fd_n, data, flags);
+    }
     void add_fd(int fd, T* data, int flags = polltype::r)
     {
       do_add_fd(fd, data, flags);
