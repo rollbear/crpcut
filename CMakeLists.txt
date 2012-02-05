@@ -135,6 +135,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/failed_check_reporter_test.cpp
      src/dogfood/fixed_string_test.cpp
      src/dogfood/list_elem_test.cpp
+     src/dogfood/namespace_info_test.cpp
      src/dogfood/output/heap_buffer_test.cpp
      src/dogfood/output/formatter_test.cpp
      src/dogfood/output/text_formatter_test.cpp
