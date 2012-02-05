@@ -428,7 +428,6 @@ TESTSUITE(cli)
       ASSERT_TRUE(cli.verbose_mode());
       ASSERT_TRUE(cli.get_test_list() == argv + 4);
     }
-    ///---
 
     TEST(output_mode_defaults_to_xml_if_output_file_is_ordered)
     {
@@ -469,6 +468,13 @@ TESTSUITE(cli)
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
                    crpcut::cli::param::exception,
                    "crpcut-" CRPCUT_VERSION_STRING);
+    }
+
+    TEST(timeouts_are_not_honoured_in_single_shot_mode)
+    {
+      ARGV("-s", "apa");
+      crpcut::cli::interpreter cli(argv);
+      ASSERT_FALSE(cli.honour_timeouts());
     }
 
   }

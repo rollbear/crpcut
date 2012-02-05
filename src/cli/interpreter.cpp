@@ -311,7 +311,7 @@ namespace crpcut {
     interpreter
     ::honour_timeouts() const
     {
-      return !disable_timeouts_;
+      return !(single_shot_  || disable_timeouts_);
     }
 
     const char *
