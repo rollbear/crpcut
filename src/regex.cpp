@@ -27,6 +27,7 @@
 #include <crpcut.hpp>
 
 namespace crpcut {
+
   regex::regex(const regex& r)
     : p(r.p)
   {
@@ -53,20 +54,14 @@ namespace crpcut {
     if (errmsg) return false;
     int i = wrapped::regexec(&r, s, 0, 0, 0);
     if (i == 0) return true;
-    if (i == REG_NOMATCH)
-      {
-        static const char tail[] = "\" does not match";
-        std::size_t len = wrapped::strlen(s) + sizeof(tail) + 1;
-        errmsg = new char[len];
-        stream::oastream os(errmsg, len);
-        os << "\"" << s << tail << '\0';
-      }
-    else
-      {
-        size_t n = wrapped::regerror(i, &r, 0, 0);
-        errmsg = new char[n];
-        wrapped::regerror(i, &r, errmsg, n);
-      }
+
+    assert(i == REG_NOMATCH);
+
+    static const char tail[] = "\" does not match";
+    std::size_t len = wrapped::strlen(s) + sizeof(tail) + 1;
+    errmsg = new char[len];
+    stream::oastream os(errmsg, len);
+    os << "\"" << s << tail << '\0';
     return false;
   }
 
@@ -79,8 +74,9 @@ namespace crpcut {
   std::ostream& operator<<(std::ostream &os, const regex::type &obj)
   {
     if (obj.errmsg)
-      return os << obj.errmsg;
-    return os << "did not match";
+      {
+        os << obj.errmsg;
+      }
+    return os;
   }
-
 }

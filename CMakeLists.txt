@@ -144,6 +144,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/posix_error_test.cpp
      src/dogfood/presentation_output_test.cpp
      src/dogfood/printer_test.cpp
+     src/dogfood/regex_test.cpp
      src/dogfood/tag_filter_test.cpp
      src/dogfood/working_dir_allocator_test.cpp
 )
