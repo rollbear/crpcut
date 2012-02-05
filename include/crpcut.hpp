@@ -1231,11 +1231,13 @@ namespace crpcut {
     public:
       static std::string try_all();
     protected:
-      crpcut_exception_translator();
+      crpcut_exception_translator(crpcut_exception_translator &
+                                  r  = root_object());
       ~crpcut_exception_translator();
-    private:
       crpcut_exception_translator(int);
+      std::string do_try_all();
       static crpcut_exception_translator& root_object();
+    private:
       crpcut_exception_translator(const crpcut_exception_translator&);
       crpcut_exception_translator& operator=(const crpcut_exception_translator&);
       virtual std::string crpcut_translate() const;
@@ -4047,8 +4049,14 @@ namespace crpcut {
 #define EXPECT_EXCEPTION(type) \
   protected virtual crpcut::policies::exception_specifier<void (type)>
 #define CRPCUT_DECLARE_EXCEPTION_TRANSLATOR(class_name, t)              \
-  class class_name : public crpcut::policies::crpcut_exception_translator \
+  class class_name                                                      \
+    : public crpcut::policies::crpcut_exception_translator              \
   {                                                                     \
+  public:                                                               \
+    class_name(crpcut::policies::crpcut_exception_translator &r =       \
+               crpcut::policies::crpcut_exception_translator::root_object()) \
+      : crpcut::policies::crpcut_exception_translator(r) {}             \
+  private:                                                              \
     std::string crpcut_translate() const                                \
     {                                                                   \
       return crpcut_catcher(crpcut_do_translate);                       \
@@ -4060,7 +4068,7 @@ namespace crpcut {
       try {                                                             \
         throw;                                                          \
       }                                                                 \
-      catch(U &u)                                                        \
+      catch(U &u)                                                       \
         {                                                               \
           return crpcut_do_translate(u);                                \
         }                                                               \

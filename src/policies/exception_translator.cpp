@@ -53,9 +53,10 @@ namespace crpcut {
     }
 
     crpcut_exception_translator
-    ::crpcut_exception_translator()
+    ::crpcut_exception_translator(crpcut_exception_translator &r)
+      : datatypes::list_elem<crpcut_exception_translator>()
     {
-      link_before(root_object());
+      link_before(r);
     }
 
     crpcut_exception_translator
@@ -65,10 +66,10 @@ namespace crpcut {
 
     std::string
     crpcut_exception_translator
-    ::try_all()
+    ::do_try_all()
     {
-      for (crpcut_exception_translator *p = root_object().next();
-           p != &root_object();
+      for (crpcut_exception_translator *p = next();
+           p != this;
            p = p->next())
         {
           try {
@@ -79,6 +80,13 @@ namespace crpcut {
             }
         }
       return "...";
+    }
+
+    std::string
+    crpcut_exception_translator
+    ::try_all()
+    {
+      return root_object().do_try_all();
     }
 
     crpcut_exception_translator&
