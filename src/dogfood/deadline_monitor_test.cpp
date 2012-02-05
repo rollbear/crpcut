@@ -150,8 +150,6 @@ TESTSUITE(deadline_monitor)
        DEPENDS_ON(remove_first_gives_shortest_deadline),
        fix)
   {
-
-
     void *buff = alloca(crpcut::deadline_monitor::space_for(16));
     crpcut::deadline_monitor m(buff, 16);
     m.insert(&t16);
@@ -210,10 +208,113 @@ TESTSUITE(deadline_monitor)
 
     ASSERT_TRUE(m.ms_until_deadline() == -1);
   }
+
+  TEST(remove_first_on_empty_aborts,
+       DEPENDS_ON(remove_first_gives_shortest_deadline),
+       EXPECT_SIGNAL_DEATH(SIGABRT),
+       NO_CORE_FILE,
+       fix)
+  {
+    void *buff = alloca(crpcut::deadline_monitor::space_for(16));
+    crpcut::deadline_monitor m(buff, 16);
+    timeboxed t17(17);
+    m.insert(&t16);
+    m.insert(&t15);
+    m.insert(&t14);
+    m.insert(&t13);
+    m.insert(&t12);
+    m.insert(&t11);
+    m.insert(&t10);
+    m.insert(&t9);
+    m.insert(&t8);
+    m.insert(&t7);
+    m.insert(&t4);
+    m.insert(&t6);
+    m.insert(&t5);
+    m.insert(&t3);
+    m.insert(&t2);
+    m.insert(&t1);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 51);
+    ASSERT_TRUE(m.remove_first() == &t1);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 52);
+    ASSERT_TRUE(m.remove_first() == &t2);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 53);
+    ASSERT_TRUE(m.remove_first() == &t3);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 54);
+    ASSERT_TRUE(m.remove_first() == &t4);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 55);
+    ASSERT_TRUE(m.remove_first() == &t5);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 56);
+    ASSERT_TRUE(m.remove_first() == &t6);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 57);
+    ASSERT_TRUE(m.remove_first() == &t7);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 58);
+    ASSERT_TRUE(m.remove_first() == &t8);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 59);
+    ASSERT_TRUE(m.remove_first() == &t9);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 60);
+    ASSERT_TRUE(m.remove_first() == &t10);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 61);
+    ASSERT_TRUE(m.remove_first() == &t11);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 62);
+    ASSERT_TRUE(m.remove_first() == &t12);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 63);
+    ASSERT_TRUE(m.remove_first() == &t13);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 64);
+    ASSERT_TRUE(m.remove_first() == &t14);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 65);
+    ASSERT_TRUE(m.remove_first() == &t15);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == 66);
+    ASSERT_TRUE(m.remove_first() == &t16);
+
+    ASSERT_TRUE(m.ms_until_deadline(clock) == -1);
+    m.remove_first();
+  }
+
+TEST(remove_nonexisting_element_aborts,
+       DEPENDS_ON(remove_maintains_sort_order),
+       EXPECT_SIGNAL_DEATH(SIGABRT),
+       NO_CORE_FILE,
+       fix)
+  {
+    void *buff = alloca(crpcut::deadline_monitor::space_for(16));
+    crpcut::deadline_monitor m(buff, 16);
+    timeboxed t17(17);
+    m.insert(&t16);
+    m.insert(&t15);
+    m.insert(&t14);
+    m.insert(&t13);
+    m.insert(&t12);
+    m.insert(&t11);
+    m.insert(&t10);
+    m.insert(&t9);
+    m.insert(&t8);
+    m.insert(&t7);
+    m.insert(&t4);
+    m.insert(&t6);
+    m.insert(&t5);
+    m.insert(&t3);
+    m.insert(&t2);
+    m.insert(&t1);
+
+    m.remove(&t17);
+  }
 }
-
-
-
-
 
 
