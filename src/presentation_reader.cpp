@@ -98,6 +98,7 @@ namespace crpcut {
     size_t len = 0;
     fd_.read_loop(&len, sizeof(len));
     char *buff = static_cast<char *>(wrapped::malloc(len + 1));
+    assert (buff);
     fd_.read_loop(buff, len);
     buff[len] = 0;
     s->name.str = buff;
