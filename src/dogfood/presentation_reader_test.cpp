@@ -191,108 +191,113 @@ TESTSUITE(presentation_reader)
     crpcut::presentation_reader reader;
   };
 
-  TEST(passed_critical_behaviour_verbose_with_info, fix<true>)
+  TEST(passed_critical_verbose_prints_all, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, "apa::katt");
-    ASSERT_FALSE(reader.read());
-    fd.info(101, crpcut::running, "en liten misse");
-    ASSERT_FALSE(reader.read());
+    fd.info(101, crpcut::running, "INFO << info");
+    fd.stderr(101, crpcut::running, "stderr");
+    fd.stdout(101, crpcut::running, "stdout");
     fd.exit_ok(101, crpcut::post_mortem, "");
-    ASSERT_FALSE(reader.read());
     fd.end_test(101, crpcut::post_mortem, true);
 
-    EXPECT_CALL(fmt, begin_case("apa::katt",true, true));
-    EXPECT_CALL(fmt, print("info","en liten misse"));
-    EXPECT_CALL(fmt, end_case());
-    ASSERT_FALSE(reader.read());
+    EXPECT_CALL(fmt, begin_case("apa::katt",true, true)).InSequence(out);
+    EXPECT_CALL(fmt, print("info", "INFO << info")).InSequence(out);
+    EXPECT_CALL(fmt, print("stderr", "stderr"));
+    EXPECT_CALL(fmt, print("stdout", "stdout"));
+    EXPECT_CALL(fmt, end_case()).InSequence(out);
+    while (!reader.read())
+      ;
   }
 
-  TEST(failed_critical_behaviour_with_nonempty_dir, fix<true>)
+  TEST(failed_critical_behaviour_with_nonempty_dir_prints_all, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, "apa::katt");
-    ASSERT_FALSE(reader.read());
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
-    ASSERT_FALSE(reader.read());
     fd.nonempty_dir(101, crpcut::running, "");
-    ASSERT_FALSE(reader.read());
     fd.end_test(101, crpcut::running, true);
 
-    EXPECT_CALL(fmt, begin_case("apa::katt", false, true));
+    EXPECT_CALL(fmt, begin_case("apa::katt", false, true)).InSequence(out);
     EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm",
-                               "directory/subdir/apa::katt"));
-    EXPECT_CALL(fmt, end_case());
-    ASSERT_FALSE(reader.read());
+                               "directory/subdir/apa::katt")).InSequence(out);
+    EXPECT_CALL(fmt, end_case()).InSequence(out);
+    while (!reader.read())
+      ;
   }
 
   TEST(interleaved_tests_are_shown_in_sequence, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, "apa::katt");
-    ASSERT_FALSE(reader.read());
     fd.begin_test(20, crpcut::creating, "ko");
-    ASSERT_FALSE(reader.read());
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
-    ASSERT_FALSE(reader.read());
     fd.fail(20, crpcut::running, "VERIFY_APA");
-    ASSERT_FALSE(reader.read());
     fd.end_test(101, crpcut::running, true);
 
-    EXPECT_CALL(fmt, begin_case("apa::katt", false, true));
-    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", ""));
-    EXPECT_CALL(fmt, end_case());
+    EXPECT_CALL(fmt, begin_case("apa::katt", false, true)).InSequence(out);
+    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "")).InSequence(out);
+    EXPECT_CALL(fmt, end_case()).InSequence(out);
 
-    ASSERT_FALSE(reader.read());
     fd.end_test(20, crpcut::running, false);
 
-    EXPECT_CALL(fmt, begin_case("ko", false, false));
-    EXPECT_CALL(fmt, print("fail", "VERIFY_APA"));
-    EXPECT_CALL(fmt, terminate(crpcut::running, "", ""));
-    EXPECT_CALL(fmt, end_case());
-    ASSERT_FALSE(reader.read());
+    EXPECT_CALL(fmt, begin_case("ko", false, false)).InSequence(out);
+    EXPECT_CALL(fmt, print("fail", "VERIFY_APA")).InSequence(out);
+    EXPECT_CALL(fmt, terminate(crpcut::running, "", "")).InSequence(out);
+    EXPECT_CALL(fmt, end_case()).InSequence(out);
+    while (!reader.read())
+      ;
   }
 
   TEST(stderr_stdout_info_are_not_shown_in_non_verbose_mode_pass, fix<false>)
   {
     fd.begin_test(101, crpcut::creating, "apa::katt");
-    ASSERT_FALSE(reader.read());
     fd.info(101, crpcut::running, "INFO");
-    ASSERT_FALSE(reader.read());
     fd.stdout(101, crpcut::running, "stdout");
-    ASSERT_FALSE(reader.read());
     fd.stderr(101, crpcut::running, "stderr");
-    ASSERT_FALSE(reader.read());
     fd.end_test(101, crpcut::destroying, true);
-    ASSERT_FALSE(reader.read());
+    while (!reader.read())
+      ;
   }
 
   TEST(stderr_stdout_info_are_shown_in_non_verbose_fail, fix<false>)
   {
     fd.begin_test(101, crpcut::creating, "apa::katt");
-    ASSERT_FALSE(reader.read());
     fd.info(101, crpcut::running, "INFO");
-    ASSERT_FALSE(reader.read());
     fd.stdout(101, crpcut::running, "stdout");
-    ASSERT_FALSE(reader.read());
     fd.stderr(101, crpcut::running, "stderr");
-    ASSERT_FALSE(reader.read());
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
-    ASSERT_FALSE(reader.read());
     fd.end_test(101, crpcut::running, false);
 
-    EXPECT_CALL(fmt, begin_case("apa::katt", false, false));
-    EXPECT_CALL(fmt, print("info", "INFO"));
-    EXPECT_CALL(fmt, print("stdout", "stdout"));
-    EXPECT_CALL(fmt, print("stderr", "stderr"));
-    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", ""));
-    EXPECT_CALL(fmt, end_case());
-    ASSERT_FALSE(reader.read());
+    EXPECT_CALL(fmt, begin_case("apa::katt", false, false)).InSequence(out);
+    EXPECT_CALL(fmt, print("info", "INFO")).InSequence(out);
+    EXPECT_CALL(fmt, print("stdout", "stdout")).InSequence(out);
+    EXPECT_CALL(fmt, print("stderr", "stderr")).InSequence(out);
+    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "")).InSequence(out);
+    EXPECT_CALL(fmt, end_case()).InSequence(out);
+    while (!reader.read())
+      ;
   }
 
   TEST(reader_returns_true_on_fail_and_removes_from_poll_on_exception,
        fix<false>)
   {
     ASSERT_TRUE(reader.read());
-    EXPECT_CALL(poll, do_del_fd(87));
+    EXPECT_CALL(poll, do_del_fd(87)).InSequence(in);
     reader.exception();
+  }
+
+  TEST(faulty_command_aborts, EXPECT_SIGNAL_DEATH(SIGABRT), NO_CORE_FILE,
+       fix<false>)
+  {
+    fd.add_data(pid_t(101));
+    fd.add_data(crpcut::comm::type(101));
+    fd.add_data(crpcut::running);
+    fd.add_data(std::size_t(0));
+    reader.read();
+  }
+
+  TEST(reader_asserts_on_write, fix<false>,
+       EXPECT_SIGNAL_DEATH(SIGABRT), NO_CORE_FILE)
+  {
+    reader.write();
   }
 }
 
