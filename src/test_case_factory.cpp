@@ -40,6 +40,7 @@
 #include "buffer_vector.hpp"
 #include "working_dir_allocator.hpp"
 #include "deadline_monitor.hpp"
+#include "test_environment.hpp"
 extern "C" {
 #  include <sys/time.h>
 #  include <fcntl.h>
@@ -238,17 +239,27 @@ namespace crpcut {
       {
         wrapped::setpgid(0, 0);
         heap::control::enable();
-        comm::report.set_fds(p2c.for_reading(pipe_pair::release_ownership),
-                             c2p.for_writing(pipe_pair::release_ownership));
-        wrapped::dup2(stdout.for_writing(), 1);
-        wrapped::dup2(stderr.for_writing(), 2);
-        stdout.close();
-        stderr.close();
-        p2c.close();
-        c2p.close();
-        current_pid_ = wrapped::getpid();
-        i->crpcut_goto_wd();
-        i->crpcut_run_test_case();
+        {
+          typedef comm::wfile_descriptor wfd;
+          wfd report_fd(c2p.for_writing(pipe_pair::release_ownership));
+          comm::report.set_write_fd(&report_fd);
+
+          typedef comm::rfile_descriptor rfd;
+          rfd response_fd(p2c.for_reading(pipe_pair::release_ownership));
+          comm::report.set_read_fd(&response_fd);
+
+          test_environment current_test;
+          comm::report.set_test_environment(&current_test);
+          wrapped::dup2(stdout.for_writing(), 1);
+          wrapped::dup2(stderr.for_writing(), 2);
+          stdout.close();
+          stderr.close();
+          p2c.close();
+          c2p.close();
+          current_pid_ = wrapped::getpid();
+          i->crpcut_goto_wd();
+          i->crpcut_run_test_case();
+        }
         wrapped::exit(0);
       }
 
@@ -316,12 +327,6 @@ namespace crpcut {
       }
   }
 
-  bool
-  test_case_factory
-  ::is_naughty_child()
-  {
-    return obj().current_pid_ != wrapped::getpid();
-  }
 
   unsigned long
   test_case_factory

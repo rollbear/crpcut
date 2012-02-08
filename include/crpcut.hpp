@@ -1096,6 +1096,8 @@ namespace crpcut {
   template <typename T>
   class poll;
 
+  class test_environment;
+
   namespace comm {
 
 #define CRPCUT_COMM_MSGS(translator)             \
@@ -1160,11 +1162,14 @@ namespace crpcut {
 
     class reporter
     {
-      wfile_descriptor write_fd;
-      rfile_descriptor read_fd;
+      wfile_descriptor *write_fd_;
+      rfile_descriptor *read_fd_;
+      test_environment *current_test_;
     public:
       reporter();
-      void set_fds(int read, int write);
+      void set_test_environment(test_environment *current_test);
+      void set_read_fd(rfile_descriptor *r);
+      void set_write_fd(wfile_descriptor *w);
       void operator()(type t, const std::ostringstream &os) const;
       template <size_t N>
       void operator()(type t, const stream::toastream<N> &os) const;
@@ -3247,8 +3252,9 @@ namespace crpcut {
     void
     reporter::write(const T& t) const
     {
+      assert(write_fd_);
       const char *p = static_cast<const char*>(static_cast<const void*>(&t));
-      write_fd.write_loop(p, sizeof(T));
+      write_fd_->write_loop(p, sizeof(T));
     }
 
     template <typename T>
@@ -3268,8 +3274,9 @@ namespace crpcut {
     void
     reporter::read(T& t) const
     {
+      assert(read_fd_);
       void *p = static_cast<void*>(&t);
-      read_fd.read_loop(p, sizeof(T));
+      read_fd_->read_loop(p, sizeof(T));
     }
 
     template <comm::type type>

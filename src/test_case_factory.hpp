@@ -58,7 +58,6 @@ namespace crpcut {
     static void test_succeeded(crpcut_test_case_registrator*);
     static const char *get_start_dir();
     static const char *get_parameter(const char *name);
-    static bool is_naughty_child();
     static unsigned long calc_cputime(const struct timeval&);
 
     class registrator_list : public crpcut_test_case_registrator

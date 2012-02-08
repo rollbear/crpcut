@@ -26,7 +26,7 @@
 
 
 #include <crpcut.hpp>
-#include "../test_case_factory.hpp"
+#include "../test_environment.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
 
 namespace crpcut {
@@ -34,9 +34,15 @@ namespace crpcut {
   namespace comm {
     reporter report;
 
+    void reporter::set_test_environment(test_environment *env)
+    {
+      assert(current_test_ == 0);
+      current_test_ = env;
+    }
+
     void reporter::operator()(type t, const char *msg, size_t len) const
     {
-      if (!tests_as_child_processes())
+      if (!current_test_)
         {
           if (len)
             {
@@ -49,11 +55,10 @@ namespace crpcut {
           return;
         }
       int mask = 0;
-      if (test_case_factory::is_naughty_child())
+      if (current_test_->is_naughty_child())
         {
-          mask = kill_me;
+          t = static_cast<type>(kill_me | t);
         }
-      t = static_cast<type>(mask | t);
 
       static const size_t header_size = sizeof(t) + sizeof(len);
       void *report_addr = alloca(len + header_size);
@@ -64,10 +69,10 @@ namespace crpcut {
       p+= sizeof(len);
       wrapped::memcpy(p, msg, len);
       len+= header_size;
-      write_fd.write_loop(report_addr, len);
+      write_fd_->write_loop(report_addr, len);
       while (mask) // infinite
         {
-          wrapped::select(0, 0, 0, 0, 0);
+          current_test_->freeze();
         }
       size_t bytes_written;
       read(bytes_written);
@@ -79,16 +84,24 @@ namespace crpcut {
     }
 
     reporter::reporter()
-      : write_fd(),
-        read_fd()
+      : write_fd_(0),
+        read_fd_(0),
+        current_test_(0)
     {
     }
 
     void
-    reporter::set_fds(int rfd, int wfd)
+    reporter::set_read_fd(rfile_descriptor *r)
     {
-      wfile_descriptor(wfd).swap(write_fd);
-      rfile_descriptor(rfd).swap(read_fd);;
+      assert(read_fd_ == 0);
+      read_fd_ = r;
+    }
+
+    void
+    reporter::set_write_fd(wfile_descriptor *w)
+    {
+      assert(write_fd_ == 0);
+      write_fd_ = w;
     }
 
     void
