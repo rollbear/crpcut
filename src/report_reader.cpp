@@ -54,12 +54,40 @@ namespace crpcut {
     comm::wfile_descriptor().swap(response_fd);
   }
 
+  void
+  report_reader
+  ::set_timeout(void *buff, size_t len)
+  {
+    typedef clocks::monotonic::timestamp timestamp;
+    assert(len == sizeof(timestamp));
+    timestamp *ts = static_cast<timestamp*>(buff);
+
+    if (reg_->crpcut_deadline_is_set())
+      {
+        reg_->crpcut_clear_deadline();
+      }
+    *ts+= clocks::monotonic::timestamp_ms_absolute();
+    reg_->crpcut_set_timeout(*ts);
+    assert(reg_->crpcut_deadline_is_set());
+    test_case_factory::set_deadline(reg_);
+  }
+
+  void
+  report_reader
+  ::cancel_timeout()
+  {
+    if (!reg_->crpcut_death_note)
+      {
+        reg_->crpcut_clear_deadline();
+      }
+  }
+
   bool
   report_reader
   ::do_read_data(bool do_reply)
   {
     comm::type t;
-    int kill_mask;
+    int kill_mask = 0;
     try {
       read_loop(&t, sizeof(t));
       kill_mask = t & comm::kill_me;
@@ -70,49 +98,17 @@ namespace crpcut {
           reg_->crpcut_register_success(false);
         }
       size_t len = 0;
-
       read_loop(&len, sizeof(len));
-      if (t == comm::set_timeout && !kill_mask)
-        {
-          clocks::monotonic::timestamp ts;
-          assert(len == sizeof(ts));
-          read_loop(&ts, len);
-          if (reg_->crpcut_deadline_is_set())
-            {
-              reg_->crpcut_clear_deadline();
-            }
-          ts+= clocks::monotonic::timestamp_ms_absolute();
-          reg_->crpcut_set_timeout(ts);
-          if (do_reply)
-            {
-              response_fd.write_loop(&len, sizeof(len));
-            }
-          assert(reg_->crpcut_deadline_is_set());
-          test_case_factory::set_deadline(reg_);
-          return true;
-        }
-      if (t == comm::cancel_timeout && !kill_mask)
-        {
-          assert(len == 0);
-          if (!reg_->crpcut_death_note)
-            {
-              reg_->crpcut_clear_deadline();
-              if (do_reply)
-                {
-                  response_fd.write_loop(&len, sizeof(len));
-                }
-            }
-          return true;
-        }
-
       char *buff = static_cast<char *>(::alloca(len));
-
       read_loop(buff, len);
+
       if (kill_mask)
         {
           if (len == 0)
             {
-              static char msg[] = "A child process spawned from the test has misbehaved. Process group killed";
+              static char msg[] =
+                  "A child process spawned from the test has misbehaved. "
+                  "Process group killed";
               buff = msg;
               len = sizeof(msg) - 1;
             }
@@ -120,18 +116,24 @@ namespace crpcut {
           reg_->crpcut_phase = child;
           wrapped::killpg(reg_->crpcut_get_pid(), SIGKILL); // now
         }
+
       if (do_reply)
         {
           response_fd.write_loop(&len, sizeof(len));
         }
       switch (t)
         {
+        case comm::set_timeout:
+          set_timeout(buff, len);
+          return true;
+        case comm::cancel_timeout:
+          assert(len == 0);
+          cancel_timeout();
+          return true;
         case comm::begin_test:
           reg_->crpcut_phase = running;
-          {
-            assert(len == sizeof(reg_->crpcut_cpu_time_at_start));
-            wrapped::memcpy(&reg_->crpcut_cpu_time_at_start, buff, len);
-          }
+          assert(len == sizeof(reg_->crpcut_cpu_time_at_start));
+          wrapped::memcpy(&reg_->crpcut_cpu_time_at_start, buff, len);
           return true;
         case comm::end_test:
           if (!reg_->crpcut_failed())

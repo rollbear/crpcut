@@ -1719,6 +1719,8 @@ namespace crpcut {
     virtual void close();
     void set_fds(int in_fd, int out_fd, poll<fdreader> *read_poller);
   private:
+    void set_timeout(void *buff, size_t len);
+    void cancel_timeout();
     virtual bool do_read_data(bool do_reply);
     comm::wfile_descriptor response_fd;
   };
