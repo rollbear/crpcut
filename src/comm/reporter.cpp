@@ -40,13 +40,34 @@ namespace crpcut {
       current_test_ = env;
     }
 
+    void reporter::send_message(type t, const char *msg, size_t len) const
+    {
+      const size_t header_size = sizeof(t) + sizeof(len);
+
+      void *report_addr = alloca(len + header_size);
+
+      *static_cast<type*>(report_addr) = t;
+      char *p = static_cast<char *>(report_addr);
+      p+= sizeof(type);
+
+      *static_cast<size_t*>(static_cast<void*>(p)) = len;
+      p+= sizeof(len);
+
+      wrapped::memcpy(p, msg, len);
+      write_fd_->write_loop(report_addr, len + header_size);
+
+      size_t bytes_written;
+      read(bytes_written);
+      assert(len == bytes_written);
+    }
+
     void reporter::operator()(type t, const char *msg, size_t len) const
     {
       if (!current_test_)
         {
           if (len)
             {
-              std::cout << "\n" << std::string(msg, len) << std::flush;
+              default_out_ << "\n" << std::string(msg, len) << std::flush;
             }
           if (t == exit_fail)
             {
@@ -54,39 +75,32 @@ namespace crpcut {
             }
           return;
         }
-      int mask = 0;
-      if (current_test_->is_naughty_child())
-        {
-          t = static_cast<type>(kill_me | t);
-        }
 
-      static const size_t header_size = sizeof(t) + sizeof(len);
-      void *report_addr = alloca(len + header_size);
-      *static_cast<type*>(report_addr) = t;
-      char *p = static_cast<char *>(report_addr);
-      p+= sizeof(type);
-      *static_cast<size_t*>(static_cast<void*>(p)) = len;
-      p+= sizeof(len);
-      wrapped::memcpy(p, msg, len);
-      len+= header_size;
-      write_fd_->write_loop(report_addr, len);
-      while (mask) // infinite
+      try {
+
+        if (current_test_->is_naughty_child())
+          {
+            t = static_cast<type>(t | kill_me);
+          }
+
+        send_message(t, msg, len);
+
+        if (t == comm::exit_fail)
+          {
+            wrapped::_Exit(0);
+          }
+      }
+      catch (...)
         {
           current_test_->freeze();
         }
-      size_t bytes_written;
-      read(bytes_written);
-      assert(len - header_size == bytes_written);
-      if (t == comm::exit_fail)
-        {
-          wrapped::_Exit(0);
-        }
     }
 
-    reporter::reporter()
+    reporter::reporter(std::ostream &default_out)
       : write_fd_(0),
         read_fd_(0),
-        current_test_(0)
+        current_test_(0),
+        default_out_(default_out)
     {
     }
 

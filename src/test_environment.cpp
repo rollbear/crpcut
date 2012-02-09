@@ -41,13 +41,17 @@ namespace crpcut {
   bool
   test_environment::is_naughty_child() const
   {
-    return pid_ != wrapped::getpid();
+    bool rv = pid_ != wrapped::getpid();
+    return rv;
   }
 
   void
   test_environment::freeze() const
   {
-    for (;;) wrapped::select(0,0,0,0,0);
+    for (;;)
+      {
+        wrapped::select(0,0,0,0,0);
+      }
   }
 }
 

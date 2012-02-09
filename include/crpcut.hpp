@@ -1165,8 +1165,9 @@ namespace crpcut {
       wfile_descriptor *write_fd_;
       rfile_descriptor *read_fd_;
       test_environment *current_test_;
+      std::ostream     &default_out_;
     public:
-      reporter();
+      reporter(std::ostream &default_out = std::cout);
       void set_test_environment(test_environment *current_test);
       void set_read_fd(rfile_descriptor *r);
       void set_write_fd(wfile_descriptor *w);
@@ -1184,6 +1185,7 @@ namespace crpcut {
       template <typename T>
       void operator()(type t, const T& data) const;
     private:
+      void send_message(type t, const char *msg, size_t len) const;
       template <typename T>
       void write(const T& t) const;
 
