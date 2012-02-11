@@ -112,6 +112,15 @@ TESTSUITE(cli)
       ASSERT_TRUE(param.get_value() == cli[0]+11);
     }
 
+    TEST(long_form_set_twice_throws, fix<const char*>,
+         DEPENDS_ON(matched_long_form_parameter_is_active))
+    {
+      static const char *cli[] = { "--identity=\"apa\"",
+                                   "--identity=\"katt\"", 0 };
+      const char *const *p = param.match(cli);
+      ASSERT_THROW(param.match(p), crpcut::cli::param::exception,
+                   ID " can only be used once");
+    }
 
     TEST(short_form_without_value_throws, fix<int>)
     {
@@ -160,6 +169,15 @@ TESTSUITE(cli)
       ASSERT_TRUE(param.get_value() == cli[1]);
     }
 
+    TEST(short_form_set_twice_throws, fix<const char*>,
+         DEPENDS_ON(matched_short_form_parameter_is_active))
+    {
+      static const char *cli[] = { "-i", "\"apa\"",
+                                   "-i", "\"katt\"", 0 };
+      const char *const *p = param.match(cli);
+      ASSERT_THROW(param.match(p), crpcut::cli::param::exception,
+                   ID " can only be used once");
+    }
 
   }
 }
