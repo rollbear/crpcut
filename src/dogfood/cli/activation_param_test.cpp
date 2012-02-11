@@ -74,6 +74,19 @@ TESTSUITE(cli)
                    "-v / --verbose can only be used once");
     }
 
+    TEST(long_form_param_with_value_throws, fix)
+    {
+      static const char *cli[] = { "--verbose=0", 0 };
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+                   "-v / --verbose does not accept any value");
+    }
+
+    TEST(short_form_param_with_value_returns_value_pos, fix)
+    {
+      static const char *cli[] = { "-v", "0", 0 };
+      ASSERT_TRUE(param.match(cli) == cli + 1);
+    }
+
   }
 
 }
