@@ -84,24 +84,6 @@ namespace crpcut {
                                           : ts);
   }
 
-  void
-  crpcut_test_case_registrator
-  ::run_test_case()
-  {
-    try {
-      do_run_test_case();
-    }
-    catch (...)
-      {
-        heap::set_limit(heap::system);
-        std::ostringstream out;
-        out << "Unexpectedly caught "
-            << policies::crpcut_exception_translator::try_all();
-
-        comm::report(comm::exit_fail, out);
-      }
-  }
-
   crpcut_test_case_registrator
   ::crpcut_test_case_registrator()
     : name_(0),

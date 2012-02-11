@@ -1779,10 +1779,9 @@ namespace crpcut {
     void deactivate_reader();
     void activate_reader();
     void set_timeout(unsigned long);
-    void run_test_case();
+    virtual void run_test_case() = 0;
     virtual tag& crpcut_tag() const = 0;
   protected:
-    virtual void do_run_test_case() = 0;
     crpcut_test_case_registrator();
     void manage_test_case_execution(crpcut_test_case_base*);
     void prepare_destruction(unsigned long ms);
@@ -3971,7 +3970,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
            crpcut::test_suite<crpcut_testsuite_id>::crpcut_reg().add_case(this); \
            crpcut::crpcut_tag_info<crpcut_test_tag>::obj();             \
          }                                                              \
-       virtual void do_run_test_case()                                  \
+       virtual void run_test_case()                                     \
        {                                                                \
          CRPCUT_DEFINE_REPORTER;                                        \
          prepare_construction(crpcut_constructor_timeout_ms);           \
