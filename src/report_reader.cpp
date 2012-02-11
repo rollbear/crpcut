@@ -116,11 +116,11 @@ namespace crpcut {
           reg_->phase_ = child;
           wrapped::killpg(reg_->get_pid(), SIGKILL); // now
         }
-
       if (do_reply)
         {
           response_fd.write_loop(&len, sizeof(len));
         }
+
       switch (t)
         {
         case comm::set_timeout:
@@ -146,7 +146,6 @@ namespace crpcut {
             buff = msg;
             len = sizeof(msg) - 1;
             t = comm::exit_fail;
-            wrapped::killpg(reg_->get_pid(), SIGKILL); // now
             break;
           }
         default:

@@ -37,7 +37,7 @@ namespace crpcut {
           start_timestamp_ms(clocks::monotonic::timestamp_ms_absolute())
       {
 
-        if (tests_as_child_processes() && timeouts_are_enabled())
+        if (timeouts_are_enabled())
           {
             clocks::monotonic::timestamp deadline = duration_ms;
             comm::report(comm::set_timeout, deadline);
@@ -50,24 +50,18 @@ namespace crpcut {
         if (!timeouts_are_enabled()) return;
         typedef clocks::monotonic mono;
         mono::timestamp now  = mono::timestamp_ms_absolute();
-        comm::report(comm::cancel_timeout, 0, 0);
         unsigned long diff = now - start_timestamp_ms;
-        if (diff > duration_ms)
+        if (diff <= duration_ms)
           {
-            stream::toastream<128> os;
-            os << "Realtime timeout " << duration_ms
-               << "ms exceeded.\n  Actual time to completion was " << diff
-               << "ms";
-            if (tests_as_child_processes())
-              {
-                comm::report(comm::exit_fail, os.begin(), os.size());
-              }
-            else
-              {
-                wrapped::write(1, os.begin(), os.size());
-                wrapped::write(1, "\n", 1);
-              }
+            const char *nullstr = 0;
+            comm::report(comm::cancel_timeout, nullstr, 0);
+            return;
           }
+        stream::toastream<128> os;
+        os << "Realtime timeout " << duration_ms
+            << "ms exceeded.\n  Actual time to completion was " << diff
+            << "ms";
+        comm::report(comm::exit_fail, os.begin(), os.size());
       }
     }
   }

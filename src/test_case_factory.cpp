@@ -262,7 +262,7 @@ namespace crpcut {
         }
         catch (...)
         {
-            wrapped::exit(1);
+            wrapped::_Exit(1);
         }
         wrapped::exit(0);
       }
