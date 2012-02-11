@@ -40,32 +40,6 @@ extern "C" {
 
 namespace crpcut {
 
-  crpcut_test_case_registrator *
-  crpcut_test_case_registrator
-  ::unlink()
-  {
-    next_->prev_ = prev_;
-    prev_->next_ = next_;
-    return next_;
-  }
-
-  void
-  crpcut_test_case_registrator::
-  link_after(crpcut_test_case_registrator *r)
-  {
-    next_ = r->next_;
-    prev_ = r;
-    next_->prev_ = this;
-    r->next_ = this;
-  }
-
-  crpcut_test_case_registrator *
-  crpcut_test_case_registrator
-  ::get_next() const
-  {
-    return next_;
-  }
-
   pid_t
   crpcut_test_case_registrator
   ::get_pid() const
@@ -132,8 +106,6 @@ namespace crpcut {
   ::crpcut_test_case_registrator()
     : name_(0),
       ns_info_(0),
-      next_(this),
-      prev_(this),
       suite_list_(0),
       active_readers_(0),
       killed_(false),
@@ -155,8 +127,6 @@ namespace crpcut {
                                  unsigned long cputime_timeout_ms)
     : name_(name),
       ns_info_(&ns),
-      next_(&test_case_factory::obj().reg_),
-      prev_(test_case_factory::obj().reg_.prev_),
       suite_list_(0),
       active_readers_(0),
       killed_(false),
@@ -170,8 +140,7 @@ namespace crpcut {
       phase_(creating),
       cputime_limit_ms_(cputime_timeout_ms)
   {
-    test_case_factory::obj().reg_.prev_ = this;
-    prev_->next_ = this;
+    link_after(test_case_factory::obj().reg_);
   }
 
   void

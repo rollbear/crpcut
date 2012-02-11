@@ -553,8 +553,8 @@ namespace crpcut {
         << "============\n"
         << std::setfill(' ');
       }
-    for (crpcut_test_case_registrator *i = reg_.get_next();
-        i != &reg_; i = i->get_next())
+    for (crpcut_test_case_registrator *i = reg_.next();
+        i != &reg_; i = i->next())
       {
         tag &test_tag = i->crpcut_tag();
         tag::importance importance = test_tag.get_importance();
@@ -605,11 +605,11 @@ namespace crpcut {
   {
     unsigned num_registered_tests = 0U;
     crpcut_test_case_registrator *next;
-    for (crpcut_test_case_registrator *i = reg.get_next();
+    for (crpcut_test_case_registrator *i = reg.next();
         i != &reg;
         i = next)
       {
-        next = i->get_next();
+        next = i->next();
         const tag& test_tag = i->crpcut_tag();
         if (test_tag.get_importance() == tag::ignored)
           {
@@ -621,7 +621,7 @@ namespace crpcut {
         if (tentative)
           {
             i->unlink();
-            i->link_after(tentative);
+            i->link_after(*tentative);
           }
       }
     return num_registered_tests;
@@ -637,7 +637,7 @@ namespace crpcut {
     unsigned mismatches = 0;
     for (const char *const*name = names; *name; ++name)
       {
-        crpcut_test_case_registrator *i = from.get_next();
+        crpcut_test_case_registrator *i = from.next();
         unsigned matches = 0;
         while (i != &from)
           {
@@ -645,13 +645,14 @@ namespace crpcut {
               {
                 ++matches;
                 ++num_selected_tests;
-                crpcut_test_case_registrator *next = i->unlink();
-                i->link_after(&to);
+                crpcut_test_case_registrator *next = i->next();
+                i->unlink();
+                i->link_after(to);
                 i = next;
               }
             else
               {
-                i = i->get_next();
+                i = i->next();
               }
           }
         if (matches == 0)
@@ -669,11 +670,11 @@ namespace crpcut {
                << " not match any test names\n";
         throw cli_exception(-1);
       }
-    crpcut_test_case_registrator *i = from.get_next();
+    crpcut_test_case_registrator *i = from.next();
     while (i != &from)
       {
         i->crpcut_uninhibit_dependants();
-        i = i->get_next();
+        i = i->next();
       }
     return num_selected_tests;
   }
@@ -850,15 +851,15 @@ namespace crpcut {
                             test_case_factory::registrator_list &reg,
                             output::formatter                   &fmt)
   {
-    if (reg.get_next() != &reg)
+    if (reg.next() != &reg)
       {
         if (output_fd != 1 && !quiet)
           {
             std::cout << "Blocked tests:\n";
           }
-        for (crpcut_test_case_registrator *i = reg.get_next();
+        for (crpcut_test_case_registrator *i = reg.next();
             i != &reg;
-            i = i->get_next())
+            i = i->next())
           {
             std::size_t name_len = i->full_name_len();
             char *buff = static_cast<char*>(alloca(name_len));
@@ -879,18 +880,20 @@ namespace crpcut {
     for (;;)
       {
         bool progress = false;
-        crpcut_test_case_registrator *i = reg_.get_next();
+        crpcut_test_case_registrator *i = reg_.next();
         while (i != &reg_)
           {
             if (cli_->honour_dependencies() && !i->crpcut_can_run())
               {
-                i = i->get_next();
+                i = i->next();
                 continue;
               }
             progress = true;
             start_test(i, poller);
             manage_children(num_parallel, poller);
-            i = i->unlink();
+            crpcut_test_case_registrator *next = i->next();
+            i->unlink();
+            i = next;
             if (!tests_as_child_procs())
               {
                 return false;

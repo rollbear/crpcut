@@ -811,8 +811,9 @@ namespace crpcut {
       const T *prev() const { return prev_; }
       bool is_empty() const;
       bool is_this(const T *p) const;
-    private:
+    protected:
       void unlink();
+    private:
       list_elem(const list_elem&);
       list_elem& operator=(const list_elem&);
       T *next_;
@@ -1746,7 +1747,8 @@ namespace crpcut {
   class crpcut_test_case_registrator
     : public virtual policies::deaths::crpcut_none,
       public virtual policies::dependencies::crpcut_base,
-      public timeboxed
+      public timeboxed,
+      public datatypes::list_elem<crpcut_test_case_registrator>
   {
     friend class test_suite_base;
   public:
@@ -1765,12 +1767,10 @@ namespace crpcut {
                int stdout_fd,
                int stderr_fd);
     void manage_death();
-    crpcut_test_case_registrator *unlink();
-    void link_after(crpcut_test_case_registrator*);
+    using list_elem::unlink;
     void kill();
     void clear_deadline();
     void unregister_fds();
-    crpcut_test_case_registrator *get_next() const;
     void set_wd(unsigned n);
     void goto_wd() const;
     pid_t get_pid() const;
@@ -1793,8 +1793,6 @@ namespace crpcut {
 
     const char                   *name_;
     const namespace_info         *ns_info_;
-    crpcut_test_case_registrator *next_;
-    crpcut_test_case_registrator *prev_;
     crpcut_test_case_registrator *suite_list_;
     unsigned                      active_readers_;
     bool                          killed_;
