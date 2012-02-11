@@ -80,8 +80,8 @@ namespace crpcut {
   ::set_timeout(unsigned long ts)
   {
     timeboxed::set_deadline(phase_ == running
-                                          ? crpcut_calc_deadline(ts)
-                                          : ts);
+                            ? crpcut_calc_deadline(ts)
+                            : ts);
   }
 
   crpcut_test_case_registrator
@@ -281,115 +281,139 @@ namespace crpcut {
       && ms > cputime_limit_ms_;
   }
 
-  void
+
+  bool
   crpcut_test_case_registrator
-  ::manage_death()
+  ::check_exit_status(int status, std::ostream &out)
   {
-    typedef test_case_factory tcf;
+    if (crpcut_failed() || crpcut_is_expected_exit(status)) return false;
+
+    crpcut_register_success(false);
+    out << "Exited with code " << status << "\nExpected ";
+    crpcut_expected_death(out);
+    return true;
+   }
+
+  bool
+  crpcut_test_case_registrator
+  ::check_signal_status(int signo, unsigned long cputime_ms, std::ostream &out)
+  {
+    if (crpcut_failed()) return false;
+
+    if (!crpcut_is_expected_signal(signo))
+      {
+        crpcut_register_success(false);
+        if (killed_)
+          {
+            out << "Timed out - killed";
+          }
+        else
+          {
+            out << "Died on signal "
+                << signo;
+          }
+        out << "\nExpected ";
+        crpcut_expected_death(out);
+        return true;;
+      }
+
+    if (cputime_timeout(cputime_ms))
+      {
+        crpcut_register_success(false);
+        out << "Test consumed "
+            << cputime_ms << "ms CPU-time\nLimit was "
+            << cputime_limit_ms_ << "ms";
+        return true;
+      }
+    return false;
+  }
+
+  ::siginfo_t get_siginfo(pid_t pid)
+  {
     ::siginfo_t info;
     for (;;)
       {
         ::siginfo_t local;
-        int rv = wrapped::waitid(P_PGID, id_t(pid_), &local, WEXITED);
+        int rv = wrapped::waitid(P_PGID, id_t(pid), &local, WEXITED);
         int n = errno;
         if (rv == -1 && n == EINTR) continue;
-        if (local.si_pid == pid_) info = local;
+        if (local.si_pid == pid) info = local;
         if (rv == 0) continue;
         break;
       }
+    return info;
+  }
+
+  bool
+  crpcut_test_case_registrator
+  ::report_nonempty_working_dir(const char *dirname)
+  {
+    if (is_dir_empty(dirname)) return false;
+
+    if (!crpcut_failed()) phase_ = post_mortem;
+    stream::toastream<1024> tcname;
+    tcname << *this << '\0';
+    test_case_factory::present(pid_, comm::dir, phase_, 0, 0);
+    wrapped::rename(dirname, tcname.begin());
+    crpcut_register_success(false);
+    return true;
+  }
+
+  void
+  crpcut_test_case_registrator
+  ::manage_death()
+  {
+    ::siginfo_t info = get_siginfo(pid_);
+
+    typedef test_case_factory tcf;
+    unsigned long cputime_ms = tcf::calc_cputime(cpu_time_at_start_);
     if (!killed_ && deadline_is_set())
       {
         clear_deadline();
       }
-    unsigned long cputime_ms = tcf::calc_cputime(cpu_time_at_start_);
     comm::type t = comm::exit_ok;
-    stream::toastream<std::numeric_limits<int>::digits/3+1> dirname;
-    dirname << dirnum_ << '\0';
 
     stream::toastream<1024> out;
     if (!death_note_)
       {
         switch (info.si_code)
-          {
+        {
           case CLD_EXITED:
-            {
-              if (!crpcut_failed())
-                {
-                  if (crpcut_is_expected_exit(info.si_status))
-                    {
-                      crpcut_on_ok_action(dirname.begin());
-                    }
-                  else
-                    {
-                      crpcut_register_success(false);
-                      out << "Exited with code "
-                          << info.si_status << "\nExpected ";
-                      crpcut_expected_death(out);
-                      t = comm::exit_fail;
-                    }
-                }
-            }
+            if (check_exit_status(info.si_status, out))
+              {
+                t = comm::exit_fail;
+              }
             break;
           case CLD_KILLED:
-            {
-              if (!crpcut_failed())
-                {
-                  if (crpcut_is_expected_signal(info.si_status))
-                    {
-                      if (cputime_timeout(cputime_ms))
-                        {
-                          crpcut_register_success(false);
-                          out << "Test consumed "
-                              << cputime_ms << "ms CPU-time\nLimit was "
-                              << cputime_limit_ms_ << "ms";
-                          t = comm::exit_fail;
-                        }
-                      else
-                        {
-                          crpcut_on_ok_action(dirname.begin());
-                        }
-                    }
-                  else
-                    {
-                      crpcut_register_success(false);
-                      if (killed_)
-                        {
-                          out << "Timed out - killed";
-                        }
-                      else
-                        {
-                          out << "Died on signal "
-                              << info.si_status;
-                        }
-                      out << "\nExpected ";
-                      crpcut_expected_death(out);
-                      t = comm::exit_fail;
-                    }
-                }
-            }
+            if (check_signal_status(info.si_status, cputime_ms, out))
+              {
+                t = comm::exit_fail;
+              }
             break;
           case CLD_DUMPED:
             out << "Died with core dump";
             t = comm::exit_fail;
-            crpcut_register_success(false);
             break;
           default:
             out << "Died for unknown reason, code=" << info.si_code;
-            crpcut_register_success(false);
             t = comm::exit_fail;
             break;
-          }
+        }
         death_note_ = true;
       }
-    if (!is_dir_empty(dirname.begin()))
+    if (t == comm::exit_fail)
       {
-        if (!crpcut_failed()) phase_ = post_mortem;
-        stream::toastream<1024> tcname;
-        tcname << *this << '\0';
-        tcf::present(pid_, comm::dir, phase_, 0, 0);
-        wrapped::rename(dirname.begin(), tcname.begin());
-        t = comm::exit_fail;
         crpcut_register_success(false);
+      }
+    stream::toastream<std::numeric_limits<int>::digits/3+1> dirname;
+    dirname << dirnum_ << '\0';
+    if (!crpcut_failed())
+      {
+        crpcut_on_ok_action(dirname.begin());
+      }
+    if (report_nonempty_working_dir(dirname.begin()))
+      {
+        t = comm::exit_fail;
       }
     tcf::present(pid_, t, phase_, out.size(), out.begin());
     crpcut_register_success(t == comm::exit_ok);

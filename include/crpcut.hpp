@@ -1787,6 +1787,11 @@ namespace crpcut {
     void prepare_destruction(unsigned long ms);
     void prepare_construction(unsigned long ms);
   private:
+    bool check_signal_status(int            signo,
+                             unsigned long  cputime_ms,
+                             std::ostream  &out);
+    bool check_exit_status(int status, std::ostream &out);
+    bool report_nonempty_working_dir(const char* dirname);
     bool cputime_timeout(unsigned long ms) const;
     std::ostream &print_name(std::ostream &) const ;
 
