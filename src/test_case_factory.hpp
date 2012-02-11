@@ -64,7 +64,7 @@ namespace crpcut {
     {
       virtual bool match_name(const char *) const { return false; }
       virtual std::ostream& print_name(std::ostream &os) const { return os; }
-      virtual void crpcut_do_run_test_case() {}
+      virtual void do_run_test_case() {}
       virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
     };
   private:

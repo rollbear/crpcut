@@ -39,11 +39,11 @@ TESTSUITE(deadline_monitor)
   private:
   };
 
-  class timeboxed : public crpcut::crpcut_timeboxed
+  class timeboxed : public crpcut::timeboxed
   {
   public:
-    timeboxed(unsigned long ms) { crpcut_set_deadline(ms); }
-    void crpcut_kill() {}
+    timeboxed(unsigned long ms) { set_deadline(ms); }
+    void kill() {}
   };
 
   struct fix

@@ -37,14 +37,14 @@ namespace crpcut {
   {
     class monotonic;
   }
-  class deadline_monitor : private buffer_vector<crpcut_timeboxed*>
+  class deadline_monitor : private buffer_vector<timeboxed*>
   {
   public:
     using buffer_vector::space_for;
     deadline_monitor(void *space, std::size_t capacity);
-    void insert(crpcut_timeboxed *);
-    void remove(crpcut_timeboxed *);
-    crpcut_timeboxed *remove_first();
+    void insert(timeboxed *);
+    void remove(timeboxed *);
+    timeboxed *remove_first();
     int ms_until_deadline(const clocks::monotonic & = clocks::monotonic::obj()) const;
   private:
   };

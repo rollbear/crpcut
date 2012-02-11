@@ -62,13 +62,13 @@ namespace crpcut {
     assert(len == sizeof(timestamp));
     timestamp *ts = static_cast<timestamp*>(buff);
 
-    if (reg_->crpcut_deadline_is_set())
+    if (reg_->deadline_is_set())
       {
-        reg_->crpcut_clear_deadline();
+        reg_->clear_deadline();
       }
     *ts+= clocks::monotonic::timestamp_ms_absolute();
-    reg_->crpcut_set_timeout(*ts);
-    assert(reg_->crpcut_deadline_is_set());
+    reg_->set_timeout(*ts);
+    assert(reg_->deadline_is_set());
     test_case_factory::set_deadline(reg_);
   }
 
@@ -76,9 +76,9 @@ namespace crpcut {
   report_reader
   ::cancel_timeout()
   {
-    if (!reg_->crpcut_death_note)
+    if (!reg_->death_note_)
       {
-        reg_->crpcut_clear_deadline();
+        reg_->clear_deadline();
       }
   }
 
@@ -113,8 +113,8 @@ namespace crpcut {
               len = sizeof(msg) - 1;
             }
           t = comm::exit_fail;
-          reg_->crpcut_phase = child;
-          wrapped::killpg(reg_->crpcut_get_pid(), SIGKILL); // now
+          reg_->phase_ = child;
+          wrapped::killpg(reg_->get_pid(), SIGKILL); // now
         }
 
       if (do_reply)
@@ -131,14 +131,14 @@ namespace crpcut {
           cancel_timeout();
           return true;
         case comm::begin_test:
-          reg_->crpcut_phase = running;
-          assert(len == sizeof(reg_->crpcut_cpu_time_at_start));
-          wrapped::memcpy(&reg_->crpcut_cpu_time_at_start, buff, len);
+          reg_->phase_ = running;
+          assert(len == sizeof(reg_->cpu_time_at_start_));
+          wrapped::memcpy(&reg_->cpu_time_at_start_, buff, len);
           return true;
         case comm::end_test:
           if (!reg_->crpcut_failed())
             {
-              reg_->crpcut_phase = destroying;
+              reg_->phase_ = destroying;
               return true;
             }
           {
@@ -146,24 +146,24 @@ namespace crpcut {
             buff = msg;
             len = sizeof(msg) - 1;
             t = comm::exit_fail;
-            wrapped::killpg(reg_->crpcut_get_pid(), SIGKILL); // now
+            wrapped::killpg(reg_->get_pid(), SIGKILL); // now
             break;
           }
         default:
           break; // silence warning
         }
 
-      present_test_data(reg_->crpcut_get_pid(),
+      present_test_data(reg_->get_pid(),
                         t,
-                        reg_->crpcut_phase,
+                        reg_->phase_,
                         len, buff);
       if (t == comm::exit_ok || t == comm::exit_fail)
         {
-          if (!reg_->crpcut_death_note && reg_->crpcut_deadline_is_set())
+          if (!reg_->death_note_ && reg_->deadline_is_set())
             {
-              reg_->crpcut_clear_deadline();
+              reg_->clear_deadline();
             }
-          reg_->crpcut_death_note = true;
+          reg_->death_note_ = true;
         }
     }
     catch (posix_error &e)

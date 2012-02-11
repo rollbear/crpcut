@@ -40,7 +40,7 @@ namespace crpcut {
   ::add_case(crpcut_test_case_registrator* r)
   {
     ++num_containing_cases;
-    r->crpcut_suite_list = list;
+    r->suite_list_ = list;
     list = r;
     r->crpcut_add(this);
   }

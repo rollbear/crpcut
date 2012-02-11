@@ -28,42 +28,42 @@
 
 namespace crpcut {
 
-  crpcut_timeboxed::~crpcut_timeboxed()
+  timeboxed::~timeboxed()
   {
   }
 
-  crpcut_timeboxed::crpcut_timeboxed()
+  timeboxed::timeboxed()
     : crpcut_absolute_deadline_ms_(0U),
       crpcut_deadline_set_(false)
   {
   }
 
-  void crpcut_timeboxed::crpcut_set_deadline(unsigned long absolute_ms)
+  void timeboxed::set_deadline(unsigned long absolute_ms)
   {
     assert(!crpcut_deadline_set_);
     crpcut_absolute_deadline_ms_ = absolute_ms;
     crpcut_deadline_set_ = true;
   }
 
-  void crpcut_timeboxed::crpcut_clear_deadline()
+  void timeboxed::clear_deadline()
   {
     assert(crpcut_deadline_set_);
     crpcut_deadline_set_ = false;
   }
 
-  bool crpcut_timeboxed::crpcut_deadline_is_set() const
+  bool timeboxed::deadline_is_set() const
   {
     return crpcut_deadline_set_;
   }
 
-  unsigned long crpcut_timeboxed::crpcut_absolute_deadline() const
+  unsigned long timeboxed::absolute_deadline() const
   {
     assert(crpcut_deadline_set_);
     return crpcut_absolute_deadline_ms_;
   }
 
-  bool crpcut_timeboxed::crpcut_compare(const crpcut_timeboxed *lh,
-                                        const crpcut_timeboxed *rh)
+  bool timeboxed::compare(const timeboxed *lh,
+                                        const timeboxed *rh)
   {
     assert(lh->crpcut_deadline_set_);
     assert(rh->crpcut_deadline_set_);

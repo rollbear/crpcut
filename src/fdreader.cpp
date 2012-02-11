@@ -67,14 +67,14 @@ namespace crpcut {
     rfile_descriptor(fd).swap(*this);
     poller_ = poller;
     poller_->add_fd(this);
-    reg_->crpcut_activate_reader();
+    reg_->activate_reader();
   }
 
   void fdreader::unregister()
   {
     assert(poller_);
     assert(reg_ != 0);
-    reg_->crpcut_deactivate_reader();
+    reg_->deactivate_reader();
     poller_->del_fd(this);
     rfile_descriptor().swap(*this);;
     poller_ = 0;

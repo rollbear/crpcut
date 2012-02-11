@@ -31,23 +31,23 @@
 namespace crpcut {
 
   deadline_monitor::deadline_monitor(void *space, std::size_t capacity)
-    : buffer_vector<crpcut_timeboxed*>(space, capacity)
+    : buffer_vector<timeboxed*>(space, capacity)
   {
   }
 
   void
-  deadline_monitor::insert(crpcut_timeboxed *p)
+  deadline_monitor::insert(timeboxed *p)
   {
-    assert(p->crpcut_deadline_is_set());
+    assert(p->deadline_is_set());
     push_back(p);
-    std::push_heap(begin(), end(), &crpcut_timeboxed::crpcut_compare);
+    std::push_heap(begin(), end(), &timeboxed::compare);
   }
 
   void
-  deadline_monitor::remove(crpcut_timeboxed *p)
+  deadline_monitor::remove(timeboxed *p)
   {
-    assert(p->crpcut_deadline_is_set());
-    crpcut_timeboxed **found = std::find(begin(), end(), p);
+    assert(p->deadline_is_set());
+    timeboxed **found = std::find(begin(), end(), p);
     assert(found != end() && "clear deadline when none was ordered");
 
     size_t n = size_t(found - begin());
@@ -57,7 +57,7 @@ namespace crpcut {
         size_t m = (n + 1) * 2 - 1;
         if (m >= size() - 1) break;
 
-        if (crpcut_timeboxed::crpcut_compare(at(m + 1),
+        if (timeboxed::compare(at(m + 1),
                                              at(m)))
           {
             at(n) = at(m);
@@ -73,7 +73,7 @@ namespace crpcut {
     pop_back();
     if (n != size())
       {
-        while (n && !crpcut_timeboxed::crpcut_compare(at(n),
+        while (n && !timeboxed::compare(at(n),
                                                       at((n - 1) / 2)))
           {
             std::swap(at(n), at((n - 1) / 2));
@@ -83,11 +83,11 @@ namespace crpcut {
 
   }
 
-  crpcut_timeboxed* deadline_monitor::remove_first()
+  timeboxed* deadline_monitor::remove_first()
   {
     assert(size());
-    crpcut_timeboxed *i = front();
-    std::pop_heap(begin(), end(), &crpcut_timeboxed::crpcut_compare);
+    timeboxed *i = front();
+    std::pop_heap(begin(), end(), &timeboxed::compare);
     pop_back();
     return i;
   }
@@ -96,7 +96,7 @@ namespace crpcut {
   deadline_monitor::ms_until_deadline(const clocks::monotonic &clock) const
   {
     if (size() == 0) return -1;
-    int delta =  int(front()->crpcut_absolute_deadline() - clock.now());
+    int delta =  int(front()->absolute_deadline() - clock.now());
     return delta < 0 ? 0 : delta;
   }
 }

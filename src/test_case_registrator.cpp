@@ -42,80 +42,80 @@ namespace crpcut {
 
   crpcut_test_case_registrator *
   crpcut_test_case_registrator
-  ::crpcut_unlink()
+  ::unlink()
   {
-    crpcut_next->crpcut_prev = crpcut_prev;
-    crpcut_prev->crpcut_next = crpcut_next;
-    return crpcut_next;
+    next_->prev_ = prev_;
+    prev_->next_ = next_;
+    return next_;
   }
 
   void
   crpcut_test_case_registrator::
-  crpcut_link_after(crpcut_test_case_registrator *r)
+  link_after(crpcut_test_case_registrator *r)
   {
-    crpcut_next = r->crpcut_next;
-    crpcut_prev = r;
-    crpcut_next->crpcut_prev = this;
-    r->crpcut_next = this;
+    next_ = r->next_;
+    prev_ = r;
+    next_->prev_ = this;
+    r->next_ = this;
   }
 
   crpcut_test_case_registrator *
   crpcut_test_case_registrator
-  ::crpcut_get_next() const
+  ::get_next() const
   {
-    return crpcut_next;
+    return next_;
   }
 
   pid_t
   crpcut_test_case_registrator
-  ::crpcut_get_pid() const
+  ::get_pid() const
   {
-    return crpcut_pid_;
+    return pid_;
   }
 
   test_phase
   crpcut_test_case_registrator
-  ::crpcut_get_phase() const
+  ::get_phase() const
   {
-    return crpcut_phase;
+    return phase_;
   }
 
   bool
   crpcut_test_case_registrator
-  ::crpcut_has_active_readers() const
+  ::has_active_readers() const
   {
-    return crpcut_active_readers > 0U;
+    return active_readers_ > 0U;
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_deactivate_reader()
+  ::deactivate_reader()
   {
-    --crpcut_active_readers;
+    --active_readers_;
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_activate_reader()
+  ::activate_reader()
   {
-    ++crpcut_active_readers;
+    ++active_readers_;
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_set_timeout(unsigned long ts)
+  ::set_timeout(unsigned long ts)
   {
-    crpcut_timeboxed::crpcut_set_deadline(crpcut_phase == running
+    timeboxed::set_deadline(phase_ == running
                                           ? crpcut_calc_deadline(ts)
                                           : ts);
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_run_test_case()
+  ::run_test_case()
   {
     try {
-      crpcut_do_run_test_case();
+      do_run_test_case();
     }
     catch (...)
       {
@@ -130,22 +130,22 @@ namespace crpcut {
 
   crpcut_test_case_registrator
   ::crpcut_test_case_registrator()
-    : crpcut_name_(0),
-      crpcut_ns_info(0),
-      crpcut_next(this),
-      crpcut_prev(this),
-      crpcut_suite_list(0),
-      crpcut_active_readers(0),
-      crpcut_killed(false),
-      crpcut_death_note(false),
-      crpcut_pid_(0),
-      crpcut_cpu_time_at_start(),
-      crpcut_dirnum(~0U),
-      crpcut_rep_reader(0),
-      crpcut_stdout_reader(0),
-      crpcut_stderr_reader(0),
-      crpcut_phase(creating),
-      crpcut_cputime_limit_ms(0)
+    : name_(0),
+      ns_info_(0),
+      next_(this),
+      prev_(this),
+      suite_list_(0),
+      active_readers_(0),
+      killed_(false),
+      death_note_(false),
+      pid_(0),
+      cpu_time_at_start_(),
+      dirnum_(~0U),
+      report_reader_(0),
+      stdout_reader_(0),
+      stderr_reader_(0),
+      phase_(creating),
+      cputime_limit_ms_(0)
   {
   }
 
@@ -153,30 +153,30 @@ namespace crpcut {
   ::crpcut_test_case_registrator(const char *name,
                                  const namespace_info &ns,
                                  unsigned long cputime_timeout_ms)
-    : crpcut_name_(name),
-      crpcut_ns_info(&ns),
-      crpcut_next(&test_case_factory::obj().reg_),
-      crpcut_prev(test_case_factory::obj().reg_.crpcut_prev),
-      crpcut_suite_list(0),
-      crpcut_active_readers(0),
-      crpcut_killed(false),
-      crpcut_death_note(false),
-      crpcut_pid_(0),
-      crpcut_cpu_time_at_start(),
-      crpcut_dirnum(~0U),
-      crpcut_rep_reader(this),
-      crpcut_stdout_reader(this),
-      crpcut_stderr_reader(this),
-      crpcut_phase(creating),
-      crpcut_cputime_limit_ms(cputime_timeout_ms)
+    : name_(name),
+      ns_info_(&ns),
+      next_(&test_case_factory::obj().reg_),
+      prev_(test_case_factory::obj().reg_.prev_),
+      suite_list_(0),
+      active_readers_(0),
+      killed_(false),
+      death_note_(false),
+      pid_(0),
+      cpu_time_at_start_(),
+      dirnum_(~0U),
+      report_reader_(this),
+      stdout_reader_(this),
+      stderr_reader_(this),
+      phase_(creating),
+      cputime_limit_ms_(cputime_timeout_ms)
   {
-    test_case_factory::obj().reg_.crpcut_prev = this;
-    crpcut_prev->crpcut_next = this;
+    test_case_factory::obj().reg_.prev_ = this;
+    prev_->next_ = this;
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_prepare_construction(unsigned long deadline)
+  ::prepare_construction(unsigned long deadline)
   {
     if (test_case_factory::tests_as_child_procs())
       {
@@ -186,7 +186,7 @@ namespace crpcut {
 
   void
   crpcut_test_case_registrator
-  ::crpcut_prepare_destruction(unsigned long deadline)
+  ::prepare_destruction(unsigned long deadline)
   {
     if (test_case_factory::tests_as_child_procs())
       {
@@ -196,9 +196,9 @@ namespace crpcut {
 
   bool
   crpcut_test_case_registrator
-  ::crpcut_match_name(const char *name_param) const
+  ::match_name(const char *name_param) const
   {
-    const char *p = crpcut_ns_info->match_name(name_param);
+    const char *p = ns_info_->match_name(name_param);
     if (p)
       {
         if (p != name_param || *p == ':')
@@ -212,29 +212,29 @@ namespace crpcut {
       {
         p = name_param;
       }
-    return crpcut::wrapped::strcmp(p, crpcut_name_) == 0;
+    return crpcut::wrapped::strcmp(p, name_) == 0;
   }
 
   std::size_t
   crpcut_test_case_registrator
-  ::crpcut_full_name_len() const
+  ::full_name_len() const
   {
-    return crpcut_ns_info->full_name_len()
+    return ns_info_->full_name_len()
       + 2
-      + wrapped::strlen(crpcut_name_);
+      + wrapped::strlen(name_);
   }
 
   std::ostream &
   crpcut_test_case_registrator
-  ::crpcut_print_name(std::ostream &os) const
+  ::print_name(std::ostream &os) const
   {
-    os << *crpcut_ns_info;
-    return os << crpcut_name_;
+    os << *ns_info_;
+    return os << name_;
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_manage_test_case_execution(crpcut_test_case_base* p)
+  ::manage_test_case_execution(crpcut_test_case_base* p)
   {
     if (test_case_factory::tests_as_child_procs())
       {
@@ -264,42 +264,42 @@ namespace crpcut {
 
   void
   crpcut_test_case_registrator
-  ::crpcut_kill()
+  ::kill()
   {
-    assert(crpcut_pid_);
-    wrapped::killpg(crpcut_pid_, SIGKILL);
-    crpcut_killed = true;
+    assert(pid_);
+    wrapped::killpg(pid_, SIGKILL);
+    killed_ = true;
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_clear_deadline()
+  ::clear_deadline()
   {
     test_case_factory::clear_deadline(this);
-    crpcut_timeboxed::crpcut_clear_deadline();
+    timeboxed::clear_deadline();
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_setup(poll<fdreader> &poller,
+  ::setup(poll<fdreader> &poller,
                  pid_t pid,
                  int in_fd, int out_fd,
                  int stdout_fd,
                  int stderr_fd)
   {
-    crpcut_pid_ = pid;
-    crpcut_stdout_reader.set_fd(stdout_fd, &poller);
-    crpcut_stderr_reader.set_fd(stderr_fd, &poller);
-    crpcut_rep_reader.set_fds(in_fd, out_fd, &poller);
+    pid_ = pid;
+    stdout_reader_.set_fd(stdout_fd, &poller);
+    stderr_reader_.set_fd(stderr_fd, &poller);
+    report_reader_.set_fds(in_fd, out_fd, &poller);
     stream::toastream<1024> os;
     os << *this;
     test_case_factory::introduce_name(pid, os.begin(), os.size());
   }
 
   void
-  crpcut_test_case_registrator::crpcut_set_wd(unsigned n)
+  crpcut_test_case_registrator::set_wd(unsigned n)
   {
-    crpcut_dirnum = n;
+    dirnum_ = n;
     stream::toastream<std::numeric_limits<int>::digits/3+1> name;
     name << n << '\0';
     if (wrapped::mkdir(name.begin(), 0700) != 0)
@@ -310,10 +310,10 @@ namespace crpcut {
 
   void
   crpcut_test_case_registrator
-  ::crpcut_goto_wd() const
+  ::goto_wd() const
   {
     stream::toastream<std::numeric_limits<int>::digits/3+1> name;
-    name << crpcut_dirnum << '\0';
+    name << dirnum_ << '\0';
     if (wrapped::chdir(name.begin()) != 0)
       {
         comm::report(comm::exit_fail, "Couldn't chdir working dir");
@@ -323,40 +323,40 @@ namespace crpcut {
 
   bool
   crpcut_test_case_registrator
-  ::crpcut_cputime_timeout(unsigned long ms) const
+  ::cputime_timeout(unsigned long ms) const
   {
     return test_case_factory::timeouts_enabled()
-      && crpcut_cputime_limit_ms
-      && ms > crpcut_cputime_limit_ms;
+      && cputime_limit_ms_
+      && ms > cputime_limit_ms_;
   }
 
   void
   crpcut_test_case_registrator
-  ::crpcut_manage_death()
+  ::manage_death()
   {
     typedef test_case_factory tcf;
     ::siginfo_t info;
     for (;;)
       {
         ::siginfo_t local;
-        int rv = wrapped::waitid(P_PGID, id_t(crpcut_pid_), &local, WEXITED);
+        int rv = wrapped::waitid(P_PGID, id_t(pid_), &local, WEXITED);
         int n = errno;
         if (rv == -1 && n == EINTR) continue;
-        if (local.si_pid == crpcut_pid_) info = local;
+        if (local.si_pid == pid_) info = local;
         if (rv == 0) continue;
         break;
       }
-    if (!crpcut_killed && crpcut_deadline_is_set())
+    if (!killed_ && deadline_is_set())
       {
-        crpcut_clear_deadline();
+        clear_deadline();
       }
-    unsigned long cputime_ms = tcf::calc_cputime(crpcut_cpu_time_at_start);
+    unsigned long cputime_ms = tcf::calc_cputime(cpu_time_at_start_);
     comm::type t = comm::exit_ok;
     stream::toastream<std::numeric_limits<int>::digits/3+1> dirname;
-    dirname << crpcut_dirnum << '\0';
+    dirname << dirnum_ << '\0';
 
     stream::toastream<1024> out;
-    if (!crpcut_death_note)
+    if (!death_note_)
       {
         switch (info.si_code)
           {
@@ -385,12 +385,12 @@ namespace crpcut {
                 {
                   if (crpcut_is_expected_signal(info.si_status))
                     {
-                      if (crpcut_cputime_timeout(cputime_ms))
+                      if (cputime_timeout(cputime_ms))
                         {
                           crpcut_register_success(false);
                           out << "Test consumed "
                               << cputime_ms << "ms CPU-time\nLimit was "
-                              << crpcut_cputime_limit_ms << "ms";
+                              << cputime_limit_ms_ << "ms";
                           t = comm::exit_fail;
                         }
                       else
@@ -401,7 +401,7 @@ namespace crpcut {
                   else
                     {
                       crpcut_register_success(false);
-                      if (crpcut_killed)
+                      if (killed_)
                         {
                           out << "Timed out - killed";
                         }
@@ -428,25 +428,25 @@ namespace crpcut {
             t = comm::exit_fail;
             break;
           }
-        crpcut_death_note = true;
+        death_note_ = true;
       }
     if (!is_dir_empty(dirname.begin()))
       {
-        if (!crpcut_failed()) crpcut_phase = post_mortem;
+        if (!crpcut_failed()) phase_ = post_mortem;
         stream::toastream<1024> tcname;
         tcname << *this << '\0';
-        tcf::present(crpcut_pid_, comm::dir, crpcut_phase, 0, 0);
+        tcf::present(pid_, comm::dir, phase_, 0, 0);
         wrapped::rename(dirname.begin(), tcname.begin());
         t = comm::exit_fail;
         crpcut_register_success(false);
       }
-    tcf::present(crpcut_pid_, t, crpcut_phase, out.size(), out.begin());
+    tcf::present(pid_, t, phase_, out.size(), out.begin());
     crpcut_register_success(t == comm::exit_ok);
-    tcf::return_dir(crpcut_dirnum);
+    tcf::return_dir(dirnum_);
     bool critical = crpcut_tag().get_importance() == tag::critical;
-    tcf::present(crpcut_pid_,
+    tcf::present(pid_,
                  comm::end_test,
-                 crpcut_phase,
+                 phase_,
                  sizeof(critical), (const char*)&critical);
     assert(crpcut_succeeded() || crpcut_failed());
     if (crpcut_succeeded())
