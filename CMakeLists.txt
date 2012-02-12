@@ -155,6 +155,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/printer_test.cpp
      src/dogfood/regex_test.cpp
      src/dogfood/tag_filter_test.cpp
+     src/dogfood/test_case_registrator_test.cpp
      src/dogfood/working_dir_allocator_test.cpp
 )
 if (NOT CMAKE_INSTALL_PREFIX)
