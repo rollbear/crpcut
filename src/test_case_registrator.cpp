@@ -193,8 +193,8 @@ namespace crpcut {
         if (p != name_param || *p == ':')
           {
             if (!*p) return true; // match for whole suites
-            if (!*p++ == ':') return false;
-            if (!*p++ == ':') return false;
+            if (*p++ != ':') return false;
+            if (*p++ != ':') return false;
           }
       }
     else
