@@ -146,6 +146,10 @@ namespace crpcut {
     lib::strcpy(dirbase_, "/tmp/crpcutXXXXXX");
   }
 
+  test_case_factory
+  ::~test_case_factory()
+  {
+  }
 
   void
   test_case_factory
@@ -270,15 +274,15 @@ namespace crpcut {
     // parent
     ++num_pending_children_;
     i->setup(poller, pid,
-                    c2p.for_reading(pipe_pair::release_ownership),
-                    p2c.for_writing(pipe_pair::release_ownership),
-                    stdout.for_reading(pipe_pair::release_ownership),
-                    stderr.for_reading(pipe_pair::release_ownership));
+             c2p.for_reading(pipe_pair::release_ownership),
+             p2c.for_writing(pipe_pair::release_ownership),
+             stdout.for_reading(pipe_pair::release_ownership),
+             stderr.for_reading(pipe_pair::release_ownership));
   }
 
   void
   test_case_factory
-  ::do_introduce_name(pid_t pid, const char *name, size_t len)
+  ::introduce_name(pid_t pid, const char *name, size_t len)
   {
     int pipe = presenter_pipe_;
     for (;;)
@@ -332,13 +336,6 @@ namespace crpcut {
   }
 
 
-  unsigned long
-  test_case_factory
-  ::calc_cputime(const struct timeval &t)
-  {
-    return obj().do_calc_cputime(t);
-  }
-
   int
   test_case_factory
   ::run_test(int argc, char *argv[], std::ostream &os)
@@ -361,20 +358,6 @@ namespace crpcut {
     return -1;
   }
 
-  void
-  test_case_factory
-  ::introduce_name(pid_t pid, const char *name, size_t len)
-  {
-    obj().do_introduce_name(pid, name, len);
-  }
-
-  void
-  test_case_factory
-  ::present(pid_t pid, comm::type t, test_phase phase,
-            size_t len, const char *buff)
-  {
-    obj().do_present(pid, t, phase, len, buff);
-  }
 
   bool
   test_case_factory
@@ -399,27 +382,6 @@ namespace crpcut {
 #else
     return false;
 #endif
-  }
-
-  void
-  test_case_factory
-  ::set_deadline(crpcut_test_case_registrator *i)
-  {
-    obj().do_set_deadline(i);
-  }
-
-  void
-  test_case_factory
-  ::clear_deadline(crpcut_test_case_registrator *i)
-  {
-    obj().do_clear_deadline(i);
-  }
-
-  void
-  test_case_factory
-  ::return_dir(unsigned num)
-  {
-    obj().do_return_dir(num);
   }
 
 
@@ -448,7 +410,7 @@ namespace crpcut {
   test_case_factory
   ::test_succeeded(crpcut_test_case_registrator*)
   {
-    ++obj().num_successful_tests_;
+    ++num_successful_tests_;
   }
 
   test_case_factory&
@@ -461,7 +423,7 @@ namespace crpcut {
 
   void
   test_case_factory
-  ::do_set_deadline(crpcut_test_case_registrator *i)
+  ::set_deadline(crpcut_test_case_registrator *i)
   {
     assert(i->deadline_is_set());
     deadlines_->insert(i);
@@ -469,7 +431,7 @@ namespace crpcut {
 
   void
   test_case_factory
-  ::do_clear_deadline(crpcut_test_case_registrator *i)
+  ::clear_deadline(crpcut_test_case_registrator *i)
   {
     assert(i->deadline_is_set());
     deadlines_->remove(i);
@@ -484,7 +446,7 @@ namespace crpcut {
 
   void
   test_case_factory
-  ::do_return_dir(unsigned num)
+  ::return_dir(unsigned num)
   {
     working_dirs_->free(num);
   }
@@ -506,11 +468,11 @@ namespace crpcut {
 
   void
   test_case_factory
-  ::do_present(pid_t       pid,
-               comm::type  t,
-               test_phase  phase,
-               size_t      len,
-               const char *buff)
+  ::present(pid_t       pid,
+            comm::type  t,
+            test_phase  phase,
+            size_t      len,
+            const char *buff)
   {
     int pipe = presenter_pipe_;
     ssize_t rv = wrapped::write(pipe, &pid, sizeof(pid));
@@ -1017,7 +979,7 @@ namespace crpcut {
   }
 
   unsigned long
-  test_case_factory::do_calc_cputime(const struct timeval& t)
+  test_case_factory::calc_cputime(const struct timeval& t)
   {
     struct rusage usage;
     int rv = wrapped::getrusage(RUSAGE_CHILDREN, &usage);

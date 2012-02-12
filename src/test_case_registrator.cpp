@@ -27,6 +27,8 @@
 #include <crpcut.hpp>
 #include "test_case_factory.hpp"
 #include "wrapped/posix_encapsulation.hpp"
+#include "filesystem_operations.hpp"
+#include "process_control.hpp"
 #include "clocks/clocks.hpp"
 #include "fsfuncs.hpp"
 extern "C" {
@@ -37,6 +39,24 @@ extern "C" {
 #include <cassert>
 #include <limits>
 
+namespace {
+  ::siginfo_t get_siginfo(pid_t pid, crpcut::process_control *process)
+  {
+    ::siginfo_t info;
+    for (;;)
+      {
+        ::siginfo_t local;
+        int rv = process->waitid(P_PGID, id_t(pid), &local, WEXITED);
+        int n = errno;
+        if (rv == -1 && n == EINTR) continue;
+        if (local.si_pid == pid) info = local;
+        if (rv == 0) continue;
+        break;
+      }
+    return info;
+  }
+
+}
 
 namespace crpcut {
 
@@ -82,6 +102,7 @@ namespace crpcut {
     timeboxed::set_deadline(phase_ == running
                             ? crpcut_calc_deadline(ts)
                             : ts);
+    factory_->set_deadline(this);
   }
 
   crpcut_test_case_registrator
@@ -95,18 +116,23 @@ namespace crpcut {
       pid_(0),
       cpu_time_at_start_(),
       dirnum_(~0U),
-      report_reader_(0),
-      stdout_reader_(0),
-      stderr_reader_(0),
       phase_(creating),
-      cputime_limit_ms_(0)
+      cputime_limit_ms_(0),
+      factory_(0),
+      reporter_(0),
+      process_(0),
+      filesystem_(0)
   {
   }
 
   crpcut_test_case_registrator
-  ::crpcut_test_case_registrator(const char *name,
-                                 const namespace_info &ns,
-                                 unsigned long cputime_timeout_ms)
+  ::crpcut_test_case_registrator(const char            *name,
+                                 const namespace_info  &ns,
+                                 unsigned long         cputime_timeout_ms,
+                                 comm::reporter        *reporter,
+                                 process_control       *process,
+                                 filesystem_operations *filesystem,
+                                 test_case_factory     *root)
     : name_(name),
       ns_info_(&ns),
       suite_list_(0),
@@ -116,22 +142,34 @@ namespace crpcut {
       pid_(0),
       cpu_time_at_start_(),
       dirnum_(~0U),
-      report_reader_(this),
-      stdout_reader_(this),
-      stderr_reader_(this),
       phase_(creating),
-      cputime_limit_ms_(cputime_timeout_ms)
+      cputime_limit_ms_(cputime_timeout_ms),
+      factory_(root),
+      reporter_(reporter),
+      process_(process),
+      filesystem_(filesystem)
   {
-    link_after(test_case_factory::obj().reg_);
+    link_after(root->reg_);
   }
 
   void
   crpcut_test_case_registrator
+  ::set_pid(pid_t pid)
+  {
+    assert(pid_ == 0);
+    pid_ = pid;
+    crpcut::stream::toastream<1024> os;
+    os << *this;
+    factory_->introduce_name(pid, os.begin(), os.size());
+
+  }
+  void
+  crpcut_test_case_registrator
   ::prepare_construction(unsigned long deadline)
   {
-    if (test_case_factory::tests_as_child_procs())
+    if (factory_->tests_as_child_procs())
       {
-        comm::report(comm::set_timeout, deadline);
+        (*reporter_)(comm::set_timeout, deadline);
       }
   }
 
@@ -139,9 +177,9 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::prepare_destruction(unsigned long deadline)
   {
-    if (test_case_factory::tests_as_child_procs())
+    if (factory_->tests_as_child_procs())
       {
-        comm::report(comm::set_timeout, deadline);
+        (*reporter_)(comm::set_timeout, deadline);
       }
   }
 
@@ -187,14 +225,14 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::manage_test_case_execution(crpcut_test_case_base* p)
   {
-    if (test_case_factory::tests_as_child_procs())
+    if (factory_->tests_as_child_procs())
       {
         struct rusage usage;
-        int rv = wrapped::getrusage(RUSAGE_SELF, &usage);
+        int rv = process_->getrusage(RUSAGE_SELF, &usage);
         assert(rv == 0);
         struct timeval cputime;
         timeradd(&usage.ru_utime, &usage.ru_stime, &cputime);
-        comm::report(comm::begin_test, cputime);
+        (*reporter_)(comm::begin_test, cputime);
       }
     try {
       p->crpcut_run();
@@ -205,9 +243,9 @@ namespace crpcut {
         std::ostringstream out;
         out << "Unexpectedly caught "
             << policies::crpcut_exception_translator::try_all();
-        comm::report(comm::exit_fail, out);
+        (*reporter_)(comm::exit_fail, out);
       }
-    if (!test_case_factory::tests_as_child_procs())
+    if (!factory_->tests_as_child_procs())
       {
         crpcut_register_success();
       }
@@ -218,7 +256,7 @@ namespace crpcut {
   ::kill()
   {
     assert(pid_);
-    wrapped::killpg(pid_, SIGKILL);
+    process_->killpg(pid_, SIGKILL);
     killed_ = true;
   }
 
@@ -226,25 +264,8 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::clear_deadline()
   {
-    test_case_factory::clear_deadline(this);
+    factory_->clear_deadline(this);
     timeboxed::clear_deadline();
-  }
-
-  void
-  crpcut_test_case_registrator
-  ::setup(poll<fdreader> &poller,
-                 pid_t pid,
-                 int in_fd, int out_fd,
-                 int stdout_fd,
-                 int stderr_fd)
-  {
-    pid_ = pid;
-    stdout_reader_.set_fd(stdout_fd, &poller);
-    stderr_reader_.set_fd(stderr_fd, &poller);
-    report_reader_.set_fds(in_fd, out_fd, &poller);
-    stream::toastream<1024> os;
-    os << *this;
-    test_case_factory::introduce_name(pid, os.begin(), os.size());
   }
 
   void
@@ -253,7 +274,7 @@ namespace crpcut {
     dirnum_ = n;
     stream::toastream<std::numeric_limits<int>::digits/3+1> name;
     name << n << '\0';
-    if (wrapped::mkdir(name.begin(), 0700) != 0)
+    if (filesystem_->mkdir(name.begin(), 0700) != 0)
       {
         assert(errno == EEXIST);
       }
@@ -265,9 +286,9 @@ namespace crpcut {
   {
     stream::toastream<std::numeric_limits<int>::digits/3+1> name;
     name << dirnum_ << '\0';
-    if (wrapped::chdir(name.begin()) != 0)
+    if (filesystem_->chdir(name.begin()) != 0)
       {
-        comm::report(comm::exit_fail, "Couldn't chdir working dir");
+        (*reporter_)(comm::exit_fail, "Couldn't chdir working dir");
         assert("unreachable code reached" == 0);
       }
   }
@@ -276,7 +297,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::cputime_timeout(unsigned long ms) const
   {
-    return test_case_factory::timeouts_enabled()
+    return factory_->timeouts_enabled()
       && cputime_limit_ms_
       && ms > cputime_limit_ms_;
   }
@@ -314,7 +335,7 @@ namespace crpcut {
           }
         out << "\nExpected ";
         crpcut_expected_death(out);
-        return true;;
+        return true;
       }
 
     if (cputime_timeout(cputime_ms))
@@ -328,21 +349,6 @@ namespace crpcut {
     return false;
   }
 
-  ::siginfo_t get_siginfo(pid_t pid)
-  {
-    ::siginfo_t info;
-    for (;;)
-      {
-        ::siginfo_t local;
-        int rv = wrapped::waitid(P_PGID, id_t(pid), &local, WEXITED);
-        int n = errno;
-        if (rv == -1 && n == EINTR) continue;
-        if (local.si_pid == pid) info = local;
-        if (rv == 0) continue;
-        break;
-      }
-    return info;
-  }
 
   bool
   crpcut_test_case_registrator
@@ -353,8 +359,8 @@ namespace crpcut {
     if (!crpcut_failed()) phase_ = post_mortem;
     stream::toastream<1024> tcname;
     tcname << *this << '\0';
-    test_case_factory::present(pid_, comm::dir, phase_, 0, 0);
-    wrapped::rename(dirname, tcname.begin());
+    factory_->present(pid_, comm::dir, phase_, 0, 0);
+    filesystem_->rename(dirname, tcname.begin());
     crpcut_register_success(false);
     return true;
   }
@@ -363,10 +369,9 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::manage_death()
   {
-    ::siginfo_t info = get_siginfo(pid_);
+    ::siginfo_t info = get_siginfo(pid_, process_);
 
-    typedef test_case_factory tcf;
-    unsigned long cputime_ms = tcf::calc_cputime(cpu_time_at_start_);
+    unsigned long cputime_ms = factory_->calc_cputime(cpu_time_at_start_);
     if (!killed_ && deadline_is_set())
       {
         clear_deadline();
@@ -415,19 +420,19 @@ namespace crpcut {
       {
         t = comm::exit_fail;
       }
-    tcf::present(pid_, t, phase_, out.size(), out.begin());
+    factory_->present(pid_, t, phase_, out.size(), out.begin());
     crpcut_register_success(t == comm::exit_ok);
-    tcf::return_dir(dirnum_);
+    factory_->return_dir(dirnum_);
     bool critical = crpcut_tag().get_importance() == tag::critical;
-    tcf::present(pid_,
-                 comm::end_test,
-                 phase_,
-                 sizeof(critical), (const char*)&critical);
+    factory_->present(pid_,
+                      comm::end_test,
+                      phase_,
+                      sizeof(critical), (const char*)&critical);
     assert(crpcut_succeeded() || crpcut_failed());
     if (crpcut_succeeded())
       {
         crpcut_tag().pass();
-        tcf::test_succeeded(this);
+        factory_->test_succeeded(this);
       }
     else
       {

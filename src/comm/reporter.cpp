@@ -34,6 +34,10 @@ namespace crpcut {
   namespace comm {
     reporter report;
 
+    reporter::~reporter()
+    {
+    }
+
     void reporter::set_test_environment(test_environment *env)
     {
       assert(current_test_ == 0);
@@ -61,7 +65,7 @@ namespace crpcut {
       assert(len == bytes_written);
     }
 
-    void reporter::operator()(type t, const char *msg, size_t len) const
+    void reporter::report(type t, const char *msg, size_t len) const
     {
       if (!current_test_)
         {
@@ -121,20 +125,26 @@ namespace crpcut {
     void
     reporter::operator()(type t, const stream::oastream &os) const
     {
-      operator()(t, os.begin(), os.size());
+      report(t, os.begin(), os.size());
     }
 
     void
     reporter::operator()(type t, const std::ostringstream &os) const
     {
       const std::string &s = os.str();
-      operator()(t, s.c_str(), s.length());
+      report(t, s.c_str(), s.length());
     }
 
     void
     reporter::operator()(type t, const char *msg) const
     {
-      operator()(t, msg, wrapped::strlen(msg));
+      report(t, msg, wrapped::strlen(msg));
+    }
+
+    void
+    reporter::operator()(type t, const char *msg, size_t len) const
+    {
+      report(t, msg, len);
     }
   }
 

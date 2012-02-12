@@ -69,7 +69,6 @@ namespace crpcut {
     *ts+= clocks::monotonic::timestamp_ms_absolute();
     reg_->set_timeout(*ts);
     assert(reg_->deadline_is_set());
-    test_case_factory::set_deadline(reg_);
   }
 
   void
@@ -152,11 +151,11 @@ namespace crpcut {
           break; // silence warning
         }
 
-      present_test_data(reg_->get_pid(),
-                        t,
-                        reg_->phase_,
-                        len, buff);
-      if (t == comm::exit_ok || t == comm::exit_fail)
+      test_case_factory::obj().present(reg_->get_pid(),
+                                       t,
+                                       reg_->phase_,
+                                       len, buff);
+        if (t == comm::exit_ok || t == comm::exit_fail)
         {
           if (!reg_->death_note_ && reg_->deadline_is_set())
             {

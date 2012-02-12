@@ -61,18 +61,18 @@ namespace crpcut {
 
   bool timeouts_are_enabled()
   {
-    return test_case_factory::timeouts_enabled();
+    return test_case_factory::obj().timeouts_enabled();
   }
 
   bool tests_as_child_processes()
   {
-    return test_case_factory::tests_as_child_procs();
+    return test_case_factory::obj().tests_as_child_procs();
   }
 
   void present_test_data(pid_t pid, comm::type t, test_phase phase,
                          size_t len, const char *buff)
   {
-    test_case_factory::present(pid, t, phase, len, buff);
+    test_case_factory::obj().present(pid, t, phase, len, buff);
   }
 
   bool is_backtrace_enabled()
@@ -93,6 +93,11 @@ namespace crpcut {
   const char *get_program_charset()
   {
     return test_case_factory::get_charset();
+  }
+
+  test_case_factory* test_case_factory_root()
+  {
+    return &test_case_factory::obj();
   }
 } // namespace crpcut
 

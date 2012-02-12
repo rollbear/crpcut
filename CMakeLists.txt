@@ -75,6 +75,7 @@ file(GLOB LIB_SRCS
      src/event.cpp
      src/failed_check_reporter.cpp
      src/fdreader.cpp
+     src/filesystem_operations.cpp
      src/fsfuncs.cpp
      src/heap.cpp
      src/istream_wrapper.cpp
@@ -102,6 +103,7 @@ file(GLOB LIB_SRCS
      src/presentation_output.cpp
      src/presentation_reader.cpp
      src/printer.cpp
+     src/process_control.cpp
      src/regex.cpp
      src/report_reader.cpp
      src/scope/time_base.cpp

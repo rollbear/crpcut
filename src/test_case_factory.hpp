@@ -37,6 +37,7 @@ namespace crpcut {
   class test_case_factory
   {
   public:
+    virtual ~test_case_factory();
     static void set_charset(const char *set_name);
     static const char *get_charset();
     static const char *get_output_charset();
@@ -46,19 +47,20 @@ namespace crpcut {
                         std::ostream &os = std::cerr);
     static int run_test(int argc, const char *argv[],
                         std::ostream &os = std::cerr);
-    static void introduce_name(pid_t pid, const char *name, size_t len);
-    static void present(pid_t pid, comm::type t, test_phase phase,
-                        size_t len, const char *buff);
-    static bool tests_as_child_procs();
-    static bool timeouts_enabled();
+    virtual void introduce_name(pid_t pid, const char *name, size_t len);
+    virtual void present(pid_t pid, comm::type t, test_phase phase,
+                         size_t len, const char *buff);
+    virtual bool tests_as_child_procs();
+    virtual bool timeouts_enabled();
+    virtual void set_deadline(crpcut_test_case_registrator *i);
+    virtual void clear_deadline(crpcut_test_case_registrator *i);
+    virtual void return_dir(unsigned num);
+    virtual void test_succeeded(crpcut_test_case_registrator*);
+    virtual unsigned long calc_cputime(const struct timeval&);
+
     static bool is_backtrace_enabled();
-    static void set_deadline(crpcut_test_case_registrator *i);
-    static void clear_deadline(crpcut_test_case_registrator *i);
-    static void return_dir(unsigned num);
-    static void test_succeeded(crpcut_test_case_registrator*);
     static const char *get_start_dir();
     static const char *get_parameter(const char *name);
-    static unsigned long calc_cputime(const struct timeval&);
 
     class registrator_list : public crpcut_test_case_registrator
     {
@@ -66,10 +68,12 @@ namespace crpcut {
       virtual std::ostream& print_name(std::ostream &os) const { return os; }
       virtual void run_test_case() {}
       virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
+      virtual void setup(poll<fdreader>    &, pid_t, int, int, int, int) {}
     };
-  private:
     static test_case_factory& obj();
+  protected:
     test_case_factory();
+  private:
     void list_tests(const char *const *names,
                     tag_list_root     &tags,
                     std::ostream      &os);
@@ -81,16 +85,9 @@ namespace crpcut {
     void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
 
     int do_run(cli::interpreter *cli, std::ostream &os, tag_list_root &tags);
-    void do_present(pid_t pid, comm::type t, test_phase phase,
-                    size_t len, const char *buff);
-    void do_introduce_name(pid_t pid, const char *name, size_t len);
-    void do_set_deadline(crpcut_test_case_registrator *i);
-    void do_clear_deadline(crpcut_test_case_registrator *i);
-    void do_return_dir(unsigned num);
     const char *do_get_start_dir() const;
     void do_set_charset(const char *set_name);
     const char *do_get_charset() const;
-    unsigned long do_calc_cputime(const struct timeval&);
     friend class crpcut_test_case_registrator;
 
 

@@ -1168,6 +1168,7 @@ namespace crpcut {
       test_environment *current_test_;
       std::ostream     &default_out_;
     public:
+      virtual ~reporter();
       reporter(std::ostream &default_out = std::cout);
       void set_test_environment(test_environment *current_test);
       void set_read_fd(rfile_descriptor *r);
@@ -1179,13 +1180,11 @@ namespace crpcut {
       void operator()(type t, const char *msg) const;
       void operator()(type t, const char *msg, size_t len) const;
       template <size_t N>
-      void operator()(type t, const char (&msg)[N]) const
-      {
-        operator()(t, msg, N - 1);
-      }
+      void operator()(type t, const char (&msg)[N]) const;
       template <typename T>
       void operator()(type t, const T& data) const;
     private:
+      virtual void report(type t, const char *msg, size_t len) const;
       void send_message(type t, const char *msg, size_t len) const;
       template <typename T>
       void write(const T& t) const;
@@ -1743,6 +1742,12 @@ namespace crpcut {
     bool          crpcut_deadline_set_;
   };
 
+  class process_control;
+  process_control *process_control_root();
+  class filesystem_operations;
+  filesystem_operations *filesystem_operations_root();
+
+  test_case_factory *test_case_factory_root();
   class test_suite_base;
   class crpcut_test_case_registrator
     : public virtual policies::deaths::crpcut_none,
@@ -1752,8 +1757,13 @@ namespace crpcut {
   {
     friend class test_suite_base;
   public:
-    crpcut_test_case_registrator(const char *name, const namespace_info &ns,
-                                 unsigned long cputime_limit_ms);
+    crpcut_test_case_registrator(const char *name,
+                                 const namespace_info &ns,
+                                 unsigned long cputime_limit_ms,
+                                 comm::reporter *reporter = &comm::report,
+                                 process_control *process = process_control_root(),
+                                 filesystem_operations *fsops = filesystem_operations_root(),
+                                 test_case_factory *root = test_case_factory_root());
     friend std::ostream &operator<<(std::ostream &os,
                                     const crpcut_test_case_registrator &t)
     {
@@ -1761,11 +1771,11 @@ namespace crpcut {
     }
     std::size_t full_name_len() const;
     bool match_name(const char *name) const;
-    void setup(poll<fdreader> &poller,
-               pid_t pid,
-               int in_fd, int out_fd,
-               int stdout_fd,
-               int stderr_fd);
+    virtual void setup(poll<fdreader>    &poller,
+                       pid_t              pid,
+                       int in_fd, int out_fd,
+                       int stdout_fd,
+                       int stderr_fd) = 0;
     void manage_death();
     using list_elem::unlink;
     void kill();
@@ -1786,8 +1796,9 @@ namespace crpcut {
     void manage_test_case_execution(crpcut_test_case_base*);
     void prepare_destruction(unsigned long ms);
     void prepare_construction(unsigned long ms);
+    void set_pid(pid_t pid);
   private:
-    bool check_signal_status(int            signo,
+     bool check_signal_status(int            signo,
                              unsigned long  cputime_ms,
                              std::ostream  &out);
     bool check_exit_status(int status, std::ostream &out);
@@ -1804,11 +1815,12 @@ namespace crpcut {
     pid_t                         pid_;
     struct timeval                cpu_time_at_start_;
     unsigned                      dirnum_;
-    report_reader                 report_reader_;
-    reader<comm::stdout>          stdout_reader_;
-    reader<comm::stderr>          stderr_reader_;
     test_phase                    phase_;
     const unsigned long           cputime_limit_ms_;
+    test_case_factory            *factory_;
+    comm::reporter               *reporter_;
+    process_control              *process_;
+    filesystem_operations        *filesystem_;
     friend class report_reader;
   };
 
@@ -3253,6 +3265,13 @@ namespace crpcut {
       operator()(t, os_);
     }
 
+    template <size_t N>
+    void
+    reporter::operator()(type t, const char (&array)[N]) const
+    {
+      operator()(t, array, N - 1);
+    }
+
     template <typename T>
     void
     reporter::write(const T& t) const
@@ -3962,15 +3981,33 @@ extern crpcut::namespace_info crpcut_current_namespace;
         public test_case_name::crpcut_constructor_timeout_enforcer,     \
         public test_case_name::crpcut_destructor_timeout_enforcer       \
     {                                                                   \
-       typedef crpcut::crpcut_test_case_registrator                     \
-         crpcut_registrator_base;                                       \
-       static const unsigned long crpcut_cputime_timeout_ms             \
-         =test_case_name::crpcut_cputime_enforcer::crpcut_cputime_timeout_ms; \
+      crpcut::report_reader                report_reader_;              \
+      crpcut::reader<crpcut::comm::stdout> stdout_reader_;              \
+      crpcut::reader<crpcut::comm::stderr> stderr_reader_;              \
+                                                                        \
+      typedef crpcut::crpcut_test_case_registrator                      \
+        crpcut_registrator_base;                                        \
+      static const unsigned long crpcut_cputime_timeout_ms              \
+        =test_case_name::crpcut_cputime_enforcer::crpcut_cputime_timeout_ms; \
+      void setup(crpcut::poll<crpcut::fdreader>   &poller,              \
+                 pid_t              pid,                                \
+                 int in_fd, int out_fd,                                 \
+                 int stdout_fd,                                         \
+                 int stderr_fd)                                         \
+      {                                                                 \
+        stdout_reader_.set_fd(stdout_fd, &poller);                      \
+        stderr_reader_.set_fd(stderr_fd, &poller);                      \
+        report_reader_.set_fds(in_fd, out_fd, &poller);                 \
+        set_pid(pid);                                                   \
+      }                                                                 \
     public:                                                             \
        crpcut_registrator()                                             \
          : crpcut_registrator_base(#test_case_name,                     \
                                    crpcut_current_namespace,            \
-                                   crpcut_cputime_timeout_ms)           \
+                                   crpcut_cputime_timeout_ms),          \
+           report_reader_(this),                                        \
+           stdout_reader_(this),                                        \
+           stderr_reader_(this)                                         \
          {                                                              \
            crpcut::test_suite<crpcut_testsuite_id>::crpcut_reg().add_case(this); \
            crpcut::crpcut_tag_info<crpcut_test_tag>::obj();             \
