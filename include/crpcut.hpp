@@ -1186,8 +1186,6 @@ namespace crpcut {
     private:
       virtual void report(type t, const char *msg, size_t len) const;
       void send_message(type t, const char *msg, size_t len) const;
-      template <typename T>
-      void write(const T& t) const;
 
       template <typename T>
       void read(T& t) const;
@@ -3274,24 +3272,11 @@ namespace crpcut {
 
     template <typename T>
     void
-    reporter::write(const T& t) const
-    {
-      assert(write_fd_);
-      const char *p = static_cast<const char*>(static_cast<const void*>(&t));
-      write_fd_->write_loop(p, sizeof(T));
-    }
-
-    template <typename T>
-    void
     reporter::operator()(comm::type t, const T& data) const
     {
       assert(tests_as_child_processes());
-      write(t);
-      size_t len = sizeof(data);
-      write(len);
-      write(data);
-      read(len);
-      assert(len == sizeof(data));
+      const void *addr = &data;
+      report(t, static_cast<const char*>(addr), sizeof(data));
     }
 
     template <typename T>
