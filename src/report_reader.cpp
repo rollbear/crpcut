@@ -75,7 +75,7 @@ namespace crpcut {
   report_reader
   ::cancel_timeout()
   {
-    if (!reg_->death_note_)
+    if (!reg_->has_death_note())
       {
         reg_->clear_deadline();
       }
@@ -112,8 +112,8 @@ namespace crpcut {
               len = sizeof(msg) - 1;
             }
           t = comm::exit_fail;
-          reg_->phase_ = child;
-          wrapped::killpg(reg_->get_pid(), SIGKILL); // now
+          reg_->set_phase(child);
+          reg_->kill();
         }
       if (do_reply)
         {
@@ -130,14 +130,17 @@ namespace crpcut {
           cancel_timeout();
           return true;
         case comm::begin_test:
-          reg_->phase_ = running;
-          assert(len == sizeof(reg_->cpu_time_at_start_));
-          wrapped::memcpy(&reg_->cpu_time_at_start_, buff, len);
+          reg_->set_phase(running);
+          {
+            void *addr = buff;
+            struct timeval *start_time = static_cast<struct timeval*>(addr);
+            reg_->set_cputime_at_start(*start_time);
+          }
           return true;
         case comm::end_test:
           if (!reg_->crpcut_failed())
             {
-              reg_->phase_ = destroying;
+              reg_->set_phase(destroying);
               return true;
             }
           {
@@ -153,15 +156,15 @@ namespace crpcut {
 
       test_case_factory::obj().present(reg_->get_pid(),
                                        t,
-                                       reg_->phase_,
+                                       reg_->get_phase(),
                                        len, buff);
         if (t == comm::exit_ok || t == comm::exit_fail)
         {
-          if (!reg_->death_note_ && reg_->deadline_is_set())
+          if (!reg_->has_death_note() && reg_->deadline_is_set())
             {
               reg_->clear_deadline();
             }
-          reg_->death_note_ = true;
+          reg_->set_death_note();
         }
     }
     catch (posix_error &e)

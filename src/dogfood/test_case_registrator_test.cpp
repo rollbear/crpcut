@@ -95,6 +95,7 @@ TESTSUITE(test_case_registrator)
     : crpcut_test_case_registrator(name, ns, cpulimit, reporter, proc, fsops, factory)
     {
     }
+    using crpcut::crpcut_test_case_registrator::set_cputime_at_start;
     using crpcut::crpcut_test_case_registrator::prepare_construction;
     using crpcut::crpcut_test_case_registrator::manage_test_case_execution;
     using crpcut::crpcut_test_case_registrator::prepare_destruction;
@@ -390,7 +391,7 @@ TESTSUITE(test_case_registrator)
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, test_succeeded(&reg));
+      EXPECT_CALL(factory, test_succeeded(&reg)).InSequence(s);
       reg.manage_death();
     }
   }

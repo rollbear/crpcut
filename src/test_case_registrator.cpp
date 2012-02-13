@@ -74,6 +74,27 @@ namespace crpcut {
     return phase_;
   }
 
+  void
+  crpcut_test_case_registrator
+  ::set_phase(test_phase p)
+  {
+    phase_ = p;
+  }
+
+  bool
+  crpcut_test_case_registrator
+  ::has_death_note() const
+  {
+    return death_note_;
+  }
+
+  void
+  crpcut_test_case_registrator
+  ::set_death_note()
+  {
+    death_note_ = true;
+  }
+
   bool
   crpcut_test_case_registrator
   ::has_active_readers() const
@@ -171,6 +192,13 @@ namespace crpcut {
       {
         (*reporter_)(comm::set_timeout, deadline);
       }
+  }
+
+  void
+  crpcut_test_case_registrator
+  ::set_cputime_at_start(const struct timeval &t)
+  {
+    cpu_time_at_start_ = t;
   }
 
   void

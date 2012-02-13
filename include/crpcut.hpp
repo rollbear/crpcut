@@ -1783,12 +1783,16 @@ namespace crpcut {
     void goto_wd() const;
     pid_t get_pid() const;
     test_phase get_phase() const;
+    void set_phase(test_phase p);
     bool has_active_readers() const;
     void deactivate_reader();
     void activate_reader();
     void set_timeout(unsigned long);
     virtual void run_test_case() = 0;
     virtual tag& crpcut_tag() const = 0;
+    void set_cputime_at_start(const struct timeval &t);
+    bool has_death_note() const;
+    void set_death_note();
   protected:
     crpcut_test_case_registrator();
     void manage_test_case_execution(crpcut_test_case_base*);
@@ -1819,7 +1823,6 @@ namespace crpcut {
     comm::reporter               *reporter_;
     process_control              *process_;
     filesystem_operations        *filesystem_;
-    friend class report_reader;
   };
 
   namespace cli {
