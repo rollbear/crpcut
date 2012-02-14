@@ -1179,16 +1179,16 @@ namespace crpcut {
 
     class reporter
     {
-      wfile_descriptor *write_fd_;
-      rfile_descriptor *read_fd_;
+      data_writer *writer_;
+      data_reader *reader_;
       test_environment *current_test_;
       std::ostream     &default_out_;
     public:
       virtual ~reporter();
       reporter(std::ostream &default_out = std::cout);
       void set_test_environment(test_environment *current_test);
-      void set_read_fd(rfile_descriptor *r);
-      void set_write_fd(wfile_descriptor *w);
+      void set_reader(data_reader *r);
+      void set_writer(data_writer *w);
       void operator()(type t, const std::ostringstream &os) const;
       template <size_t N>
       void operator()(type t, const stream::toastream<N> &os) const;
@@ -3302,9 +3302,9 @@ namespace crpcut {
     void
     reporter::read(T& t) const
     {
-      assert(read_fd_);
+      assert(reader_);
       void *p = static_cast<void*>(&t);
-      read_fd_->read_loop(p, sizeof(T));
+      reader_->read_loop(p, sizeof(T));
     }
 
     template <comm::type type>

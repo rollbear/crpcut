@@ -33,7 +33,7 @@ TESTSUITE(comm)
   TESTSUITE(reporter)
   {
     using namespace testing;
-    class wfd_mock : public crpcut::comm::wfile_descriptor
+    class writer_mock : public crpcut::comm::data_writer
     {
     public:
       MOCK_CONST_METHOD3(write_loop, void(const char*, std::size_t,
@@ -43,9 +43,10 @@ TESTSUITE(comm)
       {
          write_loop(static_cast<const char*>(addr), len, context);
       }
+      MOCK_CONST_METHOD2(write, ssize_t(const void*, std::size_t));
     };
 
-    class rfd_mock : public crpcut::comm::rfile_descriptor
+    class reader_mock : public crpcut::comm::data_reader
     {
     public:
       MOCK_CONST_METHOD3(read_loop, void(char *, std::size_t, const char*));
@@ -53,7 +54,9 @@ TESTSUITE(comm)
       {
         read_loop(static_cast<char*>(addr), len, context);
       }
+      MOCK_CONST_METHOD2(read, ssize_t(void*, std::size_t));
     };
+
     TEST(reporter_without_test_environment_prints_on_stream)
     {
        std::ostringstream os;
@@ -84,13 +87,14 @@ TESTSUITE(comm)
       };
 
       env e;
-      wfd_mock wfd;
-      rfd_mock rfd;
-      std::ostringstream os;
-      crpcut::comm::reporter r(os);
+      StrictMock<writer_mock> wfd;
+      StrictMock<reader_mock> rfd;
+      std::ostringstream      os;
+      crpcut::comm::reporter  r(os);
+
       r.set_test_environment(&e);
-      r.set_write_fd(&wfd);
-      r.set_read_fd(&rfd);
+      r.set_writer(&wfd);
+      r.set_reader(&rfd);
       EXPECT_CALL(wfd, write_loop(_, _, _));
       EXPECT_CALL(rfd, read_loop(_,_,_)).
         WillOnce(Throw(3));
@@ -109,12 +113,12 @@ TESTSUITE(comm)
       fix() : e(), wfd(), rfd(), r(fake_cout)
       {
         r.set_test_environment(&e);
-        r.set_write_fd(&wfd);
-        r.set_read_fd(&rfd);
+        r.set_writer(&wfd);
+        r.set_reader(&rfd);
       }
       crpcut::test_environment e;
-      wfd_mock                 wfd;
-      rfd_mock                 rfd;
+      StrictMock<writer_mock>  wfd;
+      StrictMock<reader_mock>  rfd;
       std::ostringstream       fake_cout;
       crpcut::comm::reporter   r;
     };

@@ -58,7 +58,7 @@ namespace crpcut {
       p+= sizeof(len);
 
       wrapped::memcpy(p, msg, len);
-      write_fd_->write_loop(report_addr, len + header_size);
+      writer_->write_loop(report_addr, len + header_size);
 
       size_t bytes_written;
       read(bytes_written);
@@ -101,25 +101,25 @@ namespace crpcut {
     }
 
     reporter::reporter(std::ostream &default_out)
-      : write_fd_(0),
-        read_fd_(0),
+      : writer_(0),
+        reader_(0),
         current_test_(0),
         default_out_(default_out)
     {
     }
 
     void
-    reporter::set_read_fd(rfile_descriptor *r)
+    reporter::set_reader(data_reader *r)
     {
-      assert(read_fd_ == 0);
-      read_fd_ = r;
+      assert(reader_ == 0);
+      reader_ = r;
     }
 
     void
-    reporter::set_write_fd(wfile_descriptor *w)
+    reporter::set_writer(data_writer *w)
     {
-      assert(write_fd_ == 0);
-      write_fd_ = w;
+      assert(writer_ == 0);
+      writer_ = w;
     }
 
     void

@@ -246,11 +246,11 @@ namespace crpcut {
         try {
           typedef comm::wfile_descriptor wfd;
           wfd report_fd(c2p.for_writing(pipe_pair::release_ownership));
-          comm::report.set_write_fd(&report_fd);
+          comm::report.set_writer(&report_fd);
 
           typedef comm::rfile_descriptor rfd;
           rfd response_fd(p2c.for_reading(pipe_pair::release_ownership));
-          comm::report.set_read_fd(&response_fd);
+          comm::report.set_reader(&response_fd);
 
           test_environment current_test;
           comm::report.set_test_environment(&current_test);
