@@ -1137,24 +1137,40 @@ namespace crpcut {
       int fd_;
     };
 
-    class rfile_descriptor : public file_descriptor
+    class data_reader
+    {
+    public:
+      virtual ~data_reader();
+      virtual ssize_t read(void *buff, size_t len) const = 0;
+      virtual void read_loop(void *buff, size_t len,
+                             const char *context = "read_loop") const;
+    };
+
+    class rfile_descriptor : public file_descriptor,
+                             public data_reader
     {
     public:
       rfile_descriptor();
       rfile_descriptor(int fd);
       virtual ssize_t read(void *buff, size_t len) const;
-      virtual void read_loop(void *buff, size_t len,
-                             const char *context = "read_loop") const;
     };
 
-    class wfile_descriptor : public file_descriptor
+    class data_writer
+    {
+    public:
+      virtual ~data_writer();
+      virtual ssize_t write(const void *buff, size_t len) const = 0;
+      virtual void write_loop(const void *buff, size_t len,
+                              const char *context = "write_loop") const;
+    };
+
+    class wfile_descriptor : public file_descriptor,
+                             public data_writer
     {
     public:
       wfile_descriptor();
       wfile_descriptor(int fd);
       virtual ssize_t write(const void *buff, size_t len) const;
-      virtual void write_loop(const void *buff, size_t len,
-                              const char *context = "write_loop") const;
     };
 
 

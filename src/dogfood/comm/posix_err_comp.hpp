@@ -24,74 +24,24 @@
  * SUCH DAMAGE.
  */
 
+
+
+#ifndef POSIX_ERR_COMP_HPP_
+#define POSIX_ERR_COMP_HPP_
+
 #include <crpcut.hpp>
-#include "../posix_error.hpp"
 
-namespace crpcut {
-  namespace comm {
-
-    file_descriptor::file_descriptor()
-    : fd_(-1)
-    {
-    }
-
-    file_descriptor::file_descriptor(int fd)
-    : fd_(fd)
-    {
-    }
-
-    file_descriptor::~file_descriptor()
-    {
-      close();
-    }
-
-    void
-    file_descriptor::close()
-    {
-      if (fd_ == -1) return;
-      (void)wrapped::close(fd_); // not much to do on error
-      fd_ = -1;
-    }
-
-    rfile_descriptor
-    ::rfile_descriptor(int fd)
-      : file_descriptor(fd)
-    {
-    }
-
-    rfile_descriptor
-    ::rfile_descriptor()
-      : file_descriptor()
-    {
-    }
-
-    ssize_t
-    rfile_descriptor
-    ::read(void *buff, size_t len) const
-    {
-      return wrapped::read(fd_, buff, len);
-    }
-
-
-    wfile_descriptor
-    ::wfile_descriptor(int fd)
-    : file_descriptor(fd)
-    {
-    }
-
-    wfile_descriptor
-    ::wfile_descriptor()
-    : file_descriptor()
-    {
-    }
-
-    ssize_t
-    wfile_descriptor
-    ::write(const void *buff, size_t len) const
-    {
-      errno = 0;
-      return wrapped::write(fd_, buff, len);
-    }
-
+class posix_err_comp
+{
+public:
+  posix_err_comp(int e, const char *s) : e_(e), s_(s) {}
+  bool operator()(::crpcut::posix_error &e)
+  {
+    return e_ == e.get_errno() && (e.what() == s_ || std::string(s_) == e.what());
   }
-}
+private:
+  int e_;
+  const char *s_;
+};
+
+#endif // POSIX_ERR_COMP_HPP_

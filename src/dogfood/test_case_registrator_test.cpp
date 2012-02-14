@@ -252,8 +252,8 @@ TESTSUITE(test_case_registrator)
     StrictMock<mock_poll> poller;
     EXPECT_CALL(factory, introduce_name(101, StartsWith("apa::test"), 9));
     reg.setup(poller, 101,
-              10,11,
-              8, 9);
+              -1,-1,
+              -1, -1);
     ASSERT_TRUE(reg.get_pid() == 101);
   }
 

@@ -29,69 +29,37 @@
 
 namespace crpcut {
   namespace comm {
-
-    file_descriptor::file_descriptor()
-    : fd_(-1)
+    data_writer
+    ::~data_writer()
     {
-    }
-
-    file_descriptor::file_descriptor(int fd)
-    : fd_(fd)
-    {
-    }
-
-    file_descriptor::~file_descriptor()
-    {
-      close();
     }
 
     void
-    file_descriptor::close()
+    data_writer
+    ::write_loop(const void *buff, size_t len, const char *context) const
     {
-      if (fd_ == -1) return;
-      (void)wrapped::close(fd_); // not much to do on error
-      fd_ = -1;
+      const char *p = static_cast<const char*>(buff);
+      size_t bytes_written = 0;
+      while (bytes_written < len)
+        {
+          ssize_t rv = write(p + bytes_written, len - bytes_written);
+          if (rv == -1 && errno == EINTR)
+            {
+              continue;
+            }
+          if (rv <= 0)
+            {
+              throw posix_error(errno, context);
+            }
+          bytes_written += size_t(rv);
+        }
     }
-
-    rfile_descriptor
-    ::rfile_descriptor(int fd)
-      : file_descriptor(fd)
-    {
-    }
-
-    rfile_descriptor
-    ::rfile_descriptor()
-      : file_descriptor()
-    {
-    }
-
-    ssize_t
-    rfile_descriptor
-    ::read(void *buff, size_t len) const
-    {
-      return wrapped::read(fd_, buff, len);
-    }
-
-
-    wfile_descriptor
-    ::wfile_descriptor(int fd)
-    : file_descriptor(fd)
-    {
-    }
-
-    wfile_descriptor
-    ::wfile_descriptor()
-    : file_descriptor()
-    {
-    }
-
-    ssize_t
-    wfile_descriptor
-    ::write(const void *buff, size_t len) const
-    {
-      errno = 0;
-      return wrapped::write(fd_, buff, len);
-    }
-
   }
 }
+
+
+
+
+
+
+

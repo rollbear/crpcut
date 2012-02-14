@@ -27,26 +27,14 @@
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
 #include "../../posix_error.hpp"
+#include "posix_err_comp.hpp"
+
 namespace {
-  class test_wfile_descriptor : public crpcut::comm::wfile_descriptor
+
+  class test_reader : public crpcut::comm::data_reader
   {
   public:
-    test_wfile_descriptor() : wfile_descriptor() {}
-    test_wfile_descriptor(int fd) : wfile_descriptor(fd) {}
-    using file_descriptor::get_fd;
-    MOCK_METHOD0(close, void());
-    ssize_t write(const void *p, size_t n) const
-    {
-      return write(static_cast<const char*>(p), n);
-    }
-    MOCK_CONST_METHOD2(write, ssize_t(const char *, size_t));
-  };
-  class test_rfile_descriptor : public crpcut::comm::rfile_descriptor
-  {
-  public:
-    test_rfile_descriptor() : rfile_descriptor() {}
-    test_rfile_descriptor(int fd) : rfile_descriptor(fd) {}
-    using file_descriptor::get_fd;
+    test_reader() : data_reader() {}
     virtual ssize_t read(void *p, size_t t) const
     {
       return read(static_cast<char*>(p), t);
@@ -56,93 +44,17 @@ namespace {
   };
 
   static const char alphabet[] = "abcdefghijklmnopqrstuvwxyz";
-
-  class posix_err_comp
-  {
-  public:
-    posix_err_comp(int e, const char *s) : e_(e), s_(s) {}
-    bool operator()(::crpcut::posix_error &e)
-    {
-      return e_ == e.get_errno() && (e.what() == s_ || std::string(s_) == e.what());
-    }
-  private:
-    int e_;
-    const char *s_;
-  };
-
-  int pending_errno;
-  void set_errno()
-  {
-    errno = pending_errno;
-  }
 }
 
-TESTSUITE(file_descriptor)
+TESTSUITE(comm)
 {
-  using namespace testing;
-  TESTSUITE(wfile_descriptor)
+  TESTSUITE(data_reader)
   {
-    TEST(default_constructed_file_descriptor_does_nothing)
-    {
-      StrictMock<test_wfile_descriptor> d;
-      ASSERT_TRUE(d.get_fd() == -1);
-    }
-
-    TEST(write_loop_constructs_in_chucks)
-    {
-      StrictMock<test_wfile_descriptor> d;
-      EXPECT_CALL(d, write(StartsWith(alphabet), 26)).
-          WillOnce(Return(10));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 10), 16)).
-          WillOnce(Return(10));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 20), 6)).
-          WillOnce(Return(6));
-      d.write_loop(alphabet, 26);
-    }
-
-    TEST(write_loop_throws_when_fd_closes)
-    {
-      const char *nullstr = 0;
-      StrictMock<test_wfile_descriptor> d;
-      EXPECT_CALL(d, write(StartsWith(alphabet), 26)).
-          WillOnce(Return(10));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 10), 16)).
-          WillOnce(Return(0));
-      ASSERT_THROW(d.write_loop(alphabet, 26),
-                   crpcut::posix_error,
-                   posix_err_comp(0, nullstr));
-    }
-
-    TEST(write_loop_continues_after_EINTR)
-    {
-      pending_errno = EINTR;
-      InSequence s;
-      StrictMock<test_wfile_descriptor> d;
-      EXPECT_CALL(d, write(StartsWith(alphabet), 26)).
-          Times(1).
-          WillOnce(Return(10));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 10), 16)).
-          Times(1).
-          WillOnce(DoAll(InvokeWithoutArgs(set_errno),
-                         Return(-1)));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 10), 16)).
-          Times(1).
-          WillOnce(Return(16));
-      d.write_loop(alphabet, 26);
-    }
-  }
-
-  TESTSUITE(rfile_descriptor)
-  {
-    TEST(default_constructed_file_descriptor_does_nothing)
-    {
-      StrictMock<test_rfile_descriptor> d;
-      ASSERT_TRUE(d.get_fd() == -1);
-    }
+    using namespace testing;
 
     TEST(read_loop_constructs_in_chunks)
     {
-      StrictMock<test_rfile_descriptor> d;
+      StrictMock<test_reader> d;
       EXPECT_CALL(d, read(_, 26)).
           WillOnce(DoAll(SetArrayArgument<0>(alphabet, alphabet + 10),
                          Return(10)));
@@ -163,7 +75,7 @@ TESTSUITE(file_descriptor)
     TEST(read_loop_throws_when_fd_closes)
     {
       const char *nullstr = 0;
-      StrictMock<test_rfile_descriptor> d;
+      StrictMock<test_reader> d;
       EXPECT_CALL(d, read(_, 26)).
           WillOnce(DoAll(SetArrayArgument<0>(alphabet, alphabet + 10),
                          Return(10)));
@@ -181,14 +93,12 @@ TESTSUITE(file_descriptor)
     TEST(read_loop_continues_after_EINTR)
     {
       InSequence s;
-      pending_errno = EINTR;
-      StrictMock<test_rfile_descriptor> d;
+      StrictMock<test_reader> d;
       EXPECT_CALL(d, read(_, 26)).
           WillOnce(DoAll(SetArrayArgument<0>(alphabet, alphabet + 10),
                          Return(10)));
       EXPECT_CALL(d, read(_, 16)).
-          WillOnce(DoAll(InvokeWithoutArgs(set_errno),
-                         Return(-1)));
+          WillOnce(SetErrnoAndReturn(EINTR, -1));
       EXPECT_CALL(d, read(_, 16)).
           WillOnce(DoAll(SetArrayArgument<0>(alphabet + 10, alphabet + 20),
                          Return(10)));

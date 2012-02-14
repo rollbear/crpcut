@@ -31,6 +31,7 @@
 namespace {
   inline void close_and_invalidate(int& fd)
   {
+    if (fd <= 0) return;
     int rv = crpcut::wrapped::close(fd);
     assert(rv == 0);
     fd = -1;
@@ -55,17 +56,16 @@ namespace crpcut {
   pipe_pair
   ::close()
   {
-    if (fds[0] >= 0) { close_and_invalidate(fds[0]); }
-    if (fds[1] >= 0) { close_and_invalidate(fds[1]); }
+    close_and_invalidate(fds[0]);
+    close_and_invalidate(fds[1]);
   }
 
   int
   pipe_pair
   ::for_reading(purpose p)
   {
-    int rv = wrapped::close(fds[1]);
-    assert(rv == 0);
-    fds[1] = -1;
+    assert(fds[1] >= 0);
+    close_and_invalidate(fds[1]);
     int n = fds[0];
     if (p == release_ownership) fds[0] = -1;
     return n;
@@ -75,13 +75,10 @@ namespace crpcut {
   pipe_pair
   ::for_writing(purpose p)
   {
-    int rv = wrapped::close(fds[0]);
-    assert(rv == 0);
-    fds[0] = -1;
+    assert(fds[0] >= 0);
+    close_and_invalidate(fds[0]);
     int n = fds[1];
     if (p == release_ownership) fds[1] = -1;
     return n;
   }
-
 }
-

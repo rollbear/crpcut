@@ -29,69 +29,39 @@
 
 namespace crpcut {
   namespace comm {
-
-    file_descriptor::file_descriptor()
-    : fd_(-1)
+    data_reader
+    ::~data_reader()
     {
-    }
-
-    file_descriptor::file_descriptor(int fd)
-    : fd_(fd)
-    {
-    }
-
-    file_descriptor::~file_descriptor()
-    {
-      close();
     }
 
     void
-    file_descriptor::close()
+    data_reader
+    ::read_loop(void *buff, size_t len, const char *context) const
     {
-      if (fd_ == -1) return;
-      (void)wrapped::close(fd_); // not much to do on error
-      fd_ = -1;
-    }
-
-    rfile_descriptor
-    ::rfile_descriptor(int fd)
-      : file_descriptor(fd)
-    {
-    }
-
-    rfile_descriptor
-    ::rfile_descriptor()
-      : file_descriptor()
-    {
-    }
-
-    ssize_t
-    rfile_descriptor
-    ::read(void *buff, size_t len) const
-    {
-      return wrapped::read(fd_, buff, len);
-    }
-
-
-    wfile_descriptor
-    ::wfile_descriptor(int fd)
-    : file_descriptor(fd)
-    {
-    }
-
-    wfile_descriptor
-    ::wfile_descriptor()
-    : file_descriptor()
-    {
-    }
-
-    ssize_t
-    wfile_descriptor
-    ::write(const void *buff, size_t len) const
-    {
+      char *p = static_cast<char*>(buff);
+      size_t bytes_read = 0;
       errno = 0;
-      return wrapped::write(fd_, buff, len);
-    }
+      while (bytes_read < len)
+        {
+          ssize_t rv = read(p + bytes_read, len - bytes_read);
+          if (rv == -1 && errno == EINTR)
+            {
+              continue;
+            }
+          if (rv <= 0)
+            {
+              throw posix_error(errno, context);
+            }
+          bytes_read += size_t(rv);
+        }
 
+    }
   }
 }
+
+
+
+
+
+
+

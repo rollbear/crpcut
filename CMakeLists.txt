@@ -67,6 +67,8 @@ file(GLOB LIB_SRCS
      src/cli/param.cpp
      src/clocks/clocks.cpp
      src/collate_result.cpp
+     src/comm/data_reader.cpp
+     src/comm/data_writer.cpp
      src/comm/file_descriptor.cpp
      src/comm/reporter.cpp
      src/convert_traits.cpp
@@ -133,7 +135,8 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/cli/param_list_test.cpp
      src/dogfood/cli/param_test.cpp
      src/dogfood/cli/value_param_test.cpp
-     src/dogfood/comm/file_descriptor_test.cpp
+     src/dogfood/comm/data_reader_test.cpp
+     src/dogfood/comm/data_writer_test.cpp
      src/dogfood/comm/reporter_test.cpp
      src/dogfood/deadline_monitor_test.cpp
      src/dogfood/dogfood.cpp
