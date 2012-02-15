@@ -267,10 +267,11 @@ TESTSUITE(test_case_registrator)
       reg.goto_wd();
     }
 
+    class my_exit {};
+
     TEST(reports_failure_to_enter, fix<100U>,
          DEPENDS_ON(changes_to_working_dir))
     {
-      class my_exit {};
       EXPECT_CALL(fsops, mkdir(_,_)).WillOnce(Return(0));
       EXPECT_CALL(fsops, chdir(StrEq("101"))).
         WillOnce(SetErrnoAndReturn(EACCES, -1));
@@ -280,6 +281,21 @@ TESTSUITE(test_case_registrator)
         WillOnce(Throw(my_exit()));
       reg.set_wd(101);
       ASSERT_THROW(reg.goto_wd(), my_exit);
+    }
+
+    TEST(returning_report_exit_fail_after_failure_to_enter_aborts, fix<100U>,
+         DEPENDS_ON(reports_failure_to_enter),
+         EXPECT_SIGNAL_DEATH(SIGABRT),
+         NO_CORE_FILE)
+    {
+      EXPECT_CALL(fsops, mkdir(_,_)).WillOnce(Return(0));
+      EXPECT_CALL(fsops, chdir(StrEq("101"))).
+        WillOnce(SetErrnoAndReturn(EACCES, -1));
+      EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
+                                   StrEq("Couldn't chdir working dir"),
+                                   26));
+      reg.set_wd(101);
+      reg.goto_wd();
     }
   }
 
@@ -473,7 +489,7 @@ TESTSUITE(test_case_registrator)
     }
 
 
-#define S(x) #x, (sizeof(#x)-1)
+#define S(...) #__VA_ARGS__, (sizeof(#__VA_ARGS__)-1)
     TEST(exit_with_wrong_code_gives_fail_report, fix<100U>)
     {
       Sequence s;
@@ -673,6 +689,42 @@ TESTSUITE(test_case_registrator)
       ASSERT_TRUE(apa.num_failed() == 0U);
       ASSERT_TRUE(apa.num_passed() == 1U);
     }
+
+    TEST(unknown_death_cause_gives_failed_test_with_code_number_in_msg,
+         fix<100U>)
+    {
+      Sequence s;
+      const pid_t test_pid = 5158;
+      setup(test_pid);
+      const crpcut::test_phase phase = crpcut::running;
+      reg.set_phase(phase);
+      SET_WD(1);
+
+      prepare_siginfo(test_pid, 0, -1, s);
+
+      EXPECT_CALL(factory, calc_cputime(_)).
+          WillOnce(Return(1000));
+
+      EXPECT_CALL(factory, present(test_pid,
+                                   crpcut::comm::exit_fail,
+                                   phase, _, _)).
+        With(Args<4,3>(ElementsAreArray(S(Died for unknown reason, code=-1)))).
+        InSequence(s);
+
+
+      EXPECT_CALL(factory, return_dir(1));
+
+      EXPECT_CALL(reg, crpcut_tag()).
+          WillRepeatedly(ReturnRef(apa));
+
+      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+          InSequence(s);
+
+      reg.manage_death();
+      ASSERT_TRUE(apa.num_failed() == 1U);
+      ASSERT_TRUE(apa.num_passed() == 0U);
+    }
+
   }
 }
 
