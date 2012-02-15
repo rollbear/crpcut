@@ -184,6 +184,7 @@ TESTSUITE(test_case_registrator)
       std::ostringstream os;
       os << reg;
       ASSERT_TRUE(os.str() == "apa::test");
+      ASSERT_TRUE(reg.full_name_len() == 9U);
     }
 
     TEST(reports_true_on_exact_name_match, fix<100U>)

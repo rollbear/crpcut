@@ -236,9 +236,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::full_name_len() const
   {
-    return ns_info_->full_name_len()
-      + 2
-      + wrapped::strlen(name_);
+    return ns_info_->full_name_len()  + wrapped::strlen(name_);
   }
 
   std::ostream &
