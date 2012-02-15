@@ -26,38 +26,51 @@
 
 #include <crpcut.hpp>
 
-namespace crpcut {
-  template <>
-  void test_wrapper<void>::run(crpcut_test_case_base *t)
+namespace {
+  void
+  report_unexpected_survive(crpcut::crpcut_test_case_base *t,
+                            crpcut::comm::reporter        &report)
   {
-    t->test();
-  }
-
-  template <>
-  void test_wrapper<policies::deaths::wrapper>::run(crpcut_test_case_base *t)
-  {
-    t->test();
-    stream::toastream<128> os;
+    crpcut::stream::toastream<128> os;
     os << "Unexpectedly survived\nExpected ";
     t->crpcut_get_reg().crpcut_expected_death(os);
-    comm::report(comm::exit_fail, os);
+    report(crpcut::comm::exit_fail, os);
+  }
+
+  const char did_not_throw[] = "Unexpectedly did not throw";
+}
+namespace crpcut {
+  template <>
+  void
+  test_wrapper<void>
+  ::run(crpcut_test_case_base *t, comm::reporter &)
+  {
+    t->test();
   }
 
   template <>
-  void test_wrapper<policies::deaths::timeout_wrapper>::run(crpcut_test_case_base *t)
+  void
+  test_wrapper<policies::deaths::wrapper>
+  ::run(crpcut_test_case_base *t, comm::reporter &report)
+  {
+    t->test();
+    report_unexpected_survive(t, report);
+  }
+
+  template <>
+  void
+  test_wrapper<policies::deaths::timeout_wrapper>
+  ::run(crpcut_test_case_base *t, comm::reporter &report)
   {
     t->test();
     if (!timeouts_are_enabled()) return;
-    stream::toastream<128> os;
-    os << "Unexpectedly survived\nExpected ";
-    t->crpcut_get_reg().crpcut_expected_death(os);
-    comm::report(comm::exit_fail, os);
+    report_unexpected_survive(t, report);
   }
 
   template <>
   void
   test_wrapper<policies::exception_wrapper<std::exception> >
-  ::run(crpcut_test_case_base* t)
+  ::run(crpcut_test_case_base* t, comm::reporter &report)
   {
     try {
       t->test();
@@ -70,14 +83,15 @@ namespace crpcut {
       std::ostringstream out;
       out << "Unexpectedly caught "
           << policies::crpcut_exception_translator::try_all();
-      comm::report(comm::exit_fail, out);
+      report(comm::exit_fail, out);
     }
-    comm::report(comm::exit_fail, "Unexpectedly did not throw");
+    report(comm::exit_fail, did_not_throw);
   }
 
   template <>
   void
-  test_wrapper<policies::any_exception_wrapper>::run(crpcut_test_case_base *t)
+  test_wrapper<policies::any_exception_wrapper>
+  ::run(crpcut_test_case_base *t, comm::reporter &report)
   {
     try {
       t->test();
@@ -85,8 +99,6 @@ namespace crpcut {
     catch (...) {
       return;
     }
-    comm::report(comm::exit_fail,
-                 "Unexpectedly did not throw");
+    report(comm::exit_fail, did_not_throw);
   }
-
 }

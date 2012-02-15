@@ -181,14 +181,14 @@ TESTSUITE(output)
       ASSERT_TRUE(rv == N - 1);
     }
 
-#define ASSERT_INTEGER_WRITE(t, n) assert_integer_write((t)(n), #n)
+#define ASSERT_INTEGER_WRITE(t, n, s) assert_integer_write((t)(n ## s), #n)
 
     TEST(integer_writes)
     {
-      ASSERT_INTEGER_WRITE(short, -32760);
-      ASSERT_INTEGER_WRITE(unsigned short, 65530);
-      ASSERT_INTEGER_WRITE(int, -2000000000);
-      ASSERT_INTEGER_WRITE(unsigned, 4000000000);
+      ASSERT_INTEGER_WRITE(short, -32760,);
+      ASSERT_INTEGER_WRITE(unsigned short, 65530, U);
+      ASSERT_INTEGER_WRITE(int, -2000000000,);
+      ASSERT_INTEGER_WRITE(unsigned, 4000000000, U);
     }
 
     TEST(string_with_illegal_chars_gets_substitutions)

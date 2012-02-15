@@ -1849,13 +1849,13 @@ namespace crpcut {
   template <typename C>
   struct test_wrapper
   {
-    static void run(crpcut_test_case_base *t);
+    static void run(crpcut_test_case_base *t, comm::reporter &report);
   };
 
   template <typename exc>
   struct test_wrapper<policies::exception_wrapper<exc> >
   {
-    static void run(crpcut_test_case_base* t)
+    static void run(crpcut_test_case_base* t, comm::reporter &report)
     {
       try {
         t->test();
@@ -1871,10 +1871,10 @@ namespace crpcut {
           char *buff = static_cast<char*>(alloca(length));
           s.copy(buff, length);
           std::string().swap(s);
-          comm::report(comm::exit_fail, buff, length);
+          report(comm::exit_fail, buff, length);
         }
-      comm::report(comm::exit_fail,
-                   "Unexpectedly did not throw");
+      report(comm::exit_fail,
+             "Unexpectedly did not throw");
     }
   };
   template <typename T,
@@ -3969,7 +3969,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
       cputime_enforcer ct(crpcut_cputime_enforcer::crpcut_cputime_timeout_ms); \
       (void)rt; /* silence warning */                                   \
       (void)ct; /* silence warning */                                   \
-      crpcut::test_wrapper<crpcut_run_wrapper>::run(this);              \
+      crpcut::test_wrapper<crpcut_run_wrapper>::run(this, crpcut::comm::report); \
       if (crpcut::tests_as_child_processes())                           \
         {                                                               \
           crpcut_test_finished(); /* tell destructor to report success */ \
