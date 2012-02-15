@@ -738,7 +738,7 @@ namespace crpcut {
                       ? '!'
                       : '?';
             std::cout << flag << std::setw(tags.longest_tag_name())
-                      <<  i->get_name()
+                      <<  i->get_name().str
                       << std::setw(8)
                       << i->num_failed() + i->num_passed()
                       << std::setw(8)
