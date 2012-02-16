@@ -150,4 +150,24 @@ TESTSUITE(test_wrapper)
     typedef crpcut::test_wrapper<policy > w;
     w::run(&test_case, reporter);
   }
+
+  TEST(exception_wrapper_reports_when_test_returns, fix)
+  {
+    EXPECT_CALL(test_case, test());
+    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,_,_)).
+        With(Args<1,2>(ElementsAreArray(S(Unexpectedly did not throw))));
+    typedef crpcut::policies::exception_wrapper<my_error> policy;
+    typedef crpcut::test_wrapper<policy> w;
+    w::run(&test_case, reporter);
+  }
+
+  TEST(exception_wrapper_is_silent_when_expected_exception_is_thrown, fix)
+  {
+    EXPECT_CALL(test_case, test()).
+        WillOnce(Throw(my_error()));
+    typedef crpcut::policies::exception_wrapper<my_error> policy;
+    typedef crpcut::test_wrapper<policy> w;
+    w::run(&test_case, reporter);
+
+  }
 }
