@@ -159,11 +159,11 @@ TESTSUITE(test_case_registrator)
       info.si_signo  = SIGCHLD;
       info.si_status = status;
       info.si_code   = code;
-      EXPECT_CALL(process_control, waitid(P_PGID, pid, _, WEXITED)).
+      EXPECT_CALL(process_control, waitid(P_PGID, id_t(pid), _, WEXITED)).
           InSequence(s).
           WillOnce(DoAll(SetArgumentPointee<2>(info),
                          Return(0)));
-      EXPECT_CALL(process_control, waitid(P_PGID, pid, _, WEXITED)).
+      EXPECT_CALL(process_control, waitid(P_PGID, id_t(pid), _, WEXITED)).
           InSequence(s).
           WillOnce(SetErrnoAndReturn(ECHILD, -1));
     }
@@ -337,10 +337,12 @@ TESTSUITE(test_case_registrator)
       EXPECT_CALL(factory, tests_as_child_procs()).
           WillRepeatedly(Return(true));
 
+      static const struct timeval utime = { 1, 5 };
+      static const struct timeval stime = { 3, 6 };
       Sequence s;
       struct rusage usage;
-      usage.ru_utime = { 1, 5 };
-      usage.ru_stime = { 3, 6 };
+      usage.ru_utime = utime;
+      usage.ru_stime = stime;
       EXPECT_CALL(process_control, getrusage(RUSAGE_SELF, _)).
           InSequence(s).
           WillOnce(DoAll(SetArgumentPointee<1>(usage),
