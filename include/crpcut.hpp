@@ -2248,12 +2248,12 @@ namespace crpcut {
     template <typename T>
     void check_true(const T& v, const char *vn) const
     {
-      if (eval(v)) {} else { report("TRUE", v, vn); }
+      if (crpcut::eval(v)) {} else { report("TRUE", v, vn); }
     }
     template <typename T>
     void assert_false(const T& v, const char *vn) const
     {
-      if (eval(v)) { report("FALSE", v, vn); }
+      if (crpcut::eval(v)) { report("FALSE", v, vn); }
     }
   private:
     template <typename T>
@@ -3794,7 +3794,7 @@ namespace crpcut {
     typedef CRPCUT_DECLTYPE(::crpcut::expr::gen<trtype>() opexpr ::crpcut::expr::gen<urtype>()) type; \
     static type func(const expr::name<T, U>& n)                         \
     {                                                                   \
-      return eval(n.t_) opexpr eval(n.u_);                              \
+      return crpcut::eval(n.t_) opexpr crpcut::eval(n.u_);              \
     }                                                                   \
   };                                                                    \
 
