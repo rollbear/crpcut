@@ -663,7 +663,7 @@ if (WITH_HTML_DOCS)
     sample_code(report_example)
     sample_output(report_example PARAMS "--verbose" "--tags=/another_tag"
                                  OUTNAME "report_example_human.out")
-    sample_output(report_example PARAMS "--xml=yes" "-verbose" "--tags=/another_tag"
+    sample_output(report_example PARAMS "--xml=yes" "--verbose" "--tags=/another_tag"
                                  OUTNAME "report_example_xml.out")
     sample_code(ilist_element.hpp NOCOMPILE)
 
