@@ -33,6 +33,37 @@ extern "C"
 
 DEFINE_TEST_TAG(filesystem);
 
+namespace {
+  struct user_streamable
+  {
+    user_streamable(int i) : i_(i) {}
+    int i_;
+  };
+
+  struct multi_streamable
+  {
+    multi_streamable(int i) : i_(i) {}
+    int i_;
+    friend std::ostream &operator<<(std::ostream &os,
+                                    const multi_streamable& obj)
+    {
+      return os << obj.i_;
+    }
+  };
+}
+namespace crpcut {
+  template <>
+  void show_value(std::ostream &os, const user_streamable &obj)
+  {
+    os << "user_streamable(" << obj.i_ << ")";
+  }
+  template <>
+  void show_value(std::ostream &os, const multi_streamable &obj)
+  {
+    os << "multi_streamable(" << obj.i_ << ")";
+  }
+}
+
 TESTSUITE(output)
 {
   TEST(should_succeed_with_stdout)
@@ -99,5 +130,20 @@ TESTSUITE(output)
         s+=(char(i));
       }
     INFO << s;
+  }
+
+  TEST(should_succeed_user_streamable_shown_as_defined)
+  {
+    user_streamable obj(1);
+    INFO << obj;
+  }
+
+  TEST(should_succeed_multi_streamable_with_user_defined)
+  {
+    multi_streamable obj(1);
+    std::ostringstream os;
+    os << obj;
+    INFO << "default operator => " << os.str();
+    INFO << "user defined operator => " << obj;
   }
 }

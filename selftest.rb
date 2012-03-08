@@ -63,12 +63,13 @@ class Test
     return "#{result} when #{@result} expected" if @result != result
     log = @log.clone
     dirname = nil
+    log_index = {}
     test.elements.each('log/*') do |entry|
       text = entry.text || ""
       name = entry.name
       t = log[name]
       return "#{name} unexpected" if !t
-      t = t.clone
+      log_index[name] = 0 if !log_index[name]
       if name == 'violation' then
         actual_phase = entry.attributes['phase']
         if @phase != actual_phase then
@@ -83,9 +84,10 @@ class Test
           return "#{dirname} is not a directory" if !isdir
         end
       end
-      re = t.delete_at(0)
+      re = t[log_index[name]]
+      log_index[name] = log_index[name] + 1
       return "Too many #{name}'s" if !re
-      return "#{text} doesn't match #{name}" if !re.match(text)
+      return "#{text} doesn't match #{name} #{re}" if !re.match(text)
     end
     return "#{dirname} has unexpected files" if dirname && @files.empty?
     return "#{@files} is missing" if !dirname && !@files.empty?
@@ -1392,6 +1394,15 @@ TESTS = {
   'output::string_with_illegal_chars_should_succeed' =>
   PassedTest.new().
   log('info', /.*/me),
+  
+  'output::should_succeed_user_streamable_shown_as_defined' =>
+  PassedTest.new().
+  log('info', /user_streamable\(1\)/e),
+  
+  'output::should_succeed_multi_streamable_with_user_defined' =>
+  PassedTest.new().
+  log('info', /default operator => 1/).
+  log('info', /user defined operator => multi_streamable\(1\)/e),
 
   'suite_deps::simple_all_ok::should_succeed' =>
   PassedTest.new(),
