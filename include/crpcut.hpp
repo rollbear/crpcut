@@ -3960,7 +3960,8 @@ extern crpcut::namespace_info crpcut_current_namespace;
   {                                                                     \
     friend struct crpcut::test_wrapper<crpcut_run_wrapper>;              \
     friend class crpcut::policies::dependencies::enforcer<test_case_name>; \
-    friend class crpcut::crpcut_test_case_registrator;  \
+    friend class crpcut::crpcut_test_case_registrator;                  \
+    typedef test_case_name crpcut_test_class;                           \
     test_case_name() {}                                                 \
     virtual void crpcut_run_test()                                      \
     {                                                                   \
@@ -4020,7 +4021,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
        {                                                                \
          CRPCUT_DEFINE_REPORTER;                                        \
          prepare_construction(crpcut_constructor_timeout_ms);           \
-         test_case_name obj;                                            \
+         crpcut_test_class obj;                                         \
          manage_test_case_execution(&obj);                              \
          prepare_destruction(crpcut_destructor_timeout_ms);             \
        }                                                                \
