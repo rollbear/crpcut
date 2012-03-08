@@ -1945,16 +1945,17 @@ namespace crpcut {
   };
 
   template <typename T>
-  void conditionally_stream(std::ostream &os, const T& t)
+  void show_value(std::ostream &os, const T& t)
   {
-    conditional_streamer<T, sizeof(T)>::stream(os, t);
+    conditional_streamer<T>::stream(os, t);
   }
 
   template <size_t N, typename T>
-  void conditionally_stream(std::ostream &os, const T& t)
+  void show_value(std::ostream &os, const T& t)
   {
     conditional_streamer<T, N>::stream(os, t);
   }
+
 
   class null_cmp
   {
@@ -2049,7 +2050,7 @@ namespace crpcut {
                     const char *name, const T& t)
   {
     std::ostringstream tmp;
-    conditionally_stream(tmp, t);
+    crpcut::show_value(tmp, t);
     std::string str = tmp.str();
     if (str != name)
       {
@@ -2272,12 +2273,12 @@ namespace crpcut {
       heap::set_limit(heap::system);
       std::ostringstream os;
 
-      conditionally_stream<8>(prepare(os,
-                                      loc_,
-                                      crpcut_check_name<action>::string(),
-                                      name,
-                                      vn),
-                              v);
+      crpcut::show_value<8>(prepare(os,
+                                    loc_,
+                                    crpcut_check_name<action>::string(),
+                                    name,
+                                    vn),
+                             v);
       comm::report(action, os);
     }
   };
@@ -3326,14 +3327,14 @@ namespace crpcut {
     template <comm::type t> template <typename V>
     direct_reporter<t>& direct_reporter<t>::operator<<(const V& v)
     {
-      conditionally_stream(os, v);
+      crpcut::show_value(os, v);
       return *this;
     }
 
     template <comm::type t> template <typename V>
     direct_reporter<t>& direct_reporter<t>::operator<<(V& v)
     {
-      conditionally_stream(os, v);
+      crpcut::show_value(os, v);
       return *this;
     }
 
@@ -3774,9 +3775,9 @@ namespace crpcut {
       friend                                                            \
         std::ostream &operator<<(std::ostream &os, const name &a)       \
       {                                                                 \
-        conditionally_stream<8>(os, a.t_);                              \
+        crpcut::show_value<8>(os, a.t_);                                \
         os << " " << #opexpr << " ";                                    \
-        conditionally_stream<8>(os, a.u_);                              \
+        crpcut::show_value<8>(os, a.u_);                                \
         return os;                                                      \
       }                                                                 \
       friend struct eval_t<name>;                                       \
@@ -3848,7 +3849,7 @@ namespace crpcut {
       friend
       std::ostream &operator<<(std::ostream &os, const atom& a)
       {
-        conditionally_stream<8>(os, a.t_);
+        crpcut::show_value<8>(os, a.t_);
         return os;
       }
     private:
