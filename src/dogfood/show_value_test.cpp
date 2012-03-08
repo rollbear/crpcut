@@ -129,8 +129,9 @@ TESTSUITE(show_value)
   {
     std::ostringstream os;
     specialized_streamable obj(100);
+    os << obj << " ";
     crpcut::show_value(os, obj);
-    ASSERT_TRUE(os.str() == "specialized(100)");
+    ASSERT_TRUE(os.str() == "100 specialized(100)");
   }
 }
 
