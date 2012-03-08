@@ -40,6 +40,11 @@ struct A
 
 TESTSUITE(basics)
 {
+  DISABLED_TEST(will_not_run)
+  {
+    FAIL << "shall never ever run!";
+  }
+
   TEST(construct, WITH_TEST_TAG(a_tag))
   {
     A *p = new A(); // leak
@@ -50,6 +55,7 @@ TESTSUITE(basics)
   {
     ASSERT_TRUE(func() == 1);
   }
+
   TEST(destroy, A, DEPENDS_ON(construct), WITH_TEST_TAG(another_tag))
   {
     INFO << "running test body";

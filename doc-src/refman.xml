@@ -1043,12 +1043,14 @@
       by adding a <function>DEPENDS_ON(...)</function> modifier to the
       test.
     </para>
-    <para>It is not possible to state a dependency on a
-      <xref linkend="DISABLED_TEST" xrefstyle="select:title"/>.</para>
     <tip>
       It is often a good idea to let testsuites depend on testsuites, and
       tests to depend on other tests inside the same testsuite.
     </tip>
+    <note>A dependency on a
+      <xref linkend="DISABLED_TEST" xrefstyle="select:title"/> is handled
+      as if the disabled test has succeeded.
+    </note>
     <note>
       <function>DEPENDS_ON(...)</function> can only be included once in
       the modifier list for each
@@ -1085,10 +1087,9 @@
     <para>The only difference between
       <xref linkend="TEST" xrefstyle="select:title"/> and
       <function>DISABLED_TEST(name, ...)</function> is that a disabled test
-      will never run, and will not be listed as untested. It is also not
-      possible to state a dependency (see
-      <xref linkend="DEPENDS_ON" xrefstyle="select:title"/>) to a disabled
-      test.
+      will be listed as untested, and never run. A dependency on a disabled
+      test is handled as if the disabled test had succeeded (see
+      <xref linkend="DEPENDS_ON" xrefstyle="select:title"/>.)
     </para>
   </section>
   <section id="EXPECT_EXCEPTION">
@@ -3357,7 +3358,8 @@ int main(int argc, char *argv[])
         <listitem>A (possibly empty) list of results from individual
         tests.</listitem>
         <listitem>A (possibly empty) list of tests that were blocked
-        from running due to unfulfilled dependencies.</listitem>
+        from running due to unfulfilled dependencies or because they
+        are disabled.</listitem>
         <listitem>A (possibly empty) list of results for each tag used by
         tests in the run.</listitem>
         <listitem>A result summary.</listitem>
@@ -3442,6 +3444,12 @@ int main(int argc, char *argv[])
 <xi:include href="../sample-output/report_example_human.out" parse="text"/>
             </screen>
 
+          </para>
+          <para>
+            The tests that are blocked from running are listed with an
+            importance symbol. '-' for a disabled test, '?' for a non-critical
+            test, and '!' for a critical test. The same importance symbol is
+            used for the tag summary.
           </para>
         </section>
         <section id="XML">

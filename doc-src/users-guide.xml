@@ -91,7 +91,8 @@
         now, but it is intended to be,
         <xref linkend="DISABLED_TEST" xrefstyle="select:title"/> will
         keep the error reports clean, and will prevent code-rot in the
-        test code, since it will be compiled.
+        test code, since it will be compiled. As a reminder, disabled tests
+        are shown in the test summary.
       </para>
     </section>
     <section id="asserts">
