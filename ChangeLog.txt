@@ -1,3 +1,13 @@
+         * A new function template:
+
+           void crpcut::show_value<T>(std::ostream&, const T&)
+
+           is added to be specialized if you want to control the display
+           of values of type T in crpcut reports.
+
+           By default std::ostream& operator<<(std::ostream &, const T&)
+           is used when available, or a hex-dump otherwise.
+
          * DISABLED_TESTs are now included in the statistics of registered
            tests and blocked tests. The list of blocked tests is enhanced
            with the importance of the blocked test. In text-mode output
