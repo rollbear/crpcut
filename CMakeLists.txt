@@ -697,6 +697,8 @@ if (WITH_HTML_DOCS)
     sample_result(simple-depend)
     sample_code(suite_depend.cpp NOCOMPILE)
     sample_code(suite_define.cpp NOCOMPILE)
+    
+    sample_result(show-value-example PARAMS "-v")
     #
     # suite_depend
     #
@@ -830,6 +832,7 @@ if (WITH_HTML_DOCS)
       ${SS}/simple-pred.cpp               ${SO}/simple-pred.out
       ${SS}/template-pred.cpp             ${SO}/template-pred.out
       ${SS}/gmock-example.cpp             ${SO}/gmock-example.out
+      ${SS}/show-value-example.cpp        ${SO}/show-value-example.out
       can_dump_core
                                           ${SO}/COPYING
       ${DOC_SOURCES} ${DOC_SRC_LIB}/crpcut-doc.css crpcut.xsl

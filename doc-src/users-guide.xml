@@ -767,6 +767,40 @@ macro.
       </para>
     </section>
   </chapter>
+  
+  <chapter id="data-display-format">
+    <title>Controlling data display format</title>
+    <para>
+    When &crpcut; needs to display the value of an object, for example in a
+    violation report due to a failed
+    <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/>, it defaults to
+    using
+    <type>std::ostream&amp;</type>&#xA0;<function>operator&lt;&lt;</function>(<type>std::ostream&amp;</type>,&#xA0;<type>const&#xA0;T&amp;</type>)
+    if it is defined for the type, or a hex-dump otherwise.
+    </para>
+    <para>
+    Should you want to display your data types in a different format, you
+    can specialize the function template
+    <type>void</type>&#xA0;<function>crpcut::show_value</function>&lt;&gt;(<type>std::ostream&amp;</type>,&#xA0;<type>const&#xA0;T&amp;</type>)
+    to display the value in any format you prefer.
+    </para>
+    <para>Example:
+      <programlisting language="c++">
+<xi:include href="../stripped-src/show-value-example.cpp" parse="text"/>
+</programlisting>
+    </para>
+    <para>The result from running the example program is:
+        <screen>
+
+<xi:include href="../sample-output/show-value-example.out" parse="text"/>
+</screen>
+    </para>
+    <para>As can be seen, the specialized
+    <type>crpcut::</type><function>show_value</function>&lt;<type>T</type>&gt;()
+    is preferred when both it and the normal stream insertion operator are
+    available.
+    </para>
+  </chapter>
   <chapter id="using-gmock">
     <title>Using google mock</title>
     <para>

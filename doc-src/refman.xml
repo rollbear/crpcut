@@ -2957,6 +2957,34 @@
     </para>
   </section>
 
+  <section id="show_value">
+    <title><type>crpcut::</type><function>show_value</function>&lt;<type>T</type>&gt;()</title>
+    <para>Function template that controls how values are represented on a
+    <type>std::ostream</type>. By default, the
+    <type>std::ostream&amp;</type>&#xA0;<function>operator&lt;&lt;</function>(<type>std::ostream&amp;</type>,&#xA0;<type>const&#xA0;T&amp;</type>)
+    stream insertion operator is used, if defined, otherwise a hex-dump of the
+    memory occupied by the object is inserted into the stream.
+    </para>
+    <para>By specializing <type>crpcut::</type><function>show_value</function>&lt;<type>T</type>&gt;()
+    for your type, you can define a different way to display values in
+    &crpcut; reports.
+    </para>
+    <para>Example:
+      <programlisting language="c++">
+<xi:include href="../stripped-src/show-value-example.cpp" parse="text"/>
+</programlisting>
+    </para>
+    <para>The result from running the example program is:
+        <screen>
+
+<xi:include href="../sample-output/show-value-example.out" parse="text"/>
+</screen>
+    </para>
+    <para>The specialized <type>crpcut::</type><function>show_value</function>&lt;<type>T</type>&gt;()
+     is preferred when both it and the normal stream insertion operator are
+    available.
+    </para>
+  </section>
   <section id="run">
     <title><type>crpcut::</type><function>run</function>()</title>
     <para>The main function of &crpcut; which runs all selected tests</para>
