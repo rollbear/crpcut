@@ -224,7 +224,7 @@ namespace crpcut {
         write(os, conversion_type_);
       } while (i++ != end);
 
-      write("\nTotal    :     Sum   Critical   Non-critical");
+      write("\n               Sum   Critical   Non-critical");
       if (num_run != num_failed)
         {
           std::ostringstream os;

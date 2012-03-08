@@ -163,7 +163,7 @@ TESTSUITE(output)
 
         static const char re[] =
           "14 test cases selected\n\n"
-              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+                               _ "Sum" _ "Critical" _ "Non-critical\n"
           "<PS>PASSED"   _ ":" _ "13"  _ "13"       _ "0<>\n"
           "<BS>UNTESTED" _ ":" _ "1<>\n$";
 
@@ -193,7 +193,7 @@ TESTSUITE(output)
         }
         static const char re[] =
               "13 test cases selected\n\n"
-              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+                               _ "Sum" _ "Critical" _ "Non-critical\n"
           "<FS>FAILED"   _ ":" _ "13"  _ "13"       _ "0<>\n$";
 
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
@@ -261,7 +261,7 @@ TESTSUITE(output)
           "<NP>?katt                  3       3       0<>\n"
           "<NP>?a_long_tag_name       1       1       0<>\n"
           "\n"
-              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+                               _ "Sum" _ "Critical" _ "Non-critical\n"
           "<PS>PASSED"   _ ":" _ "9"   _ "5"        _ "4<>\n$"
           ;
         ASSERT_PRED(crpcut::regex(re, crpcut::regex::m),
@@ -326,7 +326,7 @@ TESTSUITE(output)
           "<NF>?katt                       3       0       3<>\n"
            "<F>!a_very_long_tag_name_      1       0       1<>\n"
           "\n"
-              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+                               _ "Sum" _ "Critical" _ "Non-critical\n"
           "<FS>FAILED"   _ ":" _ "9"   _ "6"        _ "3<>\n$"
           ;
 
@@ -393,7 +393,7 @@ TESTSUITE(output)
           "<NF>?katt             3       1       2<>\n"
            "<F>!a_tag_name       2       1       1<>\n"
           "\n"
-              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+                               _ "Sum" _ "Critical" _ "Non-critical\n"
           "<PS>PASSED"   _ ":" _ "4"   _ "3"        _ "1<>\n"
           "<FS>FAILED"   _ ":" _ "6"   _ "4"        _ "2<>\n$"
           ;
@@ -460,7 +460,7 @@ TESTSUITE(output)
           "<NF>?katt                       3       1       2<>\n"
           "<NF>?a_very_long_tag_name       2       1       1<>\n"
           "\n"
-              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+                                _ "Sum" _ "Critical" _ "Non-critical\n"
           "<NPS>PASSED"   _ ":" _ "4"   _ "0"        _ "4<>\n"
           "<NFS>FAILED"   _ ":" _ "6"   _ "0"        _ "6<>\n$"
           ;
@@ -527,7 +527,7 @@ TESTSUITE(output)
           "<NF>?apa                        5       2       3<>\n"
           "<NF>?katt                       3       1       2<>\n"
           "\n"
-              "Total"    _ ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+                                _ "Sum" _ "Critical" _ "Non-critical\n"
           "<NPS>PASSED"   _ ":" _ "3"   _ "0"        _ "3<>\n"
           "<NFS>FAILED"   _ ":" _ "5"   _ "0"        _ "5<>\n$"
           ;
@@ -735,7 +735,7 @@ TESTSUITE(output)
           "  !<B>ko<>\n"
           "  -<B>tupp<>\n"
           "32 test cases selected\n\n"
-          "Total"      _   ":" _ "Sum" _ "Critical" _ "Non-critical\n"
+                               _ "Sum" _ "Critical" _ "Non-critical\n"
           "<PS>PASSED" _   ":" _  "29" _       "29" _            "0<>\n"
           "<FS>FAILED" _   ":" _   "1" _        "1" _            "0<>\n"
           "<BS>UNTESTED" _ ":" _ "2<>\n"
