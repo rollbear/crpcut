@@ -26,6 +26,7 @@
 AWK=$1
 DIR=$2
 
+DISABLED=1
 BLOCKED=7
 R=319
 RN=$(($R+$BLOCKED))
@@ -38,6 +39,7 @@ F=171
   RN=$(($RN+$GR+$GB))
   F=$(($F+$GF))
 }
+REG=$(($RN+$DISABLED))
 tests=(
     "           default_success" "run=1 failed=0"
     "           asserts"       "run=53 failed=33"
@@ -60,15 +62,15 @@ tests=(
     "-n -c 8    asserts death" "run=78 failed=52 nodeps=1"
     "-n -c 8 -v asserts death" "run=78 failed=52 nodeps=1 verbose=1"
 
-    ""                         "run=$R failed=$F blocked=$BLOCKED"
-    "-v"                       "run=$R failed=$F blocked=$BLOCKED verbose=1 "
-    "-c 8"                     "run=$R failed=$F blocked=$BLOCKED"
-    "-c 8 -v"                  "run=$R failed=$F blocked=$BLOCKED verbose=1"
+    ""                         "run=$R failed=$F blocked=$(($BLOCKED+$DISABLED))"
+    "-v"                       "run=$R failed=$F blocked=$(($BLOCKED+$DISABLED)) verbose=1 "
+    "-c 8"                     "run=$R failed=$F blocked=$(($BLOCKED+$DISABLED))"
+    "-c 8 -v"                  "run=$R failed=$F blocked=$(($BLOCKED+$DISABLED)) verbose=1"
 
-    "-n"                       "run=$RN failed=$F blocked=0 nodeps=1"
-    "-n -v"                    "run=$RN failed=$F blocked=0 nodeps=1 verbose=1"
-    "-n -c 8"                  "run=$RN failed=$F blocked=0 nodeps=1"
-    "-n -c 8 -v"               "run=$RN failed=$F blocked=0 nodeps=1 verbose=1"
+    "-n"                       "run=$RN failed=$F blocked=$DISABLED nodeps=1"
+    "-n -v"                    "run=$RN failed=$F blocked=$DISABLED nodeps=1 verbose=1"
+    "-n -c 8"                  "run=$RN failed=$F blocked=$DISABLED nodeps=1"
+    "-n -c 8 -v"               "run=$RN failed=$F blocked=$DISABLED nodeps=1 verbose=1"
     )
 echo "sanity check takes some time - be patient"
 n=0
@@ -88,7 +90,7 @@ do
     }
     r=()
     lineno=0
-    $AWK -f $DIR/filter.awk -- registered=$RN rv=$rv $expect < $filename > $reportfile
+    $AWK -f $DIR/filter.awk -- registered=$REG rv=$rv $expect < $filename > $reportfile
     [ $? == 0 ] || {
         echo FAILED
         cat $reportfile

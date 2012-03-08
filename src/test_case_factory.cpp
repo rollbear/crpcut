@@ -518,12 +518,10 @@ namespace crpcut {
     for (crpcut_test_case_registrator *i = reg_.next();
         i != &reg_; i = i->next())
       {
-        tag &test_tag = i->crpcut_tag();
-        tag::importance importance = test_tag.get_importance();
+        tag::importance importance = i->get_importance();
 
         if (importance == tag::ignored) continue;
 
-        const char prefix = importance == tag::critical ? '!' : '?';
         bool matched = !*names;
         for (const char *const*name = names; !matched && *name; ++name)
           {
@@ -531,7 +529,7 @@ namespace crpcut {
           }
         if (matched)
           {
-            std::cout << prefix;
+            std::cout << importance;
             if (longest_tag_len > 0)
               {
                 std::cout << std::setw(longest_tag_len)
@@ -556,7 +554,7 @@ namespace crpcut {
     do
       {
         tag::importance i = filter.lookup(ti->get_name());
-      ti->set_importance(i);
+        ti->set_importance(i);
       }
     while (ti++ != end);
   }
@@ -572,12 +570,16 @@ namespace crpcut {
         i = next)
       {
         next = i->next();
-        const tag& test_tag = i->crpcut_tag();
-        if (test_tag.get_importance() == tag::ignored)
+        tag::importance importance = i->get_importance();
+        if (importance == tag::ignored)
           {
             i->crpcut_uninhibit_dependants();
             i->unlink();
             continue;
+          }
+        if (importance == tag::disabled)
+          {
+            i->crpcut_uninhibit_dependants();
           }
         ++num_registered_tests;
         if (tentative)
@@ -734,10 +736,8 @@ namespace crpcut {
                 sum_crit_pass += i->num_passed();
                 sum_crit_fail += i->num_failed();
               }
-            char flag = i->get_importance() == tag::critical
-                      ? '!'
-                      : '?';
-            std::cout << flag << std::setw(tags.longest_tag_name())
+            tag::importance importance = i->get_importance();
+            std::cout << importance << std::setw(tags.longest_tag_name())
                       <<  i->get_name().str
                       << std::setw(8)
                       << i->num_failed() + i->num_passed()
@@ -827,10 +827,10 @@ namespace crpcut {
             char *buff = static_cast<char*>(alloca(name_len));
             stream::oastream os(buff, name_len);
             os << *i;
-            fmt.blocked_test(os);
+            fmt.blocked_test(i->get_importance(), os);
             if (output_fd != 1 && !quiet)
               {
-                std::cout << "  " << *i << '\n';
+                std::cout << "  " << i->get_importance() << *i << '\n';
               }
           }
       }
@@ -845,7 +845,8 @@ namespace crpcut {
         crpcut_test_case_registrator *i = reg_.next();
         while (i != &reg_)
           {
-            if (cli_->honour_dependencies() && !i->crpcut_can_run())
+            if ((cli_->honour_dependencies() && !i->crpcut_can_run())
+                || i->get_importance() == crpcut::tag::disabled)
               {
                 i = i->next();
                 continue;

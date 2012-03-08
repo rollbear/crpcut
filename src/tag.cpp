@@ -78,4 +78,12 @@ namespace crpcut {
     return importance_;
   }
 
+
+#define VERBATIM_SECOND(p1, p2) p2
+
+  std::ostream &operator<<(std::ostream &os, tag::importance i)
+  {
+    static const char icon[] = { CRPCUT_TEST_IMPORTANCE(VERBATIM_SECOND) };
+    return os << icon[i];
+  }
 }

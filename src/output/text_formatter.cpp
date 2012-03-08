@@ -275,7 +275,7 @@ namespace crpcut {
 
     void
     text_formatter
-    ::blocked_test(datatypes::fixed_string name)
+    ::blocked_test(tag::importance i, datatypes::fixed_string name)
     {
       if (!blocked_tests_)
         {
@@ -283,11 +283,15 @@ namespace crpcut {
                 conversion_type_);
           blocked_tests_ = true;
         }
-      write("  ");
+      {
+        stream::toastream<3> os;
+        os << "  " << i;
+        write(os, conversion_type_);
+      }
       modifier_.write_to(*this, text_modifier::BLOCKED);
       write(name, conversion_type_);
       modifier_.write_to(*this, text_modifier::NORMAL);
-      write("\n");
+      write("\n", conversion_type_);
     }
 
     const text_modifier&

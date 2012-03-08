@@ -68,6 +68,7 @@ namespace crpcut {
       virtual std::ostream& print_name(std::ostream &os) const { return os; }
       virtual void run_test_case() {}
       virtual tag& crpcut_tag() const { return crpcut_tag_info<crpcut::crpcut_none>::obj(); }
+      virtual tag::importance get_importance() const { return tag::disabled; }
       virtual void setup(poll<fdreader>    &, pid_t, int, int, int, int) {}
     };
     static test_case_factory& obj();

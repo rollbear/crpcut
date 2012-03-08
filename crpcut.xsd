@@ -47,8 +47,15 @@
     <xs:attribute name="result" type="result" use="required"/>
   </xs:complexType>
 
+  <xs:simpleType name="test_importance">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="critical|non_critical|disabled"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
   <xs:complexType name="testname">
     <xs:attribute name="name" type="identifier" use="required"/>
+    <xs:attribute name="importance" type="test_importance"/>
   </xs:complexType>
 
   <xs:complexType name="blocked_tests">

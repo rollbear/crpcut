@@ -85,6 +85,10 @@ namespace {
 #define GET_ARG_COUNT(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,N,...) N
 
 #define XML_FIELD_TAG(name, tag, value) _ "<" #name S #tag _ "=" _ "\"" #value "\"" _ "/>"
+
+#define XML_FIELD_TAG_PAIR(name, t1, v1, t2, v2) _ "<"  #name \
+                                                    S #t1 _ "=" _ "\"" #v1 "\""\
+                                                    S #t2 _ "=" _ "\"" #v2 "\"" _ "/>"
 #define XML_REPEAT_TAG_0(name, tag) "<" #name "/>"
 #define XML_REPEAT_TAG_1(name, tag, _1) XML_FIELD_TAG(name, tag, _1)
 #define XML_REPEAT_TAG_2(name, tag, _1, _2)                    \
@@ -144,6 +148,24 @@ namespace {
   XML_FIELD_TAG(name, tag, _8)                                          \
   XML_FIELD_TAG(name, tag, _9)
 
+#define XML_REPEAT_TAG_PAIR_2(name, t1, t2, _1, _2) \
+  XML_FIELD_TAG_PAIR(name, t1, _1, t2, _2)
+
+#define XML_REPEAT_TAG_PAIR_4(name, t1, t2, _1, _2, _3, _4) \
+  XML_FIELD_TAG_PAIR(name, t1, _1, t2, _2)                  \
+  XML_FIELD_TAG_PAIR(name, t1, _3, t2, _4)
+
+#define XML_REPEAT_TAG_PAIR_6(name, t1, t2, _1, _2, _3, _4, _5, _6) \
+  XML_FIELD_TAG_PAIR(name, t1, _1, t2, _2)                          \
+  XML_FIELD_TAG_PAIR(name, t1, _3, t2, _4)                          \
+  XML_FIELD_TAG_PAIR(name, t1, _5, t2, _6)
+
+#define XML_REPEAT_TAG_PAIR_8(name, t1, t2, _1, _2, _3, _4, _5, _6, _7, _8) \
+  XML_FIELD_TAG_PAIR(name, t1, _1, t2, _2)                                  \
+  XML_FIELD_TAG_PAIR(name, t1, _3, t2, _4)                                  \
+  XML_FIELD_TAG_PAIR(name, t1, _5, t2, _6)                                  \
+  XML_FIELD_TAG_PAIR(name, t1, _7, t2, _8)
+
 #define CALL_CONCAT_(name, num, ...) name ## num (__VA_ARGS__)
 #define CALL_CONCAT(name, num, ...) CALL_CONCAT_(name, num, __VA_ARGS__)
 
@@ -153,9 +175,16 @@ namespace {
               name,                             \
               tag,                              \
               __VA_ARGS__)
-#define XML_BLOCKED_LIST(...)                   \
-  _ "<blocked_tests>"                           \
-  _ XML_REPEAT_TAG(test, name, __VA_ARGS__)        \
+
+#define XML_REPEAT_TAG_PAIR(name, t1, t2, ...) \
+  CALL_CONCAT(XML_REPEAT_TAG_PAIR_,            \
+              ARG_COUNT(__VA_ARGS__),          \
+              name, t1, t2,                    \
+              __VA_ARGS__)
+
+#define XML_BLOCKED_LIST(...)                                \
+  _ "<blocked_tests>"                                        \
+  _ XML_REPEAT_TAG_PAIR(test, name, importance, __VA_ARGS__) \
   _ "</blocked_tests>"
 TESTSUITE(output)
 {
@@ -236,14 +265,14 @@ TESTSUITE(output)
                                           "one",
                                           vec,
                                           tags);
-        obj.blocked_test(s(apa));
-        obj.blocked_test(s(katt));
-        obj.blocked_test(s(ko));
+        obj.blocked_test(crpcut::tag::critical, s(apa));
+        obj.blocked_test(crpcut::tag::non_critical, s(katt));
+        obj.blocked_test(crpcut::tag::disabled, s(ko));
         obj.statistics(3,3,0,0);
       }
       static const char re[] =
         XML_HEADER
-        XML_BLOCKED_LIST(apa, katt, ko)
+        XML_BLOCKED_LIST(apa, critical, katt, non_critical, ko, disabled)
         XML_STATISTICS(3,3,3,0,0,0)
         XML_TRAILER
         ;
@@ -356,9 +385,9 @@ TESTSUITE(output)
                                          "Expected normal exit"),
                       s());
         obj.end_case();
-        obj.blocked_test(s(apa));
-        obj.blocked_test(s(katt));
-        obj.blocked_test(s(ko));
+        obj.blocked_test(crpcut::tag::critical, s(apa));
+        obj.blocked_test(crpcut::tag::non_critical, s(katt));
+        obj.blocked_test(crpcut::tag::disabled, s(ko));
         obj.statistics(12,12,9,6);
       }
       static const char re[] =
@@ -372,7 +401,7 @@ TESTSUITE(output)
         _ "</log>"
         _ "</test>"
 
-        XML_BLOCKED_LIST(apa, katt, ko)
+        XML_BLOCKED_LIST(apa, critical, katt, non_critical, ko, disabled)
         _ "<tag_summary>"
         XML_TAG_ENTRY(apa,1,3,true)
         XML_TAG_ENTRY(katt,2,3,false)

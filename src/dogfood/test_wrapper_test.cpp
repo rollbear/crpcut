@@ -51,6 +51,7 @@ TESTSUITE(test_wrapper)
     ~mock_registrator();
     void setup(crpcut::poll<crpcut::fdreader>&,pid_t,int,int,int,int) {};
     MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag&());
+    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
     MOCK_METHOD0(run_test_case, void());
     MOCK_CONST_METHOD1(crpcut_is_expected_exit, bool(int));
     MOCK_CONST_METHOD1(crpcut_is_expected_signal, bool(int));

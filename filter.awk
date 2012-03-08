@@ -29,7 +29,7 @@ BEGIN{
 /<blocked_tests>/ { counting_blocks=1; next }
 /<\/blocked_tests/ { counting_blocks=0; next }
 counting_blocks==1 && /<test name=.*\"\/>/  {
-    if (nodeps) {
+    if (nodeps && (match($0, "\"disabled\"") == 0)) {
         unexpected_blocked[unexpected_block_count++]=$0;
     }
     else

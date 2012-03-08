@@ -277,10 +277,13 @@ namespace crpcut {
       write("\"/>\n");
     }
 
+#define CRPCUT_STR_FIRST(p1, p2) #p1
+
     void
     xml_formatter
-    ::blocked_test(datatypes::fixed_string name)
+    ::blocked_test(tag::importance i, datatypes::fixed_string name)
     {
+      static const char *istr[] = { CRPCUT_TEST_IMPORTANCE(CRPCUT_STR_FIRST) };
       if (!blocked_tests_)
         {
           write("  <blocked_tests>\n");
@@ -288,6 +291,8 @@ namespace crpcut {
         }
       write("    <test name=\"");
       write(name, translated);
+      write("\" importance=\"");
+      write(istr[i]);
       write("\"/>\n");
     }
 

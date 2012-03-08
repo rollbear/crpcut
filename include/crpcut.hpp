@@ -948,6 +948,14 @@ namespace crpcut {
 
   typedef enum { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) } test_phase;
 
+#define CRPCUT_TEST_IMPORTANCE(translator) \
+  translator(ignored, ' '),                \
+  translator(disabled, '-'),               \
+  translator(critical, '!'),               \
+  translator(non_critical, '?')
+
+#define CRPCUT_VERBATIM_FIRST(p1, p2) p1
+
   class tag_list_root;
   class tag : public datatypes::list_elem<tag>
   {
@@ -957,7 +965,7 @@ namespace crpcut {
     tag(int len, tag_list_root *list);
     virtual ~tag(); // make eclipse happy
   public:
-    typedef enum { ignored, critical, non_critical } importance;
+    typedef enum { CRPCUT_TEST_IMPORTANCE(CRPCUT_VERBATIM_FIRST) } importance;
     virtual void fail();
     virtual void pass();
     virtual size_t num_failed() const;
@@ -971,6 +979,7 @@ namespace crpcut {
     importance importance_;
   };
 
+  std::ostream &operator<<(std::ostream &os, crpcut::tag::importance i);
   class tag_list_root : public tag
   {
   public:
@@ -1806,6 +1815,7 @@ namespace crpcut {
     void set_timeout(unsigned long);
     virtual void run_test_case() = 0;
     virtual tag& crpcut_tag() const = 0;
+    virtual tag::importance get_importance() const = 0;
     void set_cputime_at_start(const struct timeval &t);
     bool has_death_note() const;
     void set_death_note();
@@ -4029,6 +4039,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
        {                                                                \
          return crpcut::crpcut_tag_info<crpcut_test_tag>::obj();        \
        }                                                                \
+       virtual crpcut::tag::importance get_importance() const;          \
     };                                                                  \
     static crpcut_registrator &crpcut_reg()                             \
     {                                                                   \
@@ -4047,15 +4058,25 @@ extern crpcut::namespace_info crpcut_current_namespace;
     };                                                                  \
     static crpcut_trigger crpcut_trigger_obj;                           \
   };                                                                    \
+  test_case_name::crpcut_trigger test_case_name::crpcut_trigger_obj
 
 
 #define TEST_DEF(test_case_name, ...)                                   \
-  CRPCUT_TEST_CASE_DEF(test_case_name, __VA_ARGS__)                     \
-  test_case_name::crpcut_trigger test_case_name::crpcut_trigger_obj;    \
+  CRPCUT_TEST_CASE_DEF(test_case_name, __VA_ARGS__);                    \
+  crpcut::tag::importance                                               \
+  test_case_name::crpcut_registrator::get_importance() const            \
+  {                                                                     \
+    return crpcut_tag().get_importance();                               \
+  }                                                                     \
   void test_case_name::test()
 
 #define DISABLED_TEST_DEF(test_case_name, ...)                          \
-  CRPCUT_TEST_CASE_DEF(test_case_name, __VA_ARGS__)                     \
+  CRPCUT_TEST_CASE_DEF(test_case_name, __VA_ARGS__);                    \
+  crpcut::tag::importance                                               \
+  test_case_name::crpcut_registrator::get_importance() const            \
+  {                                                                     \
+    return crpcut::tag::disabled;                                       \
+  }                                                                     \
   void test_case_name::test()
 
 #define CRPCUT_CONCAT(a, b) a ## b

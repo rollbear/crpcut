@@ -418,7 +418,8 @@ TESTSUITE(depends)
   TEST(should_succeed_after_success_dependencies,
        DEPENDS_ON(default_success,
                   asserts::should_succeed_on_assert_eq_with_fixture,
-                  very_slow_success))
+                  very_slow_success,
+                  should_never_run))
   {
   }
 

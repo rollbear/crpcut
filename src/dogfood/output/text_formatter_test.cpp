@@ -720,8 +720,8 @@ TESTSUITE(output)
         obj.end_case();
 
         obj.nonempty_dir("/tmp/tmpdir");
-        obj.blocked_test(s("ko"));
-        obj.blocked_test(s("tupp"));
+        obj.blocked_test(crpcut::tag::critical, s("ko"));
+        obj.blocked_test(crpcut::tag::disabled, s("tupp"));
         obj.statistics(32, 32, 30, 1);
         const char re[] =
           "^<NF>FAILED?: apa\n"
@@ -732,8 +732,8 @@ TESTSUITE(output)
           "<>=*\n"
           "Files remain under /tmp/tmpdir\n"
           "The following tests were blocked from running:\n"
-          "  <B>ko<>\n"
-          "  <B>tupp<>\n"
+          "  !<B>ko<>\n"
+          "  -<B>tupp<>\n"
           "32 test cases selected\n\n"
           "Total"      _   ":" _ "Sum" _ "Critical" _ "Non-critical\n"
           "<PS>PASSED" _   ":" _  "29" _       "29" _            "0<>\n"

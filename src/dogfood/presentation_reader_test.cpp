@@ -156,7 +156,8 @@ TESTSUITE(presentation_reader)
     }
     MOCK_METHOD4(statistics, void(unsigned, unsigned, unsigned, unsigned));
     MOCK_METHOD1(nonempty_dir, void(const char*));
-    MOCK_METHOD1(blocked_test, void(crpcut::datatypes::fixed_string));
+    MOCK_METHOD2(blocked_test, void(crpcut::tag::importance,
+                                    crpcut::datatypes::fixed_string));
 
   };
 
