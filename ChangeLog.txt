@@ -1,3 +1,20 @@
+         * DISABLED_TESTs are now included in the statistics of registered
+           tests and blocked tests. The list of blocked tests is enhanced
+           with the importance of the blocked test. In text-mode output
+           (default to stdout) this means that each test name is prepended
+           by one of:
+           - disabled test
+           ? non-critical test
+           ! critical test.
+
+           In XML mode, the schema has been enhanced such that each test
+           listed in the blocked_tests section has an additional attribute
+           "importance" with the value being one of "disabled", "critical"
+           or "non_critical".
+
+           This rewrite also fixes a bug where disabled tests would run
+           if another test stated a dependency on it.
+
          * Fixed a race condition where the test engine could crash
            after a test had failed on a VERIFY_* macro
 
