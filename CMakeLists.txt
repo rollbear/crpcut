@@ -555,7 +555,7 @@ if (WITH_HTML_DOCS)
       endif()
       add_custom_target(
         "${OUTNAME}"
-        ${DOC_SRC_LIB}/nondecorated ../test/${program} ${PARAMS} | c++filt -t | sed ${FILTER} > "${OUTNAME}"
+        ${DOC_SRC_LIB}/nondecorated ../test/${program} ${PARAMS} | c++filt | sed ${FILTER} > "${OUTNAME}"
         DEPENDS sample-output ${program}
         WORKING_DIRECTORY sample-output
         VERBATIM)
