@@ -29,54 +29,45 @@
 namespace crpcut {
 
   regex::regex(const regex& r)
-    : p(r.p)
+    : p_(r.p_)
   {
   }
 
   std::ostream& operator<<(std::ostream &os, const regex &r)
   {
-    return os << *r.p;
+    return os << *r.p_;
   }
 
   void regex::type::init(const char *s, int flags)
   {
-    int i = wrapped::regcomp(&r, s, flags | REG_NOSUB);
+    int i = wrapped::regcomp(&r_, s, flags | REG_NOSUB);
     if (i != 0)
       {
-        size_t n = wrapped::regerror(i, &r, 0, 0);
-        errmsg = new char[n];
-        wrapped::regerror(i, &r, errmsg, n);
+        size_t n = wrapped::regerror(i, &r_, 0, 0);
+        errmsg_ = new char[n];
+        wrapped::regerror(i, &r_, errmsg_, n);
       }
   }
 
   bool regex::type::match(const char *s)
   {
-    if (errmsg) return false;
-    int i = wrapped::regexec(&r, s, 0, 0, 0);
-    if (i == 0) return true;
-
-    assert(i == REG_NOMATCH);
-
-    static const char tail[] = "\" does not match";
-    std::size_t len = wrapped::strlen(s) + sizeof(tail) + 1;
-    errmsg = new char[len];
-    stream::oastream os(errmsg, len);
-    os << "\"" << s << tail << '\0';
-    return false;
+    if (errmsg_) return false;
+    int i = wrapped::regexec(&r_, s, 0, 0, 0);
+    return i == 0;
   }
 
   regex::type::~type()
   {
-    wrapped::regfree(&r);
-    delete[] errmsg;
+    wrapped::regfree(&r_);
+    delete[] errmsg_;
   }
 
   std::ostream& operator<<(std::ostream &os, const regex::type &obj)
   {
-    if (obj.errmsg)
+    if (obj.errmsg_)
       {
-        os << obj.errmsg;
+        return os << obj.errmsg_;
       }
-    return os;
+    return os << "regex(\"" << obj.re_str_ << "\")";
   }
 }

@@ -57,7 +57,7 @@ TESTSUITE(expr)
   {
     ASSERT_VALUE(std::string("apa") =~ crpcut::regex("katt"),
                  false,
-                 "No match. Left hand value is: apa");
+                 "apa =~ regex(\"katt\"");
   }
 
   TEST(regex_matches_c_string)
@@ -70,7 +70,7 @@ TESTSUITE(expr)
   {
     const char *v = "lemur";
     ASSERT_VALUE(v =~ crpcut::regex("apa"), false,
-                 "No match. Left hand value is: lemur");
+                 "lemur =~ regex(\"apa\")");
   }
 
 
@@ -82,7 +82,7 @@ TESTSUITE(expr)
   TEST(regex_mistach_c_string_with_informative_message)
   {
     ASSERT_VALUE("katt" =~ crpcut::regex("markatta"), false,
-                 "No match. Left hand value is: katt");
+                 "katt =~ regex(\"markatta\")");
   }
 
   TEST(regex_matches_concatenated_strings)
@@ -94,7 +94,7 @@ TESTSUITE(expr)
   {
     ASSERT_VALUE("apa" + std::string("katt") =~ crpcut::regex("markatta"),
                  false,
-                 "No match. Left hand value is: apa + katt");
+                 "apa + katt =~ regex(\"markatta\")");
   }
 }
 

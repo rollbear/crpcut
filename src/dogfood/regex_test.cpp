@@ -39,9 +39,6 @@ TESTSUITE(regex)
     {
       crpcut::regex r("apa.*katt");
       ASSERT_TRUE(r(std::string("en apa och en katt!")));
-      std::ostringstream os;
-      os << r;
-      ASSERT_TRUE(os.str() == "");
     }
   }
 
@@ -51,9 +48,6 @@ TESTSUITE(regex)
     {
       crpcut::regex r(std::string("apa.*katt"));
       ASSERT_TRUE(r("en apa och en katt!"));
-      std::ostringstream os;
-      os << r;
-      ASSERT_TRUE(os.str() == "");
     }
   }
 
@@ -78,7 +72,7 @@ TESTSUITE(regex)
       ASSERT_FALSE(r("orm"));
       std::ostringstream os;
       os << r;
-      ASSERT_TRUE(os.str() == "\"orm\" does not match");
+      ASSERT_TRUE(os.str() == "regex(\"apa.*katt\")");
     }
   }
 
@@ -89,14 +83,10 @@ TESTSUITE(regex)
       crpcut::regex r = move_regex(crpcut::regex("apa.*(katt){2}",
                                                  crpcut::regex::e));
       std::ostringstream os;
-      os << r;
-      ASSERT_TRUE(os.str() == "");
       ASSERT_TRUE(r("en apa och en kattkatt!"));
-      os << r;
-      ASSERT_TRUE(os.str() == "");
       ASSERT_FALSE(r("katt"));
       os << r;
-      ASSERT_TRUE(os.str() == "\"katt\" does not match");
+      ASSERT_TRUE(os.str() == "regex(\"apa.*(katt){2}\")");
     }
   }
 

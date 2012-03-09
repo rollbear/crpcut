@@ -901,8 +901,9 @@ namespace crpcut {
     private:
       void init(const char*, int flags);
       bool match(const char*);
-      regex_t r;
-      char *errmsg;
+      regex_t r_;
+      char *errmsg_;
+      const char *re_str_;
     };
   public:
     friend std::ostream& operator<<(std::ostream &os, const type &obj);
@@ -916,18 +917,18 @@ namespace crpcut {
           regflag f1 = regflag(),
           regflag f2 = regflag(),
           regflag f3 = regflag())
-      : p(new type(t, f1 | f2 | f3))
+      : p_(new type(t, f1 | f2 | f3))
     {
     }
     regex(const regex& r);
     template <typename T>
     bool operator()(const T &t)
     {
-      return (*p)(t);
+      return (*p_)(t);
     }
     friend std::ostream& operator<<(std::ostream &os, const regex &r);
   private:
-    mutable std::auto_ptr<type> p; // Yeach! Ugly
+    mutable std::auto_ptr<type> p_; // Yeach! Ugly
   };
 
 #ifdef CRPCUT_SUPPORTS_VTEMPLATES
@@ -1936,6 +1937,11 @@ namespace crpcut {
     conditional_streamer<T, N>::stream(os, t);
   }
 
+  inline void show_value(std::ostream &os, const std::exception &e)
+  {
+    os << "what() == \"" << e.what() << "\"";
+  }
+
 
   class null_cmp
   {
@@ -2686,7 +2692,7 @@ namespace crpcut {
     predicate_streamer(const char *name, const P& pred) : n(name), p(pred) {}
     std::ostream &stream_to(std::ostream & os) const
     {
-      return os << n << " :\n" << p << '\n';
+      return os << "for " << n << ": " << p << '\n';
     }
   private:
     const char *n;
@@ -2970,9 +2976,10 @@ namespace crpcut {
 
   template <typename T>
   regex::type::type(T t, int flags)
-    : errmsg(0)
+    : errmsg_(0),
+      re_str_(datatypes::string_traits::get_c_str(t))
   {
-    init(datatypes::string_traits::get_c_str(t), flags);
+    init(re_str_, flags);
   }
 
   template <typename T>
@@ -3160,13 +3167,15 @@ namespace crpcut {
             {
               std::size_t old_size = heap::set_limit(heap::system);
               {
+                std::ostringstream os;
+                show_value(os, t);
                 comm::direct_reporter<action>()
                   << location << "\n"
                   << crpcut_check_name<action>::string()
                   << "_THROW("
                   << param_string
                   << ")\n"
-                  << m;
+                  << m << " does not match " << os.str();
               }
               heap::set_limit(old_size);
             }
@@ -3778,8 +3787,9 @@ namespace crpcut {
       friend
       std::ostream &operator<<(std::ostream &os, const predicate_match &pm)
       {
-        os << "No match. Left hand value is: ";
         crpcut::show_value(os, pm.l_);
+        os << " =~ ";
+        crpcut::show_value(os, pm.r_);
         return os;
       }
     private:

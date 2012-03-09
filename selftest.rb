@@ -390,7 +390,7 @@ TESTS = {
   FailedTest.new('running').
   tag('exception_content_match').
   log('violation',
-      /#{A_H}ASSERT_THROW\(.*\n"en liten apa" does not match/me),
+      /#{A_H}ASSERT_THROW\(.*\nregex\(\"\.\*x\.\*\"\) does not match what\(\) == \"en liten apa\"/me),
 
   'asserts::should_succeed_assert_throw_with_custom_matcher' =>
   PassedTest.new().
@@ -729,7 +729,7 @@ TESTS = {
   FailedTest.new('running').
   tag('exception_content_match').
   log('fail',
-      /.*VERIFY_THROW\(.*\n"en liten apa" does not match/me).
+      /.*VERIFY_THROW\(.*\n.*regex\(\"\.\*x\.\*\"\) does not match what\(\) == \"en liten apa\"/me).
   log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_verify_throw_with_custom_matcher' =>
@@ -1165,7 +1165,7 @@ TESTS = {
   FailedTest.new('running').
   log('violation',
        /#{PR_H}ASSERT_PRED\(is_positive, --v\)\s+param1 = -1/me),
-#
+
   'predicates::should_succeed_verify_simple_func' =>
   PassedTest.new().
   log('info', /after/),
@@ -1187,7 +1187,7 @@ TESTS = {
        /#{PR_H}VERIFY_PRED\(is_positive, --v\)\s+param1 = -1/me).
   log('info', /after/).
   log('violation', /Earlier VERIFY failed/),
-#
+
   'predicates::should_succeed_func_wrap_class' =>
   PassedTest.new(),
 
@@ -1213,7 +1213,7 @@ TESTS = {
   'predicates::should_fail_streamable_pred' =>
   FailedTest.new('running').
   log('violation',
-      /#{PR_H}ASSERT_PRED\(string_equal\(.*"katt"\)\s+param1 = katt\s+string_equal.*\) :\ncompare.*equal to "apa"/me),
+      /#{PR_H}ASSERT_PRED\(string_equal\(.*"katt"\)\s+param1 = katt\s+for string_equal.*\): compare.*equal to "apa"/me),
 
   'predicates::should_succeed_ptr_deref_eq' =>
   PassedTest.new(),
@@ -1230,7 +1230,7 @@ TESTS = {
   'predicates::should_fail_verify_streamable_pred' =>
   FailedTest.new('running').
   log('fail',
-      /#{PR_H}VERIFY_PRED\(string_equal\(.*"katt"\)\s+param1 = katt\s+string_equal.*\) :\ncompare.*equal to "apa"/me).
+      /#{PR_H}VERIFY_PRED\(string_equal\(.*"katt"\)\s+param1 = katt\s+for string_equal.*\): compare.*equal to "apa"/me).
   log('info', /after/).
   log('violation', /Earlier VERIFY failed/),
 
@@ -1275,17 +1275,17 @@ TESTS = {
   'regex::should_fail_illegal_re' =>
   FailedTest.new('running').
   log('violation',
-      /#{RE_H}ASSERT_PRED.*regex.*\)\s+param1 = apa.*\"\[a\"\) :\n.*\n/me),
+      /#{RE_H}ASSERT_PRED.*regex.*\)\s+param1 = apa.*\"\[a\"\):.*\n/me),
 
   'regex::should_fail_no_match' =>
   FailedTest.new('running').
   log('violation',
-      /#{RE_H}ASSERT_PRED.*regex.*\)\n\s+param1 = katt.*\) :\n"katt" does not match/me),
+      /#{RE_H}ASSERT_PRED.*regex.*\)\n\s+param1 = katt.*\):.*regex\(\"apa\"\)/me),
 
   'regex::should_fail_case_mismatch' =>
   FailedTest.new('running').
   log('violation',
-      /#{RE_H}ASSERT_PRED.*regex.*\)\n\s+param1 = APA.*\) :\n"APA" does not match/me),
+      /#{RE_H}ASSERT_PRED.*regex.*\)\n\s+param1 = APA.*\):.*regex\(\"apa\"\)/me),
 
   'regex::should_succeed_case_mismatch' =>
   PassedTest.new(),
@@ -1293,7 +1293,7 @@ TESTS = {
   'regex::should_fail_ere_paren_on_non_e_re' =>
   FailedTest.new('running').
   log('violation',
-      /#{RE_H}ASSERT_PRED.*\).*\)\s+param1 = apakattkattkatttupp.*"apakattkattkatttupp" does not match/me),
+      /#{RE_H}ASSERT_PRED.*\).*\)\s+param1 = apakattkattkatttupp.*regex\(\"apa\(katt\)\*tupp\"\)/me),
 
   'regex::should_succeed_ere_paren_on_e_re' =>
   PassedTest.new(),
@@ -1304,7 +1304,7 @@ TESTS = {
   'regex::should_fail_non_ere_paren_on_e_re' =>
   FailedTest.new('running').
   log('violation',
-      /#{RE_H}ASSERT_PRED.*regex::e\), \".*\"\)\s+param1 = apakattkattkatttupp.*"apakattkattkatttupp" does not match/me),
+      /#{RE_H}ASSERT_PRED.*regex::e\), \".*\"\)\s+param1 = apakattkattkatttupp.*regex\(\"apa\\\(katt\\\)\*tupp\"\)/me),
 
   'regex::should_succeed_paren_litteral_e_re' =>
   PassedTest.new(),
@@ -1315,7 +1315,7 @@ TESTS = {
   'regex::should_fail_ere_on_non_e_re' =>
   FailedTest.new('running').
   log('violation',
-      /#{RE_H}ASSERT_PRED.*\"apa\+\"\), \"apaaa\"\)\n\s+param1 = apaaa.*"apaaa" does not match\n/me),
+      /#{RE_H}ASSERT_PRED.*\"apa\+\"\), \"apaaa\"\)\n\s+param1 = apaaa.*regex\(\"apa\+\"\)/me),
 
   'regex::should_succeed_ere_on_e_re' =>
   PassedTest.new(),
