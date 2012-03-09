@@ -30,6 +30,41 @@
 
 namespace crpcut {
 
+  void hexdump(std::ostream &os, std::size_t bytes, const void *addr)
+  {
+    static const char lf[] = "\n    ";
+    os << bytes << "-byte object <";
+    if (bytes > 8) os << lf;
+    const char *p = static_cast<const char *>(addr);
+    char old_fill = os.fill();
+    std::ios_base::fmtflags old_flags = os.flags();
+    os   << std::setfill('0') ;
+    size_t n = 0;
+    for (; n < bytes; ++n)
+      {
+        os << std::hex << std::setw(2)
+           << (static_cast<unsigned>(p[n]) & 0xff);
+        if ((n & 15) == 15)
+          {
+            os << lf;
+          }
+        else if ((n & 3) == 3 && n != bytes - 1)
+          {
+            os << "  ";
+          }
+        else if ((n & 1) == 1 && n != bytes - 1)
+          {
+            os << ' ';
+          }
+      }
+    if (bytes > 8 && (n & 15) != 0)
+      {
+        os << lf;
+      }
+    os.flags(old_flags);
+    os.fill(old_fill);
+    os  << '>';
+  }
 
   int
   run(int argc, char *argv[], std::ostream &os)
