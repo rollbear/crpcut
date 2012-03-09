@@ -304,6 +304,15 @@ namespace std {
 
 namespace crpcut {
 
+  template <bool b, typename T>
+  struct enable_if; // I know, it exists in <type_traits>, but not in g++-4.2.4
+
+  template <typename T>
+  struct enable_if<true, T>
+  {
+    typedef T type;
+  };
+
   template <typename T>
   struct eval_t
   {
@@ -865,9 +874,22 @@ namespace crpcut {
 
   } // namespace datatypes
 
-  class regex
+  class predicate {};
+
+  template <typename T>
+  struct is_predicate
   {
-    class type
+    typedef char no;
+    struct yes { char v[2]; };
+    static no func(...);
+    static yes func(predicate*);
+    static const bool value = sizeof(func((T*)0)) == sizeof(yes);
+  };
+
+
+  class regex : public predicate
+  {
+    class type : public predicate
     {
     public:
       template <typename T>
@@ -3723,6 +3745,49 @@ namespace crpcut {
     return rv;
   }
 
+  namespace expr {
+
+    template <typename T>
+    class predicate_proxy
+    {
+    public:
+      typedef T &type;
+      predicate_proxy(type p) : p_(p) {}
+      type get_predicate() const { return const_cast<type>(p_); }
+    private:
+      type p_;
+    };
+
+    template <typename T>
+    struct is_predicate_proxy
+    {
+      typedef char no;
+      struct yes { char v[2]; };
+      static no func(...);
+      template <typename U>
+      static yes func(predicate_proxy<U>*);
+      static const bool value = sizeof(func((T*)0)) == sizeof(yes);
+    };
+
+    template <typename L, typename R>
+    class predicate_match
+    {
+    public:
+      predicate_match(const L& l, R& r) : l_(l), r_(r) {}
+      friend struct eval_t<predicate_match>;
+      friend
+      std::ostream &operator<<(std::ostream &os, const predicate_match &pm)
+      {
+        os << "No match. Left hand value is: ";
+        crpcut::show_value(os, pm.l_);
+        return os;
+      }
+    private:
+      const L &l_;
+      R &r_;
+    };
+  }
+
 #define CRPCUT_BINOP(name, opexpr)                                      \
   namespace expr {                                                      \
     template <typename T, typename U>                                   \
@@ -3739,6 +3804,14 @@ namespace crpcut {
         return os;                                                      \
       }                                                                 \
       friend struct eval_t<name>;                                       \
+      template <typename V>                                             \
+      typename enable_if<is_predicate_proxy<V>::value,                  \
+                         predicate_match<name, typename V::type> >::type \
+      operator=(const V& v)                                             \
+      {                                                                 \
+        typedef typename V::type predicate;                             \
+        return predicate_match<name, predicate>(*this, v.get_predicate());  \
+      }                                                                 \
     private:                                                            \
       const T& t_;                                                      \
       const U& u_;                                                      \
@@ -3791,7 +3864,15 @@ namespace crpcut {
 #undef CRPCUT_BINOP
 #undef CRPCUT_OPS
 
+
+    template <typename T>
+    typename enable_if<is_predicate<T>::value, expr::predicate_proxy<T> >::type
+    operator~(const T& t)
+    {
+      return expr::predicate_proxy<T>(const_cast<T&>(t));
+    }
   namespace expr {
+
     template <typename T, typename U>
     struct use_two_assertions_instead  operator&&(const T&, const U&);
 
@@ -3810,6 +3891,13 @@ namespace crpcut {
         crpcut::show_value<8>(os, a.t_);
         return os;
       }
+      template <typename U>
+      typename enable_if<is_predicate_proxy<U>::value,
+                         predicate_match<T, typename U::type> >::type
+      operator=(const U& u)
+      {
+        return predicate_match<T, typename U::type>(t_, u.get_predicate());
+      }
     private:
       const T& t_;
     };
@@ -3822,6 +3910,17 @@ namespace crpcut {
     static type func(const expr::atom<T> &n) { return n.t_; }
   };
 
+  template <typename T, typename U>
+  struct eval_t<expr::predicate_match<T, U> >
+  {
+    static const U& u_;
+    static const T& t_;
+    typedef CRPCUT_DECLTYPE(u_(t_)) type;
+    static type func(const expr::predicate_match<T, U> &n)
+    {
+      return n.r_(crpcut::eval(n.l_));
+    }
+  };
   namespace expr
   {
     class hook

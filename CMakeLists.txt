@@ -140,6 +140,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/comm/reporter_test.cpp
      src/dogfood/deadline_monitor_test.cpp
      src/dogfood/dogfood.cpp
+     src/dogfood/expr_test.cpp
      src/dogfood/failed_check_reporter_test.cpp
      src/dogfood/fixed_string_test.cpp
      src/dogfood/fsfuncs_test.cpp
