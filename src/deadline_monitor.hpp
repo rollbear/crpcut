@@ -40,7 +40,7 @@ namespace crpcut {
   class deadline_monitor : private buffer_vector<timeboxed*>
   {
   public:
-    using buffer_vector::space_for;
+    using buffer_vector<timeboxed*>::space_for;
     deadline_monitor(void *space, std::size_t capacity);
     void insert(timeboxed *);
     void remove(timeboxed *);

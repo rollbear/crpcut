@@ -1800,7 +1800,7 @@ namespace crpcut {
                        int stdout_fd,
                        int stderr_fd) = 0;
     void manage_death();
-    using list_elem::unlink;
+    using datatypes::list_elem<crpcut_test_case_registrator>::unlink;
     void kill();
     void clear_deadline();
     void unregister_fds();
@@ -4114,7 +4114,7 @@ namespace crpcut {
       try {                                                             \
         throw;                                                          \
       }                                                                 \
-      catch(U &u)                                                       \
+      catch(typename std::remove_reference<U>::type &u)                 \
         {                                                               \
           return crpcut_do_translate(u);                                \
         }                                                               \

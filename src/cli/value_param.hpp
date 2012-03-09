@@ -70,7 +70,7 @@ namespace crpcut {
     }
 
     template <typename T>
-    value_param<T>::operator value_param<T>::bool_type() const
+    value_param<T>::operator typename value_param<T>::bool_type() const
     {
       return active_ ? &value_param::match_value : 0;
     }
