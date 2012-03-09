@@ -131,6 +131,35 @@ namespace {
 }
 
 namespace crpcut {
+
+  void
+  test_case_factory::registrator_list
+  ::run_test_case()
+  {
+    wrapped::abort();
+  }
+
+  tag&
+  test_case_factory::registrator_list
+  ::crpcut_tag() const
+  {
+    return wrapped::abort(), crpcut_tag_info<crpcut::crpcut_none>::obj();
+  }
+
+  tag::importance
+  test_case_factory::registrator_list
+  ::get_importance() const
+  {
+    return wrapped::abort(), tag::disabled;
+  }
+
+  void
+  test_case_factory::registrator_list
+  ::setup(poll<fdreader> &, pid_t, int, int, int, int)
+  {
+    wrapped::abort();
+  }
+
   test_case_factory
   ::test_case_factory()
     : cli_(0),
