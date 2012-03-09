@@ -1,3 +1,5 @@
+         * Dropped support for ancient Intel C++ Compiler
+
          * A new function template:
 
            void crpcut::show_value<T>(std::ostream&, const T&)

@@ -250,9 +250,10 @@
       </question>
       <answer>
         <para>
-          Since it hasn't been tried, the assumption must be that it doesn't.
-          However, should you decide to give it a try, please report your
-          findings. You will be assisted when it comes to making it work.
+          It should, but since it hasn't been verified, the assumption must be
+          that it doesn't. However, should you decide to give it a try, please
+          report your findings. You will be assisted when it comes to making
+          it work.
         </para>
         <note>
           However, the <xref linkend="ulps_diff" xrefstyle="select:title"/>
@@ -272,16 +273,11 @@
           <itemizedlist>
             <listitem><para>
                 <ulink url="http://gcc.gnu.org">gcc</ulink> versions
-                4.2.4, 4.3.4, 4.4.4, 4.4.5, 4.5.1, 4.5.2, 4.6.0, 4.6.1. and 4.6.2.
+                4.2.4, 4.3.6, 4.4.6, 4.5.3 and 4.6.2.
             </para></listitem>
             <listitem>
               <para><ulink url="http://clang.llvm.org">clang</ulink> version
             3.0</para></listitem>
-            <listitem><para>
-                <ulink url="http://www.intel.com">Intel</ulink>
-                <ulink url="http://software.intel.com/en-us/intel-compilers">ICC</ulink>
-                compiler version 1.11.
-            </para></listitem>
           </itemizedlist>
         </para>
       </answer>

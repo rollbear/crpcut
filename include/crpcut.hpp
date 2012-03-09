@@ -226,34 +226,24 @@
 
 #endif
 
-#ifdef __INTEL_COMPILER
-#  ifndef __GXX_EXPERIMENTAL_CPP0X__
-#    define CRPCUT_DECLTYPE typeof
-#  else
-#    define CRPCUT_EXPERIMENTAL_CXX0X
+#ifdef __GNUG__
+#  ifdef __GXX_EXPERIMENTAL_CXX0X__
 #    define CRPCUT_DECLTYPE decltype
-#  endif
-#  define BOOST_TR1
-#  define CRPCUT_NORETURN
-#else
-#  ifdef __GNUG__
-#    ifdef __GXX_EXPERIMENTAL_CXX0X__
-#      define CRPCUT_DECLTYPE decltype
-#      define CRPCUT_EXPERIMENTAL_CXX0X
-#      if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
-#        define CRPCUT_SUPPORTS_VTEMPLATES
-#      endif
-#    else
-#      define CRPCUT_DECLTYPE typeof
-#    endif
-#    define CRPCUT_NORETURN __attribute__((noreturn))
-#    ifndef __EXCEPTIONS
-#      define CRPCUT_NO_EXCEPTION_SUPPORT
+#    define CRPCUT_EXPERIMENTAL_CXX0X
+#    if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
+#      define CRPCUT_SUPPORTS_VTEMPLATES
 #    endif
 #  else
-#    define CRPCUT_NORETURN
+#    define CRPCUT_DECLTYPE typeof
 #  endif
+#  define CRPCUT_NORETURN __attribute__((noreturn))
+#  ifndef __EXCEPTIONS
+#    define CRPCUT_NO_EXCEPTION_SUPPORT
+#  endif
+#else
+#  define CRPCUT_NORETURN
 #endif
+
 #include <stdexcept>
 #include <sstream>
 #include <string>

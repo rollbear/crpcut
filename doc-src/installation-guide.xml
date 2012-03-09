@@ -75,16 +75,10 @@
     </para>
     <para><ulink url="http://gcc.gnu.org">GCC</ulink> supports these
       since long, and &crpcut; has been verified to work with versions
-      4.3.4, 4.4.4, 4.5.3. and 4.6.2
+      4.2.4, 4.3.6, 4.4.6, 4.5.3. and 4.6.2
     </para>
     <para><ulink url="http:clang.llvm.org">Clang</ulink> works
     since version 3.0</para>
-    <para><ulink url="http://www.intel.com">Intel</ulink>
-      <ulink url="http://software.intel.com/en-us/intel-compilers">ICC</ulink>
-      version 1.11 is also verified to work, but requires the
-      <ulink url="http://www.boost.org">boost</ulink> library to get
-      access to tr1/type_traits and tr1/array. It has not received as
-      extensive testing.</para>
   </simplesect>
   <simplesect>
     <title>Operating system requirements</title>
