@@ -976,7 +976,7 @@ namespace crpcut {
             kill_presenter_process();
             if (!cleanup_directories(num_parallel, cli_->working_dir(), dirbase_, fmt)
                && output_fd != 1
-               && cli_->quiet())
+               && !cli_->quiet())
             {
               std::cout << "Files remain in " << dirbase_ << '\n';
             }
