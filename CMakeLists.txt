@@ -701,6 +701,7 @@ if (WITH_HTML_DOCS)
     sample_code(suite_define.cpp NOCOMPILE)
     
     sample_result(show-value-example PARAMS "-v")
+    sample_result(match-operator-example)
     #
     # suite_depend
     #
@@ -835,6 +836,7 @@ if (WITH_HTML_DOCS)
       ${SS}/template-pred.cpp             ${SO}/template-pred.out
       ${SS}/gmock-example.cpp             ${SO}/gmock-example.out
       ${SS}/show-value-example.cpp        ${SO}/show-value-example.out
+      ${SS}/match-operator-example.cpp    ${SO}/match-operator-example.out
       can_dump_core
                                           ${SO}/COPYING
       ${DOC_SOURCES} ${DOC_SRC_LIB}/crpcut-doc.css crpcut.xsl

@@ -1137,13 +1137,76 @@ macro.
   </chapter>
   <chapter id="predicates">
     <title>Writing predicates</title>
-    <para>A predicate is anything that can be called as if it was a
+    <para>There are two types of predicates;
+      <xref linkend="crpcut_predicates" xrefstyle="select:title"/> and
+      <xref linkend="general_predicates" xrefstyle="select:title"/>.
+    </para>
+      <para>A specific &crpcut; predicate is matched in
+      <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/>,
+      <xref linkend="ASSERT_FALSE" xrefstyle="select:title"/>,
+      <xref linkend="VERIFY_TRUE" xrefstyle="select:title"/>
+      or <xref linkend="VERIFY_FALSE" xrefstyle="select:title"/>
+      using <xref linkend="match_pseudo_operator" xrefstyle="select:title"/>.
+      The predicate is a class or struct that inherits from
+      <xref linkend="predicate_class" xrefstyle="select:title"/>,
+      has an <function>operator</function>()(<type>T</type>) and a
+      stream insertion operator for error reporting.
+    </para>
+      <para>A general predicate is anything that can be called as if it was a
       function, and that returns something that can be used as a
       <type>bool</type>. Examples of predicates are functions (of course,)
       pointers to functions, instances of classes that implement
-      <function>operator ()()</function>.
+      <function>operator ()()</function>. General predicates are typically
+      used with <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> or
+      <xref linkend="VERIFY_PRED" xrefstyle="select:title"/>.
     </para>
-    <para>Predicates are used with
+    <section id="crpcut_predicates">
+      <title>Specific &crpcut; predicates</title>
+      <section><title>predicate class</title>
+      <para>
+        A specific &crpcut; predicate inherits from
+        <xref linkend="predicate_class" xrefstyle="select:title"/>,
+        has an <function>operator</function>(<type>T</type>) accepting one
+        parameter and returning a boolean value, and has a stream
+        insertion operator for error reporting. The stream insertion
+        operator os only called if
+        <function>operator</function>()(<type>T</type>) returns
+        <literal>false</literal>. 
+      </para>
+      </section>
+      <section id="match_pseudo_operator">
+        <title>pseudo operator =~()</title>
+        <para>&crpcut; implements a pseudo operator =~()<footnote><para>
+        No, there is no such operator; this is an ugly trick using
+        <function>operator~</function>() for things inheriting from
+        <xref linkend="predicate_class" xrefstyle="select:title"/> and
+        assignment to an expression.</para></footnote>
+        to create match expressions with predicates, for use in
+        <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/>,
+        <xref linkend="VERIFY_TRUE" xrefstyle="select:title"/>,
+        <xref linkend="ASSERT_FALSE" xrefstyle="select:title"/> and
+        <xref linkend="VERIFY_FALSE" xrefstyle="select:title"/>.
+        </para>
+      </section>
+      <section><title>Example program</title>
+      <para>The following program implements a specific &crpcut; predicate
+      used to match the end of a string.
+      <programlisting language="c++">
+<xi:include href="../stripped-src/match-operator-example.cpp" parse="text"/>
+      </programlisting>
+      </para>
+      <para>When run, the output stream insertion operator is used to
+      provide information about the predicate if the matching fails:
+      <screen>
+      
+<xi:include href="../sample-output/match-operator-example.out" parse="text"/>
+      </screen>
+      </para>
+      </section>
+    </section>
+    <section id="general_predicates">
+      <title>General predicates</title>
+      <para>General Predicates are used with
       <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> or
       <xref linkend="VERIFY_PRED" xrefstyle="select:title"/>. Logically
       <function>ASSERT_PRED</function>(<constant>predicate</constant>,
@@ -1156,27 +1219,27 @@ macro.
       <xref linkend="VERIFY_PRED" xrefstyle="select:title"/>
       will list the value of each of the parameters in a violation
       report, whereas
-      <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> and
-      <xref linkend="VERIFY_PRED" xrefstyle="select:title"/> will give a
-      cruder report with less details.
-    </para>
-    <para>The below example uses both versions:
+      <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/> and
+      <xref linkend="VERIFY_TRUE" xrefstyle="select:title"/> will give a
+      cruder report with fewer details.
+      </para>
+      <para>The below example uses both versions:
       <programlisting>
 
 <xi:include href="../stripped-src/simple-pred.cpp" parse="text"/>
 </programlisting>
-    </para>
-    <para>The result shows the difference clearly
+      </para>
+      <para>The result shows the difference clearly
       <screen>
 
 <xi:include href="../sample-output/simple-pred.out" parse="text"/>
 </screen>
       </para>
-    <para>
+      <para>
       If a predicate has an output-stream operator defined,
       it will be called when making violation reports.
-    </para>
-    <para>
+      </para>
+      <para>
       Sometimes you may want the type of the predicate object to be
       determined by the types of one or several expressions.
       &crpcut; solves that  with the function template
@@ -1191,34 +1254,35 @@ macro.
       <type>crpcut::match_traits</type> for your predicate class, to provide
       a better suitable type, for example a specialization on the
       parameters.
-      <note>
+        <note>
         If you use <ulink url="http://gcc.gnu.org">GCC</ulink> version 4.3 or
         higher, and compile your test sources with <symbol>-std=c++0x</symbol>,
         there is no limit to the number of parameters to the
         <function>match</function>&lt;<type>pred_type</type>&gt;()
         function nor the <type>crpcut::match_traits</type> specialization,
         otherwise there is a maximum limit of 9 parameters.
-      </note>
-    </para>
-    <para>The above example now generalized, is unsurprisingly longer, and
+        </note>
+      </para>
+      <para>The above example now generalized, is unsurprisingly longer, and
       slightly different:
       <programlisting>
 
 <xi:include href="../stripped-src/template-pred.cpp" parse="text"/>
 </programlisting>
-    </para>
-    <para>The result from running the test program is:
+      </para>
+      <para>The result from running the test program is:
       <screen>
 
 <xi:include href="../sample-output/template-pred.out" parse="text"/>
 </screen>
-    </para>
-    <para>
+      </para>
+      <para>
       What may be less obvious is that the above three tests instantiated
       <type>is_substring::implementation&lt;const char*&gt;</type>
       for the first two versions, and
       <type>is_substring::implementation&lt;std::string&gt;</type>
       for the last.
-    </para>
+      </para>
+    </section>
   </chapter>
 </book>

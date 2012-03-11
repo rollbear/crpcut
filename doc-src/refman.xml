@@ -2817,6 +2817,15 @@
       <xref linkend="match" xrefstyle="select:title"/>
     </para>
   </section>
+  <section id="predicate_class">
+    <title><type>crpcut::predicate</type></title>
+    <para>Base class for
+    <xref linkend="crpcut_predicates" xrefstyle="select:title"/>. The
+    purpose of the class is to enable the
+    <xref linkend="match_pseudo_operator" xrefstyle="select:title"/> for
+    match expressions.
+    </para>
+  </section>
   <section id="regex">
     <title><type>crpcut::regex</type></title>
     <para>Match a string against a regular expression.</para>
