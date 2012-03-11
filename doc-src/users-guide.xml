@@ -1168,7 +1168,7 @@ macro.
       <para>
         A specific &crpcut; predicate inherits from
         <xref linkend="predicate_class" xrefstyle="select:title"/>,
-        has an <function>operator</function>(<type>T</type>) accepting one
+        has an <function>operator</function>()(<type>T</type>) accepting one
         parameter and returning a boolean value, and has a stream
         insertion operator for error reporting. The stream insertion
         operator os only called if
