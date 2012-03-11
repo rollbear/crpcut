@@ -41,6 +41,7 @@ extern "C"
 #include <stdarg.h>
 }
 #include "posix_encapsulation.hpp"
+#include "../heap.hpp"
 namespace {
   template <typename T, std::size_t N>
   inline T* begin(T (&array)[N])
@@ -85,6 +86,7 @@ namespace crpcut {
         RTLD_NOW
       };
       void *libp = 0;
+      heap::global_heap_disabler disabler_obj;
       for (const int *pf = begin(flags); pf != end(flags); ++pf)
         {
           for (const char * const *name = lib; *name; ++name)
@@ -98,11 +100,13 @@ namespace crpcut {
 
     void *dlloader::symbol(void *libp, const char *name)
     {
+      heap::global_heap_disabler disabler_obj;
       return libp ? ::dlsym(libp, name) : 0;
     }
 
     void dlloader::unload(void *libp)
     {
+      heap::global_heap_disabler disabler_obj;
       (void)::dlclose(libp); // nothing much to do in case of error.
     }
 

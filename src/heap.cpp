@@ -25,6 +25,7 @@
  */
 
 #include <crpcut.hpp>
+#include "heap.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #ifdef HAVE_VALGRIND
 #include <valgrind/valgrind.h>
@@ -84,6 +85,8 @@ namespace {
     while (n--) *dc++ = *sc++;
     return d;
   }
+
+  unsigned use_local_heap = 0;
 }
 namespace crpcut
 {
@@ -99,6 +102,20 @@ namespace crpcut
 
   namespace heap
   {
+    global_heap_disabler
+    ::global_heap_disabler()
+    {
+      assert(!use_local_heap);
+      ++use_local_heap;
+    }
+
+    global_heap_disabler
+    ::~global_heap_disabler()
+    {
+      assert(use_local_heap);
+      --use_local_heap;
+    }
+
     class new_handler_caller
     {
       typedef void (*bool_type)();
@@ -403,8 +420,11 @@ namespace crpcut
       recurse_counter recurse_checker(recursive);
       typedef libwrapper::loader<libs::libc> libc_loader;
 
-      has_malloc_sym |= !recursive && libc_loader::has_symbol("malloc");
-      if (!has_malloc_sym)
+      if (!use_local_heap)
+        {
+          has_malloc_sym |= !recursive && libc_loader::has_symbol("malloc");
+        }
+      if (use_local_heap || !has_malloc_sym)
         {
           if (current_offset == 0)
             {

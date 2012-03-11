@@ -375,7 +375,6 @@ namespace crpcut {
       static void unload(void*);
       static void assert_lib_is_loaded(void*);
       dlloader() {}
-      ~dlloader() {}
     private:
     };
 
@@ -391,7 +390,7 @@ namespace crpcut {
         libptr() = dlloader::load(lib());
         assert_lib_is_loaded(libptr());
       }
-      ~loader() { unload(libptr()); libptr() = 0;}
+      // Defaulted trivial destructor leaks memory from dlload on exit. So what?
     public:
       static bool is_loaded() { return libptr(); }
       template <typename T>
