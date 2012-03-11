@@ -278,6 +278,8 @@
       you can help it by adding the command line parameter
       <constant>-DGOOGLE_MOCK_DIR</constant>=<symbol>&lt;path-to-google-mock&gt;</symbol>.
     </para>
+    <caution>If you run the self test on a very slow computer, like a net
+    book, timeout tests are likely to fail.</caution>
   </simplesect>
   <simplesect><title>Build documentation</title>
     <para>You are not encouraged to build the documentation yourself,
@@ -395,7 +397,10 @@
         <listitem>
           <para>
           Run the self test, if you can. Before you start it, make sure the
-          machine is lightly loaded. The self test includes a lot of
+          machine is lightly loaded.</para>
+          <caution>If you run the self test on a very slow computer, like a net
+          book, timeout tests are likely to fail.</caution>
+          <para>The self test includes a lot of
           timeout tests, which can be affected by the load on the host.
           The self test may take up to a minute to run, with all those timeout
           tests under many different configurations.
