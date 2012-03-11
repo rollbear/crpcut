@@ -230,4 +230,45 @@ TESTSUITE(predicates)
     VERIFY_PRED(crpcut::match<ptr_deref_eq>(&n), p);
     INFO << "after";
   }
+
+  TESTSUITE(match_operator)
+  {
+    template <typename T, typename U>
+    class in_range_t : public crpcut::predicate
+    {
+    public:
+      in_range_t(T low, U high) : lower_bound(low), upper_bound(high) {}
+      template <typename V>
+      bool operator()(const V& v) const
+      {
+        return lower_bound <= v && v <= upper_bound;
+      }
+      friend std::ostream &operator<<(std::ostream &os, const in_range_t &r)
+      {
+        return
+            os << "in_range(" << r.lower_bound << ", " << r.upper_bound << ")";
+      }
+    private:
+      T lower_bound;
+      U upper_bound;
+    };
+
+    template <typename T, typename U>
+    in_range_t<T, U> in_range(T low, U high)
+    {
+      return in_range_t<T, U>(low, high);
+    }
+
+    TEST(should_succeed_int_range_check)
+    {
+      int n = 3;
+      ASSERT_TRUE(n =~ in_range(3,8));
+    }
+
+    TEST(should_fail_float_range_check)
+    {
+      float f = 3.14F;
+      ASSERT_TRUE(f =~ in_range(3.141592, 4));
+    }
+  }
 }

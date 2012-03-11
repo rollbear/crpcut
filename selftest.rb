@@ -1245,6 +1245,14 @@ TESTS = {
   log('info', /after/).
   log('violation', /Earlier VERIFY failed/),
 
+  'predicates::match_operator::should_succeed_int_range_check' =>
+  PassedTest.new(),
+  
+  'predicates::match_operator::should_fail_float_range_check' =>
+  FailedTest.new('running').
+  log('violation',
+       /#{PR_H}ASSERT_TRUE\(.*\)\n\s+is evaluated as:\n\s+3.14\d* =~ in_range\(3.141\d+, 4\)/me),
+
   'collate::should_succeed_collation_string' =>
   PassedTest.new(),
 
