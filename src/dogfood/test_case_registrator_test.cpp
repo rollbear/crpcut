@@ -415,7 +415,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 0, CLD_EXITED, s);
 
       EXPECT_CALL(factory, calc_cputime(_)).
-          WillOnce(Return(10));
+          WillOnce(Return(10U));
 
       EXPECT_CALL(reg, crpcut_is_expected_exit(0)).
           InSequence(s).
@@ -455,7 +455,7 @@ TESTSUITE(test_case_registrator)
 
 
         EXPECT_CALL(factory, calc_cputime(_)).
-            WillOnce(Return(10));
+            WillOnce(Return(10U));
 
         EXPECT_CALL(factory, present(test_pid,
                                      crpcut::comm::dir,
@@ -504,7 +504,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 3, CLD_EXITED, s);
 
       EXPECT_CALL(factory, calc_cputime(_)).
-          WillOnce(Return(10));
+          WillOnce(Return(10U));
 
       EXPECT_CALL(reg, crpcut_is_expected_exit(3)).
           InSequence(s).
@@ -542,7 +542,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 15, CLD_KILLED, s);
 
       EXPECT_CALL(factory, calc_cputime(_)).
-          WillOnce(Return(10));
+          WillOnce(Return(10U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(15)).
           InSequence(s).
@@ -585,7 +585,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 9, CLD_KILLED, s);
 
       EXPECT_CALL(factory, calc_cputime(_)).
-          WillOnce(Return(1000));
+          WillOnce(Return(1000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(9)).
           InSequence(s).
@@ -626,7 +626,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 6, CLD_KILLED, s);
 
       EXPECT_CALL(factory, calc_cputime(_)).
-          WillOnce(Return(1000));
+          WillOnce(Return(1000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
           InSequence(s).
@@ -665,7 +665,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 6, CLD_KILLED, s);
 
       EXPECT_CALL(factory, calc_cputime(_)).
-          WillOnce(Return(1000));
+          WillOnce(Return(1000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
           InSequence(s).
@@ -706,7 +706,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 0, -1, s);
 
       EXPECT_CALL(factory, calc_cputime(_)).
-          WillOnce(Return(1000));
+          WillOnce(Return(1000U));
 
       EXPECT_CALL(factory, present(test_pid,
                                    crpcut::comm::exit_fail,

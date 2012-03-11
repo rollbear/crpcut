@@ -3782,7 +3782,10 @@ namespace crpcut {
     class predicate_match
     {
     public:
-      predicate_match(const L& l, R& r) : l_(l), r_(r) {}
+      predicate_match(const typename std::remove_reference<L>::type &l,
+                      typename std::remove_reference<R>::type & r)
+        : l_(l),
+          r_(r) {}
       friend struct eval_t<predicate_match>;
       friend
       std::ostream &operator<<(std::ostream &os, const predicate_match &pm)
@@ -3793,8 +3796,8 @@ namespace crpcut {
         return os;
       }
     private:
-      const L &l_;
-      R &r_;
+      const typename std::remove_reference<L>::type &l_;
+      typename std::remove_reference<R>::type &r_;
     };
   }
 
@@ -3804,7 +3807,7 @@ namespace crpcut {
     class name                                                          \
     {                                                                   \
     public:                                                             \
-      name(const T& t, const U& u) : t_(t), u_(u) {}                    \
+      name(const T &t, const U &u) : t_(t), u_(u) {}                    \
       friend                                                            \
         std::ostream &operator<<(std::ostream &os, const name &a)       \
       {                                                                 \
@@ -3923,9 +3926,9 @@ namespace crpcut {
   template <typename T, typename U>
   struct eval_t<expr::predicate_match<T, U> >
   {
-    static const U& u_;
-    static const T& t_;
-    typedef CRPCUT_DECLTYPE(u_(t_)) type;
+    static typename std::remove_reference<U>::type & u_;
+    static typename std::remove_reference<T>::type & t_;
+    typedef CRPCUT_DECLTYPE(u_(crpcut::eval(t_))) type;
     static type func(const expr::predicate_match<T, U> &n)
     {
       return n.r_(crpcut::eval(n.l_));
