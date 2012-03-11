@@ -170,7 +170,7 @@ namespace crpcut {
       process_(process),
       filesystem_(filesystem)
   {
-    link_after(root->reg_);
+    link_before(root->reg_);
   }
 
   void
