@@ -1,4 +1,13 @@
-         * Dropped support for ancient Intel C++ Compiler
+         * Added a new type of predicate, inheriting from crpcut::predicate,
+           that can be matched using a pseudo operator =~ in ASSERT_TRUE(),
+           ASSERT_FALSE(), VERIFY_TRUE() and VERIFY_FALSE(). crpcut::regex
+           is one such example, where it is now possible to write:
+
+           ASSERT_TRUE(string_value =~ crpcut::regex(expr_str));
+
+           This idea was flagrantly stolen from a tounge-in-cheek mail
+           sent to the accu-general mailing list by Jonathan Wakely in a
+           discussion about a very similar topic.
 
          * A new function template:
 
@@ -33,6 +42,8 @@
          * There is no longer a limit on the number of tests that can
            be run in parallel (requested with the -c / --children command
            line parameter.)
+
+         * Dropped support for ancient Intel C++ Compiler
 
 2012-01-24 1.6.1
 
