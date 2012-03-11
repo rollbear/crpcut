@@ -2830,12 +2830,32 @@
     <title><type>crpcut::regex</type></title>
     <para>Match a string against a regular expression.</para>
     <formalpara><title>Used in:</title>
-      <para>Template parameter to
-        <xref linkend="match" xrefstyle="select:title"/> in either an
-        <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> check
-        or as matcher argument to <xref linkend="ASSERT_THROW"
+      <para>One of:
+      <itemizedlist>
+        <listitem>
+        <para>a match expression using
+         <xref linkend="match_pseudo_operator" xrefstyle="select:title"/>
+         in one of
+         <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/>,
+         <xref linkend="ASSERT_FALSE" xrefstyle="select:title"/>,
+         <xref linkend="VERIFY_TRUE" xrefstyle="select:title"/> or
+         <xref linkend="VERIFY_FALSE" xrefstyle="select:title"/>.
+         </para>
+         </listitem>
+         <listitem>
+         <para>a template parameter to
+        <xref linkend="match" xrefstyle="select:title"/> in either
+        <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> or a
+        <xref linkend="VERIFY_PRED" xrefstyle="select:title"/> check.</para>
+        </listitem>
+        <listitem>
+        <para>
+        a matcher argument to <xref linkend="ASSERT_THROW"
         xrefstyle="select:title"/> or <xref linkend="VERIFY_THROW"
         xrefstyle="select:title"/>.</para>
+        </listitem>
+      </itemizedlist>
+      </para>
       <para>The predicate accepts either a C-string or a <type>std::string</type>
         as value to match against the regular expression.</para>
     </formalpara>
@@ -2845,9 +2865,9 @@
           <listitem>
             <para>The pattern string that is a regular expression. The pattern
               can be either a C-string or a <type>std::string</type>.
-              <note>Beware of C/C++ escape rules when regular expressions
+              <caution>Beware of C/C++ escape rules when regular expressions
                 contain <quote>\</quote>.
-              </note>
+              </caution>
 
             </para>
           </listitem>
@@ -2893,7 +2913,7 @@
       <programlisting language="c++">
 <xi:include href="../stripped-src/regex.cpp" parse="text"/>
       </programlisting>
-      fails one test:
+      fails three tests:
       <screen>
 
 <xi:include href="../sample-output/regex.out" parse="text"/>

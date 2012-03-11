@@ -28,22 +28,38 @@
 #include <crpcut.hpp>
 #include <string>
 
-std::string name()
+std::string a_string()
 {
   return "192.168.0.1 is a valid IP address";
 }
 
+const char re[] = "^([0-9]{1,3}\\.){3}[0-9]{1,3}.*";
+
+TEST(begins_with_digits_and_dots)
+{
+  const char num_dot_start[] = "^[0-9\\.]* ";
+  ASSERT_TRUE(a_string() =~ crpcut::regex(num_dot_start));
+}
+
+TEST(begins_with_alpha)
+{
+  const char alpha_start[] = "^[[:alpha:]]* ";
+  ASSERT_TRUE(a_string() =~ crpcut::regex(alpha_start));
+}
+
 TEST(fail_non_extended)
 {
-  ASSERT_PRED(crpcut::match<crpcut::regex>("^([0-9]{1,3}\\.){3}[0-9]{1,3}.*"),
-              name());
+  ASSERT_PRED(crpcut::match<crpcut::regex>(re), a_string());
 }
 
 TEST(pass_extended)
 {
-  ASSERT_PRED(crpcut::match<crpcut::regex>("^([0-9]{1,3}\\.){3}[0-9]{1,3}.*",
-                                           crpcut::regex::e),
-              name());
+  ASSERT_PRED(crpcut::match<crpcut::regex>(re, crpcut::regex::e), a_string());
+}
+
+TEST(exception_what_string_mismatch)
+{
+  ASSERT_THROW(std::string().at(3), std::exception, crpcut::regex(re));
 }
 
 int main(int argc, char *argv[])

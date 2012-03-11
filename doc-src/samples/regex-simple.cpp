@@ -61,10 +61,8 @@ TEST(verify_output_format)
   event_list el;
   el.push("something happened");
   el.push("what else happened?");
-  ASSERT_PRED(crpcut::match<crpcut::regex>(fmt, crpcut::regex::e),
-              el.pop());
-  ASSERT_PRED(crpcut::match<crpcut::regex>(fmt, crpcut::regex::e),
-              el.pop());
+  ASSERT_TRUE(el.pop() =~ crpcut::regex(fmt, crpcut::regex::e));
+  ASSERT_TRUE(el.pop() =~ crpcut::regex(fmt, crpcut::regex::e));
 }
 
 

@@ -681,7 +681,9 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
     <section id="matching_regex">
       <title>Matching strings with regular expressions</title>
       <para>
-        Regular expressions are  matched using
+        Regular expressions are preferably matched using the
+        <xref linkend="match_pseudo_operator" xrefstyle="select:title"/>,
+        but can also be matched using
         <xref linkend="match" xrefstyle="select:title"/> instantiated
         with <xref linkend="regex" xrefstyle="select:title"/>, with
         <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> or
@@ -698,20 +700,20 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
         flags are <type>crpcut::regex::</type><constant>i</constant> for
         ignoring case, and <type>crpcut::regex::</type><constant>m</constant>
         for multi line patterns.
-      <note>Careful with patterns containing <quote>\</quote>, since
-        C/C++ interprets them as character escapes.</note>
+      <caution>Be careful with patterns containing <quote>\</quote>, since
+        C/C++ interprets them as character escapes.</caution>
  The output from the short test program is:
         <screen>
 
 <xi:include href="../sample-output/regex-simple.out" parse="text"/>
 </screen>
       </para>
-      <note>With <type>crpcut::regex</type> you can only assert that strings
-        match a regular expression. If you need more advanced functionality,
-        for example picking sub strings for decisions, you have to use
-        either <function>regcomp()</function> and <function>regexec()</function>,
-        or <symbol>C++</symbol> <type>std::regex</type> if your compiler
-        supports it.</note>
+      <note>With <xref linkend="regex" xrefstyle="select:title"/> you can only
+        assert that strings match a regular expression. If you need more
+        advanced functionality, for example picking sub strings for decisions,
+        you have to use either <function>regcomp()</function> and
+        <function>regexec()</function>, or <symbol>C++</symbol>
+        <type>std::regex</type> if your compiler supports it.</note>
       <tip>The site
         <ulink url="http://www.regular-expressions.info">http://www.regular-expressions.info</ulink>
         contains a wealth of info on regular expressions, if you feel
