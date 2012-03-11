@@ -1854,7 +1854,7 @@ namespace crpcut {
   template <typename exc>
   struct test_wrapper<policies::exception_wrapper<exc> >
   {
-    static void run(crpcut_test_case_base* t, comm::reporter &report)
+    static void run(crpcut_test_case_base* t, comm::reporter &report_obj)
     {
       try {
         t->test();
@@ -1870,10 +1870,9 @@ namespace crpcut {
           char *buff = static_cast<char*>(alloca(length));
           s.copy(buff, length);
           std::string().swap(s);
-          report(comm::exit_fail, buff, length);
+          report_obj(comm::exit_fail, buff, length);
         }
-      report(comm::exit_fail,
-             "Unexpectedly did not throw");
+      report_obj(comm::exit_fail, "Unexpectedly did not throw");
     }
   };
   template <typename T,
