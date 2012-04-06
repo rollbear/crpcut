@@ -89,20 +89,20 @@ namespace crpcut {
   {
     assert(enabled());
     assert(!buffer_.is_empty());
-    while (!buffer_.is_empty())
+
+    std::pair<const char *, size_t> data = buffer_.get_buffer();
+    const char *buff = data.first;
+    size_t      len  = data.second;
+
+    assert(buff);
+    assert(len);
+
+    ssize_t n = write_(fd_, buff + pos_, len - pos_);
+
+    assert(n >= 0);
+    pos_+= size_t(n);
+    if (pos_ == len)
       {
-        std::pair<const char *, size_t> data = buffer_.get_buffer();
-        const char *buff = data.first;
-        size_t      len  = data.second;
-
-        assert(buff);
-        assert(len);
-
-        ssize_t n = write_(fd_, buff + pos_, len - pos_);
-        assert(n >= 0);
-        pos_+= size_t(n);
-        if (pos_ != len) return false;
-
         pos_ = 0;
         buffer_.advance();
       }

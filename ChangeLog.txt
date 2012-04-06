@@ -1,3 +1,6 @@
+         * Fixed an output buffering bug which could propagate blocked
+           writes to output intensive tests, causing them to time out.
+
 2012-03-11 1.7.0
 
          * Added a new type of predicate, inheriting from crpcut::predicate,

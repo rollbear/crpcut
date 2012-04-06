@@ -99,49 +99,92 @@ TESTSUITE(presentation_output)
   }
 
 #define S(...) test_buffer::buff(#__VA_ARGS__, sizeof(#__VA_ARGS__) - 1)
-  TEST(write_sends_contents_of_buffer_to_writer, fix)
+
+  TESTSUITE(write)
   {
-    Sequence seq;
-    crpcut::presentation_output obj(buffer, poller, 10, writer);
-    EXPECT_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
-      .InSequence(seq);
-    obj.enable(1);
-    test_buffer::buff buff_data[] = {
-      S(hej hopp alla),
-      S(barnen i bullerbyn)
-    };
-    EXPECT_CALL(buffer, is_empty())
-      .WillRepeatedly(Return(false));
-    EXPECT_CALL(buffer, get_buffer())
-      .InSequence(seq)
-      .WillOnce(Return(buff_data[0]));
-    EXPECT_CALL(writer, do_write(10, StartsWith("hej hopp alla"), 13))
-      .InSequence(seq)
-      .WillOnce(Return(10));
-    bool rv = obj.write();
-    ASSERT_FALSE(rv);
+    TEST(returns_after_partial_fd_write, fix)
+    {
+      Sequence seq;
+      crpcut::presentation_output obj(buffer, poller, 10, writer);
+      EXPECT_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
+        .InSequence(seq);
+      obj.enable(1);
+      test_buffer::buff buff_data[] = {
+        S(hej hopp alla),
+        S(barnen i bullerbyn)
+      };
+      EXPECT_CALL(buffer, is_empty())
+        .WillOnce(Return(false));
+      EXPECT_CALL(buffer, get_buffer())
+        .InSequence(seq)
+        .WillOnce(Return(buff_data[0]));
+      EXPECT_CALL(writer, do_write(10, StartsWith("hej hopp alla"), 13))
+        .InSequence(seq)
+        .WillOnce(Return(10));
+      bool rv = obj.write();
+      ASSERT_FALSE(rv);
+    }
 
+    TEST(advance_buffer_and_return_when_current_buffer_has_been_consumed,
+         fix)
+    {
+      Sequence seq;
+      crpcut::presentation_output obj(buffer, poller, 10, writer);
+      EXPECT_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
+        .InSequence(seq);
+      obj.enable(1);
+      test_buffer::buff buff_data[] = {
+        S(hej hopp alla),
+        S(barnen i bullerbyn)
+      };
+      EXPECT_CALL(buffer, is_empty())
+        .WillRepeatedly(Return(false));
+      EXPECT_CALL(buffer, get_buffer())
+        .InSequence(seq)
+        .WillOnce(Return(buff_data[0]));
+      EXPECT_CALL(writer, do_write(10, StartsWith("hej hopp alla"), 13))
+        .InSequence(seq)
+        .WillOnce(Return(13));
+      EXPECT_CALL(buffer, advance())
+        .InSequence(seq);
+      bool rv = obj.write();
+      ASSERT_FALSE(rv);
+    }
 
-    EXPECT_CALL(buffer, get_buffer())
-      .InSequence(seq)
-      .WillOnce(Return(buff_data[0]));
-    EXPECT_CALL(writer, do_write(10, StartsWith("lla"), 3))
-      .InSequence(seq)
-      .WillOnce(Return(3));
-    EXPECT_CALL(buffer, advance())
-      .InSequence(seq);
-    EXPECT_CALL(buffer, get_buffer())
-      .InSequence(seq)
-      .WillOnce(Return(buff_data[1]));
-    EXPECT_CALL(writer, do_write(10, StartsWith("barnen i bullerbyn"), 18))
-      .InSequence(seq)
-      .WillOnce(Return(18));
-    EXPECT_CALL(buffer, advance())
-      .InSequence(seq);
-    EXPECT_CALL(buffer, is_empty())
-      .InSequence(seq)
-      .WillOnce(Return(true));
-    rv = obj.write();
-    ASSERT_FALSE(rv);
+    TEST(second_call_continues_after_partial_fd_write, fix,
+         DEPENDS_ON(returns_after_partial_fd_write,
+                    advance_buffer_and_return_when_current_buffer_has_been_consumed))
+    {
+      Sequence seq;
+      crpcut::presentation_output obj(buffer, poller, 10, writer);
+      EXPECT_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
+        .InSequence(seq);
+      obj.enable(1);
+      test_buffer::buff buff_data[] = {
+        S(hej hopp alla),
+        S(barnen i bullerbyn)
+      };
+      EXPECT_CALL(buffer, is_empty())
+        .WillRepeatedly(Return(false));
+      EXPECT_CALL(buffer, get_buffer())
+        .InSequence(seq)
+        .WillOnce(Return(buff_data[0]));
+      EXPECT_CALL(writer, do_write(10, StartsWith("hej hopp alla"), 13))
+        .InSequence(seq)
+        .WillOnce(Return(10));
+      bool rv = obj.write();
+      ASSERT_FALSE(rv);
+
+      EXPECT_CALL(buffer, get_buffer())
+        .InSequence(seq)
+        .WillOnce(Return(buff_data[0]));
+      EXPECT_CALL(writer, do_write(10, StartsWith("lla"), 3))
+        .InSequence(seq)
+        .WillOnce(Return(3));
+      EXPECT_CALL(buffer, advance())
+        .InSequence(seq);
+      rv = obj.write();
+      ASSERT_FALSE(rv);
+    }
   }
 }
