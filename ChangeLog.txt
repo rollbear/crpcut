@@ -1,3 +1,5 @@
+2012-04-06 1.7.1
+
          * Fixed an output buffering bug which could propagate blocked
            writes to output intensive tests, causing them to time out.
 
