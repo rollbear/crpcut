@@ -30,7 +30,7 @@
 #define TEST_ENVIRONMENT_HPP_
 
 extern "C" {
-#  include <sched.h>
+#  include <sys/types.h>
 }
 namespace crpcut {
   class test_environment
