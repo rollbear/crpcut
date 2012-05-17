@@ -1,3 +1,5 @@
+2012-05-17 1.7.2
+
          * Made the NO_CORE_FILE test modifier work correctly when on
            Linux /proc/sys/kernel/core_pattern is a pipe (which is the
            default on Ubunte 12.04 LTS.)
