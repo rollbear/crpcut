@@ -1,3 +1,7 @@
+         * Made the NO_CORE_FILE test modifier work correctly when on
+           Linux /proc/sys/kernel/core_pattern is a pipe (which is the
+           default on Ubunte 12.04 LTS.)
+
 2012-04-06 1.7.1
 
          * Fixed an output buffering bug which could propagate blocked
