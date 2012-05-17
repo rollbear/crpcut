@@ -89,7 +89,9 @@ TESTSUITE(test_case_registrator)
     MOCK_CONST_METHOD0(do_num_fds, std::size_t());
   };
 
-  struct test_registrator : public crpcut::crpcut_test_case_registrator
+  template <typename dump_handler>
+    struct test_registrator : public crpcut::crpcut_test_case_registrator,
+                              public virtual dump_handler
   {
   public:
     test_registrator(const char                    *name,
@@ -131,7 +133,8 @@ TESTSUITE(test_case_registrator)
     MOCK_CONST_METHOD0(crpcut_get_reg, crpcut::crpcut_test_case_registrator&());
   };
 
-  template <unsigned long cpulimit>
+  template <unsigned long cpulimit,
+            class dump_policy = crpcut::policies::core_dumps::crpcut_default_handler>
   struct fix
   {
     fix()
@@ -175,7 +178,7 @@ TESTSUITE(test_case_registrator)
     StrictMock<mock_fsops>               fsops;
     crpcut::namespace_info               top_namespace;
     crpcut::namespace_info               current_namespace;
-    test_registrator                     reg;
+    test_registrator<dump_policy>        reg;
   };
 
   TESTSUITE(just_constructed)
@@ -691,6 +694,79 @@ TESTSUITE(test_case_registrator)
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
       ASSERT_TRUE(apa.num_passed() == 1U);
+    }
+
+    TEST(expected_signal_is_successful_if_si_code_is_CLD_DUMPED_if_dumps_are_ignored,
+         fix<100U, crpcut::policies::core_dumps::crpcut_ignore>)
+    {
+      Sequence s;
+      const pid_t test_pid = 5158;
+      setup(test_pid);
+      const crpcut::test_phase phase = crpcut::running;
+      reg.set_phase(phase);
+      SET_WD(1);
+
+      prepare_siginfo(test_pid, 6, CLD_DUMPED, s);
+
+      EXPECT_CALL(factory, calc_cputime(_)).
+          WillOnce(Return(1000U));
+
+      EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
+          InSequence(s).
+          WillOnce(Return(true));
+
+      EXPECT_CALL(reg, crpcut_on_ok_action(_));
+      EXPECT_CALL(factory, timeouts_enabled()).
+          WillOnce(Return(false));
+
+      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).
+          InSequence(s);
+
+      EXPECT_CALL(factory, return_dir(1));
+
+      EXPECT_CALL(reg, crpcut_tag()).
+          WillRepeatedly(ReturnRef(apa));
+
+      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+          InSequence(s);
+
+      EXPECT_CALL(factory, test_succeeded(&reg));
+
+      reg.manage_death();
+      ASSERT_TRUE(apa.num_failed() == 0U);
+      ASSERT_TRUE(apa.num_passed() == 1U);
+    }
+
+    TEST(expected_signal_reports_core_dump_by_default_if_si_code_is_CLD_DUMPED,
+         fix<100U>)
+    {
+      Sequence s;
+      const pid_t test_pid = 5158;
+      setup(test_pid);
+      const crpcut::test_phase phase = crpcut::running;
+      reg.set_phase(phase);
+      SET_WD(1);
+
+      prepare_siginfo(test_pid, 6, CLD_DUMPED, s);
+
+      EXPECT_CALL(factory, calc_cputime(_)).
+          WillOnce(Return(1000U));
+
+      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
+          With(Args<4,3>(ElementsAreArray(S(Died with core dump)))).
+          InSequence(s);
+
+      EXPECT_CALL(factory, return_dir(1));
+
+      EXPECT_CALL(reg, crpcut_tag()).
+          WillRepeatedly(ReturnRef(apa));
+
+      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+          InSequence(s);
+
+      reg.manage_death();
+      ASSERT_TRUE(apa.num_failed() == 1U);
+      ASSERT_TRUE(apa.num_passed() == 0U);
     }
 
     TEST(unknown_death_cause_gives_failed_test_with_code_number_in_msg,

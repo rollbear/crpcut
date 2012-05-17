@@ -85,6 +85,8 @@ file(GLOB LIB_SRCS
      src/output/xml_formatter.cpp
      src/parameter_stream_traits.cpp
      src/pipe_pair.cpp
+     src/policies/core_dumps/default_handler.cpp
+     src/policies/core_dumps/ignore.cpp
      src/policies/deaths/no_action.cpp
      src/policies/deaths/none.cpp
      src/policies/deaths/wipe_working_dir.cpp
@@ -147,6 +149,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/output/text_modifier_test.cpp
      src/dogfood/output/writer_test.cpp
      src/dogfood/output/xml_formatter_test.cpp
+     src/dogfood/policies/core_dumps_test.cpp
      src/dogfood/policies/exception_translator_test.cpp
      src/dogfood/posix_error_test.cpp
      src/dogfood/presentation_output_test.cpp

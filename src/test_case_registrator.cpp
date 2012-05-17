@@ -415,15 +415,19 @@ namespace crpcut {
                 t = comm::exit_fail;
               }
             break;
+          case CLD_DUMPED:
+            if (crpcut_core_dumps_allowed())
+              {
+                out << "Died with core dump";
+                t = comm::exit_fail;
+                break;
+              }
+            // fall through
           case CLD_KILLED:
             if (check_signal_status(info.si_status, cputime_ms, out))
               {
                 t = comm::exit_fail;
               }
-            break;
-          case CLD_DUMPED:
-            out << "Died with core dump";
-            t = comm::exit_fail;
             break;
           default:
             out << "Died for unknown reason, code=" << info.si_code;

@@ -1301,6 +1301,10 @@ namespace crpcut {
       class crpcut_none {};
     }
 
+    namespace core_dumps {
+      class crpcut_default_handler;
+    }
+
     namespace timeout {
       typedef enum { realtime, cputime } type;
 
@@ -1326,6 +1330,7 @@ namespace crpcut {
       typedef crpcut_none crpcut_test_tag;
       typedef void crpcut_run_wrapper;
 
+      typedef core_dumps::crpcut_default_handler crpcut_core_dump_handler;
       typedef deaths::crpcut_none crpcut_expected_death_cause;
 
       typedef dependencies::crpcut_none crpcut_dependency;
@@ -1339,6 +1344,19 @@ namespace crpcut {
       crpcut_destructor_timeout_enforcer;
     };
 
+    namespace core_dumps {
+      class crpcut_default_handler
+      {
+      public:
+        virtual bool crpcut_core_dumps_allowed() const;
+      };
+
+      class crpcut_ignore : public virtual crpcut_default_handler
+      {
+      public:
+        virtual bool crpcut_core_dumps_allowed() const;
+      };
+    }
     namespace deaths {
 
       class crpcut_none
@@ -1472,6 +1490,7 @@ namespace crpcut {
     class no_core_file : protected virtual crpcut_default_policy
     {
     protected:
+      typedef core_dumps::crpcut_ignore crpcut_core_dump_handler;
       no_core_file();
     };
 
@@ -1787,6 +1806,7 @@ namespace crpcut {
   class crpcut_test_case_registrator
     : public virtual policies::deaths::crpcut_none,
       public virtual policies::dependencies::crpcut_base,
+      public virtual policies::core_dumps::crpcut_default_handler,
       public timeboxed,
       public datatypes::list_elem<crpcut_test_case_registrator>
   {
@@ -4065,8 +4085,10 @@ extern crpcut::namespace_info crpcut_current_namespace;
         private virtual test_case_name::crpcut_dependency,              \
         public virtual crpcut_testsuite_dep,                            \
         public test_case_name::crpcut_constructor_timeout_enforcer,     \
-        public test_case_name::crpcut_destructor_timeout_enforcer       \
+        public test_case_name::crpcut_destructor_timeout_enforcer,      \
+        public virtual test_case_name::crpcut_core_dump_handler         \
     {                                                                   \
+      using crpcut_core_dump_handler::crpcut_core_dumps_allowed;        \
       crpcut::report_reader                report_reader_;              \
       crpcut::reader<crpcut::comm::stdout> stdout_reader_;              \
       crpcut::reader<crpcut::comm::stderr> stderr_reader_;              \
