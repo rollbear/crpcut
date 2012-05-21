@@ -1181,9 +1181,14 @@ namespace crpcut {
     public:
       virtual ~data_writer();
       virtual ssize_t write(const void *buff, size_t len) const = 0;
-      virtual void write_loop(const void *buff, size_t len,
-                              const char *context = "write_loop") const;
+      template <typename T>
+      const data_writer& write_loop(const T*, size_t len = sizeof(T),
+                                    const char *context = "write_loop") const;
+      virtual const data_writer &
+      write_loop(const void *buff, size_t len,
+                 const char *context = "write_loop") const;
     };
+
 
     class wfile_descriptor : public file_descriptor,
                              public data_writer
@@ -3362,6 +3367,17 @@ namespace crpcut {
       heap::set_limit(heap_limit);
       report(type, p, len);
     }
+
+    template <typename T>
+    inline
+    const data_writer &
+    data_writer
+    ::write_loop(const T* tp, size_t len, const char *context) const
+    {
+      const void *address = tp;
+      return write_loop(address, len, context);
+    }
+
   } // namespace comm
 
   template <comm::type t>

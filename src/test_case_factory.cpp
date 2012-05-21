@@ -313,47 +313,21 @@ namespace crpcut {
   test_case_factory
   ::introduce_name(pid_t pid, const char *name, size_t len)
   {
-    int pipe = presenter_pipe_;
-    for (;;)
-      {
-        ssize_t rv = wrapped::write(pipe, &pid, sizeof(pid));
-        if (rv == sizeof(pid)) break;
-        assert(rv == -1 && errno == EINTR);
-      }
     const comm::type t = comm::begin_test;
-    for (;;)
-      {
-        ssize_t rv = wrapped::write(pipe, &t, sizeof(t));
-        if (rv == sizeof(t)) break;
-        assert(rv == -1 && errno == EINTR);
-      }
     const test_phase p = running;
-    for (;;)
-      {
-        ssize_t rv = wrapped::write(pipe, &p, sizeof(p));
-        if (rv == sizeof(p)) break;
-        assert(rv == -1 && errno == EINTR);
-      }
-    for (;;)
-      {
-        ssize_t rv = wrapped::write(pipe, &len, sizeof(len));
-        if (rv == sizeof(len)) break;
-        assert(rv == -1 && errno == EINTR);
-      }
-    for (;;)
-      {
-        ssize_t rv = wrapped::write(pipe, name, len);
-        if (size_t(rv) == len) break;
-        assert(rv == -1 && errno == EINTR);
-      }
+    presenter_pipe_
+      .write_loop(&pid)
+      .write_loop(&t)
+      .write_loop(&p)
+      .write_loop(&len)
+      .write_loop(name, len);
   }
 
   void
   test_case_factory
   ::kill_presenter_process()
   {
-    int rc = wrapped::close(presenter_pipe_);
-    assert(rc == 0);
+    comm::wfile_descriptor().swap(presenter_pipe_); // close
     siginfo_t info;
     for (;;)
       {
@@ -503,19 +477,14 @@ namespace crpcut {
             size_t      len,
             const char *buff)
   {
-    int pipe = presenter_pipe_;
-    ssize_t rv = wrapped::write(pipe, &pid, sizeof(pid));
-    assert(rv == sizeof(pid));
-    rv = wrapped::write(pipe, &t, sizeof(t));
-    assert(rv == sizeof(t));
-    rv = wrapped::write(pipe, &phase, sizeof(phase));
-    assert(rv == sizeof(phase));
-    rv = wrapped::write(pipe, &len, sizeof(len));
-    assert(rv == sizeof(len));
+    presenter_pipe_
+      .write_loop(&pid)
+      .write_loop(&t)
+      .write_loop(&phase)
+      .write_loop(&len);
     if (len)
       {
-        rv = wrapped::write(pipe, buff, len);
-        assert(size_t(rv) == len);
+        presenter_pipe_.write_loop(buff, len);
       }
   }
 
@@ -950,11 +919,12 @@ namespace crpcut {
                           dirbase_,
                           err_os);
             flush_output_buffer(output_fd, buffer);
-            presenter_pipe_ = start_presenter_process(buffer,
-                                                     output_fd,
-                                                     fmt,
-                                                     cli_->verbose_mode(),
-                                                     dirbase_);
+            int p_fd = start_presenter_process(buffer,
+                                               output_fd,
+                                               fmt,
+                                               cli_->verbose_mode(),
+                                               dirbase_);
+            comm::wfile_descriptor(p_fd).swap(presenter_pipe_);
           }
         const std::size_t num_parallel = cli_->num_parallel_tests();
         typedef poll_buffer_vector<fdreader> poll_reader;

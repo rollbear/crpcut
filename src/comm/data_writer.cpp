@@ -34,7 +34,7 @@ namespace crpcut {
     {
     }
 
-    void
+    const data_writer &
     data_writer
     ::write_loop(const void *buff, size_t len, const char *context) const
     {
@@ -53,6 +53,7 @@ namespace crpcut {
             }
           bytes_written += size_t(rv);
         }
+      return *this;
     }
   }
 }

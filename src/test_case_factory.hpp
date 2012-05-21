@@ -98,7 +98,8 @@ namespace crpcut {
     unsigned                 num_pending_children_;
     unsigned                 num_tests_run_;
     unsigned                 num_successful_tests_;
-    int                      presenter_pipe_;
+    comm::wfile_descriptor   presenter_pipe_;
+    //    int                      presenter_pipe_;
     deadline_monitor        *deadlines_;
     working_dir_allocator   *working_dirs_;
     char                     dirbase_[PATH_MAX];

@@ -36,12 +36,15 @@ TESTSUITE(comm)
     class writer_mock : public crpcut::comm::data_writer
     {
     public:
-      MOCK_CONST_METHOD3(write_loop, void(const char*, std::size_t,
-                                          const char*));
-      void write_loop(const void *addr, std::size_t len,
-                      const char *context) const
+      MOCK_CONST_METHOD3(write_loop,
+                         const crpcut::comm::data_writer&(const char*,
+                                                          std::size_t,
+                                                          const char*));
+      const data_writer& write_loop(const void *addr, std::size_t len,
+                                    const char *context) const
       {
          write_loop(static_cast<const char*>(addr), len, context);
+         return *this;
       }
       MOCK_CONST_METHOD2(write, ssize_t(const void*, std::size_t));
     };
@@ -95,7 +98,8 @@ TESTSUITE(comm)
       r.set_test_environment(&e);
       r.set_writer(&wfd);
       r.set_reader(&rfd);
-      EXPECT_CALL(wfd, write_loop(_, _, _));
+      EXPECT_CALL(wfd, write_loop(_, _, _)).
+        WillOnce(ReturnRef(wfd));
       EXPECT_CALL(rfd, read_loop(_,_,_)).
         WillOnce(Throw(3));
       r(crpcut::comm::fail, "apa");
@@ -130,8 +134,9 @@ TESTSUITE(comm)
       void *addr = set_to(request, crpcut::comm::exit_fail);
       char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
       *p++='a'; *p++='p'; *p++='a';
-      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_)).
-          With(Args<0,1>(ElementsAreArray(request)));
+      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
+        .With(Args<0,1>(ElementsAreArray(request)))
+        .WillOnce(ReturnRef(wfd));
       char response[sizeof(std::size_t)];
       set_to(response, std::size_t(3));
       EXPECT_CALL(rfd, read_loop(_,_,_)).
@@ -145,8 +150,9 @@ TESTSUITE(comm)
       void *addr = set_to(request, crpcut::comm::fail);
       char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
       *p++='a'; *p++='p'; *p++='a';
-      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_)).
-          With(Args<0,1>(ElementsAreArray(request)));
+      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
+        .With(Args<0,1>(ElementsAreArray(request)))
+        .WillOnce(ReturnRef(wfd));
       char response[sizeof(std::size_t)];
       set_to(response, std::size_t(3));
       EXPECT_CALL(rfd, read_loop(_,_,_)).
@@ -162,8 +168,9 @@ TESTSUITE(comm)
       void *addr = set_to(request, crpcut::comm::info);
       char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
       *p++='a'; *p++='p'; *p++='a';
-      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_)).
-          With(Args<0,1>(ElementsAreArray(request)));
+      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
+        .With(Args<0,1>(ElementsAreArray(request)))
+        .WillOnce(ReturnRef(wfd));
       char response[sizeof(std::size_t)];
       set_to(response, std::size_t(3));
       EXPECT_CALL(rfd, read_loop(_,_,_)).
@@ -178,7 +185,8 @@ TESTSUITE(comm)
          EXPECT_SIGNAL_DEATH(SIGABRT),
          NO_CORE_FILE)
     {
-      EXPECT_CALL(wfd, write_loop(_,_,_));
+      EXPECT_CALL(wfd, write_loop(_,_,_))
+        .WillOnce(ReturnRef(wfd));
       char response[sizeof(std::size_t)];
       set_to(response, std::size_t(4));
       EXPECT_CALL(rfd, read_loop(_,_,_)).
