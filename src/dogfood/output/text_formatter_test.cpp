@@ -134,6 +134,8 @@ TESTSUITE(output)
                                              "one",
                                              vec,
                                              tags,
+                                             100,
+                                             10,
                                              test_modifier,
                                              no_char_conversion);
         }
@@ -156,9 +158,10 @@ TESTSUITE(output)
                                              "one",
                                              vec,
                                              tags,
+                                             15, 14,
                                              test_modifier,
                                              no_char_conversion);
-          obj.statistics(15, 14, 13, 0);
+          obj.statistics(13, 0);
         }
 
         static const char re[] =
@@ -187,9 +190,10 @@ TESTSUITE(output)
                                              "one",
                                              vec,
                                              tags,
+                                             15,13,
                                              test_modifier,
                                              no_char_conversion);
-          obj.statistics(15, 13, 13, 13);
+          obj.statistics(13, 13);
         }
         static const char re[] =
               "13 test cases selected\n\n"
@@ -250,9 +254,10 @@ TESTSUITE(output)
                                              "one",
                                              vec,
                                              tags,
+                                             9,9,
                                              test_modifier,
                                              no_char_conversion);
-          obj.statistics(9, 9, 9, 0);
+          obj.statistics(9, 0);
         }
         static const char re[] =
               "9 test cases selected\n"
@@ -315,9 +320,10 @@ TESTSUITE(output)
                                              "one",
                                              vec,
                                              tags,
+                                             9,9,
                                              test_modifier,
                                              no_char_conversion);
-          obj.statistics(9, 9, 9, 9);
+          obj.statistics(9, 9);
         }
         static const char re[] =
               "9 test cases selected\n"
@@ -382,9 +388,10 @@ TESTSUITE(output)
                                              "one",
                                              vec,
                                              tags,
+                                             10,10,
                                              test_modifier,
                                              no_char_conversion);
-          obj.statistics(10, 10, 10, 6);
+          obj.statistics(10, 6);
         }
         static const char re[] =
               "10 test cases selected\n"
@@ -449,9 +456,10 @@ TESTSUITE(output)
                                              "one",
                                              vec,
                                              tags,
+                                             10,10,
                                              test_modifier,
                                              no_char_conversion);
-          obj.statistics(10, 10, 10, 6);
+          obj.statistics(10, 6);
         }
         static const char re[] =
               "10 test cases selected\n"
@@ -517,9 +525,10 @@ TESTSUITE(output)
                                              "one",
                                              vec,
                                              tags,
+                                             8,8,
                                              test_modifier,
                                              no_char_conversion);
-          obj.statistics(8, 8, 8, 5);
+          obj.statistics(8, 5);
         }
         static const char re[] =
               "8 test cases selected\n"
@@ -546,6 +555,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), true, true);
@@ -564,6 +574,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), true, false);
@@ -582,6 +593,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), false, true);
@@ -600,6 +612,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), false, false);
@@ -618,6 +631,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), false, false);
@@ -643,6 +657,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), false, false);
@@ -669,6 +684,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), false, false);
@@ -713,6 +729,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           32,32,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), false, false);
@@ -722,7 +739,7 @@ TESTSUITE(output)
         obj.nonempty_dir("/tmp/tmpdir");
         obj.blocked_test(crpcut::tag::critical, s("ko"));
         obj.blocked_test(crpcut::tag::disabled, s("tupp"));
-        obj.statistics(32, 32, 30, 1);
+        obj.statistics(30, 1);
         const char re[] =
           "^<NF>FAILED?: apa\n"
           "/tmp/tmpdir/hoppla is not empty!\n"
@@ -753,6 +770,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            "ASCII");
         obj.begin_case(s("apa"), false, false);
@@ -818,6 +836,7 @@ TESTSUITE(output)
                                            "one",
                                            vec,
                                            tags,
+                                           1,1,
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case(s("apa"), false, false);

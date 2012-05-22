@@ -55,13 +55,15 @@ namespace crpcut {
     void end_test(test_phase phase, test_case_result *);
     void nonempty_dir(test_case_result *);
     void output_data(comm::type t, test_case_result *);
+    void blocked_test();
     datatypes::list_elem<test_case_result>  messages_;
     poll<io>                               &poller_;
     comm::rfile_descriptor                 &fd_;
     output::formatter                      &fmt_;
     const char                             *working_dir_;
     bool                                    verbose_;
-
+    unsigned                                num_run_;
+    unsigned                                num_failed_;
     presentation_reader();
     presentation_reader(const presentation_reader&);
     presentation_reader& operator=(const presentation_reader&);

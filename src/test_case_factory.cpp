@@ -73,14 +73,18 @@ namespace {
                            bool                    use_xml,
                            const char             *id,
                            const char * const      argv[],
-                           crpcut::tag_list_root  &tags)
+                           crpcut::tag_list_root  &tags,
+                           unsigned                num_registered,
+                           unsigned                num_selected)
   {
     if (use_xml)
       {
-        static crpcut::output::xml_formatter xo(buffer, id, argv, tags);
+        typedef crpcut::output::xml_formatter xmlf;
+        static xmlf xo(buffer, id, argv, tags, num_registered, num_selected);
         return xo;
       }
-    static crpcut::output::text_formatter to(buffer, id, argv, tags);
+    typedef crpcut::output::text_formatter textf;
+    static textf to(buffer, id, argv, tags, num_registered, num_selected);
     return to;
   }
 
@@ -487,8 +491,8 @@ namespace crpcut {
   void
   test_case_factory
   ::list_tests(const char *const*names,
-                 tag_list_root &tags,
-                   std::ostream &err_os)
+               tag_list_root &tags,
+               std::ostream &err_os)
   {
     if (*names && **names == '-')
       {
@@ -766,14 +770,13 @@ namespace crpcut {
   bool cleanup_directories(std::size_t        num_parallel,
                            const char        *working_dir,
                            const char        *dirbase,
-                           output::formatter &fmt)
+                           comm::data_writer &presenter_pipe)
   {
     bool rv = true;
     for (unsigned n = 0; n < num_parallel; ++n)
       {
-        stream::toastream
-        < std::numeric_limits<unsigned>::digits / 3 + 1
-        > name;
+        static const unsigned bindigits = std::numeric_limits<unsigned>::digits;
+        stream::toastream<bindigits / 3 + 1> name;
         name << n << '\0';
         (void)wrapped::rmdir(name.begin());
         // failure above is taken care of as error elsewhere
@@ -781,7 +784,16 @@ namespace crpcut {
 
     if (!is_dir_empty("."))
       {
-        fmt.nonempty_dir(dirbase);
+        static const pid_t dummy = 0;
+        static const comm::type nonempty_dir = comm::dir;
+        static const test_phase phase = post_mortem;
+        static const size_t len = wrapped::strlen(dirbase) + 1;
+        presenter_pipe
+          .write_loop(&dummy)
+          .write_loop(&nonempty_dir)
+          .write_loop(&phase)
+          .write_loop(&len)
+          .write_loop(dirbase, len);
         rv = false;
       }
     else if (working_dir == 0)
@@ -796,30 +808,29 @@ namespace crpcut {
     return rv;
   }
 
-  void report_blocked_tests(int output_fd, bool quiet,
-                            test_case_factory::registrator_list &reg,
-                            output::formatter                   &fmt)
+  void report_blocked_tests(test_case_factory::registrator_list &reg,
+                            comm::data_writer                   &presenter_pipe)
   {
-    if (reg.next() != &reg)
+    static const pid_t dummy_pid(0);
+    static const comm::type begin_test = comm::begin_test;
+    static const test_phase blocked = never_run;
+
+    for (crpcut_test_case_registrator *i = reg.next();
+         i != &reg;
+         i = i->next())
       {
-        if (output_fd != 1 && !quiet)
-          {
-            std::cout << "Blocked tests:\n";
-          }
-        for (crpcut_test_case_registrator *i = reg.next();
-            i != &reg;
-            i = i->next())
-          {
-            std::size_t name_len = i->full_name_len();
-            char *buff = static_cast<char*>(alloca(name_len));
-            stream::oastream os(buff, name_len);
-            os << *i;
-            fmt.blocked_test(i->get_importance(), os);
-            if (output_fd != 1 && !quiet)
-              {
-                std::cout << "  " << i->get_importance() << *i << '\n';
-              }
-          }
+        const std::size_t name_len = i->full_name_len();
+        char *buff = static_cast<char*>(alloca(name_len));
+        stream::oastream os(buff, name_len);
+        os << *i;
+        const tag::importance importance = i->get_importance();
+        presenter_pipe
+          .write_loop(&dummy_pid)
+          .write_loop(&begin_test)
+          .write_loop(&blocked)
+          .write_loop(&name_len)
+          .write_loop(buff, name_len)
+          .write_loop(&importance);
       }
   }
 
@@ -897,7 +908,9 @@ namespace crpcut {
                                                  cli_->xml_output(),
                                                  cli_->identity_string(),
                                                  cli_->argv(),
-                                                 tags);
+                                                 tags,
+                                                 num_registered_tests,
+                                                 num_selected_tests);
 
         int output_fd = open_report_file(cli_->report_file(), err_os);
         if (tests_as_child_procs())
@@ -931,19 +944,18 @@ namespace crpcut {
 
         if (tests_as_child_procs())
           {
-            kill_presenter_process();
-            if (!cleanup_directories(num_parallel, cli_->working_dir(), dirbase_, fmt)
+            if (!cleanup_directories(num_parallel,
+                                     cli_->working_dir(),
+                                     dirbase_,
+                                     presenter_pipe_)
                && output_fd != 1
                && !cli_->quiet())
             {
               std::cout << "Files remain in " << dirbase_ << '\n';
             }
+            report_blocked_tests(reg_, presenter_pipe_);
+            kill_presenter_process();
           }
-
-        report_blocked_tests(output_fd, cli_->quiet(), reg_, fmt);
-
-        fmt.statistics(num_registered_tests, num_selected_tests, num_tests_run_,
-                       num_tests_run_ - num_successful_tests_);
         if (output_fd != 1 && !cli_->quiet())
           {
             show_summary(num_selected_tests, tags);

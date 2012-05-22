@@ -67,6 +67,8 @@ namespace crpcut {
                      const char          *,
                      const char   *const *,
                      const tag_list_root &tags,
+                     std::size_t       /*num_registered*/,
+                     std::size_t         num_selected,
                      const text_modifier &mod,
                      const char         *os)
       : writer(buff,
@@ -76,7 +78,8 @@ namespace crpcut {
         blocked_tests_(false),
         conversion_type_(os ? translated : verbatim),
         tags_(tags),
-        modifier_(mod)
+        modifier_(mod),
+        num_selected_(num_selected)
     {
     }
 
@@ -176,12 +179,10 @@ namespace crpcut {
 
     void
     text_formatter
-    ::statistics(unsigned /* num_registered */,
-                 unsigned num_selected,
-                 unsigned num_run,
+    ::statistics(unsigned num_run,
                  unsigned num_failed)
     {
-      write(num_selected);
+      write(num_selected_);
       write(" test cases selected\n", conversion_type_);
       std::size_t sum_passed[] = { 0, 0 };
       std::size_t sum_failed[] = { 0, 0 };
@@ -252,12 +253,12 @@ namespace crpcut {
           modifier_.write_to(os, text_modifier::NORMAL);
           write(os);
         }
-      if (num_selected != num_run)
+      if (num_selected_ != num_run)
         {
           std::ostringstream os;
           os << "\n";
           modifier_.write_to(os, text_modifier::BLOCKED_SUM);
-          os << "UNTESTED :" << std::setw(8) << num_selected - num_run;
+          os << "UNTESTED :" << std::setw(8) << num_selected_ - num_run;
           modifier_.write_to(os, text_modifier::NORMAL);
           write(os);
         }

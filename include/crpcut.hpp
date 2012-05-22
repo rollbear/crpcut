@@ -950,12 +950,13 @@ namespace crpcut {
   };
 #endif
 
-#define CRPCUT_TEST_PHASES(translator)   \
-  translator(creating),                  \
-  translator(running),                   \
-  translator(destroying),                \
-  translator(post_mortem),               \
-  translator(child)
+#define CRPCUT_TEST_PHASES(translator)     \
+              translator(creating),        \
+              translator(running),         \
+              translator(destroying),      \
+              translator(post_mortem),     \
+              translator(child),           \
+              translator(never_run)
 
 
   typedef enum { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) } test_phase;

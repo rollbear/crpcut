@@ -53,7 +53,9 @@ namespace crpcut {
     ::xml_formatter(output::buffer      &buffer,
                     const char          *id,
                     const char * const   argv[],
-                    const tag_list_root &tags)
+                    const tag_list_root &tags,
+                    std::size_t          num_registered,
+                    std::size_t          num_selected)
       : writer(buffer,
                "UTF-8",
                xml_replacement(get_illegal_char_representation())),
@@ -61,7 +63,9 @@ namespace crpcut {
         last_closed_(false),
         blocked_tests_(false),
         tag_summary_(false),
-        tags_(tags)
+        tags_(tags),
+        num_registered_(num_registered),
+        num_selected_(num_selected)
     {
       char machine_string[HOST_NAME_MAX + 1];
       int rv = wrapped::gethostname(machine_string, sizeof(machine_string));
@@ -228,9 +232,7 @@ namespace crpcut {
 
     void
     xml_formatter
-    ::statistics(unsigned num_registered,
-                 unsigned num_selected,
-                 unsigned num_run,
+    ::statistics(unsigned num_run,
                  unsigned num_failed)
     {
       tag_list_root::const_iterator i = tags_.begin();
@@ -247,13 +249,13 @@ namespace crpcut {
 
       write("  <statistics>\n"
             "    <registered_test_cases>");
-      write(num_registered);
+      write(num_registered_);
       write("</registered_test_cases>\n"
             "    <selected_test_cases>");
-      write(num_selected);
+      write(num_selected_);
       write("</selected_test_cases>\n"
             "    <untested_test_cases>");
-      write(num_selected - num_run);
+      write(num_selected_ - num_run);
       write("</untested_test_cases>\n"
             "    <run_test_cases>");
       write(num_run);

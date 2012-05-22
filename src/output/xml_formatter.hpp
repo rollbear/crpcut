@@ -41,7 +41,9 @@ namespace crpcut {
       xml_formatter(output::buffer      &buffer,
                     const char          *id,
                     const char * const   argv[],
-                    const tag_list_root &tags);
+                    const tag_list_root &tags,
+                    std::size_t          num_registered,
+                    std::size_t          num_selected);
       virtual ~xml_formatter();
       virtual void begin_case(datatypes::fixed_string name,
                               bool                    result,
@@ -52,9 +54,7 @@ namespace crpcut {
                              datatypes::fixed_string dirname);
       virtual void print(datatypes::fixed_string label,
                          datatypes::fixed_string data);
-      virtual void statistics(unsigned num_registered,
-                              unsigned num_selected,
-                              unsigned num_run,
+      virtual void statistics(unsigned num_run,
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);
       virtual void blocked_test(tag::importance         i,
@@ -69,6 +69,8 @@ namespace crpcut {
       bool                 blocked_tests_;
       bool                 tag_summary_;
       const tag_list_root &tags_;
+      std::size_t          num_registered_;
+      std::size_t          num_selected_;
     };
   }
 }

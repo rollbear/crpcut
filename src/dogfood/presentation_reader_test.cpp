@@ -117,6 +117,16 @@ TESTSUITE(presentation_reader)
     {
       msg<crpcut::comm::info>(id, phase, name);
     }
+    template <size_t N>
+    void blocked_test(const char (&name)[N], crpcut::tag::importance i)
+    {
+      add_data(pid_t(0));
+      add_data(crpcut::comm::begin_test);
+      add_data(crpcut::never_run);
+      //      add_data(N);
+      add_data(name);
+      add_data(i);
+    }
   private:
     template <crpcut::comm::type type, size_t N>
     void msg(pid_t id, crpcut::test_phase phase, const char (&name)[N])
@@ -154,10 +164,15 @@ TESTSUITE(presentation_reader)
     {
       print(std::string(s1.str, s1.len), std::string(s2.str, s2.len));
     }
-    MOCK_METHOD4(statistics, void(unsigned, unsigned, unsigned, unsigned));
+    MOCK_METHOD2(statistics, void(unsigned, unsigned));
     MOCK_METHOD1(nonempty_dir, void(const char*));
     MOCK_METHOD2(blocked_test, void(crpcut::tag::importance,
-                                    crpcut::datatypes::fixed_string));
+                                    std::string));
+    void blocked_test(crpcut::tag::importance i,
+                      crpcut::datatypes::fixed_string s)
+    {
+      blocked_test(i, std::string(s.str, s.len));
+    }
 
   };
 
@@ -224,7 +239,23 @@ TESTSUITE(presentation_reader)
     while (!reader.read())
       ;
   }
+  TEST(nonempty_dir_with_pid_0_reports_to_formatter_immediately, fix<true>)
+  {
+    fd.nonempty_dir(0, crpcut::running, "apa\0");
 
+    EXPECT_CALL(fmt, nonempty_dir(testing::StrEq("apa")));
+    while (!reader.read())
+      ;
+  }
+  TEST(test_with_phase_never_run_is_a_blocked_test, fix<true>)
+  {
+    fd.blocked_test("apa::katt", crpcut::tag::critical);
+    fd.blocked_test("apa::orm", crpcut::tag::non_critical);
+    EXPECT_CALL(fmt, blocked_test(crpcut::tag::critical, "apa::katt"));
+    EXPECT_CALL(fmt, blocked_test(crpcut::tag::non_critical, "apa::orm"));
+    while (!reader.read())
+      ;
+  }
   TEST(interleaved_tests_are_shown_in_sequence, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, "apa::katt");
@@ -282,6 +313,7 @@ TESTSUITE(presentation_reader)
   {
     ASSERT_TRUE(reader.read());
     EXPECT_CALL(poll, do_del_fd(87)).InSequence(in);
+    EXPECT_CALL(fmt, statistics(0,0));
     reader.exception();
   }
 

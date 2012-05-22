@@ -49,7 +49,7 @@ TESTSUITE(printer)
                       crpcut::datatypes::fixed_string));
     MOCK_METHOD2(print, void(crpcut::datatypes::fixed_string,
                              crpcut::datatypes::fixed_string));
-    MOCK_METHOD4(statistics, void(unsigned, unsigned, unsigned, unsigned));
+    MOCK_METHOD2(statistics, void(unsigned, unsigned));
     MOCK_METHOD1(nonempty_dir, void(const char*));
     MOCK_METHOD2(blocked_test,
                  void(crpcut::tag::importance,

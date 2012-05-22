@@ -51,7 +51,9 @@ namespace crpcut {
       fd_(fd),
       fmt_(fmt),
       working_dir_(working_dir),
-      verbose_(verbose)
+      verbose_(verbose),
+      num_run_(0),
+      num_failed_(0)
   {
     poller_.add_fd(fd_, this);
   }
@@ -67,6 +69,7 @@ namespace crpcut {
   {
     poller_.del_fd(&fd_);
     comm::rfile_descriptor().swap(fd_);
+    fmt_.statistics(num_run_, num_failed_);
   }
 
   test_case_result *
@@ -117,8 +120,11 @@ namespace crpcut {
     assert(len == sizeof(critical));
     fd_.read_loop(&critical, len);
 
+    ++num_run_;
     if (s->explicit_fail || !s->success || verbose_)
       {
+        num_failed_ += s->explicit_fail || !s->success;
+
         printer print(fmt_,
                       s->name,
                       s->success && !s->explicit_fail,
@@ -161,8 +167,14 @@ namespace crpcut {
   {
     size_t len;
     fd_.read_loop(&len, sizeof(len));
-    assert(len == 0);
-    (void)len; // silense warning
+    assert(s || len > 0U);
+    if (!s)
+      {
+        char *name = static_cast<char*>(alloca(len));
+        fd_.read_loop(name, len);
+        fmt_.nonempty_dir(name);
+        return;
+      }
     s->success = false;
     s->nonempty_dir = true;
   }
@@ -187,6 +199,22 @@ namespace crpcut {
     e->link_before(s->history);
   }
 
+  void
+  presentation_reader
+  ::blocked_test()
+  {
+    size_t len;
+    fd_.read_loop(&len, sizeof(len));
+    assert(len);
+    void *addr = alloca(len + 1);
+    char *name = static_cast<char*>(addr);
+    fd_.read_loop(name, len);
+    tag::importance importance;
+    fd_.read_loop(&importance, sizeof(importance));
+    fmt_.blocked_test(importance,
+                      datatypes::fixed_string::make(name, len));
+  }
+
   bool
   presentation_reader
   ::read()
@@ -194,18 +222,24 @@ namespace crpcut {
     try {
       pid_t test_case_id;
       fd_.read_loop(&test_case_id, sizeof(test_case_id));
-      test_case_result *s = find_result_for(test_case_id);
-      if (!s)
-        {
-          s = new test_case_result(test_case_id);
-          s->link_after(messages_);
-        }
 
       comm::type t;
       fd_.read_loop(&t, sizeof(t));
 
       test_phase phase;
       fd_.read_loop(&phase, sizeof(phase));
+
+      if (phase == never_run)
+        {
+          blocked_test();
+          return false;
+        }
+      test_case_result *s = find_result_for(test_case_id);
+      if (!s && test_case_id)
+        {
+          s = new test_case_result(test_case_id);
+          s->link_after(messages_);
+        }
 
       int mask = t & comm::kill_me;
       t = static_cast<comm::type>(t & ~mask);

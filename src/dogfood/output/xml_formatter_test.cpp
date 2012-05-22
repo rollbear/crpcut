@@ -201,7 +201,8 @@ TESTSUITE(output)
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
                                           vec,
-                                          tags);
+                                          tags,
+                                          1,1);
 
       }
       static const char re[] =
@@ -222,8 +223,9 @@ TESTSUITE(output)
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
                                           vec,
-                                          tags);
-        obj.statistics(0,0,0,0);
+                                          tags,
+                                          0,0);
+        obj.statistics(0,0);
       }
       static const char re[] =
         XML_HEADER
@@ -244,8 +246,9 @@ TESTSUITE(output)
       crpcut::output::xml_formatter obj(test_buffer,
                                         "one",
                                         vec,
-                                        tags);
-      obj.statistics(0,0,0,0);
+                                        tags,
+                                        0,0);
+      obj.statistics(0,0);
       static const char re[] =
         XML_HEADER
         XML_STATISTICS(0,0,0,0,0,0)
@@ -264,11 +267,12 @@ TESTSUITE(output)
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
                                           vec,
-                                          tags);
+                                          tags,
+                                          3,3);
         obj.blocked_test(crpcut::tag::critical, s(apa));
         obj.blocked_test(crpcut::tag::non_critical, s(katt));
         obj.blocked_test(crpcut::tag::disabled, s(ko));
-        obj.statistics(3,3,0,0);
+        obj.statistics(0,0);
       }
       static const char re[] =
         XML_HEADER
@@ -317,8 +321,9 @@ TESTSUITE(output)
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
                                           vec,
-                                          tags);
-        obj.statistics(9,9,9,6);
+                                          tags,
+                                          9,9);
+        obj.statistics(9,6);
       }
       static const char re[] =
         XML_HEADER
@@ -374,7 +379,8 @@ TESTSUITE(output)
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
                                           vec,
-                                          tags);
+                                          tags,
+                                          12,12);
 
         obj.begin_case(s(tupp), true, true);
         obj.end_case();
@@ -388,7 +394,7 @@ TESTSUITE(output)
         obj.blocked_test(crpcut::tag::critical, s(apa));
         obj.blocked_test(crpcut::tag::non_critical, s(katt));
         obj.blocked_test(crpcut::tag::disabled, s(ko));
-        obj.statistics(12,12,9,6);
+        obj.statistics(9,6);
       }
       static const char re[] =
         XML_HEADER
@@ -424,7 +430,8 @@ TESTSUITE(output)
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
                                           vec,
-                                          tags);
+                                          tags,
+                                          0,0);
         static const char msg[] = "\t\n\r!\"#$%&'()*+,-./0123456789"
                                   ":;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                   "[\\]^_` abcdefghijklmnopqrstuvwxyz"
@@ -433,7 +440,7 @@ TESTSUITE(output)
         obj.print(s(info),
                   crpcut::datatypes::fixed_string::make(msg, sizeof(msg) - 1));
         obj.end_case();
-        obj.statistics(0,0,0,0);
+        obj.statistics(0,0);
       }
       static const char re[] =
         XML_HEADER
@@ -465,7 +472,8 @@ TESTSUITE(output)
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
                                           vec,
-                                          tags);
+                                          tags,
+                                          0,0);
         char msg[256];
         for (size_t i = 0; i < sizeof(msg); ++i)
           {
@@ -475,7 +483,7 @@ TESTSUITE(output)
         obj.print(s(info),
                   crpcut::datatypes::fixed_string::make(msg));
         obj.end_case();
-        obj.statistics(0,0,0,0);
+        obj.statistics(0,0);
       }
 
 #define IL "&#xfffd;"
@@ -521,14 +529,15 @@ TESTSUITE(output)
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
                                           vec,
-                                          tags);
+                                          tags,
+                                          0,0);
         obj.begin_case(s(tupp), false, true);
         obj.terminate(crpcut::post_mortem,
                       s(),
                       s(/tmp/crpcut02342/tests::tupp));
         obj.end_case();
         obj.nonempty_dir("/tmp/crpcut02342");
-        obj.statistics(0,0,0,0);
+        obj.statistics(0,0);
       }
 
 #define IL "&#xfffd;"
