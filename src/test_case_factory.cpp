@@ -259,14 +259,9 @@ namespace crpcut {
 
     i->set_wd(working_dirs_->allocate());
     pid_t pid;
-    for (;;)
-      {
-        pid = wrapped::fork();
-        if (pid < 0) throw posix_error(errno, "fork test-case process");
-        if (pid >= 0) break;
-        assert(errno == EINTR);
-      }
-    if (pid < 0) return;
+    do { pid = wrapped::fork(); } while (pid == -1 && errno == EINTR);
+
+    if (pid < 0) throw posix_error(errno, "fork test-case process");
 
     if (pid == 0) // child
       {
