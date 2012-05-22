@@ -592,25 +592,21 @@ namespace crpcut {
   {
     unsigned num_selected_tests = 0U;
     unsigned mismatches = 0;
+    typedef crpcut_test_case_registrator reg;
     for (const char *const*name = names; *name; ++name)
       {
-        crpcut_test_case_registrator *i = from.next();
         unsigned matches = 0;
-        while (i != &from)
+        for (reg *i = from.next(); i != &from;)
           {
+            reg *next = i->next();
             if (i->match_name(*name))
               {
                 ++matches;
                 ++num_selected_tests;
-                crpcut_test_case_registrator *next = i->next();
                 i->unlink();
                 i->link_after(to);
-                i = next;
               }
-            else
-              {
-                i = i->next();
-              }
+            i = next;
           }
         if (matches == 0)
           {
@@ -627,11 +623,9 @@ namespace crpcut {
                << " not match any test names\n";
         throw cli_exception(-1);
       }
-    crpcut_test_case_registrator *i = from.next();
-    while (i != &from)
+    for (reg *i = from.next(); i != &from; i = i->next())
       {
         i->crpcut_uninhibit_dependants();
-        i = i->next();
       }
     return num_selected_tests;
   }
@@ -835,21 +829,20 @@ namespace crpcut {
     for (;;)
       {
         bool progress = false;
-        crpcut_test_case_registrator *i = reg_.next();
-        while (i != &reg_)
+        typedef crpcut_test_case_registrator reg;
+        reg *next;
+        for (reg *i = reg_.next(); i != &reg_;i = next)
           {
-            if ((cli_->honour_dependencies() && !i->crpcut_can_run())
+            next = i->next();
+            if (   (cli_->honour_dependencies() && !i->crpcut_can_run())
                 || i->get_importance() == crpcut::tag::disabled)
               {
-                i = i->next();
                 continue;
               }
             progress = true;
             start_test(i, poller);
             manage_children(num_parallel, poller);
-            crpcut_test_case_registrator *next = i->next();
             i->unlink();
-            i = next;
             if (!tests_as_child_procs())
               {
                 return false;
