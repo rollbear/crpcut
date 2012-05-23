@@ -55,9 +55,7 @@ namespace crpcut {
         {
           *current_ = new block;
         }
-      std::size_t size = len < block::size - (*current_)->len_
-        ? len
-        : block::size - (*current_)->len_;
+      std::size_t size = std::min(len, block::size - (*current_)->len_);
       wrapped::memcpy((*current_)->mem_ + (*current_)->len_, buff, size);
       (*current_)->len_ += size;
       if ((*current_)->len_ == block::size)
@@ -98,6 +96,7 @@ namespace crpcut {
         {
           block *tmp = head_;
           head_ = tmp->next_;
+          if (current_ == &tmp->next_) current_ = &head_;
           delete tmp;
         }
       if (!head_) current_ = &head_;

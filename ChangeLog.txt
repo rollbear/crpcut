@@ -1,3 +1,6 @@
+         * Fixed an output buffering bug where deallocated memory could
+           be accessed.
+
 2012-05-17 1.7.2
 
          * Made the NO_CORE_FILE test modifier work correctly when on
