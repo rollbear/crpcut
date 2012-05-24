@@ -54,7 +54,7 @@ namespace crpcut {
   presentation_output
   ::enable(bool val)
   {
-    if (val != is_enabled_)
+    if (fd_ != -1 && val != is_enabled_)
       {
         if (val)
           {

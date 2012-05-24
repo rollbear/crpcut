@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@ namespace crpcut {
     presentation_reader(poll<io>               &poller,
                         comm::rfile_descriptor &fd,
                         output::formatter      &fmt,
+                        output::formatter      &summary_fmt,
                         bool                    verbose,
                         const char             *working_dir);
     virtual ~presentation_reader();
@@ -60,6 +61,7 @@ namespace crpcut {
     poll<io>                               &poller_;
     comm::rfile_descriptor                 &fd_;
     output::formatter                      &fmt_;
+    output::formatter                      &summary_fmt_;
     const char                             *working_dir_;
     bool                                    verbose_;
     unsigned                                num_run_;

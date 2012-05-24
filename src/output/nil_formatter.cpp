@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,20 +24,73 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PRESENTATION_HPP
-#define PRESENTATION_HPP
+#include "nil_formatter.hpp"
+
 
 namespace crpcut {
   namespace output {
-    class formatter;
-    class buffer;
+    using datatypes::fixed_string;
+    nil_formatter
+    ::nil_formatter(buffer              &,
+                     const char          *,
+                     const char   *const *,
+                     const tag_list_root &,
+                     std::size_t,
+                     std::size_t)
+    {
+    }
+
+    nil_formatter
+    ::~nil_formatter()
+    {
+    }
+
+    void
+    nil_formatter
+    ::begin_case(datatypes::fixed_string /*name*/,
+                 bool                    /*result*/,
+                 bool                    /*critical*/)
+    {
+    }
+
+    void
+    nil_formatter
+    ::end_case()
+    {
+    }
+
+    void
+    nil_formatter
+    ::terminate(test_phase              /*phase*/,
+                datatypes::fixed_string /*msg*/,
+                datatypes::fixed_string /*dirname*/)
+    {
+    }
+
+    void
+    nil_formatter
+    ::print(datatypes::fixed_string /*label*/,
+            datatypes::fixed_string /*data*/)
+    {
+    }
+
+    void
+    nil_formatter
+    ::statistics(unsigned /*num_run*/,
+                 unsigned /*num_failed*/)
+    {
+    }
+
+    void
+    nil_formatter
+    ::nonempty_dir(const char *)
+    {
+    }
+
+    void
+    nil_formatter
+    ::blocked_test(tag::importance, datatypes::fixed_string)
+    {
+    }
   }
-  int start_presenter_process(output::buffer    &buffer,
-                              int                fd,
-                              output::formatter &fmt,
-                              output::buffer    &summary_buffer,
-                              output::formatter &summary_fmt,
-                              bool               verbose,
-                              const char        *working_dir);
 }
-#endif // PRESENTATION_HPP

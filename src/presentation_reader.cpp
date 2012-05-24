@@ -45,11 +45,13 @@ namespace crpcut {
   ::presentation_reader(poll<io>               &poller,
                         comm::rfile_descriptor &fd,
                         output::formatter      &fmt,
+                        output::formatter      &summary_fmt,
                         bool                    verbose,
                         const char             *working_dir)
     : poller_(poller),
       fd_(fd),
       fmt_(fmt),
+      summary_fmt_(summary_fmt),
       working_dir_(working_dir),
       verbose_(verbose),
       num_run_(0),
@@ -70,6 +72,7 @@ namespace crpcut {
     poller_.del_fd(&fd_);
     comm::rfile_descriptor().swap(fd_);
     fmt_.statistics(num_run_, num_failed_);
+    summary_fmt_.statistics(num_run_, num_failed_);
   }
 
   test_case_result *
@@ -173,6 +176,7 @@ namespace crpcut {
         char *name = static_cast<char*>(alloca(len));
         fd_.read_loop(name, len);
         fmt_.nonempty_dir(name);
+        summary_fmt_.nonempty_dir(name);
         return;
       }
     s->success = false;
@@ -207,12 +211,13 @@ namespace crpcut {
     fd_.read_loop(&len, sizeof(len));
     assert(len);
     void *addr = alloca(len + 1);
-    char *name = static_cast<char*>(addr);
-    fd_.read_loop(name, len);
+    char *name_buff = static_cast<char*>(addr);
+    fd_.read_loop(name_buff, len);
     tag::importance importance;
     fd_.read_loop(&importance, sizeof(importance));
-    fmt_.blocked_test(importance,
-                      datatypes::fixed_string::make(name, len));
+    datatypes::fixed_string name = { name_buff, len };
+    fmt_.blocked_test(importance, name);
+    summary_fmt_.blocked_test(importance, name);
   }
 
   bool

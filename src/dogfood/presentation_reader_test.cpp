@@ -123,7 +123,6 @@ TESTSUITE(presentation_reader)
       add_data(pid_t(0));
       add_data(crpcut::comm::begin_test);
       add_data(crpcut::never_run);
-      //      add_data(N);
       add_data(name);
       add_data(i);
     }
@@ -195,14 +194,16 @@ TESTSUITE(presentation_reader)
     fix()
     : fd(87),
       fmt(),
+      summary_fmt(),
       poll(87, &in),
-      reader(poll, fd, fmt, verbose, "directory/subdir")
+      reader(poll, fd, fmt, summary_fmt, verbose, "directory/subdir")
     {
     }
     Sequence in;
     Sequence out;
     fd_mock                     fd;
     StrictMock<fmt_mock>        fmt;
+    StrictMock<fmt_mock>        summary_fmt;
     StrictMock<poll_mock>       poll;
     crpcut::presentation_reader reader;
   };
@@ -244,6 +245,7 @@ TESTSUITE(presentation_reader)
     fd.nonempty_dir(0, crpcut::running, "apa\0");
 
     EXPECT_CALL(fmt, nonempty_dir(testing::StrEq("apa")));
+    EXPECT_CALL(summary_fmt, nonempty_dir(testing::StrEq("apa")));
     while (!reader.read())
       ;
   }
@@ -252,7 +254,9 @@ TESTSUITE(presentation_reader)
     fd.blocked_test("apa::katt", crpcut::tag::critical);
     fd.blocked_test("apa::orm", crpcut::tag::non_critical);
     EXPECT_CALL(fmt, blocked_test(crpcut::tag::critical, "apa::katt"));
+    EXPECT_CALL(summary_fmt, blocked_test(crpcut::tag::critical, "apa::katt"));
     EXPECT_CALL(fmt, blocked_test(crpcut::tag::non_critical, "apa::orm"));
+    EXPECT_CALL(summary_fmt, blocked_test(crpcut::tag::non_critical, "apa::orm"));
     while (!reader.read())
       ;
   }
@@ -314,6 +318,7 @@ TESTSUITE(presentation_reader)
     ASSERT_TRUE(reader.read());
     EXPECT_CALL(poll, do_del_fd(87)).InSequence(in);
     EXPECT_CALL(fmt, statistics(0,0));
+    EXPECT_CALL(summary_fmt, statistics(0,0));
     reader.exception();
   }
 

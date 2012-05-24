@@ -79,6 +79,7 @@ file(GLOB LIB_SRCS
      src/namespace_info.cpp
      src/output/formatter.cpp
      src/output/heap_buffer.cpp
+     src/output/nil_formatter.cpp
      src/output/text_formatter.cpp
      src/output/text_modifier.cpp
      src/output/writer.cpp

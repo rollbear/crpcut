@@ -39,6 +39,8 @@ namespace crpcut {
   int start_presenter_process(output::buffer    &buffer,
                               int                fd,
                               output::formatter &fmt,
+                              output::buffer    &summary_buffer,
+                              output::formatter &summary_fmt,
                               bool               verbose,
                               const char        *working_dir)
   {
@@ -55,10 +57,16 @@ namespace crpcut {
       }
     comm::rfile_descriptor presenter_pipe(p.for_reading());
 
-    void *poll_memory = alloca(poll_buffer_vector<io>::space_for(2));
-    poll_buffer_vector<io> poller(poll_memory, 2);
-    presentation_reader r(poller, presenter_pipe, fmt, verbose, working_dir);
+    void *poll_memory = alloca(poll_buffer_vector<io>::space_for(4));
+    poll_buffer_vector<io> poller(poll_memory, 4);
+    presentation_reader r(poller,
+                          presenter_pipe,
+                          fmt,
+                          summary_fmt,
+                          verbose,
+                          working_dir);
     presentation_output o(buffer, poller, fd);
+    presentation_output so(summary_buffer, poller, fd == 1 ? -1 : 1);
     while (poller.num_fds() > 0)
       {
         poll<io>::descriptor desc = poller.wait();
@@ -68,6 +76,8 @@ namespace crpcut {
         if (desc.hup() || exc)   desc->exception();
         bool output_change = o.enabled() == buffer.is_empty();
         if (output_change) o.enable(!o.enabled());
+        output_change = so.enabled() == summary_buffer.is_empty();
+        if (output_change) so.enable(!so.enabled());
       }
     wrapped::exit(0);
     return 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,20 +24,41 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PRESENTATION_HPP
-#define PRESENTATION_HPP
+#ifndef NIL_FORMATTER_HPP
+#define NIL_FORMATTER_HPP
+
+#include "formatter.hpp"
 
 namespace crpcut {
   namespace output {
-    class formatter;
     class buffer;
+    class nil_formatter : public formatter
+    {
+    public:
+      nil_formatter(output::buffer &,
+                    const char *,
+                    const char*const*,
+                    const tag_list_root &,
+                    std::size_t,
+                    std::size_t);
+
+      ~nil_formatter();
+      virtual void begin_case(datatypes::fixed_string name,
+                              bool                    result,
+                              bool                    critical);
+      virtual void end_case();
+      virtual void terminate(test_phase phase,
+                             datatypes::fixed_string msg,
+                             datatypes::fixed_string dirname);
+      virtual void print(datatypes::fixed_string label,
+                         datatypes::fixed_string data);
+      virtual void statistics(unsigned num_run,
+                              unsigned num_failed);
+      virtual void nonempty_dir(const char *s);
+      virtual void blocked_test(tag::importance         i,
+                                datatypes::fixed_string name);
+    private:
+    };
   }
-  int start_presenter_process(output::buffer    &buffer,
-                              int                fd,
-                              output::formatter &fmt,
-                              output::buffer    &summary_buffer,
-                              output::formatter &summary_fmt,
-                              bool               verbose,
-                              const char        *working_dir);
 }
-#endif // PRESENTATION_HPP
+#endif // NIL_FORMATTER_HPP

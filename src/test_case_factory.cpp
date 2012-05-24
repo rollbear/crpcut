@@ -36,6 +36,7 @@
 #include "presentation.hpp"
 #include "output/xml_formatter.hpp"
 #include "output/text_formatter.hpp"
+#include "output/nil_formatter.hpp"
 #include "cli/interpreter.hpp"
 #include "buffer_vector.hpp"
 #include "working_dir_allocator.hpp"
@@ -68,24 +69,23 @@ namespace {
   }
 
 
-  crpcut::output::formatter
-  &select_output_formatter(crpcut::output::buffer &buffer,
-                           bool                    use_xml,
-                           const char             *id,
-                           const char * const      argv[],
-                           crpcut::tag_list_root  &tags,
-                           unsigned                num_registered,
-                           unsigned                num_selected)
+  template <typename A, typename B>
+  crpcut::output::formatter&
+  select_output_formatter(crpcut::output::buffer &buffer,
+                          bool                    use_A,
+                          const char             *id,
+                          const char * const      argv[],
+                          crpcut::tag_list_root  &tags,
+                          unsigned                num_registered,
+                          unsigned                num_selected)
   {
-    if (use_xml)
+    if (use_A)
       {
-        typedef crpcut::output::xml_formatter xmlf;
-        static xmlf xo(buffer, id, argv, tags, num_registered, num_selected);
-        return xo;
+        static A ao(buffer, id, argv, tags, num_registered, num_selected);
+        return ao;
       }
-    typedef crpcut::output::text_formatter textf;
-    static textf to(buffer, id, argv, tags, num_registered, num_selected);
-    return to;
+    static B bo(buffer, id, argv, tags, num_registered, num_selected);
+    return bo;
   }
 
   CRPCUT_DEFINE_EXCEPTION_TRANSLATOR_CLASS(std_exception_translator,
@@ -691,88 +691,12 @@ namespace crpcut {
       }
   }
 
-  void
-  test_case_factory
-  ::show_summary(unsigned num_selected_tests,
-                 tag_list_root &tags) const
-  {
-    size_t sum_crit_pass = 0;
-    size_t sum_crit_fail = 0;
-    std::cout << num_selected_tests << " test cases selected\n";
-    const tag_list::iterator begin(tags.begin());
-    const tag_list::iterator end(tags.end());
-    if (begin != end)
-      {
-        bool header_displayed = false;
-        for (tag_list::iterator i = begin; i != end; ++i)
-          {
-            if (!i->get_name()) continue;
-            if (i->num_passed() + i->num_failed() == 0) continue;
-            if (!header_displayed)
-              {
-                std::cout << ' ' << std::setw(tags.longest_tag_name())
-                << "tag"
-                << std::setw(8)
-                << "total"
-                << std::setw(8)
-                << "passed"
-                << std::setw(8)
-                << "failed"
-                << '\n';
 
-                header_displayed = true;
-              }
-            if (i->get_importance() == tag::critical)
-              {
-                sum_crit_pass += i->num_passed();
-                sum_crit_fail += i->num_failed();
-              }
-            tag::importance importance = i->get_importance();
-            std::cout << importance << std::setw(tags.longest_tag_name())
-                      <<  i->get_name().str
-                      << std::setw(8)
-                      << i->num_failed() + i->num_passed()
-                      << std::setw(8)
-                      << i->num_failed()
-                      << std::setw(8)
-                      << i->num_passed()
-                      << '\n';
-          }
-      }
-
-    std::cout << "\n           " << std::setw(8) << "Sum"
-              << std::setw(11)
-              << "Critical"
-              << std::setw(15)
-              << "Non-critical";
-    std::cout << "\nPASSED   : " << std::setw(8) << num_successful_tests_
-              << std::setw(11)
-              << sum_crit_pass
-              << std::setw(15)
-              << num_successful_tests_ - sum_crit_pass
-              << "\nFAILED   : "
-              << std::setw(8)
-              << num_tests_run_ - num_successful_tests_
-              << std::setw(11)
-              << sum_crit_fail
-              << std::setw(15)
-              << num_tests_run_ - num_successful_tests_ - sum_crit_fail
-              << '\n';
-    if (num_selected_tests != num_tests_run_)
-      {
-        std::cout << "UNTESTED : " << std::setw(8)
-        << num_selected_tests - num_tests_run_
-        << '\n';
-      }
-  }
-
-
-  bool cleanup_directories(std::size_t        num_parallel,
+  void cleanup_directories(std::size_t        num_parallel,
                            const char        *working_dir,
                            const char        *dirbase,
                            comm::data_writer &presenter_pipe)
   {
-    bool rv = true;
     for (unsigned n = 0; n < num_parallel; ++n)
       {
         static const unsigned bindigits = std::numeric_limits<unsigned>::digits;
@@ -794,7 +718,6 @@ namespace crpcut {
           .write_loop(&phase)
           .write_loop(&len)
           .write_loop(dirbase, len);
-        rv = false;
       }
     else if (working_dir == 0)
       {
@@ -805,7 +728,6 @@ namespace crpcut {
           }
         (void)wrapped::rmdir(dirbase); // ignore, taken care of as error
       }
-    return rv;
   }
 
   void report_blocked_tests(test_case_factory::registrator_list &reg,
@@ -902,17 +824,32 @@ namespace crpcut {
         std_exception_translator std_except_obj;
         c_string_translator c_string_obj;
 
-        output::heap_buffer buffer;
-        using output::formatter;
-        formatter &fmt = select_output_formatter(buffer,
-                                                 cli_->xml_output(),
-                                                 cli_->identity_string(),
-                                                 cli_->argv(),
-                                                 tags,
-                                                 num_registered_tests,
-                                                 num_selected_tests);
-
         int output_fd = open_report_file(cli_->report_file(), err_os);
+
+        using output::formatter;
+        typedef output::text_formatter tf;
+        typedef output::xml_formatter  xf;
+        typedef output::nil_formatter  nf;
+
+        output::heap_buffer buffer;
+        formatter &fmt =
+          select_output_formatter<xf, tf>(buffer,
+                                          cli_->xml_output(),
+                                          cli_->identity_string(),
+                                          cli_->argv(),
+                                          tags,
+                                          num_registered_tests,
+                                          num_selected_tests);
+        output::heap_buffer summary_buffer;
+        formatter &summary_fmt =
+          select_output_formatter<nf, tf>(summary_buffer,
+                                          cli_->quiet() || output_fd == 1,
+                                          cli_->identity_string(),
+                                          cli_->argv(),
+                                          tags,
+                                          num_registered_tests,
+                                          num_selected_tests);
+
         if (tests_as_child_procs())
           {
             setup_dirbase(cli_->program_name(),
@@ -923,6 +860,8 @@ namespace crpcut {
             int p_fd = start_presenter_process(buffer,
                                                output_fd,
                                                fmt,
+                                               summary_buffer,
+                                               summary_fmt,
                                                cli_->verbose_mode(),
                                                dirbase_);
             comm::wfile_descriptor(p_fd).swap(presenter_pipe_);
@@ -944,21 +883,12 @@ namespace crpcut {
 
         if (tests_as_child_procs())
           {
-            if (!cleanup_directories(num_parallel,
-                                     cli_->working_dir(),
-                                     dirbase_,
-                                     presenter_pipe_)
-               && output_fd != 1
-               && !cli_->quiet())
-            {
-              std::cout << "Files remain in " << dirbase_ << '\n';
-            }
+            cleanup_directories(num_parallel,
+                                cli_->working_dir(),
+                                dirbase_,
+                                presenter_pipe_);
             report_blocked_tests(reg_, presenter_pipe_);
             kill_presenter_process();
-          }
-        if (output_fd != 1 && !cli_->quiet())
-          {
-            show_summary(num_selected_tests, tags);
           }
         flush_output_buffer(output_fd, buffer);
         return int(num_tests_run_ - num_successful_tests_);
