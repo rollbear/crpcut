@@ -43,13 +43,13 @@ namespace crpcut {
                     std::size_t);
 
       ~nil_formatter();
-      virtual void begin_case(datatypes::fixed_string name,
-                              bool                    result,
-                              bool                    critical);
+      virtual void begin_case(std::string name,
+                              bool        result,
+                              bool        critical);
       virtual void end_case();
-      virtual void terminate(test_phase phase,
+      virtual void terminate(test_phase              phase,
                              datatypes::fixed_string msg,
-                             datatypes::fixed_string dirname);
+                             std::string             dirname);
       virtual void print(datatypes::fixed_string label,
                          datatypes::fixed_string data);
       virtual void statistics(unsigned num_run,

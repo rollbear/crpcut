@@ -47,9 +47,9 @@ namespace crpcut {
 
     void
     nil_formatter
-    ::begin_case(datatypes::fixed_string /*name*/,
-                 bool                    /*result*/,
-                 bool                    /*critical*/)
+    ::begin_case(std::string /*name*/,
+                 bool        /*result*/,
+                 bool        /*critical*/)
     {
     }
 
@@ -63,7 +63,7 @@ namespace crpcut {
     nil_formatter
     ::terminate(test_phase              /*phase*/,
                 datatypes::fixed_string /*msg*/,
-                datatypes::fixed_string /*dirname*/)
+                std::string             /*dirname*/)
     {
     }
 

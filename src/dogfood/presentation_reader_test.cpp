@@ -69,10 +69,15 @@ TESTSUITE(presentation_reader)
         }
       return ssize_t(s);
     }
-    template <size_t N>
-    void begin_test(pid_t id, crpcut::test_phase phase, const char (&name)[N])
+    void begin_test(pid_t                                       id,
+                    crpcut::test_phase                          phase,
+                    const crpcut::crpcut_test_case_registrator *test)
     {
-      msg<crpcut::comm::begin_test>(id, phase, name);
+      add_data(id);
+      add_data(crpcut::comm::begin_test);
+      add_data(phase);
+      add_data(sizeof(test));
+      add_data(test);
     }
     void end_test(pid_t id, crpcut::test_phase phase, bool critical)
     {
@@ -143,17 +148,13 @@ TESTSUITE(presentation_reader)
   {
   public:
     MOCK_METHOD3(begin_case, void(std::string,bool,bool));
-    void begin_case(crpcut::datatypes::fixed_string s, bool b1, bool b2)
-    {
-      begin_case(std::string(s.str, s.len), b1, b2);
-    }
     MOCK_METHOD0(end_case, void());
     MOCK_METHOD3(terminate, void(crpcut::test_phase, std::string, std::string));
     void terminate(crpcut::test_phase phase,
                    crpcut::datatypes::fixed_string s1,
-                   crpcut::datatypes::fixed_string s2)
+                   std::string                     s2)
     {
-      terminate(phase, std::string(s1.str, s1.len), std::string(s2.str, s2.len));
+      terminate(phase, std::string(s1.str, s1.len), s2);
     }
 
     MOCK_METHOD2(print, void(std::string, std::string));
@@ -188,6 +189,21 @@ TESTSUITE(presentation_reader)
     MOCK_CONST_METHOD0(do_num_fds, std::size_t());
   };
 
+  class registrator_mock : public crpcut::crpcut_test_case_registrator
+  {
+    typedef crpcut::crpcut_test_case_registrator R;
+  public:
+    registrator_mock(const char *name) : R(name, top, 100), top(0,0) {}
+    MOCK_METHOD6(setup, void(crpcut::poll<crpcut::fdreader>&,
+                             pid_t,
+                             int, int, int, int));
+    MOCK_METHOD0(run_test_case, void());
+    MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag &());
+    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
+
+    crpcut::namespace_info top;
+  };
+
   template <bool verbose>
   struct fix
   {
@@ -196,21 +212,26 @@ TESTSUITE(presentation_reader)
       fmt(),
       summary_fmt(),
       poll(87, &in),
+      apa_katt("apa::katt"),
+      ko("ko"),
       reader(poll, fd, fmt, summary_fmt, verbose, "directory/subdir")
     {
     }
-    Sequence in;
-    Sequence out;
-    fd_mock                     fd;
-    StrictMock<fmt_mock>        fmt;
-    StrictMock<fmt_mock>        summary_fmt;
-    StrictMock<poll_mock>       poll;
-    crpcut::presentation_reader reader;
+    Sequence                     in;
+    Sequence                     out;
+    fd_mock                      fd;
+    StrictMock<fmt_mock>         fmt;
+    StrictMock<fmt_mock>         summary_fmt;
+    StrictMock<poll_mock>        poll;
+    StrictMock<registrator_mock> apa_katt;
+    StrictMock<registrator_mock> ko;
+    crpcut::presentation_reader  reader;
   };
+
 
   TEST(passed_critical_verbose_prints_all, fix<true>)
   {
-    fd.begin_test(101, crpcut::creating, "apa::katt");
+    fd.begin_test(101, crpcut::creating, &apa_katt);
     fd.info(101, crpcut::running, "INFO << info");
     fd.stderr(101, crpcut::running, "stderr");
     fd.stdout(101, crpcut::running, "stdout");
@@ -228,7 +249,7 @@ TESTSUITE(presentation_reader)
 
   TEST(failed_critical_behaviour_with_nonempty_dir_prints_all, fix<true>)
   {
-    fd.begin_test(101, crpcut::creating, "apa::katt");
+    fd.begin_test(101, crpcut::creating, &apa_katt);
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
     fd.nonempty_dir(101, crpcut::running, "");
     fd.end_test(101, crpcut::running, true);
@@ -262,8 +283,8 @@ TESTSUITE(presentation_reader)
   }
   TEST(interleaved_tests_are_shown_in_sequence, fix<true>)
   {
-    fd.begin_test(101, crpcut::creating, "apa::katt");
-    fd.begin_test(20, crpcut::creating, "ko");
+    fd.begin_test(101, crpcut::creating, &apa_katt);
+    fd.begin_test(20, crpcut::creating, &ko);
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
     fd.fail(20, crpcut::running, "VERIFY_APA");
     fd.end_test(101, crpcut::running, true);
@@ -284,7 +305,7 @@ TESTSUITE(presentation_reader)
 
   TEST(stderr_stdout_info_are_not_shown_in_non_verbose_mode_pass, fix<false>)
   {
-    fd.begin_test(101, crpcut::creating, "apa::katt");
+    fd.begin_test(101, crpcut::creating, &apa_katt);
     fd.info(101, crpcut::running, "INFO");
     fd.stdout(101, crpcut::running, "stdout");
     fd.stderr(101, crpcut::running, "stderr");
@@ -295,7 +316,7 @@ TESTSUITE(presentation_reader)
 
   TEST(stderr_stdout_info_are_shown_in_non_verbose_fail, fix<false>)
   {
-    fd.begin_test(101, crpcut::creating, "apa::katt");
+    fd.begin_test(101, crpcut::creating, &apa_katt);
     fd.info(101, crpcut::running, "INFO");
     fd.stdout(101, crpcut::running, "stdout");
     fd.stderr(101, crpcut::running, "stderr");

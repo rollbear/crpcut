@@ -30,7 +30,7 @@
 namespace crpcut {
   printer
   ::printer(output::formatter      &o,
-            datatypes::fixed_string name,
+            std::string             name,
             bool                    result,
             bool                    critical)
     : o_(o)

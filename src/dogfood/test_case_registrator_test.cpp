@@ -46,7 +46,8 @@ TESTSUITE(test_case_registrator)
   public:
     MOCK_METHOD0(tests_as_child_procs, bool());
     MOCK_METHOD0(timeouts_enabled, bool());
-    MOCK_METHOD3(introduce_name, void(pid_t, const char*, size_t));
+    MOCK_METHOD2(introduce_test, void(pid_t,
+                                      const crpcut::crpcut_test_case_registrator *));
     MOCK_METHOD5(present, void(pid_t, crpcut::comm::type, crpcut::test_phase,
                                std::size_t, const char *));
     MOCK_METHOD1(set_deadline, void(crpcut::crpcut_test_case_registrator*));
@@ -152,7 +153,7 @@ TESTSUITE(test_case_registrator)
     void setup(pid_t pid)
     {
       StrictMock<mock_poll> poller;
-      EXPECT_CALL(factory, introduce_name(pid, StartsWith("apa::test"), 9));
+      EXPECT_CALL(factory, introduce_test(pid, &reg));
       reg.setup(poller, pid, -1, -1, -1, -1);
     }
     void prepare_siginfo(pid_t pid, int status, int code, Sequence s)

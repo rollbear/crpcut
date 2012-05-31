@@ -35,7 +35,7 @@ namespace crpcut {
      explicit_fail(false),
      success(false),
      nonempty_dir(false),
-     name(datatypes::fixed_string::make("")),
+     test(0),
      termination(datatypes::fixed_string::make(""))
   {
   }
@@ -44,7 +44,6 @@ namespace crpcut {
   ::~test_case_result()
   {
     if (termination) wrapped::free(termination.str);
-    if (name) wrapped::free(name.str);
     while (!history.is_empty())
       {
         event *e = history.next();

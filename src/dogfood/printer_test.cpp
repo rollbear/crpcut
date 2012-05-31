@@ -28,25 +28,17 @@
 #include "../printer.hpp"
 #include "../output/formatter.hpp"
 
-namespace {
-  template <size_t N>
-  crpcut::datatypes::fixed_string s(const char (&f)[N])
-  {
-    crpcut::datatypes::fixed_string rv = { f, N - 1 };
-    return rv;
-  }
-}
 TESTSUITE(printer)
 {
   class test_formatter : public crpcut::output::formatter
   {
   public:
-    MOCK_METHOD3(begin_case, void(crpcut::datatypes::fixed_string, bool, bool));
+    MOCK_METHOD3(begin_case, void(std::string, bool, bool));
     MOCK_METHOD0(end_case, void());
     MOCK_METHOD3(terminate,
                  void(crpcut::test_phase,
                       crpcut::datatypes::fixed_string,
-                      crpcut::datatypes::fixed_string));
+                      std::string));
     MOCK_METHOD2(print, void(crpcut::datatypes::fixed_string,
                              crpcut::datatypes::fixed_string));
     MOCK_METHOD2(statistics, void(unsigned, unsigned));
@@ -64,8 +56,8 @@ TESTSUITE(printer)
     using namespace testing;
     StrictMock<test_formatter> fmt;
 
-    EXPECT_CALL(fmt, begin_case(s("apa"), false, true)).Times(1);
-    crpcut::printer p(fmt, s("apa"), false, true);
+    EXPECT_CALL(fmt, begin_case("apa", false, true)).Times(1);
+    crpcut::printer p(fmt, "apa", false, true);
     Mock::VerifyAndClearExpectations(&fmt);
     EXPECT_CALL(fmt, end_case()).Times(1);
   }

@@ -38,7 +38,7 @@ namespace crpcut {
   {
   public:
     printer(output::formatter      &o,
-            datatypes::fixed_string name,
+            std::string             name,
             bool                    result,
             bool                    critical);
     ~printer();

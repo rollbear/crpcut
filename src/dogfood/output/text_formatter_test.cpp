@@ -558,7 +558,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), true, true);
+        obj.begin_case("apa", true, true);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<P>PASSED!: apa\n<>=*\n"),
                     test_buffer.os.str());
@@ -577,7 +577,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), true, false);
+        obj.begin_case("apa", true, false);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<NP>PASSED?: apa\n<>=*\n"),
                     test_buffer.os.str());
@@ -596,7 +596,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), false, true);
+        obj.begin_case("apa", false, true);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<F>FAILED!: apa\n<>=*\n"),
                     test_buffer.os.str());
@@ -615,7 +615,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), false, false);
+        obj.begin_case("apa", false, false);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<NF>FAILED?: apa\n<>=*\n"),
                     test_buffer.os.str());
@@ -634,8 +634,8 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), false, false);
-        obj.terminate(crpcut::destroying, s("katt"), s(""));
+        obj.begin_case("apa", false, false);
+        obj.terminate(crpcut::destroying, s("katt"), "");
         obj.end_case();
         const char re[] =
           "^<NF>FAILED?: apa\n"
@@ -660,8 +660,8 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), false, false);
-        obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpfile"));
+        obj.begin_case("apa", false, false);
+        obj.terminate(crpcut::creating, s("katt"), "/tmp/tmpfile");
         obj.end_case();
         const char re[] =
           "^<NF>FAILED?: apa\n"
@@ -687,12 +687,12 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), false, false);
+        obj.begin_case("apa", false, false);
         obj.print(s("type"),
                   s("the quick brown fox jumps over the lazy dog"));
         obj.print(s("morse"),
                   s("jag missade hissen\ni mississippi"));
-        obj.terminate(crpcut::creating, s("katt"), s(""));
+        obj.terminate(crpcut::creating, s("katt"), "");
         obj.end_case();
         const char re[] =
           "^<NF>FAILED?: apa\n"
@@ -732,8 +732,8 @@ TESTSUITE(output)
                                            32,32,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), false, false);
-        obj.terminate(crpcut::creating, s("katt"), s("/tmp/tmpdir/hoppla"));
+        obj.begin_case("apa", false, false);
+        obj.terminate(crpcut::creating, s("katt"), "/tmp/tmpdir/hoppla");
         obj.end_case();
 
         obj.nonempty_dir("/tmp/tmpdir");
@@ -773,7 +773,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            "ASCII");
-        obj.begin_case(s("apa"), false, false);
+        obj.begin_case("apa", false, false);
 
         char buff[255];
         for (size_t i = 0; i < sizeof(buff); ++i)
@@ -783,7 +783,7 @@ TESTSUITE(output)
 
         obj.print(s("info"),
                   crpcut::datatypes::fixed_string::make(buff, 255));
-        obj.terminate(crpcut::creating, s("katt"), s(""));
+        obj.terminate(crpcut::creating, s("katt"), "");
         obj.end_case();
         const char pattern[] =
           "<NF>FAILED?: apa\n"
@@ -839,7 +839,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case(s("apa"), false, false);
+        obj.begin_case("apa", false, false);
 
         char buff[255];
         for (size_t i = 0; i < sizeof(buff); ++i)
@@ -849,7 +849,7 @@ TESTSUITE(output)
 
         obj.print(s("info"),
                   crpcut::datatypes::fixed_string::make(buff, 255));
-        obj.terminate(crpcut::creating, s("katt"), s(""));
+        obj.terminate(crpcut::creating, s("katt"), "");
         obj.end_case();
         const char pattern[] =
           "<NF>FAILED?: apa\n"

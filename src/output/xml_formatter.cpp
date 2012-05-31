@@ -158,9 +158,9 @@ namespace crpcut {
 
     void
     xml_formatter
-    ::begin_case(datatypes::fixed_string name,
-                 bool                    result,
-                 bool                    critical)
+    ::begin_case(std::string name,
+                 bool        result,
+                 bool        critical)
     {
       write("  <test name=\"");
       write(name, translated);
@@ -190,14 +190,14 @@ namespace crpcut {
     xml_formatter
     ::terminate(test_phase              phase,
                 datatypes::fixed_string msg,
-                datatypes::fixed_string dirname)
+                std::string             dirname)
     {
-      assert(dirname || msg);
+      assert(dirname.length() || msg);
       make_closed();
       write("      <violation phase=");
       const datatypes::fixed_string &ps = phase_str(phase);
       write(ps.str, ps.len);
-      if (dirname)
+      if (dirname.length())
         {
           write(" nonempty_dir=\"");
           write(dirname, translated);

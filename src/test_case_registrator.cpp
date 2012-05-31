@@ -179,9 +179,7 @@ namespace crpcut {
   {
     assert(pid_ == 0);
     pid_ = pid;
-    crpcut::stream::toastream<1024> os;
-    os << *this;
-    factory_->introduce_name(pid, os.begin(), os.size());
+    factory_->introduce_test(pid, this);
 
   }
   void

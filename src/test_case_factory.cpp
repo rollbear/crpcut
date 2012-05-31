@@ -310,16 +310,17 @@ namespace crpcut {
 
   void
   test_case_factory
-  ::introduce_name(pid_t pid, const char *name, size_t len)
+  ::introduce_test(pid_t pid, const crpcut_test_case_registrator *reg)
   {
-    const comm::type t = comm::begin_test;
-    const test_phase p = running;
+    const comm::type t   = comm::begin_test;
+    const test_phase p   = running;
+    const size_t     len = sizeof(reg);
     presenter_pipe_
       .write_loop(&pid)
       .write_loop(&t)
       .write_loop(&p)
       .write_loop(&len)
-      .write_loop(name, len);
+      .write_loop(&reg, len);
   }
 
   void

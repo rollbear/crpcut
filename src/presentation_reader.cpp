@@ -97,18 +97,14 @@ namespace crpcut {
   presentation_reader
   ::begin_test(test_case_result *s)
   {
-    assert(!s->name);
+    assert(!s->test);
     assert(s->history.is_empty());
-    // introduction to test case, name follows
+    // introduction to test case follows
 
     size_t len = 0;
     fd_.read_loop(&len, sizeof(len));
-    char *buff = static_cast<char *>(wrapped::malloc(len + 1));
-    assert (buff);
-    fd_.read_loop(buff, len);
-    buff[len] = 0;
-    s->name.str = buff;
-    s->name.len = len;
+    assert(len == sizeof(s->test));
+    fd_.read_loop(&s->test, len);
     s->success = true;
     s->nonempty_dir = false;
   }
@@ -128,8 +124,10 @@ namespace crpcut {
       {
         num_failed_ += s->explicit_fail || !s->success;
 
+        std::ostringstream name;
+        name << *s->test;
         printer print(fmt_,
-                      s->name,
+                      name.str(),
                       s->success && !s->explicit_fail,
                       critical);
 
@@ -144,16 +142,9 @@ namespace crpcut {
           {
             if (s->nonempty_dir)
               {
-                const size_t dlen = wrapped::strlen(working_dir_);
-                len = dlen;
-                len+= 1;
-                len+= s->name.len;
-                char *dn = static_cast<char*>(alloca(len + 1));
-                lib::strcpy(lib::strcpy(lib::strcpy(dn,  working_dir_),
-                                        "/"),
-                            s->name.str);
-                fmt_.terminate(phase, s->termination,
-                              datatypes::fixed_string::make(dn, len));
+                std::ostringstream dirname;
+                dirname << working_dir_ << "/" << *s->test;
+                fmt_.terminate(phase, s->termination, dirname.str());
               }
             else
               {

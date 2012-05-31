@@ -52,6 +52,10 @@ namespace crpcut {
       typedef enum { translated, verbatim } type;
       writer(buffer& buff, const char *to_charset, const char *subst);
       virtual ~writer();
+      std::size_t write(std::string s, type t = verbatim) const
+      {
+        return write(s.c_str(), s.length(), t);
+      }
       std::size_t write(datatypes::fixed_string s, type t = verbatim) const
       {
         return write(s.str, s.len, t);

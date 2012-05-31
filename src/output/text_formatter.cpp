@@ -90,9 +90,9 @@ namespace crpcut {
 
     void
     text_formatter
-    ::begin_case(datatypes::fixed_string name,
-                 bool                    result,
-                 bool                    critical)
+    ::begin_case(std::string name,
+                 bool        result,
+                 bool        critical)
     {
       modifier_.write_to(*this, violation_mods[result][critical]);
       did_output_ = false;
@@ -115,14 +115,14 @@ namespace crpcut {
     text_formatter
     ::terminate(test_phase              phase,
                 datatypes::fixed_string msg,
-                datatypes::fixed_string dirname)
+                std::string             dirname)
     {
       if (did_output_)
         {
           write(delim, conversion_type_);
         }
       did_output_ = true;
-      if (dirname)
+      if (dirname.length())
         {
           write(dirname, conversion_type_);
           write(" is not empty!\n", conversion_type_);

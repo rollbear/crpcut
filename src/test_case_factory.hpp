@@ -33,6 +33,7 @@ namespace crpcut {
 
   class working_dir_allocator;
   class deadline_monitor;
+  class test_case_registrator;
 
   class test_case_factory
   {
@@ -47,7 +48,8 @@ namespace crpcut {
                         std::ostream &os = std::cerr);
     static int run_test(int argc, const char *argv[],
                         std::ostream &os = std::cerr);
-    virtual void introduce_name(pid_t pid, const char *name, size_t len);
+    virtual void introduce_test(pid_t                               pid,
+                                const crpcut_test_case_registrator *reg);
     virtual void present(pid_t pid, comm::type t, test_phase phase,
                          size_t len, const char *buff);
     virtual bool tests_as_child_procs();

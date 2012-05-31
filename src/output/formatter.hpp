@@ -37,14 +37,13 @@ namespace crpcut {
     class formatter
     {
     public:
-      virtual void begin_case(datatypes::fixed_string name,
-                              bool                    result,
-                              bool                    critical) = 0;
+      virtual void begin_case(std::string name,
+                              bool        result,
+                              bool        critical) = 0;
       virtual void end_case()  = 0;
       virtual void terminate(test_phase              phase,
                              datatypes::fixed_string msg,
-                             datatypes::fixed_string dirname
-                             = datatypes::fixed_string::make("")) = 0;
+                             std::string             dirname = "") = 0;
       virtual void print(datatypes::fixed_string label,
                          datatypes::fixed_string data) = 0;
       virtual void statistics(unsigned num_run,

@@ -382,14 +382,14 @@ TESTSUITE(output)
                                           tags,
                                           12,12);
 
-        obj.begin_case(s(tupp), true, true);
+        obj.begin_case("tupp", true, true);
         obj.end_case();
-        obj.begin_case(s(lemur), false, true);
+        obj.begin_case("lemur", false, true);
         obj.print(s(stderr), s(ehepp));
         obj.terminate(crpcut::running,
                       fixed_string::make("Died on signal 6\n"
                                          "Expected normal exit"),
-                      s());
+                      "");
         obj.end_case();
         obj.blocked_test(crpcut::tag::critical, s(apa));
         obj.blocked_test(crpcut::tag::non_critical, s(katt));
@@ -436,7 +436,7 @@ TESTSUITE(output)
                                   ":;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                   "[\\]^_` abcdefghijklmnopqrstuvwxyz"
                                   "{|}~";
-        obj.begin_case(s(tupp), true, true);
+        obj.begin_case("tupp", true, true);
         obj.print(s(info),
                   crpcut::datatypes::fixed_string::make(msg, sizeof(msg) - 1));
         obj.end_case();
@@ -479,7 +479,7 @@ TESTSUITE(output)
           {
             msg[i] = char(i);
           }
-        obj.begin_case(s(tupp), true, true);
+        obj.begin_case("tupp", true, true);
         obj.print(s(info),
                   crpcut::datatypes::fixed_string::make(msg));
         obj.end_case();
@@ -531,10 +531,10 @@ TESTSUITE(output)
                                           vec,
                                           tags,
                                           0,0);
-        obj.begin_case(s(tupp), false, true);
+        obj.begin_case("tupp", false, true);
         obj.terminate(crpcut::post_mortem,
                       s(),
-                      s(/tmp/crpcut02342/tests::tupp));
+                      "/tmp/crpcut02342/tests::tupp");
         obj.end_case();
         obj.nonempty_dir("/tmp/crpcut02342");
         obj.statistics(0,0);
