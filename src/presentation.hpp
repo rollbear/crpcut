@@ -32,8 +32,8 @@ namespace crpcut {
     class formatter;
     class buffer;
   }
-  int start_presenter_process(output::buffer    &buffer,
-                              int                fd,
+  int start_presenter_process(int                fd,
+                              output::buffer    &buffer,
                               output::formatter &fmt,
                               output::buffer    &summary_buffer,
                               output::formatter &summary_fmt,

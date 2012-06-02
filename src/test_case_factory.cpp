@@ -857,8 +857,8 @@ namespace crpcut {
                           dirbase_,
                           err_os);
             flush_output_buffer(output_fd, buffer);
-            int p_fd = start_presenter_process(buffer,
-                                               output_fd,
+            int p_fd = start_presenter_process(output_fd,
+                                               buffer,
                                                fmt,
                                                summary_buffer,
                                                summary_fmt,
