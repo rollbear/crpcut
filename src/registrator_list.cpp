@@ -24,40 +24,35 @@
  * SUCH DAMAGE.
  */
 
-#ifndef NIL_FORMATTER_HPP
-#define NIL_FORMATTER_HPP
-
-#include "formatter.hpp"
+#include "registrator_list.hpp"
 
 namespace crpcut {
-  namespace output {
-    class buffer;
-    class nil_formatter : public formatter
-    {
-    public:
-      nil_formatter(output::buffer &,
-                    const char *,
-                    const char*const*,
-                    const tag_list_root &,
-                    std::size_t,
-                    std::size_t);
 
-      ~nil_formatter();
-      virtual void begin_case(std::string name,
-                              bool        result,
-                              bool        critical);
-      virtual void end_case();
-      virtual void terminate(test_phase              phase,
-                             datatypes::fixed_string msg,
-                             std::string             dirname);
-      virtual void print(datatypes::fixed_string label,
-                         datatypes::fixed_string data);
-      virtual void statistics(unsigned num_run,
-                              unsigned num_failed);
-      virtual void nonempty_dir(const char *s);
-      virtual void blocked_test(tag::importance i, std::string name);
-    private:
-    };
+  void
+  registrator_list
+  ::run_test_case()
+  {
+    wrapped::abort();
+  }
+
+  tag&
+  registrator_list
+  ::crpcut_tag() const
+  {
+    return wrapped::abort(), crpcut_tag_info<crpcut::crpcut_none>::obj();
+  }
+
+  tag::importance
+  registrator_list
+  ::get_importance() const
+  {
+    return wrapped::abort(), tag::disabled;
+  }
+
+  void
+  registrator_list
+  ::setup(poll<fdreader> &, pid_t, int, int, int, int)
+  {
+    wrapped::abort();
   }
 }
-#endif // NIL_FORMATTER_HPP

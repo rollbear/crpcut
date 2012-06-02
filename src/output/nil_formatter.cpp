@@ -89,7 +89,7 @@ namespace crpcut {
 
     void
     nil_formatter
-    ::blocked_test(tag::importance, datatypes::fixed_string)
+    ::blocked_test(tag::importance, std::string)
     {
     }
   }

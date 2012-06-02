@@ -135,35 +135,6 @@ namespace {
 }
 
 namespace crpcut {
-
-  void
-  test_case_factory::registrator_list
-  ::run_test_case()
-  {
-    wrapped::abort();
-  }
-
-  tag&
-  test_case_factory::registrator_list
-  ::crpcut_tag() const
-  {
-    return wrapped::abort(), crpcut_tag_info<crpcut::crpcut_none>::obj();
-  }
-
-  tag::importance
-  test_case_factory::registrator_list
-  ::get_importance() const
-  {
-    return wrapped::abort(), tag::disabled;
-  }
-
-  void
-  test_case_factory::registrator_list
-  ::setup(poll<fdreader> &, pid_t, int, int, int, int)
-  {
-    wrapped::abort();
-  }
-
   test_case_factory
   ::test_case_factory()
     : cli_(0),
@@ -558,8 +529,8 @@ namespace crpcut {
   }
 
   unsigned
-  make_tentative_test_list(test_case_factory::registrator_list &reg,
-                           test_case_factory::registrator_list *tentative)
+  make_tentative_test_list(registrator_list &reg,
+                           registrator_list *tentative)
   {
     unsigned num_registered_tests = 0U;
     crpcut_test_case_registrator *next;
@@ -590,10 +561,10 @@ namespace crpcut {
   }
 
   unsigned
-  filter_out_tests_by_name(const char *const                   *names,
-                           test_case_factory::registrator_list &from,
-                           test_case_factory::registrator_list &to,
-                           std::ostream                        &err_os)
+  filter_out_tests_by_name(const char *const *names,
+                           registrator_list  &from,
+                           registrator_list  &to,
+                           std::ostream      &err_os)
   {
     unsigned num_selected_tests = 0U;
     unsigned mismatches = 0;
@@ -637,10 +608,10 @@ namespace crpcut {
 
   std::pair<unsigned, unsigned>
   select_tests(const char *const *names,
-               test_case_factory::registrator_list &reg,
-               std::ostream &err_os)
+               registrator_list  &reg,
+               std::ostream      &err_os)
   {
-    test_case_factory::registrator_list tentative;
+    crpcut::registrator_list tentative;
     unsigned num_registered_tests = make_tentative_test_list(reg,
                                                              *names
                                                              ? &tentative
@@ -728,32 +699,6 @@ namespace crpcut {
                               "chdir back from testcase working dir");
           }
         (void)wrapped::rmdir(dirbase); // ignore, taken care of as error
-      }
-  }
-
-  void report_blocked_tests(test_case_factory::registrator_list &reg,
-                            comm::data_writer                   &presenter_pipe)
-  {
-    static const pid_t dummy_pid(0);
-    static const comm::type begin_test = comm::begin_test;
-    static const test_phase blocked = never_run;
-
-    for (crpcut_test_case_registrator *i = reg.next();
-         i != &reg;
-         i = i->next())
-      {
-        const std::size_t name_len = i->full_name_len();
-        char *buff = static_cast<char*>(alloca(name_len));
-        stream::oastream os(buff, name_len);
-        os << *i;
-        const tag::importance importance = i->get_importance();
-        presenter_pipe
-          .write_loop(&dummy_pid)
-          .write_loop(&begin_test)
-          .write_loop(&blocked)
-          .write_loop(&name_len)
-          .write_loop(buff, name_len)
-          .write_loop(&importance);
       }
   }
 
@@ -864,7 +809,8 @@ namespace crpcut {
                                                summary_buffer,
                                                summary_fmt,
                                                cli_->verbose_mode(),
-                                               dirbase_);
+                                               dirbase_,
+                                               reg_);
             comm::wfile_descriptor(p_fd).swap(presenter_pipe_);
           }
         const std::size_t num_parallel = cli_->num_parallel_tests();
@@ -888,7 +834,6 @@ namespace crpcut {
                                 cli_->working_dir(),
                                 dirbase_,
                                 presenter_pipe_);
-            report_blocked_tests(reg_, presenter_pipe_);
             kill_presenter_process();
           }
         flush_output_buffer(output_fd, buffer);

@@ -30,6 +30,7 @@
 #include "output/formatter.hpp"
 #include "poll.hpp"
 #include "posix_error.hpp"
+#include "registrator_list.hpp"
 #include <crpcut.hpp>
 
 namespace {
@@ -47,7 +48,8 @@ namespace crpcut {
                         output::formatter      &fmt,
                         output::formatter      &summary_fmt,
                         bool                    verbose,
-                        const char             *working_dir)
+                        const char             *working_dir,
+                        registrator_list       &reg)
     : poller_(poller),
       fd_(fd),
       fmt_(fmt),
@@ -55,7 +57,8 @@ namespace crpcut {
       working_dir_(working_dir),
       verbose_(verbose),
       num_run_(0),
-      num_failed_(0)
+      num_failed_(0),
+      reg_(reg)
   {
     poller_.add_fd(fd_, this);
   }
@@ -71,6 +74,17 @@ namespace crpcut {
   {
     poller_.del_fd(&fd_);
     comm::rfile_descriptor().swap(fd_);
+    for (crpcut_test_case_registrator *i = reg_.next();
+         i != &reg_;
+         i = i->next())
+      {
+        std::ostringstream os;
+        os << *i;
+        std::string name(os.str());
+        tag::importance importance = i->get_importance();
+        fmt_.blocked_test(importance, name);
+        summary_fmt_.blocked_test(importance, name);
+      }
     fmt_.statistics(num_run_, num_failed_);
     summary_fmt_.statistics(num_run_, num_failed_);
   }
@@ -105,6 +119,7 @@ namespace crpcut {
     fd_.read_loop(&len, sizeof(len));
     assert(len == sizeof(s->test));
     fd_.read_loop(&s->test, len);
+    s->test->unlink();
     s->success = true;
     s->nonempty_dir = false;
   }
@@ -194,23 +209,6 @@ namespace crpcut {
     e->link_before(s->history);
   }
 
-  void
-  presentation_reader
-  ::blocked_test()
-  {
-    size_t len;
-    fd_.read_loop(&len, sizeof(len));
-    assert(len);
-    void *addr = alloca(len + 1);
-    char *name_buff = static_cast<char*>(addr);
-    fd_.read_loop(name_buff, len);
-    tag::importance importance;
-    fd_.read_loop(&importance, sizeof(importance));
-    datatypes::fixed_string name = { name_buff, len };
-    fmt_.blocked_test(importance, name);
-    summary_fmt_.blocked_test(importance, name);
-  }
-
   bool
   presentation_reader
   ::read()
@@ -225,11 +223,6 @@ namespace crpcut {
       test_phase phase;
       fd_.read_loop(&phase, sizeof(phase));
 
-      if (phase == never_run)
-        {
-          blocked_test();
-          return false;
-        }
       test_case_result *s = find_result_for(test_case_id);
       if (!s && test_case_id)
         {

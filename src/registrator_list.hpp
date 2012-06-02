@@ -24,40 +24,21 @@
  * SUCH DAMAGE.
  */
 
-#ifndef NIL_FORMATTER_HPP
-#define NIL_FORMATTER_HPP
+#ifndef REGISTRATOR_LIST_HPP
+#define REGISTRATOR_LIST_HPP
 
-#include "formatter.hpp"
+#include <crpcut.hpp>
 
 namespace crpcut {
-  namespace output {
-    class buffer;
-    class nil_formatter : public formatter
-    {
-    public:
-      nil_formatter(output::buffer &,
-                    const char *,
-                    const char*const*,
-                    const tag_list_root &,
-                    std::size_t,
-                    std::size_t);
 
-      ~nil_formatter();
-      virtual void begin_case(std::string name,
-                              bool        result,
-                              bool        critical);
-      virtual void end_case();
-      virtual void terminate(test_phase              phase,
-                             datatypes::fixed_string msg,
-                             std::string             dirname);
-      virtual void print(datatypes::fixed_string label,
-                         datatypes::fixed_string data);
-      virtual void statistics(unsigned num_run,
-                              unsigned num_failed);
-      virtual void nonempty_dir(const char *s);
-      virtual void blocked_test(tag::importance i, std::string name);
-    private:
-    };
-  }
+  class registrator_list : public crpcut_test_case_registrator
+  {
+  public:
+    virtual void run_test_case();
+    virtual tag& crpcut_tag() const;
+    virtual tag::importance get_importance() const;
+    virtual void setup(poll<fdreader>    &, pid_t, int, int, int, int);
+  };
 }
-#endif // NIL_FORMATTER_HPP
+
+#endif // REGISTRATOR_LIST_HPP

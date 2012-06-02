@@ -283,7 +283,7 @@ namespace crpcut {
 
     void
     xml_formatter
-    ::blocked_test(tag::importance i, datatypes::fixed_string name)
+    ::blocked_test(tag::importance i, std::string name)
     {
       static const char *istr[] = { CRPCUT_TEST_IMPORTANCE(CRPCUT_STR_FIRST) };
       if (!blocked_tests_)

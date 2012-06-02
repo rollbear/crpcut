@@ -30,6 +30,7 @@
 #include "../presentation_reader.hpp"
 #include "../output/formatter.hpp"
 #include "../poll.hpp"
+#include "../registrator_list.hpp"
 #include <deque>
 #include <string>
 
@@ -122,15 +123,6 @@ TESTSUITE(presentation_reader)
     {
       msg<crpcut::comm::info>(id, phase, name);
     }
-    template <size_t N>
-    void blocked_test(const char (&name)[N], crpcut::tag::importance i)
-    {
-      add_data(pid_t(0));
-      add_data(crpcut::comm::begin_test);
-      add_data(crpcut::never_run);
-      add_data(name);
-      add_data(i);
-    }
   private:
     template <crpcut::comm::type type, size_t N>
     void msg(pid_t id, crpcut::test_phase phase, const char (&name)[N])
@@ -173,7 +165,6 @@ TESTSUITE(presentation_reader)
     {
       blocked_test(i, std::string(s.str, s.len));
     }
-
   };
 
   class poll_mock : public crpcut::poll<crpcut::io>
@@ -214,8 +205,10 @@ TESTSUITE(presentation_reader)
       poll(87, &in),
       apa_katt("apa::katt"),
       ko("ko"),
-      reader(poll, fd, fmt, summary_fmt, verbose, "directory/subdir")
+      reader(poll, fd, fmt, summary_fmt, verbose, "directory/subdir", list)
     {
+      list.link_after(ko);
+      list.link_after(apa_katt);
     }
     Sequence                     in;
     Sequence                     out;
@@ -225,6 +218,7 @@ TESTSUITE(presentation_reader)
     StrictMock<poll_mock>        poll;
     StrictMock<registrator_mock> apa_katt;
     StrictMock<registrator_mock> ko;
+    crpcut::registrator_list     list;
     crpcut::presentation_reader  reader;
   };
 
@@ -270,17 +264,7 @@ TESTSUITE(presentation_reader)
     while (!reader.read())
       ;
   }
-  TEST(test_with_phase_never_run_is_a_blocked_test, fix<true>)
-  {
-    fd.blocked_test("apa::katt", crpcut::tag::critical);
-    fd.blocked_test("apa::orm", crpcut::tag::non_critical);
-    EXPECT_CALL(fmt, blocked_test(crpcut::tag::critical, "apa::katt"));
-    EXPECT_CALL(summary_fmt, blocked_test(crpcut::tag::critical, "apa::katt"));
-    EXPECT_CALL(fmt, blocked_test(crpcut::tag::non_critical, "apa::orm"));
-    EXPECT_CALL(summary_fmt, blocked_test(crpcut::tag::non_critical, "apa::orm"));
-    while (!reader.read())
-      ;
-  }
+
   TEST(interleaved_tests_are_shown_in_sequence, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
@@ -337,8 +321,17 @@ TESTSUITE(presentation_reader)
        fix<false>)
   {
     ASSERT_TRUE(reader.read());
-    EXPECT_CALL(poll, do_del_fd(87)).InSequence(in);
-    EXPECT_CALL(fmt, statistics(0,0));
+    EXPECT_CALL(poll, do_del_fd(87));
+    EXPECT_CALL(ko, get_importance())
+      .WillRepeatedly(Return(crpcut::tag::critical));
+    EXPECT_CALL(apa_katt, get_importance())
+      .WillRepeatedly(Return(crpcut::tag::non_critical));
+
+    EXPECT_CALL(fmt, blocked_test(crpcut::tag::critical, "ko"))
+      .InSequence(in);
+    EXPECT_CALL(summary_fmt, blocked_test(crpcut::tag::critical, "ko"))
+      .InSequence(in);
+    EXPECT_CALL(fmt, statistics(0,0)).InSequence(in);
     EXPECT_CALL(summary_fmt, statistics(0,0));
     reader.exception();
   }

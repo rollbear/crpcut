@@ -28,6 +28,7 @@
 #define TEST_CASE_FACTORY_HPP_
 
 #include <crpcut.hpp>
+#include "registrator_list.hpp"
 
 namespace crpcut {
 
@@ -64,14 +65,6 @@ namespace crpcut {
     static const char *get_start_dir();
     static const char *get_parameter(const char *name);
 
-    class registrator_list : public crpcut_test_case_registrator
-    {
-    public:
-      virtual void run_test_case();
-      virtual tag& crpcut_tag() const;
-      virtual tag::importance get_importance() const;
-      virtual void setup(poll<fdreader>    &, pid_t, int, int, int, int);
-    };
     static test_case_factory& obj();
   protected:
     test_case_factory();

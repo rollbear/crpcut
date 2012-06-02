@@ -57,8 +57,7 @@ namespace crpcut {
       virtual void statistics(unsigned num_run,
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);
-      virtual void blocked_test(tag::importance         i,
-                                datatypes::fixed_string name);
+      virtual void blocked_test(tag::importance i, std::string name);
     private:
       void tag_summary(const tag& t);
       virtual datatypes::fixed_string escape(char c) const;

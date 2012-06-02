@@ -269,9 +269,9 @@ TESTSUITE(output)
                                           vec,
                                           tags,
                                           3,3);
-        obj.blocked_test(crpcut::tag::critical, s(apa));
-        obj.blocked_test(crpcut::tag::non_critical, s(katt));
-        obj.blocked_test(crpcut::tag::disabled, s(ko));
+        obj.blocked_test(crpcut::tag::critical, "apa");
+        obj.blocked_test(crpcut::tag::non_critical, "katt");
+        obj.blocked_test(crpcut::tag::disabled, "ko");
         obj.statistics(0,0);
       }
       static const char re[] =
@@ -391,9 +391,9 @@ TESTSUITE(output)
                                          "Expected normal exit"),
                       "");
         obj.end_case();
-        obj.blocked_test(crpcut::tag::critical, s(apa));
-        obj.blocked_test(crpcut::tag::non_critical, s(katt));
-        obj.blocked_test(crpcut::tag::disabled, s(ko));
+        obj.blocked_test(crpcut::tag::critical, "apa");
+        obj.blocked_test(crpcut::tag::non_critical, "katt");
+        obj.blocked_test(crpcut::tag::disabled, "ko");
         obj.statistics(9,6);
       }
       static const char re[] =

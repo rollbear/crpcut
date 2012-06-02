@@ -104,6 +104,7 @@ file(GLOB LIB_SRCS
      src/presentation_reader.cpp
      src/printer.cpp
      src/process_control.cpp
+     src/registrator_list.cpp
      src/regex.cpp
      src/report_reader.cpp
      src/scope/time_base.cpp

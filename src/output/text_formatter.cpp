@@ -276,7 +276,7 @@ namespace crpcut {
 
     void
     text_formatter
-    ::blocked_test(tag::importance i, datatypes::fixed_string name)
+    ::blocked_test(tag::importance i, std::string name)
     {
       if (!blocked_tests_)
         {

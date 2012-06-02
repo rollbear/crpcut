@@ -737,8 +737,8 @@ TESTSUITE(output)
         obj.end_case();
 
         obj.nonempty_dir("/tmp/tmpdir");
-        obj.blocked_test(crpcut::tag::critical, s("ko"));
-        obj.blocked_test(crpcut::tag::disabled, s("tupp"));
+        obj.blocked_test(crpcut::tag::critical, "ko");
+        obj.blocked_test(crpcut::tag::disabled, "tupp");
         obj.statistics(30, 1);
         const char re[] =
           "^<NF>FAILED?: apa\n"

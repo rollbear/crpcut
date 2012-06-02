@@ -955,9 +955,7 @@ namespace crpcut {
               translator(running),         \
               translator(destroying),      \
               translator(post_mortem),     \
-              translator(child),           \
-              translator(never_run)
-
+              translator(child)
 
   typedef enum { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) } test_phase;
 

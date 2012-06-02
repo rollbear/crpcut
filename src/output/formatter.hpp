@@ -49,7 +49,7 @@ namespace crpcut {
       virtual void statistics(unsigned num_run,
                               unsigned num_failed) = 0;
       virtual void nonempty_dir(const  char*)  = 0;
-      virtual void blocked_test(tag::importance i, datatypes::fixed_string name)  = 0;
+      virtual void blocked_test(tag::importance i, std::string name)  = 0;
       virtual ~formatter();
     protected:
       static const datatypes::fixed_string &phase_str(test_phase);

@@ -40,52 +40,49 @@ namespace {
   };
 }
 
-TESTSUITE(test_case_factory)
+TESTSUITE(registrator_list)
 {
-  TESTSUITE(registrator_list)
+  typedef crpcut::registrator_list list;
+  TEST(construction_does_nothing)
   {
-    typedef crpcut::test_case_factory::registrator_list list;
-    TEST(construction_does_nothing)
-    {
-      list l;
-    }
+    list l;
+  }
 
-    TEST(run_test_case_aborts,
-         DEPENDS_ON(construction_does_nothing),
-         EXPECT_SIGNAL_DEATH(SIGABRT),
-         NO_CORE_FILE)
-    {
-      list l;
-      l.run_test_case();
-    }
+  TEST(run_test_case_aborts,
+       DEPENDS_ON(construction_does_nothing),
+       EXPECT_SIGNAL_DEATH(SIGABRT),
+       NO_CORE_FILE)
+  {
+    list l;
+    l.run_test_case();
+  }
 
-    TEST(crpcut_tag_aborts,
-         DEPENDS_ON(construction_does_nothing),
-         EXPECT_SIGNAL_DEATH(SIGABRT),
-         NO_CORE_FILE)
-    {
-      list l;
-      l.crpcut_tag();
-    }
+  TEST(crpcut_tag_aborts,
+       DEPENDS_ON(construction_does_nothing),
+       EXPECT_SIGNAL_DEATH(SIGABRT),
+       NO_CORE_FILE)
+  {
+    list l;
+    l.crpcut_tag();
+  }
 
-    TEST(get_importance_aborts,
-         DEPENDS_ON(construction_does_nothing),
-         EXPECT_SIGNAL_DEATH(SIGABRT),
-         NO_CORE_FILE)
-    {
-      list l;
-      l.get_importance();
-    }
+  TEST(get_importance_aborts,
+       DEPENDS_ON(construction_does_nothing),
+       EXPECT_SIGNAL_DEATH(SIGABRT),
+       NO_CORE_FILE)
+  {
+    list l;
+    l.get_importance();
+  }
 
-    TEST(setup_aborts,
-         DEPENDS_ON(construction_does_nothing),
-         EXPECT_SIGNAL_DEATH(SIGABRT),
-         NO_CORE_FILE)
-    {
-      list l;
-      testing::StrictMock<mock_poll> poller;
-      l.setup(poller, pid_t(1), 1,2,3,4);
-    }
+  TEST(setup_aborts,
+       DEPENDS_ON(construction_does_nothing),
+       EXPECT_SIGNAL_DEATH(SIGABRT),
+       NO_CORE_FILE)
+  {
+    list l;
+    testing::StrictMock<mock_poll> poller;
+    l.setup(poller, pid_t(1), 1,2,3,4);
   }
 }
 

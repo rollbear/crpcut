@@ -31,6 +31,7 @@
 
 #include "io.hpp"
 namespace crpcut {
+  class registrator_list;
   namespace output {
     class formatter;
   }
@@ -45,7 +46,8 @@ namespace crpcut {
                         output::formatter      &fmt,
                         output::formatter      &summary_fmt,
                         bool                    verbose,
-                        const char             *working_dir);
+                        const char             *working_dir,
+                        registrator_list       &reg);
     virtual ~presentation_reader();
     virtual bool read();
     virtual bool write();
@@ -66,6 +68,7 @@ namespace crpcut {
     bool                                    verbose_;
     unsigned                                num_run_;
     unsigned                                num_failed_;
+    registrator_list                       &reg_;
     presentation_reader();
     presentation_reader(const presentation_reader&);
     presentation_reader& operator=(const presentation_reader&);

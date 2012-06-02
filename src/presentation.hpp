@@ -28,6 +28,7 @@
 #define PRESENTATION_HPP
 
 namespace crpcut {
+  class registrator_list;
   namespace output {
     class formatter;
     class buffer;
@@ -38,6 +39,7 @@ namespace crpcut {
                               output::buffer    &summary_buffer,
                               output::formatter &summary_fmt,
                               bool               verbose,
-                              const char        *working_dir);
+                              const char        *working_dir,
+                              registrator_list  &reg);
 }
 #endif // PRESENTATION_HPP

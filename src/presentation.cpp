@@ -42,7 +42,8 @@ namespace crpcut {
                               output::buffer    &summary_buffer,
                               output::formatter &summary_fmt,
                               bool               verbose,
-                              const char        *working_dir)
+                              const char        *working_dir,
+                              registrator_list  &reg)
   {
     pipe_pair p("communication pipe for presenter process");
 
@@ -64,7 +65,8 @@ namespace crpcut {
                           fmt,
                           summary_fmt,
                           verbose,
-                          working_dir);
+                          working_dir,
+                          reg);
     presentation_output o(buffer, poller, fd);
     presentation_output so(summary_buffer, poller, fd == 1 ? -1 : 1);
     while (poller.num_fds() > 0)
