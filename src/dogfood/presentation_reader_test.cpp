@@ -194,18 +194,27 @@ TESTSUITE(presentation_reader)
 
     crpcut::namespace_info top;
   };
+  class tag_list : public crpcut::tag_list_root
+  {
+  public:
+    virtual crpcut::datatypes::fixed_string get_name() const
+    {
+      static const crpcut::datatypes::fixed_string s = { "", 0 };
+      return s;
+    }
+  };
 
   template <bool verbose>
   struct fix
   {
     fix()
-    : fd(87),
-      fmt(),
-      summary_fmt(),
-      poll(87, &in),
-      apa_katt("apa::katt"),
-      ko("ko"),
-      reader(poll, fd, fmt, summary_fmt, verbose, "directory/subdir", list)
+      : fd(87),
+        fmt(),
+        summary_fmt(),
+        poll(87, &in),
+        apa_katt("apa::katt"),
+        ko("ko"),
+        reader(poll, fd, fmt, summary_fmt, verbose, "directory/subdir", list)
     {
       list.link_after(ko);
       list.link_after(apa_katt);
@@ -219,6 +228,7 @@ TESTSUITE(presentation_reader)
     StrictMock<registrator_mock> apa_katt;
     StrictMock<registrator_mock> ko;
     crpcut::registrator_list     list;
+    tag_list                     tags;
     crpcut::presentation_reader  reader;
   };
 
@@ -232,6 +242,8 @@ TESTSUITE(presentation_reader)
     fd.exit_ok(101, crpcut::post_mortem, "");
     fd.end_test(101, crpcut::post_mortem, true);
 
+    EXPECT_CALL(apa_katt, crpcut_tag())
+      .WillOnce(ReturnRef(tags));
     EXPECT_CALL(fmt, begin_case("apa::katt",true, true)).InSequence(out);
     EXPECT_CALL(fmt, print("info", "INFO << info")).InSequence(out);
     EXPECT_CALL(fmt, print("stderr", "stderr"));
@@ -248,6 +260,8 @@ TESTSUITE(presentation_reader)
     fd.nonempty_dir(101, crpcut::running, "");
     fd.end_test(101, crpcut::running, true);
 
+    EXPECT_CALL(apa_katt, crpcut_tag())
+      .WillOnce(ReturnRef(tags));
     EXPECT_CALL(fmt, begin_case("apa::katt", false, true)).InSequence(out);
     EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm",
                                "directory/subdir/apa::katt")).InSequence(out);
@@ -273,6 +287,10 @@ TESTSUITE(presentation_reader)
     fd.fail(20, crpcut::running, "VERIFY_APA");
     fd.end_test(101, crpcut::running, true);
 
+    EXPECT_CALL(apa_katt, crpcut_tag())
+      .WillOnce(ReturnRef(tags));
+    EXPECT_CALL(ko, crpcut_tag())
+      .WillOnce(ReturnRef(tags));
     EXPECT_CALL(fmt, begin_case("apa::katt", false, true)).InSequence(out);
     EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "")).InSequence(out);
     EXPECT_CALL(fmt, end_case()).InSequence(out);
@@ -294,6 +312,9 @@ TESTSUITE(presentation_reader)
     fd.stdout(101, crpcut::running, "stdout");
     fd.stderr(101, crpcut::running, "stderr");
     fd.end_test(101, crpcut::destroying, true);
+
+    EXPECT_CALL(apa_katt, crpcut_tag())
+      .WillOnce(ReturnRef(tags));
     while (!reader.read())
       ;
   }
@@ -307,6 +328,8 @@ TESTSUITE(presentation_reader)
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
     fd.end_test(101, crpcut::running, false);
 
+    EXPECT_CALL(apa_katt, crpcut_tag())
+      .WillOnce(ReturnRef(tags));
     EXPECT_CALL(fmt, begin_case("apa::katt", false, false)).InSequence(out);
     EXPECT_CALL(fmt, print("info", "INFO")).InSequence(out);
     EXPECT_CALL(fmt, print("stdout", "stdout")).InSequence(out);
@@ -335,6 +358,7 @@ TESTSUITE(presentation_reader)
     EXPECT_CALL(summary_fmt, statistics(0,0));
     reader.exception();
   }
+
 
   TEST(faulty_command_aborts, EXPECT_SIGNAL_DEATH(SIGABRT), NO_CORE_FILE,
        fix<false>)

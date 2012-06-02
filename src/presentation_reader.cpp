@@ -128,23 +128,25 @@ namespace crpcut {
   presentation_reader
   ::end_test(test_phase phase, test_case_result* s)
   {
+    assert(s->test);
+
     size_t len;
     fd_.read_loop(&len, sizeof(len));
     bool critical;
     assert(len == sizeof(critical));
     fd_.read_loop(&critical, len);
 
+    const bool pass = s->success && !s->explicit_fail;
+    tag &t = s->test->crpcut_tag();
+    if (pass) t.pass(); else t.fail();
     ++num_run_;
-    if (s->explicit_fail || !s->success || verbose_)
+    if (!pass || verbose_)
       {
-        num_failed_ += s->explicit_fail || !s->success;
+        num_failed_ += !pass;
 
         std::ostringstream name;
         name << *s->test;
-        printer print(fmt_,
-                      name.str(),
-                      s->success && !s->explicit_fail,
-                      critical);
+        printer print(fmt_, name.str(), pass, critical);
 
         for (event *i = s->history.next();
             i != static_cast<event*>(&s->history);
