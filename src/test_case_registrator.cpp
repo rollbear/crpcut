@@ -457,15 +457,6 @@ namespace crpcut {
                       phase_,
                       sizeof(critical), (const char*)&critical);
     assert(crpcut_succeeded() || crpcut_failed());
-    if (crpcut_succeeded())
-      {
-        crpcut_tag().pass();
-        factory_->test_succeeded(this);
-      }
-    else
-      {
-        crpcut_tag().fail();
-      }
   }
 
 } // namespace crpcut

@@ -277,4 +277,11 @@ namespace crpcut {
     return true;
   }
 
+  unsigned
+  presentation_reader
+  ::num_failed() const
+  {
+    return num_failed_;
+  }
+
 }

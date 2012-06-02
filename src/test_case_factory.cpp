@@ -140,8 +140,6 @@ namespace crpcut {
     : cli_(0),
       current_pid_(0),
       num_pending_children_(0),
-      num_tests_run_(0),
-      num_successful_tests_(0),
       presenter_pipe_(-1),
       deadlines_(0),
       working_dirs_(0),
@@ -218,7 +216,6 @@ namespace crpcut {
   test_case_factory
   ::start_test(crpcut_test_case_registrator *i, poll<fdreader>& poller)
   {
-    ++num_tests_run_;
     if (!tests_as_child_procs())
       {
         std::cout << *i << " ";
@@ -294,19 +291,23 @@ namespace crpcut {
       .write_loop(&reg, len);
   }
 
-  void
+  int
   test_case_factory
   ::kill_presenter_process()
   {
     comm::wfile_descriptor().swap(presenter_pipe_); // close
     siginfo_t info;
+    int num_failed;
     for (;;)
       {
         int rv = wrapped::waitid(P_ALL, 0, &info, WEXITED);
         if (rv == -1 && errno == EINTR) continue;
         assert(rv == 0);
+        assert(info.si_code == CLD_EXITED);
+        num_failed = info.si_status;
         break;
       }
+    return num_failed;
   }
 
 
@@ -378,13 +379,6 @@ namespace crpcut {
   ::get_illegal_rep()
   {
     return obj().cli_->illegal_representation();
-  }
-
-  void
-  test_case_factory
-  ::test_succeeded(crpcut_test_case_registrator*)
-  {
-    ++num_successful_tests_;
   }
 
   test_case_factory&
@@ -828,16 +822,17 @@ namespace crpcut {
 
         if (!schedule_tests(num_parallel, poller)) return 0;
 
+        int num_failed = 0;
         if (tests_as_child_procs())
           {
             cleanup_directories(num_parallel,
                                 cli_->working_dir(),
                                 dirbase_,
                                 presenter_pipe_);
-            kill_presenter_process();
+            num_failed = kill_presenter_process();
           }
         flush_output_buffer(output_fd, buffer);
-        return int(num_tests_run_ - num_successful_tests_);
+        return num_failed;
       }
     catch (cli_exception &e)
     {

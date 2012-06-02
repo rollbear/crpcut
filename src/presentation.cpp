@@ -81,7 +81,7 @@ namespace crpcut {
         output_change = so.enabled() == summary_buffer.is_empty();
         if (output_change) so.enable(!so.enabled());
       }
-    wrapped::exit(0);
+    wrapped::exit(r.num_failed());
     return 0;
   }
 }

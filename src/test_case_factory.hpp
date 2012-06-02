@@ -58,7 +58,6 @@ namespace crpcut {
     virtual void set_deadline(crpcut_test_case_registrator *i);
     virtual void clear_deadline(crpcut_test_case_registrator *i);
     virtual void return_dir(unsigned num);
-    virtual void test_succeeded(crpcut_test_case_registrator*);
     virtual unsigned long calc_cputime(const struct timeval&);
 
     static bool is_backtrace_enabled();
@@ -75,7 +74,7 @@ namespace crpcut {
     bool schedule_tests(std::size_t num_parallel, poll<fdreader> &poller);
     void show_summary(unsigned       num_selected_tests,
                       tag_list_root &tags) const;
-    void kill_presenter_process();
+    int kill_presenter_process();
     void manage_children(std::size_t max_pending_children, poll<fdreader> &poller);
     void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
 
@@ -91,8 +90,6 @@ namespace crpcut {
     pid_t                    current_pid_;
     registrator_list         reg_;
     unsigned                 num_pending_children_;
-    unsigned                 num_tests_run_;
-    unsigned                 num_successful_tests_;
     comm::wfile_descriptor   presenter_pipe_;
     deadline_monitor        *deadlines_;
     working_dir_allocator   *working_dirs_;

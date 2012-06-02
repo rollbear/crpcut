@@ -52,6 +52,7 @@ namespace crpcut {
     virtual bool read();
     virtual bool write();
     virtual void exception();
+    unsigned num_failed() const;
   private:
     test_case_result *find_result_for(pid_t);
     void begin_test(test_case_result*);

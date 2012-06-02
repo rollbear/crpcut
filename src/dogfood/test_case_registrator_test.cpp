@@ -53,7 +53,6 @@ TESTSUITE(test_case_registrator)
     MOCK_METHOD1(set_deadline, void(crpcut::crpcut_test_case_registrator*));
     MOCK_METHOD1(clear_deadline, void(crpcut::crpcut_test_case_registrator*));
     MOCK_METHOD1(return_dir, void(unsigned));
-    MOCK_METHOD1(test_succeeded, void(crpcut::crpcut_test_case_registrator*));
     MOCK_METHOD1(calc_cputime, unsigned long(const struct timeval&));
   };
 
@@ -441,7 +440,6 @@ TESTSUITE(test_case_registrator)
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, test_succeeded(&reg)).InSequence(s);
       reg.manage_death();
     }
 
@@ -482,7 +480,7 @@ TESTSUITE(test_case_registrator)
           WillRepeatedly(ReturnRef(apa));
 
         reg.manage_death();
-        ASSERT_TRUE(apa.num_failed() == 1U);
+        ASSERT_TRUE(apa.num_failed() == 0U);
         ASSERT_TRUE(apa.num_passed() == 0U);
       }
       ::remove("99/junk_file");
@@ -531,7 +529,7 @@ TESTSUITE(test_case_registrator)
           InSequence(s);
 
       reg.manage_death();
-      ASSERT_TRUE(apa.num_failed() == 1U);
+      ASSERT_TRUE(apa.num_failed() == 0U);
       ASSERT_TRUE(apa.num_passed() == 0U);
     }
 
@@ -569,7 +567,7 @@ TESTSUITE(test_case_registrator)
           InSequence(s);
 
       reg.manage_death();
-      ASSERT_TRUE(apa.num_failed() == 1U);
+      ASSERT_TRUE(apa.num_failed() == 0U);
       ASSERT_TRUE(apa.num_passed() == 0U);
     }
     TEST(exit_with_wrong_signal_gives_timeout_report_if_killed,
@@ -613,7 +611,7 @@ TESTSUITE(test_case_registrator)
 
       reg.kill();
       reg.manage_death();
-      ASSERT_TRUE(apa.num_failed() == 1U);
+      ASSERT_TRUE(apa.num_failed() == 0U);
       ASSERT_TRUE(apa.num_passed() == 0U);
     }
 
@@ -652,7 +650,7 @@ TESTSUITE(test_case_registrator)
           InSequence(s);
 
       reg.manage_death();
-      ASSERT_TRUE(apa.num_failed() == 1U);
+      ASSERT_TRUE(apa.num_failed() == 0U);
       ASSERT_TRUE(apa.num_passed() == 0U);
     }
 
@@ -690,11 +688,9 @@ TESTSUITE(test_case_registrator)
       EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
-      EXPECT_CALL(factory, test_succeeded(&reg));
-
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
-      ASSERT_TRUE(apa.num_passed() == 1U);
+      ASSERT_TRUE(apa.num_passed() == 0U);
     }
 
     TEST(expected_signal_is_successful_if_si_code_is_CLD_DUMPED_if_dumps_are_ignored,
@@ -731,11 +727,9 @@ TESTSUITE(test_case_registrator)
       EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
-      EXPECT_CALL(factory, test_succeeded(&reg));
-
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
-      ASSERT_TRUE(apa.num_passed() == 1U);
+      ASSERT_TRUE(apa.num_passed() == 0U);
     }
 
     TEST(expected_signal_reports_core_dump_by_default_if_si_code_is_CLD_DUMPED,
@@ -766,7 +760,7 @@ TESTSUITE(test_case_registrator)
           InSequence(s);
 
       reg.manage_death();
-      ASSERT_TRUE(apa.num_failed() == 1U);
+      ASSERT_TRUE(apa.num_failed() == 0U);
       ASSERT_TRUE(apa.num_passed() == 0U);
     }
 
@@ -801,7 +795,7 @@ TESTSUITE(test_case_registrator)
           InSequence(s);
 
       reg.manage_death();
-      ASSERT_TRUE(apa.num_failed() == 1U);
+      ASSERT_TRUE(apa.num_failed() == 0U);
       ASSERT_TRUE(apa.num_passed() == 0U);
     }
 
