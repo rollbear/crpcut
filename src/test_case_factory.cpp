@@ -216,14 +216,6 @@ namespace crpcut {
   test_case_factory
   ::start_test(crpcut_test_case_registrator *i, poll<fdreader>& poller)
   {
-    if (!tests_as_child_procs())
-      {
-        std::cout << *i << " ";
-        i->run_test_case();
-        std::cout << "OK\n";
-        return;
-      }
-
     pipe_pair c2p("communication pipe test-case to main process");
     pipe_pair p2c("communication pipe main process to test-case");
     pipe_pair stderr("communication pipe for test-case stderr");
@@ -755,10 +747,17 @@ namespace crpcut {
         unsigned num_selected_tests = rv.first;
         unsigned num_registered_tests = rv.second;
 
-        if (cli_->single_shot_mode() && num_selected_tests != 1U)
+        if (cli_->single_shot_mode())
           {
-            err_os << "Single shot requires exactly one test selected\n";
-            throw cli_exception(-1);
+            if (num_selected_tests != 1U)
+              {
+                err_os << "Single shot requires exactly one test selected\n";
+                throw cli_exception(-1);
+              }
+            crpcut_test_case_registrator *i = reg_.next();
+            std::cout << *i << " ";
+            std::cout << "OK\n";
+            return 0;
           }
 
         std_exception_translator std_except_obj;
@@ -790,23 +789,21 @@ namespace crpcut {
                                           num_registered_tests,
                                           num_selected_tests);
 
-        if (tests_as_child_procs())
-          {
-            setup_dirbase(cli_->program_name(),
-                          cli_->working_dir(),
-                          dirbase_,
-                          err_os);
-            flush_output_buffer(output_fd, buffer);
-            int p_fd = start_presenter_process(output_fd,
-                                               buffer,
-                                               fmt,
-                                               summary_buffer,
-                                               summary_fmt,
-                                               cli_->verbose_mode(),
-                                               dirbase_,
-                                               reg_);
-            comm::wfile_descriptor(p_fd).swap(presenter_pipe_);
-          }
+        setup_dirbase(cli_->program_name(),
+                      cli_->working_dir(),
+                      dirbase_,
+                      err_os);
+        flush_output_buffer(output_fd, buffer);
+        int p_fd = start_presenter_process(output_fd,
+                                           buffer,
+                                           fmt,
+                                           summary_buffer,
+                                           summary_fmt,
+                                           cli_->verbose_mode(),
+                                           dirbase_,
+                                           reg_);
+        comm::wfile_descriptor(p_fd).swap(presenter_pipe_);
+
         const std::size_t num_parallel = cli_->num_parallel_tests();
         typedef poll_buffer_vector<fdreader> poll_reader;
         void *poll_memory = alloca(poll_reader::space_for(num_parallel*3U));
@@ -822,15 +819,12 @@ namespace crpcut {
 
         if (!schedule_tests(num_parallel, poller)) return 0;
 
-        int num_failed = 0;
-        if (tests_as_child_procs())
-          {
-            cleanup_directories(num_parallel,
-                                cli_->working_dir(),
-                                dirbase_,
-                                presenter_pipe_);
-            num_failed = kill_presenter_process();
-          }
+        cleanup_directories(num_parallel,
+                            cli_->working_dir(),
+                            dirbase_,
+                            presenter_pipe_);
+        int num_failed = kill_presenter_process();
+
         flush_output_buffer(output_fd, buffer);
         return num_failed;
       }
