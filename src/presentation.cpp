@@ -36,27 +36,17 @@
 
 namespace crpcut {
 
-  int start_presenter_process(int                fd,
-                              output::buffer    &buffer,
-                              output::formatter &fmt,
-                              output::buffer    &summary_buffer,
-                              output::formatter &summary_fmt,
-                              bool               verbose,
-                              const char        *working_dir,
-                              registrator_list  &reg)
+  int show_test_results(int                presentation_fd,
+                        int                output_fd,
+                        output::buffer    &buffer,
+                        output::formatter &fmt,
+                        output::buffer    &summary_buffer,
+                        output::formatter &summary_fmt,
+                        bool               verbose,
+                        const char        *working_dir,
+                        registrator_list  &reg)
   {
-    pipe_pair p("communication pipe for presenter process");
-
-    pid_t pid = wrapped::fork();
-    if (pid < 0)
-      {
-        throw posix_error(errno, "forking presenter process");
-      }
-    if (pid != 0)
-      {
-        return p.for_writing(pipe_pair::release_ownership);
-      }
-    comm::rfile_descriptor presenter_pipe(p.for_reading());
+    comm::rfile_descriptor presenter_pipe(presentation_fd);
 
     void *poll_memory = alloca(poll_buffer_vector<io>::space_for(4));
     poll_buffer_vector<io> poller(poll_memory, 4);
@@ -67,8 +57,8 @@ namespace crpcut {
                           verbose,
                           working_dir,
                           reg);
-    presentation_output o(buffer, poller, fd);
-    presentation_output so(summary_buffer, poller, fd == 1 ? -1 : 1);
+    presentation_output o(buffer, poller, output_fd);
+    presentation_output so(summary_buffer, poller, output_fd == 1 ? -1 : 1);
     while (poller.num_fds() > 0)
       {
         poll<io>::descriptor desc = poller.wait();
@@ -76,12 +66,10 @@ namespace crpcut {
         if (desc.read())  exc |= desc->read();
         if (desc.write()) exc |= desc->write();
         if (desc.hup() || exc)   desc->exception();
-        bool output_change = o.enabled() == buffer.is_empty();
-        if (output_change) o.enable(!o.enabled());
-        output_change = so.enabled() == summary_buffer.is_empty();
-        if (output_change) so.enable(!so.enabled());
+        if (o.enabled() == buffer.is_empty())           o.enable(!o.enabled());
+        if (so.enabled() == summary_buffer.is_empty()) so.enable(!so.enabled());
       }
-    wrapped::exit(r.num_failed());
-    return 0;
+    return r.num_failed();
   }
+
 }

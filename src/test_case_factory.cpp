@@ -285,26 +285,6 @@ namespace crpcut {
 
   int
   test_case_factory
-  ::kill_presenter_process()
-  {
-    comm::wfile_descriptor().swap(presenter_pipe_); // close
-    siginfo_t info;
-    int num_failed;
-    for (;;)
-      {
-        int rv = wrapped::waitid(P_ALL, 0, &info, WEXITED);
-        if (rv == -1 && errno == EINTR) continue;
-        assert(rv == 0);
-        assert(info.si_code == CLD_EXITED);
-        num_failed = info.si_status;
-        break;
-      }
-    return num_failed;
-  }
-
-
-  int
-  test_case_factory
   ::run_test(int argc, char *argv[], std::ostream &os)
   {
     return run_test(argc, const_cast<const char**>(argv), os);
@@ -611,24 +591,6 @@ namespace crpcut {
     return std::make_pair(num_selected_tests, num_registered_tests);
   }
 
-  void flush_output_buffer(int output_fd, output::buffer &buffer)
-  {
-    while (!buffer.is_empty())
-      {
-        std::pair<const char *, size_t> data = buffer.get_buffer();
-        size_t bytes_written = 0;
-        while (bytes_written < data.second)
-          {
-            ssize_t n = wrapped::write(output_fd,
-                                       data.first + bytes_written,
-                                       data.second - bytes_written);
-            assert(n >= 0);
-            bytes_written += size_t(n);
-          }
-        buffer.advance();
-      }
-  }
-
   void setup_dirbase(const char   *program_name,
                      const char   *working_dir,
                      char         *dirbase,
@@ -688,7 +650,7 @@ namespace crpcut {
       }
   }
 
-  bool test_case_factory
+  void test_case_factory
   ::schedule_tests(std::size_t num_parallel, poll<fdreader> &poller)
   {
     for (;;)
@@ -708,10 +670,6 @@ namespace crpcut {
             start_test(i, poller);
             manage_children(num_parallel, poller);
             i->unlink();
-            if (!tests_as_child_procs())
-              {
-                return false;
-              }
           }
         if (!progress)
           {
@@ -720,7 +678,45 @@ namespace crpcut {
           }
       }
     if (num_pending_children_) manage_children(1, poller);
-    return true;
+  }
+
+  int
+  test_case_factory::spawn_test_runner()
+  {
+    pipe_pair p("communication pipe for presenter process");
+
+    pid_t pid = wrapped::fork();
+    if (pid < 0)
+      {
+        throw posix_error(errno, "forking presenter process");
+      }
+    if (pid != 0)
+      {
+        return p.for_reading(pipe_pair::release_ownership);
+      }
+    comm::wfile_descriptor(p.for_writing()).swap(presenter_pipe_);
+
+    const std::size_t num_parallel = cli_->num_parallel_tests();
+    typedef poll_buffer_vector<fdreader> poll_reader;
+    void *poll_memory = alloca(poll_reader::space_for(num_parallel*3U));
+    poll_reader poller(poll_memory, num_parallel*3U);
+
+    void *deadline_space = alloca(deadline_monitor::space_for(num_parallel));
+    deadline_monitor deadlines(deadline_space, num_parallel);
+    deadlines_ = &deadlines;
+
+    void *wd_space = alloca(working_dir_allocator::space_for(num_parallel));
+    working_dir_allocator dir_allocator(wd_space, num_parallel);
+    working_dirs_ = &dir_allocator;
+
+    schedule_tests(num_parallel, poller);
+
+    cleanup_directories(num_parallel,
+                        cli_->working_dir(),
+                        dirbase_,
+                        presenter_pipe_);
+    wrapped::exit(0);
+    return 0;
   }
 
   int
@@ -793,8 +789,9 @@ namespace crpcut {
                       cli_->working_dir(),
                       dirbase_,
                       err_os);
-        flush_output_buffer(output_fd, buffer);
-        int p_fd = start_presenter_process(output_fd,
+        int runner_fd = spawn_test_runner();
+        int num_failed = show_test_results(runner_fd,
+                                           output_fd,
                                            buffer,
                                            fmt,
                                            summary_buffer,
@@ -802,30 +799,8 @@ namespace crpcut {
                                            cli_->verbose_mode(),
                                            dirbase_,
                                            reg_);
-        comm::wfile_descriptor(p_fd).swap(presenter_pipe_);
-
-        const std::size_t num_parallel = cli_->num_parallel_tests();
-        typedef poll_buffer_vector<fdreader> poll_reader;
-        void *poll_memory = alloca(poll_reader::space_for(num_parallel*3U));
-        poll_reader poller(poll_memory, num_parallel*3U);
-
-        void *deadline_space = alloca(deadline_monitor::space_for(num_parallel));
-        deadline_monitor deadlines(deadline_space, num_parallel);
-        deadlines_ = &deadlines;
-
-        void *wd_space = alloca(working_dir_allocator::space_for(num_parallel));
-        working_dir_allocator dir_allocator(wd_space, num_parallel);
-        working_dirs_ = &dir_allocator;
-
-        if (!schedule_tests(num_parallel, poller)) return 0;
-
-        cleanup_directories(num_parallel,
-                            cli_->working_dir(),
-                            dirbase_,
-                            presenter_pipe_);
-        int num_failed = kill_presenter_process();
-
-        flush_output_buffer(output_fd, buffer);
+        siginfo_t info;
+        wrapped::waitid(P_ALL, WEXITED, &info, 0);
         return num_failed;
       }
     catch (cli_exception &e)

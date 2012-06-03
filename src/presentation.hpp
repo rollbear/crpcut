@@ -33,13 +33,14 @@ namespace crpcut {
     class formatter;
     class buffer;
   }
-  int start_presenter_process(int                fd,
-                              output::buffer    &buffer,
-                              output::formatter &fmt,
-                              output::buffer    &summary_buffer,
-                              output::formatter &summary_fmt,
-                              bool               verbose,
-                              const char        *working_dir,
-                              registrator_list  &reg);
+  int show_test_results(int                presentation_fd,
+                        int                output_fd,
+                        output::buffer    &buffer,
+                        output::formatter &fmt,
+                        output::buffer    &summary_buffer,
+                        output::formatter &summary_fmt,
+                        bool               verbose,
+                        const char        *working_dir,
+                        registrator_list  &reg);
 }
 #endif // PRESENTATION_HPP

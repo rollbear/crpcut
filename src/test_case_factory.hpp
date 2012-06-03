@@ -71,10 +71,10 @@ namespace crpcut {
     void list_tests(const char *const *names,
                     tag_list_root     &tags,
                     std::ostream      &os);
-    bool schedule_tests(std::size_t num_parallel, poll<fdreader> &poller);
+    void schedule_tests(std::size_t num_parallel, poll<fdreader> &poller);
     void show_summary(unsigned       num_selected_tests,
                       tag_list_root &tags) const;
-    int kill_presenter_process();
+    int  spawn_test_runner();
     void manage_children(std::size_t max_pending_children, poll<fdreader> &poller);
     void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
 
