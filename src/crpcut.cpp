@@ -99,6 +99,11 @@ namespace crpcut {
     return test_case_factory::obj().timeouts_enabled();
   }
 
+  unsigned timeout_slowdown_factor()
+  {
+    return test_case_factory::obj().timeout_slowdown_factor();
+  }
+
   bool tests_as_child_processes()
   {
     return test_case_factory::obj().tests_as_child_procs();

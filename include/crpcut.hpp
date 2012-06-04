@@ -2983,6 +2983,7 @@ namespace crpcut {
                          size_t len, const char *buff);
 
   bool timeouts_are_enabled();
+  unsigned timeout_slowdown_factor();
   bool is_backtrace_enabled();
   bool tests_as_child_processes();
   const char *get_output_charset();
@@ -4044,7 +4045,7 @@ namespace crpcut {
                   << crpcut_check_name<action>::string()
                   << "_SCOPE_" << cond::name()
                   << "_" << clock::name() << "_MS(" << limit_ << ")"
-                  "\nActual time used was " << t - (deadline_-limit_) << "ms";
+                  "\nActual time used was " << t - deadline_ + limit_ << "ms";
               }
           }
       }
@@ -4531,7 +4532,7 @@ namespace crpcut
   if (const crpcut::scope::time_base& CRPCUT_LOCAL_NAME(time_scope)     \
       = crpcut::scope::time<crpcut::comm::action,                       \
                             crpcut::scope::time_base::type,             \
-                            crpcut::scope::time_base::clock>(ms,        \
+                            crpcut::scope::time_base::clock>(ms*crpcut::timeout_slowdown_factor(), \
                                                              __FILE__,  \
                                                              __LINE__)) \
     { CRPCUT_LOCAL_NAME(time_scope).silence_warning(); } else           \

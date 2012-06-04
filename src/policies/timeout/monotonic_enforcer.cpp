@@ -33,7 +33,7 @@ namespace crpcut {
 
       monotonic_enforcer
       ::monotonic_enforcer(unsigned long timeout_ms)
-        : duration_ms(timeout_ms),
+        : duration_ms(timeout_ms * timeout_slowdown_factor()),
           start_timestamp_ms(clocks::monotonic::timestamp_ms_absolute())
       {
 

@@ -320,6 +320,13 @@ namespace crpcut {
     return obj().cli_->honour_timeouts();
   }
 
+  unsigned
+  test_case_factory
+  ::timeout_slowdown_factor()
+  {
+    return obj().cli_->timeout_slowdown_factor();
+  }
+
   bool
   test_case_factory
   ::is_backtrace_enabled()

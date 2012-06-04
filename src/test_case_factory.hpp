@@ -55,6 +55,7 @@ namespace crpcut {
                          size_t len, const char *buff);
     virtual bool tests_as_child_procs();
     virtual bool timeouts_enabled();
+    virtual unsigned timeout_slowdown_factor();
     virtual void set_deadline(crpcut_test_case_registrator *i);
     virtual void clear_deadline(crpcut_test_case_registrator *i);
     virtual void return_dir(unsigned num);

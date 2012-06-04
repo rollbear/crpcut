@@ -39,7 +39,7 @@ TESTSUITE(timeouts)
        DEADLINE_REALTIME_MS(200),
        NO_CORE_FILE)
   {
-    usleep(50000);
+    usleep(50000*crpcut::timeout_slowdown_factor());
   }
 
   TEST(should_fail_slow_realtime_deadline,
@@ -47,12 +47,13 @@ TESTSUITE(timeouts)
        NO_CORE_FILE,
        WITH_TEST_TAG(slow))
   {
-    usleep(200000);
+    usleep(200000*crpcut::timeout_slowdown_factor());
   }
 
   TEST(should_succeed_slow_cputime_deadline, DEADLINE_CPU_MS(100), NO_CORE_FILE)
   {
-    usleep(300000); // should usleep busy-wait, this test would fail miserably
+    usleep(300000*crpcut::timeout_slowdown_factor());
+    // should usleep busy-wait, this test would fail miserably
   }
 
   TEST(should_fail_slow_cputime_deadline,
@@ -64,7 +65,8 @@ TESTSUITE(timeouts)
     const clock_t ticks_per_sec = sysconf(_SC_CLK_TCK);
     tms t;
     times(&t);
-    clock_t deadline = t.tms_utime + t.tms_stime + ticks_per_sec/5;
+    const size_t factor = crpcut::timeout_slowdown_factor();
+    clock_t deadline = (t.tms_utime + t.tms_stime + ticks_per_sec/5)*factor;
     for (;;)
       {
         for (volatile int n = 0; n < 100000; ++n)
@@ -90,7 +92,7 @@ TESTSUITE(timeouts)
        NO_CORE_FILE,
        WITH_TEST_TAG(slow))
   {
-    sleep(2);
+    sleep(2*crpcut::timeout_slowdown_factor());
   }
 
   template <bool constructor_cond, bool destructor_cond>
@@ -133,13 +135,13 @@ TESTSUITE(timeouts)
          EXPECT_REALTIME_TIMEOUT_MS(100),
          WITH_TEST_TAG(slow))
       {
-        sleep(2);
+        sleep(2*crpcut::timeout_slowdown_factor());
       }
 
     TEST(should_fail_early_return,
          EXPECT_REALTIME_TIMEOUT_MS(100))
-      {
-      }
+    {
+    }
 
     TEST(should_fail_cputime,
          EXPECT_REALTIME_TIMEOUT_MS(100),
@@ -155,7 +157,7 @@ TESTSUITE(timeouts)
          DEADLINE_CPU_MS(10),
          WITH_TEST_TAG(slow))
     {
-      sleep(3);
+      sleep(3*crpcut::timeout_slowdown_factor());
     }
 
   }
@@ -167,7 +169,7 @@ TESTSUITE(timeouts)
     {
       ASSERT_SCOPE_MAX_REALTIME_MS(10)
       {
-        usleep(1000);
+        usleep(1000*crpcut::timeout_slowdown_factor());
       }
     }
 
@@ -175,7 +177,7 @@ TESTSUITE(timeouts)
     {
       ASSERT_SCOPE_MAX_REALTIME_MS(15)
       {
-        usleep(20000);
+        usleep(20000*crpcut::timeout_slowdown_factor());
       }
     }
 
@@ -185,7 +187,7 @@ TESTSUITE(timeouts)
       {
         ASSERT_SCOPE_MAX_CPUTIME_MS(5)
         {
-          usleep(40000);
+          usleep(40000*crpcut::timeout_slowdown_factor());
         }
       }
     }
@@ -197,7 +199,8 @@ TESTSUITE(timeouts)
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
       times(&t);
-      clock_t deadline = t.tms_utime + t.tms_stime + clocks_per_tick;
+      const size_t factor = crpcut::timeout_slowdown_factor();
+      clock_t deadline = (t.tms_utime + t.tms_stime + clocks_per_tick)*factor;
       ASSERT_SCOPE_MAX_CPUTIME_MS(900)
       {
         ASSERT_SCOPE_MIN_REALTIME_MS(1000)
@@ -217,7 +220,7 @@ TESTSUITE(timeouts)
     {
       VERIFY_SCOPE_MAX_REALTIME_MS(10)
       {
-        usleep(1000);
+        usleep(1000 * crpcut::timeout_slowdown_factor());
       }
       INFO << "after";
     }
@@ -226,7 +229,7 @@ TESTSUITE(timeouts)
     {
       VERIFY_SCOPE_MAX_REALTIME_MS(15)
       {
-        usleep(20000);
+        usleep(20000*crpcut::timeout_slowdown_factor());
       }
       INFO << "after";
     }
@@ -237,7 +240,7 @@ TESTSUITE(timeouts)
       {
         VERIFY_SCOPE_MAX_CPUTIME_MS(5)
         {
-          usleep(40000);
+          usleep(40000*crpcut::timeout_slowdown_factor());
         }
       }
       INFO << "after";
@@ -248,7 +251,8 @@ TESTSUITE(timeouts)
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
       times(&t);
-      clock_t deadline = t.tms_utime + t.tms_stime + clocks_per_tick;
+      const size_t factor = crpcut::timeout_slowdown_factor();
+      clock_t deadline = (t.tms_utime + t.tms_stime + clocks_per_tick) * factor;
       VERIFY_SCOPE_MAX_CPUTIME_MS(900)
       {
         VERIFY_SCOPE_MIN_REALTIME_MS(1000)
