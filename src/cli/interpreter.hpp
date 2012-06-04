@@ -56,6 +56,7 @@ namespace crpcut {
       const char *       named_parameter(const char *name);
       bool               quiet() const;
       bool               single_shot_mode() const;
+      unsigned           timeout_slowdown_factor() const;
       bool               honour_timeouts() const;
       const char *       tag_specification() const;
       bool               verbose_mode() const;
@@ -82,6 +83,7 @@ namespace crpcut {
       named_param              param_;
       activation_param         quiet_;
       activation_param         single_shot_;
+      value_param<unsigned>    slowdown_;
       activation_param         disable_timeouts_;
       value_param<const char*> tags_;
       activation_param         verbose_;

@@ -27,6 +27,20 @@
 
 #include "interpreter.hpp"
 
+
+namespace {
+  template <typename T1, typename T2>
+  void throw_if_illegal_combination(T1 &t1, T2 &t2)
+  {
+    if (t1 && t2)
+      {
+        std::ostringstream os;
+        t1.syntax(os) << " cannot be combined with ";
+        t2.syntax(os);
+        throw crpcut::cli::param::exception(os.str());
+      }
+  }
+}
 namespace crpcut {
   namespace cli {
     interpreter::
@@ -76,6 +90,9 @@ namespace crpcut {
                      "Run only one test case, and run it in the main process\n"
                      "for ease of debugging",
                      list_),
+        slowdown_('S', "slowdown", "factor",
+                  "Multiply all timeout times with a factor",
+                  list_),
         disable_timeouts_('t', "disable-timeouts",
                           "Never fail a test due to time consumption",
                           list_),
@@ -117,17 +134,6 @@ namespace crpcut {
       throw cli::param::exception(os.str());
     }
 
-    template <typename T1, typename T2>
-    void throw_if_illegal_combination(T1 &t1, T2 &t2)
-    {
-      if (t1 && t2)
-        {
-          std::ostringstream os;
-          t1.syntax(os) << " cannot be combined with ";
-          t2.syntax(os);
-          throw param::exception(os.str());
-        }
-    }
     const char *const *
     interpreter
     ::match_argv()
@@ -191,6 +197,8 @@ namespace crpcut {
       throw_if_illegal_combination(list_tags_, tags_);
       throw_if_illegal_combination(list_tags_, verbose_);
       throw_if_illegal_combination(list_tags_, xml_);
+      throw_if_illegal_combination(slowdown_ ,disable_timeouts_);
+      throw_if_illegal_combination(slowdown_, single_shot_);
 
       if (xml_output() && output_charset())
         {
@@ -305,6 +313,13 @@ namespace crpcut {
     ::single_shot_mode() const
     {
       return single_shot_;
+    }
+
+    unsigned
+    interpreter
+    ::timeout_slowdown_factor() const
+    {
+      return slowdown_ ? slowdown_.get_value() : 1U;
     }
 
     bool

@@ -77,6 +77,9 @@ namespace {
 "        Run only one test case, and run it in the main process\n"
 "        for ease of debugging\n"
 "\n"
+"   -S factor / --slowdown=factor\n"
+"        Multiply all timeout times with a factor\n"
+"\n"
 "   -t / --disable-timeouts\n"
 "        Never fail a test due to time consumption\n"
 "\n"
@@ -115,7 +118,6 @@ TESTSUITE(cli)
     TEST(construction_with_unknown_short_form_flag_gives_usage)
     {
       ARGV("-_");
-      //      static const char *argv[] = { "testprog", "-_", 0 };
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
                    crpcut::cli::param::exception,
                    usage);
@@ -124,7 +126,6 @@ TESTSUITE(cli)
     TEST(construction_with_unknown_long_form_flag_gives_usage)
     {
       ARGV("--_");
-      //      static const char *argv[] = { "testprog", "--_", 0 };
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
                    crpcut::cli::param::exception,
                    usage);
@@ -364,6 +365,35 @@ TESTSUITE(cli)
       ASSERT_TRUE(cli.single_shot_mode());
     }
 
+    TEST(slowdown_factor_is_one_if_missing_in_argv)
+    {
+      ARGV("-x", "--param=apa=katt", "-n");
+      crpcut::cli::interpreter cli(argv);
+      ASSERT_TRUE(cli.timeout_slowdown_factor() == 1U);
+    }
+
+    TEST(slowdown_factor_can_be_set_via_command_line_short_form)
+    {
+      ARGV("--param=apa=katt", "-S", "8", "-n");
+      crpcut::cli::interpreter cli(argv);
+      ASSERT_TRUE(cli.timeout_slowdown_factor() == 8U);
+    }
+
+    TEST(slowdown_factor_can_be_set_via_command_line_long_form)
+    {
+      ARGV("--param=apa=katt", "--slowdown=28", "-n");
+      crpcut::cli::interpreter cli(argv);
+      ASSERT_TRUE(cli.timeout_slowdown_factor() == 28U);
+    }
+
+    TEST(single_shot_mode_cannot_be_combined_with_slowdown)
+    {
+      ARGV("--slowdown=5", "--param=apa=katt", "-s");
+      ASSERT_THROW(crpcut::cli::interpreter cli(argv),
+                   crpcut::cli::param::exception,
+                   "-S factor / --slowdown=factor cannot be combined with -s / --single-shot");
+    }
+
     TEST(single_shot_mode_cannot_be_combined_with_xml_output)
     {
       ARGV("-s", "-x", "apa");
@@ -395,6 +425,14 @@ TESTSUITE(cli)
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
                    crpcut::cli::param::exception,
                    "-s / --single-shot cannot be combined with -t / --disable-timeouts");
+    }
+
+    TEST(disable_timeouts_and_slowdown_throws)
+    {
+      ARGV("-t", "-S", "5");
+      ASSERT_THROW(crpcut::cli::interpreter cli(argv),
+                   crpcut::cli::param::exception,
+                   "-S factor / --slowdown=factor cannot be combined with -t / --disable-timeouts");
     }
 
     TEST(tags_specification_is_null_if_not_included_in_argv)
