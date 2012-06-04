@@ -1,3 +1,9 @@
+         * By request, a command line option -S factor / --slowdown=factor,
+           where factor is a positive integer, has been added. It extends all
+           timeouts. This can be useful if unit tests are run by a continuous
+           integration tool and are run in a very slow environment, like
+           under valgrind or a code coverage tool.
+
          * Fixed an output buffering bug where deallocated memory could
            be accessed.
 
