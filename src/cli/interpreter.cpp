@@ -213,6 +213,13 @@ namespace crpcut {
           num_children_.syntax(os) << " - number must be at least 1";
           throw param::exception(os.str());
         }
+
+      if (slowdown_ && slowdown_.get_value() == 0)
+        {
+          std::ostringstream os;
+          slowdown_.syntax(os) << " - factor must be at least 1";
+          throw param::exception(os.str());
+        }
       return rv;
     }
 

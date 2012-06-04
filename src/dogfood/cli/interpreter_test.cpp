@@ -372,6 +372,14 @@ TESTSUITE(cli)
       ASSERT_TRUE(cli.timeout_slowdown_factor() == 1U);
     }
 
+    TEST(zero_slowdown_throws)
+    {
+      ARGV("-x", "--slowdown=0", "-n");
+      ASSERT_THROW(crpcut::cli::interpreter cli(argv),
+                   crpcut::cli::param::exception,
+                   "-S factor / --slowdown=factor - factor must be at least 1");
+    }
+
     TEST(slowdown_factor_can_be_set_via_command_line_short_form)
     {
       ARGV("--param=apa=katt", "-S", "8", "-n");
