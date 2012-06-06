@@ -174,6 +174,42 @@ TESTSUITE(cli)
           "\n        syntax description of the parameter in the list";
       ASSERT_TRUE(os.str() == pattern);
     }
+
+    TEST(parameter_with_0_short_form_matches_long_form)
+    {
+      crpcut::cli::param_list list;
+      typedef crpcut::cli::param P;
+      P param(0, "long", "a toy value just to test the idea",
+              list);
+      static const char *cli[] = { "--long", 0 };
+      static char const * const *p = param.match(cli);
+      ASSERT_TRUE(p == cli + 1);
+    }
+
+    TEST(parameter_with_0_short_form_does_not_match_single_dash)
+    {
+      crpcut::cli::param_list list;
+      typedef crpcut::cli::param P;
+      P param(0, "long", "a toy value just to test the idea",
+              list);
+      static const char *cli[] = { "-", 0 };
+      const char *const *p = param.match(cli);
+      ASSERT_FALSE(p);
+    }
+
+    TEST(parameter_with_0_short_form_describes_only_long_form)
+    {
+      crpcut::cli::param_list list;
+      typedef crpcut::cli::param P;
+      P param(0, "long", "a toy value just to test the idea",
+              list);
+      std::ostringstream os;
+      os << param;
+      static const char pattern[] =
+        "   --long\n"
+        "        a toy value just to test the idea";
+      ASSERT_TRUE(os.str() == pattern);
+    }
   }
 }
 

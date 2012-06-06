@@ -43,7 +43,9 @@ namespace crpcut {
       if (*p == 0) return 0;
       const char *parameter_name = *p++;
       if (*parameter_name != '-') return 0;
-      if (parameter_name[1] == short_form_ && parameter_name[2] == 0)
+      if (short_form_ != 0
+          && parameter_name[1] == short_form_
+          && parameter_name[2] == 0)
         {
           return p + match_value(*p, true);
         }
@@ -69,15 +71,19 @@ namespace crpcut {
     param
     ::syntax(std::ostream &os) const
     {
-      os << '-' << short_form_;
-      if (value_description_)
+      if (short_form_)
         {
-          os << " ";
-          if (req_ == optional) os << "{";
-          os << value_description_;
-          if (req_ == optional) os << "}";
+          os << '-' << short_form_;
+          if (value_description_)
+            {
+              os << " ";
+              if (req_ == optional) os << "{";
+              os << value_description_;
+              if (req_ == optional) os << "}";
+            }
+          os << " / ";
         }
-      os << " / --" << long_form_;
+      os << "--" << long_form_;
       if (value_description_)
         {
           if (req_ == optional) os << "{";
