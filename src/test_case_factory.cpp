@@ -759,6 +759,7 @@ namespace crpcut {
               }
             crpcut_test_case_registrator *i = reg_.next();
             std::cout << *i << " ";
+            i->run_test_case();
             std::cout << "OK\n";
             return 0;
           }
