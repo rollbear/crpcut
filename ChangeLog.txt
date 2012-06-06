@@ -1,3 +1,5 @@
+2012-06-06 1.8.0
+
          * By request, a command line option --timeout-multiplier=factor,
            where factor is a positive integer, has been added. It extends all
            timeouts. This can be useful if unit tests are run by a continuous
