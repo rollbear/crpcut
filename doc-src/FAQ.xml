@@ -341,7 +341,9 @@
           <ulink url="http://valgrind.org">valgrind</ulink>,
           you may temporarily turn off all timeouts with the
           <xref linkend="disable-timeouts" xrefstyle="select:title"/>
-          command line parameter.
+          command line parameter, or extend the timeouts using
+          <xref linkend="timeout-multiplier" xrefstyle="select:title"/>
+          to compensate for the slower execution time.
         </note>
       </answer>
     </qandaentry>
@@ -596,6 +598,7 @@
         </para>
       </answer>
     </qandaentry>
+
   </qandaset>
 </chapter>
 <chapter id="google-mock">

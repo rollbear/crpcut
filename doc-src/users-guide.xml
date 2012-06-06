@@ -964,6 +964,13 @@ macro.
       line flag comes to the rescue. It tells &crpcut; to never fail a test
       due to its time consumption.
     </tip>
+    <tip>
+      If your continuous integration tool runs unit-tests with code coverage,
+      or a similar environment that severely slows down execution, you
+      can extend all timeouts using the command line parameter
+      <xref linkend="timeout-multiplier" xrefstyle="select:title"/>, while
+      still enjoying the timed guards against no-progress bugs.
+    </tip>
   </chapter>
 
   <chapter id="lib-stubs">

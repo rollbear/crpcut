@@ -474,14 +474,19 @@
     <para>On failure, the test is terminated with an error report. The report
     includes the parameter value <parameter>ms</parameter> and the actual
     CPU-time consumed.</para>
+      <note>
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
     <note>
-      It is possible to temporarily disable the assertion with the
+      It is also possible to temporarily disable the assertion with the
       <xref linkend="disable-timeouts" refstyle="select:title"/>
       command line flag, in which case the assertion will always succeed,
       regardless of the amount of CPU-time consumed by the following
-      code block. This can be useful when running with time consuming tools
-      like <ulink url="http://valgrind.org">valgrind</ulink>.
-    </note>
+      code block.</note>
     <para>See also:
     <xref linkend="VERIFY_SCOPE_MAX_CPUTIME_MS" xrefstyle="select:title"/>.
     </para>
@@ -524,10 +529,36 @@
       It is possible to temporarily disable the assertion with the
       <xref linkend="disable-timeouts" refstyle="select:title"/>
       command line flag, in which case the assertion will always succeed,
+      regardless of the amount of CPU-time consumed by the following
+      code block.</note>
+      <note>
+        It is also possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
+    <note>
+      It is possible to temporarily disable the assertion with the
+      <xref linkend="disable-timeouts" refstyle="select:title"/>
+      command line flag, in which case the assertion will always succeed,
       regardless of the amount of time consumed by the following
       code block. This can be useful when running with time consuming tools
       like <ulink url="http://valgrind.org">valgrind</ulink>.
     </note>
+      <note>
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
+    <note>
+      It is also possible to temporarily disable the assertion with the
+      <xref linkend="disable-timeouts" refstyle="select:title"/>
+      command line flag, in which case the assertion will always succeed,
+      regardless of the amount of time consumed by the following
+      code block.</note>
     <para>See also:
     <xref linkend="VERIFY_SCOPE_MAX_REALTIME_MS" xrefstyle="select:title"/>.
     </para>
@@ -566,13 +597,19 @@
     <para>On failure, the test is terminated with an error report. The report
     includes the parameter value <parameter>ms</parameter> and the actual
     time consumed.</para>
+      <note>
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
     <note>
-      It is possible to temporarily disable the assertion with the
+      It is also possible to temporarily disable the assertion with the
       <xref linkend="disable-timeouts" refstyle="select:title"/>
       command line flag, in which case the assertion will always succeed,
       regardless of the amount of time consumed by the following
-      code block.
-    </note>
+      code block.</note>
     <para>See also:
     <xref linkend="VERIFY_SCOPE_MIN_REALTIME_MS" xrefstyle="select:title"/>
     </para>
@@ -935,7 +972,14 @@
         <xref linkend="TEST" xrefstyle="select:title"/>.
       </para>
       <note>
-        It is possible to temporarily disable the deadline with the
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
+      <note>
+        It is also possible to temporarily disable the deadline with the
         <xref linkend="disable-timeouts" refstyle="select:title"/>
         command line flag.
       </note>
@@ -985,7 +1029,14 @@
         <xref linkend="TEST" xrefstyle="select:title"/>.
       </para>
       <note>
-        It is possible to temporarily disable the deadline with the
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
+      <note>
+        It is also possible to temporarily disable the deadline with the
         <xref linkend="disable-timeouts" refstyle="select:title"/>
         command line flag.
       </note>
@@ -1209,7 +1260,14 @@
 <xi:include href="../sample-output/expect_realtime_timeout.out" parse="text"/>
 </screen>
       <note>
-        It is possible to temporarily disable the expectation with the
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
+      <note>
+        It is also possible to temporarily disable the expectation with the
         <xref linkend="disable-timeouts" refstyle="select:title"/>
         command line flag.
       </note>
@@ -1326,7 +1384,14 @@
 <xi:include href="../sample-output/fixture_construction_timeout.out" parse="text"/>
 </screen>
       <note>
-        It is possible to temporarily disable the deadline with the
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
+      <note>
+        It is also possible to temporarily disable the deadline with the
         <xref linkend="disable-timeouts" refstyle="select:title"/>
         command line flag.
       </note>
@@ -1358,7 +1423,14 @@
             parse="text"/>
 </screen>
       <note>
-        It is possible to temporarily disable the deadline with the
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
+      <note>
+        It is also possible to temporarily disable the deadline with the
         <xref linkend="disable-timeouts" refstyle="select:title"/>
         command line flag.
       </note>
@@ -1520,10 +1592,12 @@
       <para>Should you have a test that needs more time than
         <literal>2</literal>s, you can raise the limit with the
         <xref linkend="DEADLINE_REALTIME_MS"
-              xrefstyle="select:title"/> modifier or, if the
+              xrefstyle="select:title"/> modifier. If the
         need is temporary due to running with time consuming tools like
         <ulink url="http://valgrind.org">valgrind</ulink>, you may
-        temporarily turn off all timeouts with the
+        temporarily extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, or even turn off all timeouts with the
         <xref linkend="disable-timeouts" xrefstyle="select:title"/>
         command line parameter.
       </para>
@@ -2200,13 +2274,19 @@
     with an error report. The report
     includes the parameter value <parameter>ms</parameter> and the actual
     CPU-time consumed.</para>
+      <note>
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
     <note>
-      It is possible to temporarily disable the check with the
+      It is also possible to temporarily disable the check with the
       <xref linkend="disable-timeouts" refstyle="select:title"/>
       command line flag, in which case the assertion will always succeed,
       regardless of the amount of CPU-time consumed by the following
-      code block. This can be useful when running with time consuming tools
-      like <ulink url="http://valgrind.org">valgrind</ulink>.
+      code block.
     </note>
     <para>See also:
     <xref linkend="ASSERT_SCOPE_MAX_CPUTIME_MS" xrefstyle="select:title"/>.
@@ -2247,13 +2327,19 @@
     with an error report. The report
     includes the parameter value <parameter>ms</parameter> and the actual
     time consumed.</para>
+      <note>
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
     <note>
-      It is possible to temporarily disable the check with the
+      It is also possible to temporarily disable the check with the
       <xref linkend="disable-timeouts" refstyle="select:title"/>
       command line flag, in which case the assertion will always succeed,
       regardless of the amount of time consumed by the following
-      code block. This can be useful when running with time consuming tools
-      like <ulink url="http://valgrind.org">valgrind</ulink>.
+      code block.
     </note>
     <para>See also:
     <xref linkend="ASSERT_SCOPE_MAX_REALTIME_MS" xrefstyle="select:title"/>.
@@ -2294,8 +2380,15 @@
     with an error report. The report
     includes the parameter value <parameter>ms</parameter> and the actual
     time consumed.</para>
+      <note>
+        It is possible to extend the timeout limit using the
+        command line parameter <xref linkend="timeout-multiplier"
+        xrefstyle="select:title"/>, which can be useful when running the test
+        program with time consuming tools
+        like <ulink url="http://valgrind.org">valgrind</ulink>.
+      </note>
     <note>
-      It is possible to temporarily disable the check with the
+      It is also possible to temporarily disable the check with the
       <xref linkend="disable-timeouts" refstyle="select:title"/>
       command line flag, in which case the assertion will always succeed,
       regardless of the amount of time consumed by the following
@@ -3283,7 +3376,7 @@ int main(int argc, char *argv[])
             </para>
             <note><parameter>-o</parameter> / <parameter>--output</parameter>
               cannot be combined with
-              <parameter>-s</parameter><parameter>--single-shot</parameter></note>
+              <parameter>-s</parameter> / <parameter>--single-shot</parameter></note>
           </listitem>
         </varlistentry>
         <varlistentry id="cli-param"><term><parameter>-p</parameter>
@@ -3330,6 +3423,22 @@ int main(int argc, char *argv[])
             </caution>
           </listitem>
         </varlistentry>
+
+        <varlistentry id="timeout-multiplier"><term><parameter>--timeout-multiplier</parameter>=<constant>factor</constant></term>
+        <listitem>
+          <para>Extend all timeouts by multiplying the timeout times, including
+          the defaulted timeouts, with <constant>factor</constant>. The
+          <constant>factor</constant> must be a positive integer.
+          </para>
+          <note>
+            <parameter>--timeout-multiplier</parameter>=<constant>factor</constant>
+            cannot be combined with <parameter>-s</parameter> /
+            <parameter>--single-shot</parameter> or <parameter>-t</parameter> /
+          <parameter>--disable-timeouts</parameter>.
+          </note>
+        </listitem>
+        </varlistentry>
+
         <varlistentry id="disable-timeouts"><term><parameter>-t</parameter> / <parameter>--disable-timeouts</parameter></term>
           <listitem>
             <para>Never fail a test due to its time consumption. This can be
@@ -3338,8 +3447,17 @@ int main(int argc, char *argv[])
             </para>
             <caution>
               This turns off the safe guard of &crpcut; that kills tests that
-              have no progress (infinite loops, sleeps, etc.)
+              have no progress (infinite loops, sleeps, etc.) If you run
+              tests under slow tools like
+              <ulink url="http://valgrind.org">valgrind</ulink>,
+              use <xref linkend="timeout-multiplier" xrefstyle="select:title"/>
+              instead.
             </caution>
+            <note><parameter>-t</parameter> /
+            <parameter>--disable-timeouts</parameter> cannot be combined with
+            <parameter>-s</parameter> / <parameter>--single-shot</parameter>
+            or <parameter>--timeout-multiplier</parameter>.
+            </note>
           </listitem>
         </varlistentry>
 
