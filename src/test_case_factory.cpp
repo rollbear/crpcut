@@ -797,18 +797,18 @@ namespace crpcut {
                       dirbase_,
                       err_os);
         int runner_fd = spawn_test_runner();
-        int num_failed = show_test_results(runner_fd,
-                                           output_fd,
-                                           buffer,
-                                           fmt,
-                                           summary_buffer,
-                                           summary_fmt,
-                                           cli_->verbose_mode(),
-                                           dirbase_,
-                                           reg_);
+        unsigned num_failed = show_test_results(runner_fd,
+                                                output_fd,
+                                                buffer,
+                                                fmt,
+                                                summary_buffer,
+                                                summary_fmt,
+                                                cli_->verbose_mode(),
+                                                dirbase_,
+                                                reg_);
         siginfo_t info;
         wrapped::waitid(P_ALL, WEXITED, &info, 0);
-        return num_failed;
+        return int(num_failed);
       }
     catch (cli_exception &e)
     {

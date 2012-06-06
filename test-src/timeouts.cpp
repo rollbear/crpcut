@@ -65,7 +65,7 @@ TESTSUITE(timeouts)
     const clock_t ticks_per_sec = sysconf(_SC_CLK_TCK);
     tms t;
     times(&t);
-    const size_t factor = crpcut::timeout_multiplier();
+    const long factor = long(crpcut::timeout_multiplier());
     clock_t deadline = (t.tms_utime + t.tms_stime + ticks_per_sec/5)*factor;
     for (;;)
       {
@@ -199,7 +199,7 @@ TESTSUITE(timeouts)
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
       times(&t);
-      const size_t factor = crpcut::timeout_multiplier();
+      const long factor = long(crpcut::timeout_multiplier());
       clock_t deadline = (t.tms_utime + t.tms_stime + clocks_per_tick)*factor;
       ASSERT_SCOPE_MAX_CPUTIME_MS(900)
       {
@@ -251,7 +251,7 @@ TESTSUITE(timeouts)
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
       times(&t);
-      const size_t factor = crpcut::timeout_multiplier();
+      const long factor = long(crpcut::timeout_multiplier());
       clock_t deadline = (t.tms_utime + t.tms_stime + clocks_per_tick) * factor;
       VERIFY_SCOPE_MAX_CPUTIME_MS(900)
       {

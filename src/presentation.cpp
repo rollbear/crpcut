@@ -36,15 +36,15 @@
 
 namespace crpcut {
 
-  int show_test_results(int                presentation_fd,
-                        int                output_fd,
-                        output::buffer    &buffer,
-                        output::formatter &fmt,
-                        output::buffer    &summary_buffer,
-                        output::formatter &summary_fmt,
-                        bool               verbose,
-                        const char        *working_dir,
-                        registrator_list  &reg)
+  unsigned show_test_results(int                presentation_fd,
+                             int                output_fd,
+                             output::buffer    &buffer,
+                             output::formatter &fmt,
+                             output::buffer    &summary_buffer,
+                             output::formatter &summary_fmt,
+                             bool               verbose,
+                             const char        *working_dir,
+                             registrator_list  &reg)
   {
     comm::rfile_descriptor presenter_pipe(presentation_fd);
 
