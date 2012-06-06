@@ -310,14 +310,14 @@ namespace crpcut {
   test_case_factory
   ::tests_as_child_procs()
   {
-    return !obj().cli_->single_shot_mode();
+    return !cli_->single_shot_mode();
   }
 
   bool
   test_case_factory
   ::timeouts_enabled()
   {
-    return obj().cli_->honour_timeouts();
+    return cli_->honour_timeouts();
   }
 
   unsigned
