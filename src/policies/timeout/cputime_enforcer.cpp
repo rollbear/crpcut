@@ -34,7 +34,7 @@ namespace crpcut {
 
       cputime_enforcer
       ::cputime_enforcer(unsigned long timeout_ms)
-        : duration_ms(timeout_ms * timeout_slowdown_factor()),
+        : duration_ms(timeout_ms * timeout_multiplier()),
           start_timestamp_ms(clocks::cputime::timestamp_ms_absolute())
       {
         if (timeout_ms && timeouts_are_enabled())

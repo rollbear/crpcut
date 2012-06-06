@@ -39,7 +39,7 @@ TESTSUITE(timeouts)
        DEADLINE_REALTIME_MS(200),
        NO_CORE_FILE)
   {
-    usleep(50000*crpcut::timeout_slowdown_factor());
+    usleep(50000*crpcut::timeout_multiplier());
   }
 
   TEST(should_fail_slow_realtime_deadline,
@@ -47,12 +47,12 @@ TESTSUITE(timeouts)
        NO_CORE_FILE,
        WITH_TEST_TAG(slow))
   {
-    usleep(200000*crpcut::timeout_slowdown_factor());
+    usleep(200000*crpcut::timeout_multiplier());
   }
 
   TEST(should_succeed_slow_cputime_deadline, DEADLINE_CPU_MS(100), NO_CORE_FILE)
   {
-    usleep(300000*crpcut::timeout_slowdown_factor());
+    usleep(300000*crpcut::timeout_multiplier());
     // should usleep busy-wait, this test would fail miserably
   }
 
@@ -65,7 +65,7 @@ TESTSUITE(timeouts)
     const clock_t ticks_per_sec = sysconf(_SC_CLK_TCK);
     tms t;
     times(&t);
-    const size_t factor = crpcut::timeout_slowdown_factor();
+    const size_t factor = crpcut::timeout_multiplier();
     clock_t deadline = (t.tms_utime + t.tms_stime + ticks_per_sec/5)*factor;
     for (;;)
       {
@@ -92,7 +92,7 @@ TESTSUITE(timeouts)
        NO_CORE_FILE,
        WITH_TEST_TAG(slow))
   {
-    sleep(2*crpcut::timeout_slowdown_factor());
+    sleep(2*crpcut::timeout_multiplier());
   }
 
   template <bool constructor_cond, bool destructor_cond>
@@ -135,7 +135,7 @@ TESTSUITE(timeouts)
          EXPECT_REALTIME_TIMEOUT_MS(100),
          WITH_TEST_TAG(slow))
       {
-        sleep(2*crpcut::timeout_slowdown_factor());
+        sleep(2*crpcut::timeout_multiplier());
       }
 
     TEST(should_fail_early_return,
@@ -157,7 +157,7 @@ TESTSUITE(timeouts)
          DEADLINE_CPU_MS(10),
          WITH_TEST_TAG(slow))
     {
-      sleep(3*crpcut::timeout_slowdown_factor());
+      sleep(3*crpcut::timeout_multiplier());
     }
 
   }
@@ -169,7 +169,7 @@ TESTSUITE(timeouts)
     {
       ASSERT_SCOPE_MAX_REALTIME_MS(10)
       {
-        usleep(1000*crpcut::timeout_slowdown_factor());
+        usleep(1000*crpcut::timeout_multiplier());
       }
     }
 
@@ -177,7 +177,7 @@ TESTSUITE(timeouts)
     {
       ASSERT_SCOPE_MAX_REALTIME_MS(15)
       {
-        usleep(20000*crpcut::timeout_slowdown_factor());
+        usleep(20000*crpcut::timeout_multiplier());
       }
     }
 
@@ -187,7 +187,7 @@ TESTSUITE(timeouts)
       {
         ASSERT_SCOPE_MAX_CPUTIME_MS(5)
         {
-          usleep(40000*crpcut::timeout_slowdown_factor());
+          usleep(40000*crpcut::timeout_multiplier());
         }
       }
     }
@@ -199,7 +199,7 @@ TESTSUITE(timeouts)
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
       times(&t);
-      const size_t factor = crpcut::timeout_slowdown_factor();
+      const size_t factor = crpcut::timeout_multiplier();
       clock_t deadline = (t.tms_utime + t.tms_stime + clocks_per_tick)*factor;
       ASSERT_SCOPE_MAX_CPUTIME_MS(900)
       {
@@ -220,7 +220,7 @@ TESTSUITE(timeouts)
     {
       VERIFY_SCOPE_MAX_REALTIME_MS(10)
       {
-        usleep(1000 * crpcut::timeout_slowdown_factor());
+        usleep(1000 * crpcut::timeout_multiplier());
       }
       INFO << "after";
     }
@@ -229,7 +229,7 @@ TESTSUITE(timeouts)
     {
       VERIFY_SCOPE_MAX_REALTIME_MS(15)
       {
-        usleep(20000*crpcut::timeout_slowdown_factor());
+        usleep(20000*crpcut::timeout_multiplier());
       }
       INFO << "after";
     }
@@ -240,7 +240,7 @@ TESTSUITE(timeouts)
       {
         VERIFY_SCOPE_MAX_CPUTIME_MS(5)
         {
-          usleep(40000*crpcut::timeout_slowdown_factor());
+          usleep(40000*crpcut::timeout_multiplier());
         }
       }
       INFO << "after";
@@ -251,7 +251,7 @@ TESTSUITE(timeouts)
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
       times(&t);
-      const size_t factor = crpcut::timeout_slowdown_factor();
+      const size_t factor = crpcut::timeout_multiplier();
       clock_t deadline = (t.tms_utime + t.tms_stime + clocks_per_tick) * factor;
       VERIFY_SCOPE_MAX_CPUTIME_MS(900)
       {

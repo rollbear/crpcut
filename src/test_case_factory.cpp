@@ -322,9 +322,9 @@ namespace crpcut {
 
   unsigned
   test_case_factory
-  ::timeout_slowdown_factor()
+  ::timeout_multiplier()
   {
-    return obj().cli_->timeout_slowdown_factor();
+    return cli_->timeout_multiplier();
   }
 
   bool

@@ -2983,7 +2983,7 @@ namespace crpcut {
                          size_t len, const char *buff);
 
   bool timeouts_are_enabled();
-  unsigned timeout_slowdown_factor();
+  unsigned timeout_multiplier();
   bool is_backtrace_enabled();
   bool tests_as_child_processes();
   const char *get_output_charset();
@@ -4532,7 +4532,7 @@ namespace crpcut
   if (const crpcut::scope::time_base& CRPCUT_LOCAL_NAME(time_scope)     \
       = crpcut::scope::time<crpcut::comm::action,                       \
                             crpcut::scope::time_base::type,             \
-                            crpcut::scope::time_base::clock>(ms*crpcut::timeout_slowdown_factor(), \
+                            crpcut::scope::time_base::clock>(ms*crpcut::timeout_multiplier(), \
                                                              __FILE__,  \
                                                              __LINE__)) \
     { CRPCUT_LOCAL_NAME(time_scope).silence_warning(); } else           \

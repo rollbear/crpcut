@@ -99,9 +99,9 @@ namespace crpcut {
     return test_case_factory::obj().timeouts_enabled();
   }
 
-  unsigned timeout_slowdown_factor()
+  unsigned timeout_multiplier()
   {
-    return test_case_factory::obj().timeout_slowdown_factor();
+    return test_case_factory::obj().timeout_multiplier();
   }
 
   bool tests_as_child_processes()

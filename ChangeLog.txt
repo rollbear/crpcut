@@ -1,4 +1,4 @@
-         * By request, a command line option -S factor / --slowdown=factor,
+         * By request, a command line option --timeout-multiplier=factor,
            where factor is a positive integer, has been added. It extends all
            timeouts. This can be useful if unit tests are run by a continuous
            integration tool and are run in a very slow environment, like

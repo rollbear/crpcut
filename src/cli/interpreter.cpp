@@ -90,7 +90,7 @@ namespace crpcut {
                      "Run only one test case, and run it in the main process\n"
                      "for ease of debugging",
                      list_),
-        slowdown_('S', "slowdown", "factor",
+        timeout_multiplier_(0, "timeout-multiplier", "factor",
                   "Multiply all timeout times with a factor",
                   list_),
         disable_timeouts_('t', "disable-timeouts",
@@ -197,8 +197,8 @@ namespace crpcut {
       throw_if_illegal_combination(list_tags_, tags_);
       throw_if_illegal_combination(list_tags_, verbose_);
       throw_if_illegal_combination(list_tags_, xml_);
-      throw_if_illegal_combination(slowdown_ ,disable_timeouts_);
-      throw_if_illegal_combination(slowdown_, single_shot_);
+      throw_if_illegal_combination(timeout_multiplier_ ,disable_timeouts_);
+      throw_if_illegal_combination(timeout_multiplier_, single_shot_);
 
       if (xml_output() && output_charset())
         {
@@ -214,10 +214,10 @@ namespace crpcut {
           throw param::exception(os.str());
         }
 
-      if (slowdown_ && slowdown_.get_value() == 0)
+      if (timeout_multiplier_ && timeout_multiplier_.get_value() == 0)
         {
           std::ostringstream os;
-          slowdown_.syntax(os) << " - factor must be at least 1";
+          timeout_multiplier_.syntax(os) << " - factor must be at least 1";
           throw param::exception(os.str());
         }
       return rv;
@@ -324,9 +324,9 @@ namespace crpcut {
 
     unsigned
     interpreter
-    ::timeout_slowdown_factor() const
+    ::timeout_multiplier() const
     {
-      return slowdown_ ? slowdown_.get_value() : 1U;
+      return timeout_multiplier_ ? timeout_multiplier_.get_value() : 1U;
     }
 
     bool
