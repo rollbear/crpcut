@@ -1352,6 +1352,7 @@ namespace crpcut {
       class crpcut_default_handler
       {
       public:
+        virtual ~crpcut_default_handler(); // make eclipse happy
         virtual bool crpcut_core_dumps_allowed() const;
       };
 
