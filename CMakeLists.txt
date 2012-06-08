@@ -152,6 +152,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/output/writer_test.cpp
      src/dogfood/output/xml_formatter_test.cpp
      src/dogfood/policies/core_dumps_test.cpp
+     src/dogfood/policies/deaths_test.cpp
      src/dogfood/policies/exception_translator_test.cpp
      src/dogfood/posix_error_test.cpp
      src/dogfood/presentation_output_test.cpp
