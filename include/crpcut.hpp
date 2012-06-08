@@ -3716,9 +3716,7 @@ namespace crpcut {
     test_suite_base();
   public:
     void add_case(crpcut_test_case_registrator* r);
-    void report_success();
   private:
-    unsigned num_containing_cases;
     crpcut_test_case_registrator *list;
   };
 

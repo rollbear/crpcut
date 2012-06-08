@@ -30,8 +30,7 @@ namespace crpcut {
 
   test_suite_base
   ::test_suite_base()
-    : num_containing_cases(0),
-      list(0)
+    : list(0)
   {
   }
 
@@ -39,20 +38,9 @@ namespace crpcut {
   test_suite_base
   ::add_case(crpcut_test_case_registrator* r)
   {
-    ++num_containing_cases;
     r->suite_list_ = list;
     list = r;
     r->crpcut_add(this);
   }
 
-  void
-  test_suite_base
-  ::report_success()
-  {
-    --num_containing_cases;
-    if (num_containing_cases == 0) // now everything that depends on this
-      {                            // case may run.
-        crpcut_register_success();
-      }
-  }
 }
