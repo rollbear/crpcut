@@ -147,6 +147,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/namespace_info_test.cpp
      src/dogfood/output/heap_buffer_test.cpp
      src/dogfood/output/formatter_test.cpp
+     src/dogfood/output/nil_formatter_test.cpp
      src/dogfood/output/text_formatter_test.cpp
      src/dogfood/output/text_modifier_test.cpp
      src/dogfood/output/writer_test.cpp
