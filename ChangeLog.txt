@@ -1,3 +1,5 @@
+2012-06-12 1.8.1
+
          * --timeout-multiplier=factor now also has effect on fixture
            construction and destruction timeouts.
 
