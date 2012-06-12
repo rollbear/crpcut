@@ -181,13 +181,23 @@ TESTSUITE(output)
       ASSERT_TRUE(rv == N - 1);
     }
 
-#define ASSERT_INTEGER_WRITE(t, n, s) assert_integer_write((t)(n ## s), #n)
+#define APPLY(x, ...) x(__VA_ARGS__)
+#define COUNT_(a0,a1,n, ...) n
+#define COUNT(...) COUNT_(__VA_ARGS__,2,1,0)
+#define FIRST(n, ...) n
+
+#define CONCAT1(a) a
+#define CONCAT2(a,b) a ## b
+#define CONCAT(...) APPLY(CRPCUT_CONCAT, CONCAT, COUNT(__VA_ARGS__))(__VA_ARGS__)
+#define ASSERT_INTEGER_WRITE(t, ...)                                    \
+    assert_integer_write((t)(CONCAT(__VA_ARGS__)),                      \
+                         APPLY(CRPCUT_STRINGIZE, FIRST(__VA_ARGS__, dummy)))
 
     TEST(integer_writes)
     {
-      ASSERT_INTEGER_WRITE(short, -32760,);
+      ASSERT_INTEGER_WRITE(short, -32760);
       ASSERT_INTEGER_WRITE(unsigned short, 65530, U);
-      ASSERT_INTEGER_WRITE(int, -2000000000,);
+      ASSERT_INTEGER_WRITE(int, -2000000000);
       ASSERT_INTEGER_WRITE(unsigned, 4000000000, U);
     }
 
