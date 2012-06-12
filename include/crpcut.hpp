@@ -1367,6 +1367,7 @@ namespace crpcut {
       class crpcut_none
       {
       public:
+        crpcut_none() {}
         virtual ~crpcut_none() {}
         virtual bool crpcut_is_expected_exit(int) const;
         virtual bool crpcut_is_expected_signal(int) const;
