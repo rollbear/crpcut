@@ -53,9 +53,9 @@ namespace crpcut {
                                 const crpcut_test_case_registrator *reg);
     virtual void present(pid_t pid, comm::type t, test_phase phase,
                          size_t len, const char *buff);
-    virtual bool tests_as_child_procs();
-    virtual bool timeouts_enabled();
-    virtual unsigned timeout_multiplier();
+    virtual bool tests_as_child_procs() const;
+    virtual bool timeouts_enabled() const;
+    virtual unsigned timeout_multiplier() const;
     virtual void set_deadline(crpcut_test_case_registrator *i);
     virtual void clear_deadline(crpcut_test_case_registrator *i);
     virtual void return_dir(unsigned num);

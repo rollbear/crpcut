@@ -308,21 +308,21 @@ namespace crpcut {
 
   bool
   test_case_factory
-  ::tests_as_child_procs()
+  ::tests_as_child_procs() const
   {
     return !cli_->single_shot_mode();
   }
 
   bool
   test_case_factory
-  ::timeouts_enabled()
+  ::timeouts_enabled() const
   {
     return cli_->honour_timeouts();
   }
 
   unsigned
   test_case_factory
-  ::timeout_multiplier()
+  ::timeout_multiplier() const
   {
     return cli_->timeout_multiplier();
   }

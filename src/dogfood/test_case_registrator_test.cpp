@@ -44,8 +44,8 @@ TESTSUITE(test_case_registrator)
   class mock_factory : public crpcut::test_case_factory
   {
   public:
-    MOCK_METHOD0(tests_as_child_procs, bool());
-    MOCK_METHOD0(timeouts_enabled, bool());
+    MOCK_CONST_METHOD0(tests_as_child_procs, bool());
+    MOCK_CONST_METHOD0(timeouts_enabled, bool());
     MOCK_METHOD2(introduce_test, void(pid_t,
                                       const crpcut::crpcut_test_case_registrator *));
     MOCK_METHOD5(present, void(pid_t, crpcut::comm::type, crpcut::test_phase,
@@ -54,6 +54,7 @@ TESTSUITE(test_case_registrator)
     MOCK_METHOD1(clear_deadline, void(crpcut::crpcut_test_case_registrator*));
     MOCK_METHOD1(return_dir, void(unsigned));
     MOCK_METHOD1(calc_cputime, unsigned long(const struct timeval&));
+    MOCK_CONST_METHOD0(timeout_multiplier, unsigned());
   };
 
   class mock_reporter : public crpcut::comm::reporter
@@ -311,26 +312,61 @@ TESTSUITE(test_case_registrator)
 
   TESTSUITE(prepare_construction)
   {
-    TEST(reports_deadline_if_run_as_child_process, fix<10U>)
+    TEST(reports_deadline_multiplied_if_timeouts_are_enabled, fix<10U>)
     {
-      EXPECT_CALL(factory, tests_as_child_procs()).
-          WillOnce(Return(true));
+      unsigned factor = 20;
+      unsigned requested_timeout = 100;
 
-      unsigned long result = 100U;
+      EXPECT_CALL(factory, timeouts_enabled()).
+        WillOnce(Return(true));
+
+      EXPECT_CALL(factory, timeout_multiplier()).
+        WillOnce(Return(factor));
+      unsigned long result = requested_timeout*factor;
       const void *addr = &result;
       const char *result_str = static_cast<const char*>(addr);
       EXPECT_CALL(reporter, report(crpcut::comm::set_timeout, _, sizeof(result))).
           With(Args<1,2>(ElementsAreArray(result_str, sizeof(result))));
-      reg.prepare_construction(100U);
+      reg.prepare_construction(requested_timeout);
     }
 
-    TEST(does_nothing_if_not_run_as_child_process, fix<10U>)
+    TEST(does_nothing_if_timeouts_are_disabled, fix<10U>)
     {
-      EXPECT_CALL(factory, tests_as_child_procs()).
+      EXPECT_CALL(factory, timeouts_enabled()).
           WillOnce(Return(false));
       reg.prepare_construction(100U);
     }
   }
+
+  TESTSUITE(prepare_destruction)
+  {
+    TEST(reports_deadline_multiplied_if_timeouts_are_enabled, fix<10U>)
+    {
+      unsigned factor = 20;
+      unsigned requested_timeout = 100;
+
+      EXPECT_CALL(factory, timeouts_enabled()).
+        WillOnce(Return(true));
+
+      EXPECT_CALL(factory, timeout_multiplier()).
+        WillOnce(Return(factor));
+
+      unsigned long result = requested_timeout*factor;
+      const void *addr = &result;
+      const char *result_str = static_cast<const char*>(addr);
+      EXPECT_CALL(reporter, report(crpcut::comm::set_timeout, _, sizeof(result))).
+          With(Args<1,2>(ElementsAreArray(result_str, sizeof(result))));
+      reg.prepare_destruction(requested_timeout);
+    }
+
+    TEST(does_nothing_if_timeouts_are_disabled, fix<10U>)
+    {
+      EXPECT_CALL(factory, timeouts_enabled()).
+          WillOnce(Return(false));
+      reg.prepare_destruction(100U);
+    }
+  }
+
 
   TESTSUITE(manage_test_case_execution)
   {

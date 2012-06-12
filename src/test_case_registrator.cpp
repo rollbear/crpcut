@@ -186,9 +186,10 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::prepare_construction(unsigned long deadline)
   {
-    if (factory_->tests_as_child_procs())
+    if (factory_->timeouts_enabled())
       {
-        (*reporter_)(comm::set_timeout, deadline);
+        unsigned long req = deadline*factory_->timeout_multiplier();
+        (*reporter_)(comm::set_timeout, req);
       }
   }
 
@@ -203,9 +204,10 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::prepare_destruction(unsigned long deadline)
   {
-    if (factory_->tests_as_child_procs())
+    if (factory_->timeouts_enabled())
       {
-        (*reporter_)(comm::set_timeout, deadline);
+        unsigned long req = deadline*factory_->timeout_multiplier();
+        (*reporter_)(comm::set_timeout, req);
       }
   }
 

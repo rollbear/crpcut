@@ -1,10 +1,13 @@
+         * --timeout-multiplier=factor now also has effect on fixture
+           construction and destruction timeouts.
+
 2012-06-06 1.8.0
 
          * By request, a command line option --timeout-multiplier=factor,
-           where factor is a positive integer, has been added. It extends all
-           timeouts. This can be useful if unit tests are run by a continuous
-           integration tool and are run in a very slow environment, like
-           under valgrind or a code coverage tool.
+           where factor is a positive integer, has been added. It extends
+           all timeouts. This can be useful if unit tests are run by a
+           continuous integration tool and are run in a very slow
+           environment, like under valgrind or a code coverage tool.
 
          * Fixed an output buffering bug where deallocated memory could
            be accessed.
