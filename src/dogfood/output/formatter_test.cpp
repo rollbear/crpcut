@@ -42,16 +42,15 @@ TESTSUITE(output)
     class access : public crpcut::output::formatter
     {
     public:
-      using crpcut::output::formatter::phase_str;
+      using formatter::phase_str;
     };
     TEST(phase_strings_are_correct)
     {
-      typedef access a;
-      ASSERT_TRUE(a::phase_str(crpcut::creating)    == S(creating));
-      ASSERT_TRUE(a::phase_str(crpcut::running)     == S(running));
-      ASSERT_TRUE(a::phase_str(crpcut::destroying)  == S(destroying));
-      ASSERT_TRUE(a::phase_str(crpcut::post_mortem) == S(post_mortem));
-      ASSERT_TRUE(a::phase_str(crpcut::child)       == S(child));
+      ASSERT_TRUE(access::phase_str(crpcut::creating)    == S(creating));
+      ASSERT_TRUE(access::phase_str(crpcut::running)     == S(running));
+      ASSERT_TRUE(access::phase_str(crpcut::destroying)  == S(destroying));
+      ASSERT_TRUE(access::phase_str(crpcut::post_mortem) == S(post_mortem));
+      ASSERT_TRUE(access::phase_str(crpcut::child)       == S(child));
     }
   }
 }
