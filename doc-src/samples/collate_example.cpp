@@ -60,7 +60,7 @@ public:
     while (b != e)
       {
         INFO << *i << "<=" << *b;
-        ASSERT_PRED(crpcut::collate(*i, std::locale(locname)) <= *b);
+        ASSERT_TRUE(crpcut::collate(*i, std::locale(locname)) <= *b);
         i = b++;
       }
   }

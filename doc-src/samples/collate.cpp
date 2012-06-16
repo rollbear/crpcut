@@ -33,14 +33,14 @@ char str2_utf8[] = { 'z', '\xc3', '\xb6', 0};
 
 TEST(in_german_locale)
 {
-  ASSERT_PRED(crpcut::collate(str1_utf8, std::locale("de_DE.utf8")) < str2_utf8);
-  ASSERT_PRED(crpcut::collate(str1_utf8, std::locale("de_DE.utf8")) > str2_utf8);
+  ASSERT_TRUE(crpcut::collate(str1_utf8, std::locale("de_DE.utf8")) < str2_utf8);
+  ASSERT_TRUE(crpcut::collate(str1_utf8, std::locale("de_DE.utf8")) > str2_utf8);
 }
 
 TEST(in_swedish_locale)
 {
-  ASSERT_PRED(crpcut::collate(str1_utf8, std::locale("sv_SE.utf8")) < str2_utf8);
-  ASSERT_PRED(crpcut::collate(str1_utf8, std::locale("sv_SE.utf8")) > str2_utf8);
+  ASSERT_TRUE(crpcut::collate(str1_utf8, std::locale("sv_SE.utf8")) < str2_utf8);
+  ASSERT_TRUE(crpcut::collate(str1_utf8, std::locale("sv_SE.utf8")) > str2_utf8);
 }
 
 int main(int argc, char *argv[])

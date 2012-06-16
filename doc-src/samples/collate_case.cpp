@@ -29,12 +29,12 @@
 
 TEST(case_insensitive_pass)
 {
-  ASSERT_PRED(crpcut::collate<crpcut::lowercase>("Name") == "name");
+  ASSERT_TRUE(crpcut::collate<crpcut::lowercase>("Name") == "name");
 }
 
 TEST(case_sensitive_fail)
 {
-  ASSERT_PRED(crpcut::collate<crpcut::verbatim>("Name") == "name");
+  ASSERT_TRUE(crpcut::collate<crpcut::verbatim>("Name") == "name");
 }
 
 int main(int argc, char *argv[])
