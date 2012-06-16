@@ -24,7 +24,7 @@
 #  SUCH DAMAGE.
 
 AWK=$1
-DIR=$2
+DIR="$2"
 
 DISABLED=1
 BLOCKED=7
@@ -84,13 +84,13 @@ do
     reportfile=/tmp/crpcut_sanity_report$$_$(($n/2+1))
     ./test/testprog -x -p apa=katt -p numeric=010 $param > $filename
     rv=$?
-    xmllint --noout --schema $DIR/crpcut.xsd $filename 2> /dev/null || {
+    xmllint --noout --schema "$DIR/crpcut.xsd" $filename 2> /dev/null || {
         echo "$filename violates crpcut.xsd XML Schema"
         exit 1
     }
     r=()
     lineno=0
-    $AWK -f $DIR/filter.awk -- registered=$REG rv=$rv $expect < $filename > $reportfile
+    $AWK -f "$DIR/filter.awk" -- registered=$REG rv=$rv $expect < $filename > $reportfile
     [ $? == 0 ] || {
         echo FAILED
         cat $reportfile
@@ -104,3 +104,4 @@ do
     n=$(($n+2))
 done
 rm apafil
+exit 0
