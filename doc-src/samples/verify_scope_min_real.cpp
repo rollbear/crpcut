@@ -26,8 +26,11 @@
 
 
 #include <crpcut.hpp>
-#include <sys/times.h>
-
+extern "C"
+{
+#  include <unistd.h>
+#  include <sys/times.h>
+}
 TEST(sleeps)
 {
   VERIFY_SCOPE_MIN_REALTIME_MS(5)

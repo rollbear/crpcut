@@ -28,7 +28,8 @@
 
 extern "C"
 {
-#include <signal.h>
+#  include <signal.h>
+#  include <unistd.h>
 }
 
 TEST(fail_too_quick, EXPECT_REALTIME_TIMEOUT_MS(100))

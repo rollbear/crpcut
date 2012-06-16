@@ -26,8 +26,11 @@
 
 
 #include <crpcut.hpp>
-#include <sys/times.h>
-
+extern "C"
+{
+#  include <unistd.h>
+#  include <sys/times.h>
+}
 TEST(long_real_time_short_cpu_time)
 {
   ASSERT_SCOPE_MAX_CPUTIME_MS(3)

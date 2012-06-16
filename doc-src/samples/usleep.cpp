@@ -26,7 +26,10 @@
 
 
 #include <crpcut.hpp>
-
+extern "C"
+{
+#  include <unistd.h>
+}
 TEST(verify_time_consumption_of_usleep)
 {
   ASSERT_SCOPE_MIN_REALTIME_MS(99)
