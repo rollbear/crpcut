@@ -620,13 +620,19 @@ extern "C"
 
 }
 
-
-void *operator new(size_t s) throw (std::bad_alloc)
+#if __cplusplus == 201103L
+#define THROW(...)
+#define NOTHROW noexcept
+#else
+#define THROW(...) throw (__VA_ARGS__)
+#define NOTHROW throw ()
+#endif
+void *operator new(size_t s) THROW (std::bad_alloc)
 {
   return crpcut::heap::alloc_new_mem(s, by_new_elem);
 }
 
-void *operator new(size_t s, const std::nothrow_t&) throw ()
+void *operator new(size_t s, const std::nothrow_t&) NOTHROW
 {
   try {
     return crpcut::heap::alloc_new_mem(s, by_new_elem);
@@ -636,12 +642,12 @@ void *operator new(size_t s, const std::nothrow_t&) throw ()
   return 0;
 }
 
-void *operator new[](size_t s) throw (std::bad_alloc)
+void *operator new[](size_t s) THROW (std::bad_alloc)
 {
   return crpcut::heap::alloc_new_mem(s, by_new_array);
 }
 
-void *operator new[](size_t s, const std::nothrow_t&) throw ()
+void *operator new[](size_t s, const std::nothrow_t&) NOTHROW
 {
   try {
     return crpcut::heap::alloc_new_mem(s, by_new_array);
@@ -651,22 +657,22 @@ void *operator new[](size_t s, const std::nothrow_t&) throw ()
   return 0;
 }
 
-void operator delete[](void *p) throw ()
+void operator delete[](void *p) NOTHROW
 {
   crpcut::heap::free_mem(p, by_new_array);
 }
 
-void operator delete[](void *p, const std::nothrow_t&) throw ()
+void operator delete[](void *p, const std::nothrow_t&) NOTHROW
 {
   crpcut::heap::free_mem(p, by_new_array);
 }
 
-void operator delete(void *p) throw ()
+void operator delete(void *p) NOTHROW
 {
   crpcut::heap::free_mem(p, by_new_elem);
 }
 
-void operator delete(void *p, const std::nothrow_t&) throw ()
+void operator delete(void *p, const std::nothrow_t&) NOTHROW
 {
   crpcut::heap::free_mem(p, by_new_elem);
 }
