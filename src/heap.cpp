@@ -31,12 +31,24 @@
 #include <valgrind/valgrind.h>
 #include <valgrind/memcheck.h>
 namespace {
-  inline void valgrind_create_mempool(void *a,size_t b,bool c) { VALGRIND_CREATE_MEMPOOL(a,b,c); }
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
   inline void valgrind_make_mem_noaccess(void *a, size_t  b) { VALGRIND_MAKE_MEM_NOACCESS(a, b);}
   inline void valgrind_make_mem_undefined(void *a, size_t b) { VALGRIND_MAKE_MEM_UNDEFINED(a, b);}
   inline void valgrind_make_mem_defined(void *a, size_t b) { VALGRIND_MAKE_MEM_DEFINED(a, b);}
+#if defined(__GNUC__) && __GNUC_PREREQ(4,6)
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
+  inline void valgrind_create_mempool(void *a,size_t b,bool c) { VALGRIND_CREATE_MEMPOOL(a,b,c);}
   inline void valgrind_mempool_free(void *a, void  *b) { VALGRIND_MEMPOOL_FREE(a, b);}
   inline void valgrind_mempool_alloc(void *a, void *b, size_t c) { VALGRIND_MEMPOOL_ALLOC(a, b, c);}
+#if defined(__GNUC__) && __GNUC_PREREQ(4,6)
+#pragma GCC diagnostic warning "-Wunused-but-set-variable"
+#endif
+#ifdef __GNUC__
+#pragma GCC diagnostic warning "-Wconversion"
+#endif
 }
 #else
 namespace {
