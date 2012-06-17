@@ -2117,7 +2117,7 @@ namespace crpcut {
     typedef typename param_traits<T1>::type type1;
     typedef typename param_traits<T2>::type type2;
   public:
-    tester_t(const char *loc, const char *ops, comm::reporter &report = comm::report)
+    tester_t(const char *loc, const char *ops, comm::reporter &report)
       : tester_base(loc, ops, report)
     {
     }
@@ -2152,7 +2152,7 @@ namespace crpcut {
   {
     typedef typename param_traits<T1>::type type1;
   public:
-    tester_t(const char *loc, const char *ops, comm::reporter &report = comm::report)
+    tester_t(const char *loc, const char *ops, comm::reporter &report)
       : tester_base(loc, ops, report)
     {
     }
@@ -2193,7 +2193,7 @@ namespace crpcut {
   {
     typedef typename param_traits<T2>::type type2;
   public:
-    tester_t(const char *loc, const char *ops, comm::reporter &report = comm::report)
+    tester_t(const char *loc, const char *ops, comm::reporter &report)
       : tester_base(loc, ops, report)
     {
     }
@@ -2233,11 +2233,11 @@ namespace crpcut {
   tester_t<action,
            typename if_else<null1, void, T1>::type,
            typename if_else<null2, void, T2>::type>
-  tester(const char *loc, const char *op)
+  tester(const char *loc, const char *op, comm::reporter & report = comm::report)
   {
     tester_t<action,
              typename if_else<null1, void, T1>::type,
-             typename if_else<null2, void, T2>::type> v(loc, op);
+             typename if_else<null2, void, T2>::type> v(loc, op, report);
     return v;
   }
 
