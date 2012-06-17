@@ -2075,8 +2075,8 @@ namespace crpcut {
   class tester_base
   {
   protected:
-    tester_base(const char *loc, const char *ops)
-      : location(loc), op(ops)
+    tester_base(const char *loc, const char *ops, comm::reporter &report)
+      : location_(loc), op_(ops), report_(report)
     {
     }
     template <comm::type action, typename T1, typename T2>
@@ -2087,9 +2087,9 @@ namespace crpcut {
           heap::set_limit(heap::system);
           using std::ostringstream;
           ostringstream os;
-          os << location
+          os << location_
              << "\n" << crpcut_check_name<action>::string()
-             << "_" << op << "(" << n1 << ", " << n2 << ")";
+             << "_" << op_ << "(" << n1 << ", " << n2 << ")";
 
           static const char *prefix[] = { "\n  where ", "\n        " };
           bool prev = stream_param(os, prefix[0], n1, v1);
@@ -2102,12 +2102,13 @@ namespace crpcut {
           std::string().swap(s);
           os.~ostringstream();
           new (&os) ostringstream();
-          comm::report(action, p, len);
+          this->report_(action, p, len);
         }
       }
   private:
-    const char *location;
-    const char *op;
+    const char *location_;
+    const char *op_;
+    comm::reporter &report_;
   };
 
   template <comm::type action, typename T1, typename T2>
@@ -2116,7 +2117,10 @@ namespace crpcut {
     typedef typename param_traits<T1>::type type1;
     typedef typename param_traits<T2>::type type2;
   public:
-    tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
+    tester_t(const char *loc, const char *ops, comm::reporter &report = comm::report)
+      : tester_base(loc, ops, report)
+    {
+    }
     void EQ(type1 v1, const char *n1, type2 v2, const char *n2) const
     {
       verify<action, type1, type2>(v1 == v2, v1, n1, v2, n2);
@@ -2148,7 +2152,10 @@ namespace crpcut {
   {
     typedef typename param_traits<T1>::type type1;
   public:
-    tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
+    tester_t(const char *loc, const char *ops, comm::reporter &report = comm::report)
+      : tester_base(loc, ops, report)
+    {
+    }
     template <typename T2>
     void EQ(type1 v1, const char *n1, T2 v2, const char *n2) const
     {
@@ -2186,7 +2193,10 @@ namespace crpcut {
   {
     typedef typename param_traits<T2>::type type2;
   public:
-    tester_t(const char *loc, const char *ops) : tester_base(loc, ops) {}
+    tester_t(const char *loc, const char *ops, comm::reporter &report = comm::report)
+      : tester_base(loc, ops, report)
+    {
+    }
     template <typename T1>
     void EQ(T1 v1, const char *n1, type2 v2, const char *n2) const
     {
@@ -2217,27 +2227,6 @@ namespace crpcut {
     {
       verify<action, T1, type2>(0 <= v2, v1, n1, v2, n2);
     }
-  };
-
-  template <comm::type action>
-  class tester_t<action, void, void> /* pretty bizarre */ : tester_base
-  {
-  public:
-    void EQ(int, const char*,int, const char*) const { }
-    void NE(int, const char *n1, int, const char *n2) const
-    {
-      verify<action, int,int>(false, 0, n1, 0, n2);
-    }
-    void GT(int, const char *n1, int, const char *n2) const
-    {
-      verify<action, int,int>(false, 0, n1, 0, n2);
-    }
-    void GE(int, const char*, int, const char *) const { }
-    void LT(int, const char *n1, int, const char *n2) const
-    {
-      verify<action, int,int>(false, 0, n1, 0, n2);
-    }
-    void LE(int, const char*, int, const char*) const { }
   };
 
   template <comm::type action, bool null1, typename T1, bool null2, typename T2>
