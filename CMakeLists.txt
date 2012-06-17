@@ -126,6 +126,7 @@ file(GLOB LIB_SRCS
 include_directories(include)
 file(GLOB DOGFOOD_SRCS
      src/dogfood/binary_tester_test.cpp
+     src/dogfood/bool_tester_test.cpp
      src/dogfood/buffer_vector_test.cpp
      src/dogfood/check_name_test.cpp
      src/dogfood/cli/activation_param_test.cpp

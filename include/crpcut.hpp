@@ -2267,7 +2267,7 @@ namespace crpcut {
       if (crpcut::eval(v)) {} else { report("TRUE", v, vn); }
     }
     template <typename T>
-    void assert_false(const T& v, const char *vn) const
+    void check_false(const T& v, const char *vn) const
     {
       if (crpcut::eval(v)) { report("FALSE", v, vn); }
     }
@@ -4330,18 +4330,18 @@ namespace crpcut {
 
 
 #ifdef __CDT_PARSER__
-#define CRPCUT_CHECK_FALSE(action, a)           \
-  do {                                          \
-    crpcut::bool_tester<crpcut::comm::action>   \
-    (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))  \
-    .assert_false((a), #a);                     \
+#define CRPCUT_CHECK_FALSE(action, a)                   \
+  do {                                                  \
+    crpcut::bool_tester<crpcut::comm::action>           \
+      (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))        \
+      .check_false((a), #a);                            \
   } while (0)
 
-#define CRPCUT_CHECK_TRUE(action, a)           \
-  do {                                          \
-    crpcut::bool_tester<crpcut::comm::action>   \
-    (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))  \
-    .check_true((a), #a);                     \
+#define CRPCUT_CHECK_TRUE(action, a)                    \
+  do {                                                  \
+    crpcut::bool_tester<crpcut::comm::action>           \
+      (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))        \
+      .check_true((a), #a);                             \
   } while (0)
 
 
@@ -4368,7 +4368,7 @@ namespace crpcut {
     try {                                                               \
       crpcut::bool_tester<crpcut::comm::action>                         \
         (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
-        .assert_false((crpcut::expr::hook()->*a), #a);                  \
+        .check_false((crpcut::expr::hook()->*a), #a);                   \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
         using crpcut::policies::report_unexpected_exception;            \
