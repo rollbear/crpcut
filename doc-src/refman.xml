@@ -2601,11 +2601,13 @@
     <title><type>crpcut::collate</type></title>
     <para>Compare the sort order of strings in a locale.</para>
     <formalpara><title>Used in:</title>
-      <para>An <xref linkend="ASSERT_PRED" xrefstyle="select:title"/> or
-        <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/>.</para>
+      <para>An <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/>,
+        <xref linkend="VERIFY_TRUE" xrefstyle="select:title"/>,
+        <xref linkend="ASSERT_FALSE" xrefstyle="select:title"/> or
+        <xref linkend="VERIFY_FALSE" xrefstyle="select:title"/>.</para>
     </formalpara>
     <para>The basic use syntax is:</para>
-    <function>ASSERT_PRED</function>(<type>crpcut::</type><function>collate</function>(<parameter>reference_string</parameter>, <parameter>locale</parameter>)
+    <function>ASSERT_TRUE</function>(<type>crpcut::</type><function>collate</function>(<parameter>reference_string</parameter>, <parameter>locale</parameter>)
     <symbol> op </symbol> <parameter>tested_string</parameter>)
     <para><parameter>locale</parameter> defaults to the current locale and
       can be left out.</para>

@@ -730,10 +730,10 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
         The result of <type>crpcut::</type><function>collate</function>
         can be compared against a string using the comparison operators
         &lt;, &lt;=, !=, ==, &gt;=, and &gt; using the
-        <xref linkend="ASSERT_PRED" xrefstyle="select:title"/>,
-        <xref linkend="VERIFY_PRED" xrefstyle="select:title"/>,
-        <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/> or the
-        <xref linkend="VERIFY_TRUE" xrefstyle="select:title"/> macro.
+        <xref linkend="ASSERT_TRUE" xrefstyle="select:title"/>,
+        <xref linkend="VERIFY_TRUE" xrefstyle="select:title"/>,
+        <xref linkend="ASSERT_FALSE" xrefstyle="select:title"/> or the
+        <xref linkend="VERIFY_FALSE" xrefstyle="select:title"/> macro.
 macro.
         <note>Operator == in a collation check does not mean strict
           equality, but rather that the left hand side and right hand
