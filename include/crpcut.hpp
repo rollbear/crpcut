@@ -2256,7 +2256,11 @@ namespace crpcut {
   {
     const char *loc_;
   public:
-    bool_tester(const char *loc) : loc_(loc) {}
+    bool_tester(const char *loc, comm::reporter &reporter = comm::report)
+      : loc_(loc),
+        report_(reporter)
+    {
+    }
     template <typename T>
     void check_true(const T& v, const char *vn) const
     {
@@ -2280,8 +2284,10 @@ namespace crpcut {
                                     name,
                                     vn),
                              v);
-      comm::report(action, os);
+      this->report_(action, os);
     }
+
+    comm::reporter &report_;
   };
 
   template <case_convert_type converter>
