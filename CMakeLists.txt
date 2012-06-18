@@ -136,6 +136,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/cli/param_list_test.cpp
      src/dogfood/cli/param_test.cpp
      src/dogfood/cli/value_param_test.cpp
+     src/dogfood/collate_test.cpp
      src/dogfood/comm/data_reader_test.cpp
      src/dogfood/comm/data_writer_test.cpp
      src/dogfood/comm/reporter_test.cpp

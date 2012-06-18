@@ -2783,12 +2783,7 @@ namespace crpcut {
 
     collate_result operator<(const std::string &s) const
     {
-      collate_result rv(compare(s) < 0
-                        ? 0
-                        : s.c_str(),
-                        ref,
-                        locale);
-      return rv;
+      return operator<(s.c_str());
     }
     collate_result operator<(const char *r) const
     {
@@ -2802,12 +2797,7 @@ namespace crpcut {
 
     collate_result operator<=(const std::string &s) const
     {
-      collate_result rv(compare(s) <= 0
-                        ? 0
-                        : s.c_str(),
-                        ref,
-                        locale);
-      return rv;
+      return operator<=(s.c_str());
     }
     collate_result operator<=(const char *r) const
     {
@@ -2821,12 +2811,7 @@ namespace crpcut {
 
     collate_result operator>(const std::string &s) const
     {
-      collate_result rv(compare(s) > 0
-                        ? 0
-                        : s.c_str(),
-                        ref,
-                        locale);
-      return rv;
+      return operator>(s.c_str());
     }
     collate_result operator>(const char *r) const
     {
@@ -2840,13 +2825,9 @@ namespace crpcut {
 
     collate_result operator>=(const std::string &s) const
     {
-      collate_result rv(compare(s) >= 0
-                        ? 0
-                        : s.c_str(),
-                        ref,
-                        locale);
-      return rv;
+      return operator>=(s.c_str());
     }
+
     collate_result operator>=(const char *r) const
     {
       collate_result rv(compare(r) >= 0
@@ -2859,13 +2840,9 @@ namespace crpcut {
 
     collate_result operator==(const std::string &s) const
     {
-      collate_result rv(compare(s) == 0
-                        ? 0
-                        : s.c_str(),
-                        ref,
-                        locale);
-      return rv;
+      return operator==(s.c_str());
     }
+
     collate_result operator==(const char *r) const
     {
       collate_result rv(compare(r) == 0
@@ -2878,13 +2855,9 @@ namespace crpcut {
 
     collate_result operator!=(const std::string &s) const
     {
-      collate_result rv(compare(s) != 0
-                        ? 0
-                        : s.c_str(),
-                        ref,
-                        locale);
-      return rv;
+      return operator!=(s.c_str());
     }
+
     collate_result operator!=(const char *r) const
     {
       collate_result rv(compare(r) != 0

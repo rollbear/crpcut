@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -193,14 +193,14 @@ TESTSUITE(timeouts)
     }
 
     TEST(should_fail_cputime_long,
-         DEADLINE_REALTIME_MS(2000),
+         DEADLINE_REALTIME_MS(3000),
          WITH_TEST_TAG(slow))
     {
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
       times(&t);
       const long factor = long(crpcut::timeout_multiplier());
-      clock_t deadline = (t.tms_utime + t.tms_stime + clocks_per_tick)*factor;
+      clock_t deadline = t.tms_utime + t.tms_stime + clocks_per_tick * factor;
       ASSERT_SCOPE_MAX_CPUTIME_MS(900)
       {
         ASSERT_SCOPE_MIN_REALTIME_MS(1000)
@@ -246,13 +246,13 @@ TESTSUITE(timeouts)
       INFO << "after";
     }
 
-    TEST(should_fail_verify_cputime_long, WITH_TEST_TAG(slow))
+    TEST(should_fail_verify_cputime_long, DEADLINE_REALTIME_MS(3000), WITH_TEST_TAG(slow))
     {
       const clock_t clocks_per_tick = sysconf(_SC_CLK_TCK);
       tms t;
       times(&t);
       const long factor = long(crpcut::timeout_multiplier());
-      clock_t deadline = (t.tms_utime + t.tms_stime + clocks_per_tick) * factor;
+      clock_t deadline = t.tms_utime + t.tms_stime + clocks_per_tick * factor;
       VERIFY_SCOPE_MAX_CPUTIME_MS(900)
       {
         VERIFY_SCOPE_MIN_REALTIME_MS(1000)
