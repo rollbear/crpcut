@@ -1238,7 +1238,7 @@ namespace crpcut {
     class direct_reporter
     {
     public:
-      direct_reporter();
+      direct_reporter(reporter &r = report);
       template <typename V>
       direct_reporter& operator<<(V& v);
       template <typename V>
@@ -1265,6 +1265,7 @@ namespace crpcut {
       direct_reporter& operator=(const direct_reporter&);
       size_t heap_limit;
       std::ostringstream os;
+      reporter& report_;
     };
 
   } // namespace comm
@@ -3303,8 +3304,9 @@ namespace crpcut {
     }
 
     template <comm::type type>
-    direct_reporter<type>::direct_reporter()
-      : heap_limit(heap::set_limit(heap::system))
+    direct_reporter<type>::direct_reporter(reporter &r)
+      : heap_limit(heap::set_limit(heap::system)),
+        report_(r)
     {
     }
 
@@ -3334,8 +3336,8 @@ namespace crpcut {
       char *p = static_cast<char*>(alloca(len));
       s.copy(p, len);
       std::string().swap(s);
+      report_(type, p, len);
       heap::set_limit(heap_limit);
-      report(type, p, len);
     }
 
     template <typename T>

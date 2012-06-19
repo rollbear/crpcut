@@ -139,6 +139,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/collate_test.cpp
      src/dogfood/comm/data_reader_test.cpp
      src/dogfood/comm/data_writer_test.cpp
+     src/dogfood/comm/direct_reporter_test.cpp
      src/dogfood/comm/reporter_test.cpp
      src/dogfood/datatypes/string_traits_test.cpp
      src/dogfood/deadline_monitor_test.cpp
