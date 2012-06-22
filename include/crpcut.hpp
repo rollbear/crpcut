@@ -4027,7 +4027,7 @@ namespace crpcut {
           reporter_(r.reporter_)
       {
         static const unsigned long zero(0UL);
-        limit_ = ~zero;
+        r.limit_ = ~zero;
       }
     private:
       time& operator=(const time&);
