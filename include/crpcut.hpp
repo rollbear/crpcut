@@ -1952,11 +1952,50 @@ namespace crpcut {
     }
   };
 
+  inline void show_value(std::ostream &os, const std::exception &e)
+  {
+    os << "what() == \"" << e.what() << "\"";
+  }
+
+  namespace stream {
+    template <typename T>
+    class is_std_exception
+    {
+      typedef char no;
+      struct yes { char v[2]; };
+      static no func(...);
+      static yes func(std::exception *);
+    public:
+      static const bool value = sizeof(func(static_cast<T*>(0))) == sizeof(yes);
+    };
+
+    template <typename T, bool b = is_std_exception<T>::value>
+    struct value_streamer
+    {
+      static void show_value(std::ostream &os, const T& t)
+      {
+        conditional_streamer<T>::stream(os, t);
+      }
+    };
+
+    template <typename T>
+    struct value_streamer<T, true>
+    {
+      static void show_value(std::ostream &os, const T& t)
+      {
+        const std::exception &e = t;
+        crpcut::show_value(os, e);
+      }
+    };
+
+  }
+
   template <typename T>
   void show_value(std::ostream &os, const T& t)
   {
-    conditional_streamer<T>::stream(os, t);
+    stream::value_streamer<T>::show_value(os, t);
   }
+
 
   template <size_t N, typename T>
   void show_value(std::ostream &os, const T& t)
@@ -1964,10 +2003,6 @@ namespace crpcut {
     conditional_streamer<T, N>::stream(os, t);
   }
 
-  inline void show_value(std::ostream &os, const std::exception &e)
-  {
-    os << "what() == \"" << e.what() << "\"";
-  }
 
 
   class null_cmp

@@ -71,6 +71,12 @@ namespace crpcut {
   {
     os << "specialized(" << obj.i_ << ")";
   }
+
+  template <>
+  void show_value(std::ostream &os, const std::bad_alloc &)
+  {
+    os << "Ouch, out of memory!!!";
+  }
 }
 TESTSUITE(show_value)
 {
@@ -108,6 +114,15 @@ TESTSUITE(show_value)
                 "    >");
 
   }
+
+  TEST(a_size_limited_unstreamable_object_is_shown_as_question_mark)
+  {
+    std::ostringstream os;
+    unstreamable<8> obj;
+    crpcut::show_value<7>(os, obj);
+    ASSERT_TRUE(os.str() == "?");
+  }
+
   TEST(a_streamable_object_is_shown_using_its_output_stream_operator)
   {
     std::ostringstream os;
@@ -125,7 +140,7 @@ TESTSUITE(show_value)
     ASSERT_TRUE(os.str() == "special(100)");
   }
 
-  TEST(a_streamable_object_with_show_value_spelialization_is_shown_using_it)
+  TEST(a_streamable_object_with_show_value_specialization_is_shown_using_it)
   {
     std::ostringstream os;
     specialized_streamable obj(100);
@@ -133,9 +148,22 @@ TESTSUITE(show_value)
     crpcut::show_value(os, obj);
     ASSERT_TRUE(os.str() == "100 specialized(100)");
   }
+
+  TEST(a_standard_exception_object_without_specialization_shows_what_str)
+  {
+    std::ostringstream os;
+    std::range_error r("out of bounds");
+    crpcut::show_value(os, r);
+    ASSERT_TRUE(os.str() == "what() == \"out of bounds\"");
+  }
+
+  TEST(a_standard_exception_with_specialization_is_shown_using_it)
+  {
+    std::ostringstream os;
+    std::bad_alloc b;
+    crpcut::show_value(os, b);
+    ASSERT_TRUE(os.str() == "Ouch, out of memory!!!");
+  }
 }
-
-
-
 
 
