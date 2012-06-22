@@ -69,12 +69,17 @@ TESTSUITE(comm)
       ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa\nkatt");
     }
 
+    TEST(variables_are_forwarded, fix)
+    {
+      {
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter);
+        int c = 3;
+        const unsigned u = 8;
+        d << c << " " << u;
+      }
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\n3 8");
+    }
+
   }
 }
-
-
-
-
-
-
 

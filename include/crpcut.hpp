@@ -3998,19 +3998,21 @@ namespace crpcut {
     class time : public time_base
     {
     public:
-      time(unsigned long ms, const char *file, size_t line)
-        : time_base(clock::now() + ms, file, line),
-          limit_(ms)
+      time(unsigned long ms, const char *file, size_t line,
+           comm::reporter &reporter = comm::report)
+        : time_base(clock::now() + ms * crpcut::timeout_multiplier(), file, line),
+          limit_(ms),
+          reporter_(reporter)
       {
       }
       ~time()
       {
-        if (limit_ + 1) // wrap around to 0 signals disabled temporary
+        if (limit_ + 1 > 0) // wrap around to 0 signals disabled
           {
             unsigned long t = clock::now();
             if (timeouts_are_enabled() && cond::busted(t, deadline_))
               {
-                comm::direct_reporter<action>()
+                comm::direct_reporter<action>(reporter_)
                   << filename_ << ":" << line_ << "\n"
                   << crpcut_check_name<action>::string()
                   << "_SCOPE_" << cond::name()
@@ -4021,15 +4023,17 @@ namespace crpcut {
       }
       time(const time& r)
         : time_base(r),
-          limit_(r.limit_)
+          limit_(r.limit_),
+          reporter_(r.reporter_)
       {
-        typedef unsigned long ul;
-        r.limit_ = ~(ul());
+        static const unsigned long zero(0UL);
+        limit_ = ~zero;
       }
     private:
       time& operator=(const time&);
 
       unsigned long mutable limit_;
+      comm::reporter       &reporter_;
     };
   }
 

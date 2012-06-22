@@ -181,6 +181,23 @@ TESTSUITE(comm)
       r(crpcut::comm::info, os);
     }
 
+    TEST(reporter_forwards_contents_from_char_array, fix)
+    {
+      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3];
+      void *addr = set_to(request, crpcut::comm::info);
+      char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
+      *p++='a'; *p++='p'; *p++='a';
+      EXPECT_CALL(wfd, write_loop(_, sizeof(request), _))
+        .With(Args<0,1>(ElementsAreArray(request)))
+        .WillOnce(ReturnRef(wfd));
+      char response[sizeof(std::size_t)];
+      set_to(response, std::size_t(3));
+      EXPECT_CALL(rfd, read_loop(_,_,_))
+        .WillOnce(SetArrayArgument<0>(&response[0], response + sizeof(size_t)));
+      static const char apa[] = "apa";
+      r(crpcut::comm::info, apa);
+    }
+
     TEST(reporter_aborts_on_wrong_response, fix,
          EXPECT_SIGNAL_DEATH(SIGABRT),
          NO_CORE_FILE)
