@@ -422,7 +422,7 @@ namespace crpcut {
                 t = comm::exit_fail;
                 break;
               }
-            // fall through
+            // no break - fall through
           case CLD_KILLED:
             if (check_signal_status(info.si_status, cputime_ms, out))
               {
