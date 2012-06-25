@@ -48,53 +48,83 @@ namespace {
 
 TESTSUITE(expr)
 {
-  TEST(regex_matches_std_string)
+  TESTSUITE(match_pseudo_op)
   {
-    ASSERT_VALUE(std::string("apa") =~ crpcut::regex("apa"), true);
+    TESTSUITE(regex)
+    {
+      TEST(regex_matches_std_string)
+      {
+        ASSERT_VALUE(std::string("apa") =~ crpcut::regex("apa"), true);
+      }
+
+      TEST(regex_mismatch_std_string_with_informative_message)
+      {
+        ASSERT_VALUE(std::string("apa") =~ crpcut::regex("katt"),
+                     false,
+                     "apa =~ regex(\"katt\"");
+      }
+
+      TEST(regex_matches_c_string)
+      {
+        const char *v = "lemur";
+        ASSERT_VALUE(v =~ crpcut::regex(".*ur"), true);
+      }
+
+      TEST(regex_mismatch_c_string_with_informative_message)
+      {
+        const char *v = "lemur";
+        ASSERT_VALUE(v =~ crpcut::regex("apa"), false,
+                     "lemur =~ regex(\"apa\")");
+      }
+
+      TEST(regex_matches_string_literal)
+      {
+        ASSERT_VALUE("apa" =~ crpcut::regex("a.a"), true);
+      }
+
+      TEST(regex_mistach_c_string_with_informative_message)
+      {
+        ASSERT_VALUE("katt" =~ crpcut::regex("markatta"), false,
+                     "katt =~ regex(\"markatta\")");
+      }
+
+      TEST(regex_matches_concatenated_strings)
+      {
+        ASSERT_VALUE(std::string("apa") + "katt" =~ crpcut::regex(".*"), true);
+      }
+
+      TEST(regex_mismatches_concatenated_strings_with_informative_message)
+      {
+        ASSERT_VALUE("apa" + std::string("katt") =~ crpcut::regex("markatta"),
+                     false,
+                     "apa + katt =~ regex(\"markatta\")");
+      }
+    }
   }
 
-  TEST(regex_mismatch_std_string_with_informative_message)
+  TESTSUITE(normal_ops)
   {
-    ASSERT_VALUE(std::string("apa") =~ crpcut::regex("katt"),
-                 false,
-                 "apa =~ regex(\"katt\"");
-  }
+    TEST(simple_int_addition_yields_yields_correct_value_and_string_rep)
+    {
+      const int v1 = 3;
+      ASSERT_VALUE(v1+8, 11, "3 + 8");
+    }
 
-  TEST(regex_matches_c_string)
-  {
-    const char *v = "lemur";
-    ASSERT_VALUE(v =~ crpcut::regex(".*ur"), true);
-  }
+    struct s
+    {
+      //enum { n = 11 };
+      static const int n = 11;
+    };
 
-  TEST(regex_mismatch_c_string_with_informative_message)
-  {
-    const char *v = "lemur";
-    ASSERT_VALUE(v =~ crpcut::regex("apa"), false,
-                 "lemur =~ regex(\"apa\")");
-  }
+    TEST(add_int_and_static_const_int_value_yields_correct_value_and_string_rep)
+    {
+      ASSERT_VALUE(s::n+3, 14, "11 + 3");
+    }
 
-
-  TEST(regex_matches_string_literal)
-  {
-    ASSERT_VALUE("apa" =~ crpcut::regex("a.a"), true);
-  }
-
-  TEST(regex_mistach_c_string_with_informative_message)
-  {
-    ASSERT_VALUE("katt" =~ crpcut::regex("markatta"), false,
-                 "katt =~ regex(\"markatta\")");
-  }
-
-  TEST(regex_matches_concatenated_strings)
-  {
-    ASSERT_VALUE(std::string("apa") + "katt" =~ crpcut::regex(".*"), true);
-  }
-
-  TEST(regex_mismatches_concatenated_strings_with_informative_message)
-  {
-    ASSERT_VALUE("apa" + std::string("katt") =~ crpcut::regex("markatta"),
-                 false,
-                 "apa + katt =~ regex(\"markatta\")");
+    TEST(add_static_const_int_value_and_int_yields_correct_value_and_string_rep)
+    {
+      //      ASSERT_VALUE(3 + s::n, 14, "3 + 11");
+    }
   }
 }
 

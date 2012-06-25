@@ -3867,15 +3867,15 @@ namespace crpcut {
         return predicate_match<name, predicate>(*this, v.get_predicate());  \
       }                                                                 \
     private:                                                            \
-      const T& t_;                                                      \
-      const U& u_;                                                      \
+      const T &t_;                                                      \
+      const U &u_;                                                      \
     };                                                                  \
   }
 
 #define CRPCUT_OPFUNC(name, opexpr)                                     \
   namespace expr {                                                      \
     template <typename T, typename U>                                   \
-    name<T, U> operator opexpr(const T& t, const U& u)                  \
+    name<T, U> operator opexpr(const T& t, const U& u)                   \
     {                                                                   \
       return name<T, U>(t, u);                                          \
     }                                                                   \
@@ -3937,7 +3937,7 @@ namespace crpcut {
     class atom
     {
     public:
-      atom(const T& t) : t_(t) {}
+      atom(T t) : t_(t) {}
       friend struct eval_t<atom>;
       friend
       std::ostream &operator<<(std::ostream &os, const atom& a)
@@ -3953,14 +3953,15 @@ namespace crpcut {
         return predicate_match<T, typename U::type>(t_, u.get_predicate());
       }
     private:
-      const T& t_;
+      const T t_;
     };
   }
 
   template <typename T>
   struct eval_t<expr::atom<T> >
   {
-    typedef const T& type;
+    typedef typename std::remove_cv<typename std::remove_reference<T>::type>::type naked_type;
+    typedef typename if_else<is_struct<naked_type>::value, const naked_type&, naked_type>::type type;
     static type func(const expr::atom<T> &n) { return n.t_; }
   };
 
@@ -3986,7 +3987,14 @@ namespace crpcut {
         return r;
       }
       template <typename T>
-      atom<T> operator->*(const T& t) const
+      typename enable_if<is_struct<T>::value, atom<const T&> >::type
+      operator->*(const T& t) const
+      {
+        return atom<const T&>(t);
+      }
+      template <typename T>
+      typename enable_if<!is_struct<T>::value, atom<T> >::type
+      operator->*(T t) const
       {
         return atom<T>(t);
       }
