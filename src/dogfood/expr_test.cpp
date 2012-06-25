@@ -112,7 +112,6 @@ TESTSUITE(expr)
 
     struct s
     {
-      //enum { n = 11 };
       static const int n = 11;
     };
 
@@ -123,8 +122,39 @@ TESTSUITE(expr)
 
     TEST(add_static_const_int_value_and_int_yields_correct_value_and_string_rep)
     {
-      //      ASSERT_VALUE(3 + s::n, 14, "3 + 11");
+      ASSERT_VALUE(3 + s::n, 14, "3 + 11");
     }
+
+    TEST(add_char_array_and_const_std_string_yields_correct_value_and_string_rep)
+    {
+      const std::string katt("katta");
+      ASSERT_VALUE("mar" + katt, std::string("markatta"), "mar + katta");
+    }
+
+    TEST(add_const_std_string_and_char_array_yields_correct_value_and_string_rep)
+    {
+      const std::string mar("mar");
+      ASSERT_VALUE(mar + "katta", std::string("markatta"), "mar + katta");
+    }
+
+    TEST(class_static_const_plus_unsigned_equals_long_yields_correct_value_and_string_rep)
+    {
+      const unsigned m = 3;
+      ASSERT_VALUE(s::n + m == 14L, true, "11 + 3 == 14");
+    }
+
+    TEST(unsigned_plus_class_static_const_equals_long_yields_correct_value_and_string)
+    {
+      const unsigned m = 3;
+      ASSERT_VALUE(m + s::n == 14L, true, "3 + 11 == 14");
+    }
+
+    TEST(short_plus_int_equals_class_static_const_yields_correct_value_and_string)
+    {
+      const short m = 3;
+      ASSERT_VALUE(m + 8 == s::n, true, "3 + 8 == 11");
+    }
+
   }
 }
 

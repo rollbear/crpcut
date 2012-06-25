@@ -3867,15 +3867,15 @@ namespace crpcut {
         return predicate_match<name, predicate>(*this, v.get_predicate());  \
       }                                                                 \
     private:                                                            \
-      const T &t_;                                                      \
-      const U &u_;                                                      \
+      T t_;                                                             \
+      U u_;                                                             \
     };                                                                  \
   }
 
 #define CRPCUT_OPFUNC(name, opexpr)                                     \
   namespace expr {                                                      \
     template <typename T, typename U>                                   \
-    name<T, U> operator opexpr(const T& t, const U& u)                   \
+    name<T, U> operator opexpr(T t, U u)                                \
     {                                                                   \
       return name<T, U>(t, u);                                          \
     }                                                                   \
