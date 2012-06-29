@@ -313,11 +313,19 @@ namespace crpcut {
     typedef T type;
   };
 
+  namespace datatypes {
+    template <typename T>
+    struct undecorated
+    {
+      typedef typename std::remove_reference<T>::type noref_type;
+      typedef typename std::remove_cv<noref_type>::type type;
+    };
+  }
   template <typename T>
   struct eval_t
   {
-    typedef const T &type;
-    static type func(const T& t) { return t; }
+    typedef const typename datatypes::undecorated<T>::type &type;
+    static type func(type t) { return t; }
   };
 
   template <typename T>
@@ -3823,8 +3831,8 @@ namespace crpcut {
     class predicate_match
     {
     public:
-      predicate_match(const typename std::remove_reference<L>::type &l,
-                      typename std::remove_reference<R>::type & r)
+      predicate_match(const typename datatypes::undecorated<L>::type &l,
+                      typename datatypes::undecorated<R>::type & r)
         : l_(l),
           r_(r) {}
       friend struct eval_t<predicate_match>;
@@ -3837,8 +3845,8 @@ namespace crpcut {
         return os;
       }
     private:
-      const typename std::remove_reference<L>::type &l_;
-      typename std::remove_reference<R>::type &r_;
+      const typename datatypes::undecorated<L>::type &l_;
+      typename datatypes::undecorated<R>::type &r_;
     };
   }
 
@@ -3848,7 +3856,7 @@ namespace crpcut {
     class name                                                          \
     {                                                                   \
     public:                                                             \
-      name(const T &t, const U &u) : t_(t), u_(u) {}                    \
+      name(T t, U u) : t_(t), u_(u) {}                                  \
       friend                                                            \
         std::ostream &operator<<(std::ostream &os, const name &a)       \
       {                                                                 \
@@ -3875,9 +3883,16 @@ namespace crpcut {
 #define CRPCUT_OPFUNC(name, opexpr)                                     \
   namespace expr {                                                      \
     template <typename T, typename U>                                   \
-    name<T, U> operator opexpr(T t, U u)                                \
+    typename enable_if<is_struct<U>::value, name<const T&, const U&> >::type   \
+    operator opexpr(const T &t, const U &u)                             \
     {                                                                   \
-      return name<T, U>(t, u);                                          \
+      return name<const T&, const U&>(t, u);                            \
+    }                                                                   \
+    template <typename T, typename U>                                   \
+    typename enable_if<!is_struct<U>::value, name<const T&, U> >::type  \
+    operator opexpr(const T &t, U u)                                    \
+    {                                                                   \
+      return name<const T&, U>(t, u);                                   \
     }                                                                   \
   }                                                                     \
   template <typename T, typename U>                                     \
@@ -3885,14 +3900,16 @@ namespace crpcut {
   {                                                                     \
     typedef typename eval_t<T>::type ttype;                             \
     typedef typename eval_t<U>::type utype;                             \
-    typedef typename std::remove_reference<typename std::remove_cv<ttype>::type>::type trtype; \
-    typedef typename std::remove_reference<typename std::remove_cv<utype>::type>::type urtype; \
+    typedef typename datatypes::undecorated<ttype>::type trtype;       \
+    typedef typename datatypes::undecorated<utype>::type urtype;       \
     typedef CRPCUT_DECLTYPE(::crpcut::expr::gen<trtype>() opexpr ::crpcut::expr::gen<urtype>()) type; \
     static type func(const expr::name<T, U>& n)                         \
     {                                                                   \
-      return crpcut::eval(n.t_) opexpr crpcut::eval(n.u_);              \
+      return ::crpcut::eval(n.t_) opexpr ::crpcut::eval(n.u_);          \
     }                                                                   \
   };                                                                    \
+  template <typename T, typename U>                                     \
+  struct eval_t<const expr::name<T, U>&> : public eval_t<expr::name<T, U> > {};
 
 #define CRPCUT_OPS(x)                           \
   x(eq_op, ==)                                  \
@@ -3960,16 +3977,19 @@ namespace crpcut {
   template <typename T>
   struct eval_t<expr::atom<T> >
   {
-    typedef typename std::remove_cv<typename std::remove_reference<T>::type>::type naked_type;
+    typedef typename datatypes::undecorated<T>::type naked_type;
     typedef typename if_else<is_struct<naked_type>::value, const naked_type&, naked_type>::type type;
     static type func(const expr::atom<T> &n) { return n.t_; }
   };
 
+  template <typename T>
+  struct eval_t<const expr::atom<T>&> : public eval_t<expr::atom<T> > {};
+
   template <typename T, typename U>
   struct eval_t<expr::predicate_match<T, U> >
   {
-    static typename std::remove_reference<U>::type & u_;
-    static typename std::remove_reference<T>::type & t_;
+    static typename datatypes::undecorated<U>::type & u_;
+    static typename datatypes::undecorated<T>::type & t_;
     typedef CRPCUT_DECLTYPE(u_(crpcut::eval(t_))) type;
     static type func(const expr::predicate_match<T, U> &n)
     {
@@ -4222,7 +4242,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
 namespace crpcut {
   namespace datatypes {
     template <typename T>
-    const volatile typename std::remove_cv<typename std::remove_reference<T>::type>::type &gettype();
+    const volatile typename undecorated<T>::typee &gettype();
 
   }
 }

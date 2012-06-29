@@ -1,5 +1,10 @@
+         * Fixed a bug where the elements in expressions in ASSERT_TRUE(),
+           ASSERT_FALSE(), VERIFY_TRUE() and VERIFY_FALSE() had to be
+           available by reference (and thus could not be used for
+           class scope static const value-only members.)
+
          * Fixed a bug where INFO and FAIL would throw std::bad_alloc
-           when the heap space was configured too low in a test. 
+           when the heap space was configured too low in a test.
 
 2012-06-12 1.8.1
 
