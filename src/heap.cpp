@@ -190,7 +190,7 @@ namespace crpcut
 #ifdef USE_BACKTRACE
         if (!is_backtrace_enabled()) return;
         msg << header;
-        void *stack_addr;
+        void *stack_addr = 0;
         if (stack) stack_addr = stack + 1;
         if (size == 0)
           {
