@@ -26,6 +26,7 @@
 
 #include <crpcut.hpp>
 
+
 TESTSUITE(heap)
 {
   TEST(should_succeed_allocation_leak)
@@ -79,6 +80,7 @@ TESTSUITE(heap)
         ASSERT_LE(pre + 100, crpcut::heap::allocated_bytes());
         void *p2 = malloc(150);
         ASSERT_LE(pre + 250, crpcut::heap::allocated_bytes());
+        INFO << "p1=" << p1 << " p2=" << p2;
         free(p1);
         free(p2);
       }
@@ -126,6 +128,7 @@ TESTSUITE(heap)
         VERIFY_LE(pre + 100, crpcut::heap::allocated_bytes());
         void *p2 = malloc(150);
         VERIFY_LE(pre + 250, crpcut::heap::allocated_bytes());
+        INFO << "p1=" << p1 << " p2=" << p2;
         free(p1);
         free(p2);
       }

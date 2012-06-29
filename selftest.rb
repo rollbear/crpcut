@@ -1615,7 +1615,8 @@ TESTS = {
   PassedTest.new(),
 
   'heap::should_succeed_malloc_free_balance' =>
-  PassedTest.new(),
+  PassedTest.new().
+  log('info', /p1=.* p2=.*/),
 
   'heap::should_fail_verify_scope_leak_free' =>
   FailedTest.new('running').
@@ -1631,6 +1632,7 @@ TESTS = {
 
   'heap::should_succeed_verify_malloc_free_balance' =>
   PassedTest.new().
+  log('info', /p1=.* p2=.*/).
   log('info', /after/),
 
   'heap::should_succeed_empty_balance_fix' =>
