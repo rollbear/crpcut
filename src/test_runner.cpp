@@ -103,15 +103,6 @@ namespace {
     return fd;
   }
 
-  void list_tags(crpcut::tag_list_root &tags)
-  {
-    for (crpcut::tag_list::iterator i = tags.begin(); i != tags.end(); ++i)
-      {
-        std::cout << i->get_name().str << "\n";
-      }
-    throw cli_exception(0);
-  }
-
 }
 
 namespace crpcut {
@@ -624,7 +615,11 @@ namespace crpcut {
       {
         const char *const *test_names = cli_->get_test_list();
 
-        if (cli_->list_tags()) list_tags(tags);
+        if (cli_->list_tags())
+          {
+            tags.print_to(std::cout);
+            throw cli_exception(0);
+          }
         configure_tags(cli_->tag_specification(), tags);
         if (cli_->list_tests()) list_tests(test_names, tags, err_os);
         if (cli_->working_dir())

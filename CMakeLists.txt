@@ -112,6 +112,7 @@ file(GLOB LIB_SRCS
      src/tag.cpp
      src/tag_filter.cpp
      src/tag_info.cpp
+     src/tag_list_root.cpp
      src/test_case_base.cpp
      src/test_case_registrator.cpp
      src/test_case_result.cpp
@@ -171,6 +172,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/scope/time_test.cpp
      src/dogfood/show_value_test.cpp
      src/dogfood/tag_filter_test.cpp
+     src/dogfood/tag_list_test.cpp
      src/dogfood/test_case_registrator_test.cpp
      src/dogfood/test_runner_test.cpp
      src/dogfood/test_wrapper_test.cpp
