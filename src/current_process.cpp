@@ -24,29 +24,29 @@
  * SUCH DAMAGE.
  */
 
-#include "test_environment.hpp"
+#include "current_process.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 
 namespace crpcut {
 
-  test_environment::test_environment()
+  current_process::current_process()
     : pid_(wrapped::getpid())
   {
   }
 
-  test_environment::~test_environment()
+  current_process::~current_process()
   {
   }
 
   bool
-  test_environment::is_naughty_child() const
+  current_process::is_naughty_child() const
   {
     bool rv = pid_ != wrapped::getpid();
     return rv;
   }
 
   void
-  test_environment::freeze() const
+  current_process::freeze() const
   {
     for (;;)
       {

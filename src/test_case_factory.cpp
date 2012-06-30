@@ -41,7 +41,7 @@
 #include "buffer_vector.hpp"
 #include "working_dir_allocator.hpp"
 #include "deadline_monitor.hpp"
-#include "test_environment.hpp"
+#include "current_process.hpp"
 extern "C" {
 #  include <sys/time.h>
 #  include <fcntl.h>
@@ -240,8 +240,8 @@ namespace crpcut {
           rfd response_fd(p2c.for_reading(pipe_pair::release_ownership));
           comm::report.set_reader(&response_fd);
 
-          test_environment current_test;
-          comm::report.set_test_environment(&current_test);
+          current_process current_test;
+          comm::report.set_process_control(&current_test);
           wrapped::dup2(stdout.for_writing(), 1);
           wrapped::dup2(stderr.for_writing(), 2);
           stdout.close();

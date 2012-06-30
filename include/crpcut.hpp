@@ -1125,7 +1125,7 @@ namespace crpcut {
   template <typename T>
   class poll;
 
-  class test_environment;
+  class current_process;
 
   namespace comm {
 
@@ -1214,12 +1214,12 @@ namespace crpcut {
     {
       data_writer *writer_;
       data_reader *reader_;
-      test_environment *current_test_;
+      current_process *current_test_;
       std::ostream     &default_out_;
     public:
       virtual ~reporter();
       reporter(std::ostream &default_out = std::cout);
-      void set_test_environment(test_environment *current_test);
+      void set_process_control(current_process *current_test);
       void set_reader(data_reader *r);
       void set_writer(data_writer *w);
       void operator()(type t, const std::ostringstream &os) const;

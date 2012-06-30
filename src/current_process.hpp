@@ -26,23 +26,23 @@
 
 
 
-#ifndef TEST_ENVIRONMENT_HPP_
-#define TEST_ENVIRONMENT_HPP_
+#ifndef CURRENT_PROCESS_HPP_
+#define CURRENT_PROCESS_HPP_
 
 extern "C" {
 #  include <sys/types.h>
 }
 namespace crpcut {
-  class test_environment
+  class current_process
   {
   public:
-    test_environment();
-    virtual ~test_environment();
+    current_process();
+    virtual ~current_process();
     virtual bool is_naughty_child() const;
     virtual void freeze() const;
   private:
-    test_environment(const test_environment&);
-    test_environment& operator=(const test_environment&);
+    current_process(const current_process&);
+    current_process& operator=(const current_process&);
     pid_t pid_;
   };
 }
@@ -52,4 +52,4 @@ namespace crpcut {
 
 
 
-#endif // TEST_ENVIRONMENT_HPP_
+#endif // CURRENT_PROCESS_HPP_

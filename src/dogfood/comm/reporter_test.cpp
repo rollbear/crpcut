@@ -26,7 +26,7 @@
 
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
-#include "../../test_environment.hpp"
+#include "../../current_process.hpp"
 
 TESTSUITE(comm)
 {
@@ -60,7 +60,7 @@ TESTSUITE(comm)
       MOCK_CONST_METHOD2(read, ssize_t(void*, std::size_t));
     };
 
-    TEST(reporter_without_test_environment_prints_on_stream)
+    TEST(reporter_without_current_process_prints_on_stream)
     {
        std::ostringstream os;
        {
@@ -70,7 +70,7 @@ TESTSUITE(comm)
        ASSERT_TRUE(os.str() == "\napa");
     }
 
-    TEST(reporter_without_test_environment_prints_and_aborts_for_exit_fail,
+    TEST(reporter_without_current_process_prints_and_aborts_for_exit_fail,
          EXPECT_SIGNAL_DEATH(SIGABRT),
          NO_CORE_FILE)
     {
@@ -82,20 +82,20 @@ TESTSUITE(comm)
     TEST(naughty_children_are_killed_by_starvation,
          EXPECT_EXIT(1))
     {
-      class env : public crpcut::test_environment
+      class env : public crpcut::current_process
       {
       public:
         bool is_naughty_child() const { return true; }
         void freeze() const { exit(1); }
       };
 
-      env e;
+      env                     e;
       StrictMock<writer_mock> wfd;
       StrictMock<reader_mock> rfd;
       std::ostringstream      os;
       crpcut::comm::reporter  r(os);
 
-      r.set_test_environment(&e);
+      r.set_process_control(&e);
       r.set_writer(&wfd);
       r.set_reader(&rfd);
       EXPECT_CALL(wfd, write_loop(_, _, _)).
@@ -116,11 +116,11 @@ TESTSUITE(comm)
     {
       fix() : e(), wfd(), rfd(), r(fake_cout)
       {
-        r.set_test_environment(&e);
+        r.set_process_control(&e);
         r.set_writer(&wfd);
         r.set_reader(&rfd);
       }
-      crpcut::test_environment e;
+      crpcut::current_process  e;
       StrictMock<writer_mock>  wfd;
       StrictMock<reader_mock>  rfd;
       std::ostringstream       fake_cout;

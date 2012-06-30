@@ -26,7 +26,7 @@
 
 
 #include <crpcut.hpp>
-#include "../test_environment.hpp"
+#include "../current_process.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
 
 namespace crpcut {
@@ -38,10 +38,10 @@ namespace crpcut {
     {
     }
 
-    void reporter::set_test_environment(test_environment *env)
+    void reporter::set_process_control(current_process *pc)
     {
       assert(current_test_ == 0);
-      current_test_ = env;
+      current_test_ = pc;
     }
 
     void reporter::send_message(type t, const char *msg, size_t len) const

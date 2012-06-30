@@ -40,49 +40,62 @@ namespace crpcut {
   {
   public:
     virtual ~test_case_factory();
+
+
     static void set_charset(const char *set_name);
     static const char *get_charset();
     static const char *get_output_charset();
     static const char *get_illegal_rep();
+    virtual bool tests_as_child_procs() const;
+    virtual bool timeouts_enabled() const;
+    virtual unsigned timeout_multiplier() const;
+    static bool is_backtrace_enabled();
+    static const char *get_start_dir();
+    static const char *get_parameter(const char *name);
+private:
+    void do_set_charset(const char *set_name);
+    const char *do_get_charset() const;
+    const char *do_get_start_dir() const;
 
-    static int run_test(int argc, char *argv[],
-                        std::ostream &os = std::cerr);
-    static int run_test(int argc, const char *argv[],
-                        std::ostream &os = std::cerr);
+
+
+public:
     virtual void introduce_test(pid_t                               pid,
                                 const crpcut_test_case_registrator *reg);
     virtual void present(pid_t pid, comm::type t, test_phase phase,
                          size_t len, const char *buff);
-    virtual bool tests_as_child_procs() const;
-    virtual bool timeouts_enabled() const;
-    virtual unsigned timeout_multiplier() const;
+private:
+    void show_summary(unsigned       num_selected_tests,
+                      tag_list_root &tags) const;
+    void list_tests(const char *const *names,
+                    tag_list_root     &tags,
+                    std::ostream      &os);
+
+
+public:
+    static int run_test(int argc, char *argv[],
+                        std::ostream &os = std::cerr);
+    static int run_test(int argc, const char *argv[],
+                        std::ostream &os = std::cerr);
     virtual void set_deadline(crpcut_test_case_registrator *i);
     virtual void clear_deadline(crpcut_test_case_registrator *i);
     virtual void return_dir(unsigned num);
     virtual unsigned long calc_cputime(const struct timeval&);
+private:
+    void schedule_tests(std::size_t num_parallel, poll<fdreader> &poller);
+    int  spawn_test_runner();
+    void manage_children(std::size_t max_pending_children, poll<fdreader> &poller);
+    void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
+    int do_run(cli::interpreter *cli, std::ostream &os, tag_list_root &tags);
 
-    static bool is_backtrace_enabled();
-    static const char *get_start_dir();
-    static const char *get_parameter(const char *name);
+
+public:
 
     static test_case_factory& obj();
   protected:
     test_case_factory();
   private:
-    void list_tests(const char *const *names,
-                    tag_list_root     &tags,
-                    std::ostream      &os);
-    void schedule_tests(std::size_t num_parallel, poll<fdreader> &poller);
-    void show_summary(unsigned       num_selected_tests,
-                      tag_list_root &tags) const;
-    int  spawn_test_runner();
-    void manage_children(std::size_t max_pending_children, poll<fdreader> &poller);
-    void start_test(crpcut_test_case_registrator *i, poll<fdreader> &poller);
 
-    int do_run(cli::interpreter *cli, std::ostream &os, tag_list_root &tags);
-    const char *do_get_start_dir() const;
-    void do_set_charset(const char *set_name);
-    const char *do_get_charset() const;
     friend class crpcut_test_case_registrator;
 
 
