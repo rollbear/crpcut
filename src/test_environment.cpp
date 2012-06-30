@@ -24,69 +24,101 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
-#include <crpcut.hpp>
-#include "../test_case_factory.hpp"
-#include "../poll.hpp"
-
-namespace {
-  class mock_poll : public crpcut::poll<crpcut::fdreader>
+#include "test_environment.hpp"
+#include "cli/interpreter.hpp"
+#include "wrapped/posix_encapsulation.hpp"
+namespace crpcut {
+  test_environment
+  ::test_environment(cli::interpreter *cli)
+  : cli_(cli),
+    charset_("UTF-8")
   {
-  public:
-    MOCK_METHOD3(do_add_fd, void(int, crpcut::fdreader*, int));
-    MOCK_METHOD1(do_del_fd, void(int));
-    MOCK_METHOD1(do_wait, descriptor(int));
-    MOCK_CONST_METHOD0(do_num_fds, std::size_t());
-  };
+    wrapped::getcwd(homedir_, sizeof(homedir_));
+  }
+
+  test_environment
+  ::~test_environment()
+  {
+  }
+
+
+
+  const char *
+  test_environment
+  ::get_output_charset() const
+  {
+    return cli_->output_charset();
+  }
+
+  bool
+  test_environment
+  ::tests_as_child_procs() const
+  {
+    return !cli_->single_shot_mode();
+  }
+
+  bool
+  test_environment
+  ::timeouts_enabled() const
+  {
+    return cli_->honour_timeouts();
+  }
+
+  unsigned
+  test_environment
+  ::timeout_multiplier() const
+  {
+    return cli_->timeout_multiplier();
+  }
+
+  bool
+  test_environment
+  ::is_backtrace_enabled() const
+  {
+#ifdef USE_BACKTRACE
+    return cli_->backtrace_enabled();
+#else
+    return false;
+#endif
+  }
+
+
+  const char*
+  test_environment
+  ::get_start_dir() const
+  {
+    return homedir_;
+  }
+
+  const char*
+  test_environment
+  ::get_parameter(const char *name) const
+  {
+    return cli_->named_parameter(name);
+  }
+
+  const char*
+  test_environment
+  ::get_illegal_rep() const
+  {
+    return cli_->illegal_representation();
+  }
+
+  void
+  test_environment
+  ::set_charset(const char* set_name)
+  {
+    charset_ = set_name;
+  }
+
+  const char*
+  test_environment
+  ::get_charset() const
+  {
+    return charset_;
+  }
 
 }
-
-TESTSUITE(registrator_list)
-{
-  typedef crpcut::registrator_list list;
-  TEST(construction_does_nothing)
-  {
-    list l;
-  }
-
-  TEST(run_test_case_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-  {
-    list l;
-    l.run_test_case();
-  }
-
-  TEST(crpcut_tag_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-  {
-    list l;
-    l.crpcut_tag();
-  }
-
-  TEST(get_importance_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-  {
-    list l;
-    l.get_importance();
-  }
-
-  TEST(setup_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-  {
-    list l;
-    testing::StrictMock<mock_poll> poller;
-    l.setup(poller, pid_t(1), 1,2,3,4);
-  }
-}
-
 
 
 

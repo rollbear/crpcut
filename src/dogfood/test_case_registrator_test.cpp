@@ -44,8 +44,6 @@ TESTSUITE(test_case_registrator)
   class mock_factory : public crpcut::test_case_factory
   {
   public:
-    MOCK_CONST_METHOD0(tests_as_child_procs, bool());
-    MOCK_CONST_METHOD0(timeouts_enabled, bool());
     MOCK_METHOD2(introduce_test, void(pid_t,
                                       const crpcut::crpcut_test_case_registrator *));
     MOCK_METHOD5(present, void(pid_t, crpcut::comm::type, crpcut::test_phase,
@@ -54,9 +52,23 @@ TESTSUITE(test_case_registrator)
     MOCK_METHOD1(clear_deadline, void(crpcut::crpcut_test_case_registrator*));
     MOCK_METHOD1(return_dir, void(unsigned));
     MOCK_METHOD1(calc_cputime, unsigned long(const struct timeval&));
-    MOCK_CONST_METHOD0(timeout_multiplier, unsigned());
   };
 
+  class mock_environment : public crpcut::test_environment
+  {
+  public:
+    MOCK_CONST_METHOD0(tests_as_child_procs, bool());
+    MOCK_CONST_METHOD0(timeouts_enabled, bool());
+    MOCK_METHOD1(set_charset, void(const char *));
+    MOCK_CONST_METHOD0(get_charset, const char *());
+    MOCK_CONST_METHOD0(get_output_charset, const char*());
+    MOCK_CONST_METHOD0(get_illegal_rep, const char*());
+    MOCK_CONST_METHOD0(timeout_multiplier, unsigned());
+    MOCK_CONST_METHOD0(is_backtrace_enabled, bool());
+    MOCK_CONST_METHOD0(get_start_dir, const char *());
+    MOCK_CONST_METHOD1(get_parameter, const char *(const char *name));
+
+  };
   class mock_reporter : public crpcut::comm::reporter
   {
   public:
@@ -105,6 +117,7 @@ TESTSUITE(test_case_registrator)
     : crpcut_test_case_registrator(name, ns, cpulimit, reporter, proc, fsops, factory)
     {
     }
+    using crpcut::crpcut_test_case_registrator::set_test_environment;
     using crpcut::crpcut_test_case_registrator::set_cputime_at_start;
     using crpcut::crpcut_test_case_registrator::prepare_construction;
     using crpcut::crpcut_test_case_registrator::manage_test_case_execution;
@@ -149,6 +162,7 @@ TESTSUITE(test_case_registrator)
       reg("test", current_namespace, cpulimit,
           &reporter, &process_control, &fsops, &factory)
     {
+      reg.set_test_environment(&env);
     }
     void setup(pid_t pid)
     {
@@ -173,6 +187,7 @@ TESTSUITE(test_case_registrator)
     }
 
     std::ostringstream                   default_out;
+    StrictMock<mock_environment>         env;
     StrictMock<mock_factory>             factory;
     mock_reporter                        reporter;
     StrictMock<mock_process_control>     process_control;
@@ -317,10 +332,10 @@ TESTSUITE(test_case_registrator)
       unsigned factor = 20;
       unsigned requested_timeout = 100;
 
-      EXPECT_CALL(factory, timeouts_enabled()).
+      EXPECT_CALL(env, timeouts_enabled()).
         WillOnce(Return(true));
 
-      EXPECT_CALL(factory, timeout_multiplier()).
+      EXPECT_CALL(env, timeout_multiplier()).
         WillOnce(Return(factor));
       unsigned long result = requested_timeout*factor;
       const void *addr = &result;
@@ -332,7 +347,7 @@ TESTSUITE(test_case_registrator)
 
     TEST(does_nothing_if_timeouts_are_disabled, fix<10U>)
     {
-      EXPECT_CALL(factory, timeouts_enabled()).
+      EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(false));
       reg.prepare_construction(100U);
     }
@@ -345,10 +360,10 @@ TESTSUITE(test_case_registrator)
       unsigned factor = 20;
       unsigned requested_timeout = 100;
 
-      EXPECT_CALL(factory, timeouts_enabled()).
+      EXPECT_CALL(env, timeouts_enabled()).
         WillOnce(Return(true));
 
-      EXPECT_CALL(factory, timeout_multiplier()).
+      EXPECT_CALL(env, timeout_multiplier()).
         WillOnce(Return(factor));
 
       unsigned long result = requested_timeout*factor;
@@ -361,7 +376,7 @@ TESTSUITE(test_case_registrator)
 
     TEST(does_nothing_if_timeouts_are_disabled, fix<10U>)
     {
-      EXPECT_CALL(factory, timeouts_enabled()).
+      EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(false));
       reg.prepare_destruction(100U);
     }
@@ -373,7 +388,7 @@ TESTSUITE(test_case_registrator)
     TEST(reports_cputime_if_run_as_child_procs, fix<10U>)
     {
 
-      EXPECT_CALL(factory, tests_as_child_procs()).
+      EXPECT_CALL(env, tests_as_child_procs()).
           WillRepeatedly(Return(true));
 
       static const struct timeval utime = { 1, 5 };
@@ -403,7 +418,7 @@ TESTSUITE(test_case_registrator)
 
     TEST(reports_success_if_not_run_as_child_procs, fix<10U>)
     {
-      EXPECT_CALL(factory, tests_as_child_procs()).
+      EXPECT_CALL(env, tests_as_child_procs()).
           WillRepeatedly(Return(false));
 
       StrictMock<mock_testcase> test_obj;
@@ -670,7 +685,7 @@ TESTSUITE(test_case_registrator)
           InSequence(s).
           WillOnce(Return(true));
 
-      EXPECT_CALL(factory, timeouts_enabled()).
+      EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(true));
 
       EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
@@ -710,7 +725,7 @@ TESTSUITE(test_case_registrator)
           WillOnce(Return(true));
 
       EXPECT_CALL(reg, crpcut_on_ok_action(_));
-      EXPECT_CALL(factory, timeouts_enabled()).
+      EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(false));
 
       EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).
@@ -749,7 +764,7 @@ TESTSUITE(test_case_registrator)
           WillOnce(Return(true));
 
       EXPECT_CALL(reg, crpcut_on_ok_action(_));
-      EXPECT_CALL(factory, timeouts_enabled()).
+      EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(false));
 
       EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).

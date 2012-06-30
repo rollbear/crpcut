@@ -270,14 +270,10 @@
 #include <memory>
 extern "C"
 {
-#include <limits.h>
-#include <dlfcn.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <dirent.h>
-#include <regex.h>
-#include <stdint.h>
-#include <errno.h>
+#  include <dlfcn.h>
+#  include <sys/wait.h>
+#  include <regex.h>
+#  include <stdint.h>
 }
 
 namespace std {
@@ -1816,6 +1812,7 @@ namespace crpcut {
   class filesystem_operations;
   filesystem_operations *filesystem_operations_root();
 
+  class test_environment;
   test_case_factory *test_case_factory_root();
   class test_suite_base;
   class crpcut_test_case_registrator
@@ -1833,7 +1830,7 @@ namespace crpcut {
                                  comm::reporter *reporter = &comm::report,
                                  process_control *process = process_control_root(),
                                  filesystem_operations *fsops = filesystem_operations_root(),
-                                 test_case_factory *root = test_case_factory_root());
+                                 test_case_factory *factory = test_case_factory_root());
     friend std::ostream &operator<<(std::ostream &os,
                                     const crpcut_test_case_registrator &t)
     {
@@ -1846,6 +1843,7 @@ namespace crpcut {
                        int in_fd, int out_fd,
                        int stdout_fd,
                        int stderr_fd) = 0;
+    void set_test_environment(test_environment *env);
     void manage_death();
     using datatypes::list_elem<crpcut_test_case_registrator>::unlink;
     void kill();
@@ -1893,6 +1891,7 @@ namespace crpcut {
     test_phase                    phase_;
     const unsigned long           cputime_limit_ms_;
     test_case_factory            *factory_;
+    test_environment             *env_;
     comm::reporter               *reporter_;
     process_control              *process_;
     filesystem_operations        *filesystem_;

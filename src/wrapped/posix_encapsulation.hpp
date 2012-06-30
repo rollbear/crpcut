@@ -31,6 +31,7 @@
 #include <crpcut.hpp>
 extern "C" {
 #  include <stdarg.h>
+#  include <dirent.h>
 }
 
 #include "../posix_write.hpp"

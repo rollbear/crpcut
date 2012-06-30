@@ -140,6 +140,7 @@ namespace crpcut {
       phase_(creating),
       cputime_limit_ms_(0),
       factory_(0),
+      env_(0),
       reporter_(0),
       process_(0),
       filesystem_(0)
@@ -153,7 +154,7 @@ namespace crpcut {
                                  comm::reporter        *reporter,
                                  process_control       *process,
                                  filesystem_operations *filesystem,
-                                 test_case_factory     *root)
+                                 test_case_factory     *factory)
     : name_(name),
       ns_info_(&ns),
       suite_list_(0),
@@ -165,12 +166,13 @@ namespace crpcut {
       dirnum_(~0U),
       phase_(creating),
       cputime_limit_ms_(cputime_timeout_ms),
-      factory_(root),
+      factory_(factory),
+      env_(0),
       reporter_(reporter),
       process_(process),
       filesystem_(filesystem)
   {
-    link_before(root->reg_);
+    link_before(factory_->reg_);
   }
 
   void
@@ -186,9 +188,9 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::prepare_construction(unsigned long deadline)
   {
-    if (factory_->timeouts_enabled())
+    if (env_->timeouts_enabled())
       {
-        unsigned long req = deadline*factory_->timeout_multiplier();
+        unsigned long req = deadline*env_->timeout_multiplier();
         (*reporter_)(comm::set_timeout, req);
       }
   }
@@ -204,9 +206,9 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::prepare_destruction(unsigned long deadline)
   {
-    if (factory_->timeouts_enabled())
+    if (env_->timeouts_enabled())
       {
-        unsigned long req = deadline*factory_->timeout_multiplier();
+        unsigned long req = deadline*env_->timeout_multiplier();
         (*reporter_)(comm::set_timeout, req);
       }
   }
@@ -251,7 +253,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::manage_test_case_execution(crpcut_test_case_base* p)
   {
-    if (factory_->tests_as_child_procs())
+    if (env_->tests_as_child_procs())
       {
         struct rusage usage;
         int rv = process_->getrusage(RUSAGE_SELF, &usage);
@@ -271,7 +273,7 @@ namespace crpcut {
             << policies::crpcut_exception_translator::try_all();
         (*reporter_)(comm::exit_fail, out);
       }
-    if (!factory_->tests_as_child_procs())
+    if (!env_->tests_as_child_procs())
       {
         crpcut_register_success();
       }
@@ -323,7 +325,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::cputime_timeout(unsigned long ms) const
   {
-    return factory_->timeouts_enabled()
+    return env_->timeouts_enabled()
       && cputime_limit_ms_
       && ms > cputime_limit_ms_;
   }
@@ -375,6 +377,13 @@ namespace crpcut {
     return false;
   }
 
+  void
+  crpcut_test_case_registrator
+  ::set_test_environment(test_environment *env)
+  {
+    assert(env_ == 0);
+    env_ = env;
+  }
 
   bool
   crpcut_test_case_registrator

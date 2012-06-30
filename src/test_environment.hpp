@@ -24,72 +24,44 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
-#include <crpcut.hpp>
-#include "../test_case_factory.hpp"
-#include "../poll.hpp"
 
-namespace {
-  class mock_poll : public crpcut::poll<crpcut::fdreader>
-  {
-  public:
-    MOCK_METHOD3(do_add_fd, void(int, crpcut::fdreader*, int));
-    MOCK_METHOD1(do_del_fd, void(int));
-    MOCK_METHOD1(do_wait, descriptor(int));
-    MOCK_CONST_METHOD0(do_num_fds, std::size_t());
-  };
 
-}
+#ifndef TEST_ENVIRONMENT_HPP_
+#define TEST_ENVIRONMENT_HPP_
 
-TESTSUITE(registrator_list)
+extern "C"
 {
-  typedef crpcut::registrator_list list;
-  TEST(construction_does_nothing)
-  {
-    list l;
+#  include <dirent.h>
+}
+namespace crpcut {
+  namespace cli {
+    class interpreter;
   }
+  class test_environment
+  {
+  protected:
+    test_environment() : cli_(0), charset_(0) {} // for test use
+  public:
+    test_environment(cli::interpreter *cli);
+    virtual ~test_environment();
 
-  TEST(run_test_case_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-  {
-    list l;
-    l.run_test_case();
-  }
+    virtual void set_charset(const char *set_name);
+    virtual const char *get_charset() const;
+    virtual const char *get_output_charset() const;
+    virtual const char *get_illegal_rep() const;
+    virtual bool tests_as_child_procs() const;
+    virtual bool timeouts_enabled() const;
+    virtual unsigned timeout_multiplier() const;
+    virtual bool is_backtrace_enabled() const;
+    virtual const char *get_start_dir() const;
+    virtual const char *get_parameter(const char *name) const;
+  private:
 
-  TEST(crpcut_tag_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-  {
-    list l;
-    l.crpcut_tag();
-  }
-
-  TEST(get_importance_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-  {
-    list l;
-    l.get_importance();
-  }
-
-  TEST(setup_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-  {
-    list l;
-    testing::StrictMock<mock_poll> poller;
-    l.setup(poller, pid_t(1), 1,2,3,4);
-  }
+    cli::interpreter *cli_;
+    const char       *charset_;
+    char              homedir_[PATH_MAX];
+  };
 }
 
 
-
-
-
-
-
+#endif // TEST_ENVIRONMENT_HPP_

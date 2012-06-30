@@ -137,13 +137,13 @@ namespace {
 namespace crpcut {
   test_case_factory
   ::test_case_factory()
-    : cli_(0),
+    : env_(0),
+      cli_(0),
       current_pid_(0),
       num_pending_children_(0),
       presenter_pipe_(-1),
       deadlines_(0),
-      working_dirs_(0),
-      charset_("UTF-8")
+      working_dirs_(0)
   {
     lib::strcpy(dirbase_, "/tmp/crpcutXXXXXX");
   }
@@ -151,28 +151,6 @@ namespace crpcut {
   test_case_factory
   ::~test_case_factory()
   {
-  }
-
-  void
-  test_case_factory
-  ::set_charset(const char *set_name)
-  {
-    obj().do_set_charset(set_name);
-  }
-
-  const char *
-  test_case_factory
-  ::get_charset()
-  {
-    return obj().do_get_charset();
-  }
-
-
-  const char *
-  test_case_factory
-  ::get_output_charset()
-  {
-    return obj().cli_->output_charset();
   }
 
 
@@ -306,60 +284,6 @@ namespace crpcut {
   }
 
 
-  bool
-  test_case_factory
-  ::tests_as_child_procs() const
-  {
-    return !cli_->single_shot_mode();
-  }
-
-  bool
-  test_case_factory
-  ::timeouts_enabled() const
-  {
-    return cli_->honour_timeouts();
-  }
-
-  unsigned
-  test_case_factory
-  ::timeout_multiplier() const
-  {
-    return cli_->timeout_multiplier();
-  }
-
-  bool
-  test_case_factory
-  ::is_backtrace_enabled()
-  {
-#ifdef USE_BACKTRACE
-    return obj().cli_->backtrace_enabled();
-#else
-    return false;
-#endif
-  }
-
-
-  const char*
-  test_case_factory
-  ::get_start_dir()
-  {
-    return obj().do_get_start_dir();
-  }
-
-  const char*
-  test_case_factory
-  ::get_parameter(const char *name)
-  {
-    return obj().cli_->named_parameter(name);
-  }
-
-  const char*
-  test_case_factory
-  ::get_illegal_rep()
-  {
-    return obj().cli_->illegal_representation();
-  }
-
   test_case_factory&
   test_case_factory
   ::obj()
@@ -384,12 +308,6 @@ namespace crpcut {
     deadlines_->remove(i);
   }
 
-  const char*
-  test_case_factory
-  ::do_get_start_dir() const
-  {
-    return homedir_;
-  }
 
   void
   test_case_factory
@@ -398,19 +316,6 @@ namespace crpcut {
     working_dirs_->free(num);
   }
 
-  void
-  test_case_factory
-  ::do_set_charset(const char* set_name)
-  {
-    charset_ = set_name;
-  }
-
-  const char*
-  test_case_factory
-  ::do_get_charset() const
-  {
-    return charset_;
-  }
 
 
   void
@@ -674,6 +579,7 @@ namespace crpcut {
                 continue;
               }
             progress = true;
+            i->set_test_environment(env_);
             start_test(i, poller);
             manage_children(num_parallel, poller);
             i->unlink();
@@ -732,6 +638,8 @@ namespace crpcut {
                             tag_list_root& tags)
   {
     cli_ = cli;
+    test_environment env(cli_);
+    env_ = &env;
     try
       {
         const char *const *test_names = cli_->get_test_list();
@@ -739,7 +647,6 @@ namespace crpcut {
         if (cli_->list_tags()) list_tags(tags);
         configure_tags(cli_->tag_specification(), tags);
         if (cli_->list_tests()) list_tests(test_names, tags, err_os);
-        wrapped::getcwd(homedir_, sizeof(homedir_));
         if (cli_->working_dir())
           {
             lib::strcpy(dirbase_, cli_->working_dir());
@@ -758,6 +665,7 @@ namespace crpcut {
                 throw cli_exception(-1);
               }
             crpcut_test_case_registrator *i = reg_.next();
+            i->set_test_environment(env_);
             std::cout << *i << " ";
             i->run_test_case();
             std::cout << "OK\n";
@@ -843,4 +751,10 @@ namespace crpcut {
   }
 
 
+  test_environment&
+  test_case_factory
+  ::environment() const
+  {
+    return *env_;
+  }
 }
