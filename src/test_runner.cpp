@@ -49,26 +49,6 @@ extern "C" {
 
 namespace {
 
-  template <typename T, size_t N>
-  T *begin(T (&array)[N])
-  {
-    return array;
-  }
-
-  template <typename T, size_t N>
-  T *end(T (&array)[N])
-  {
-    return array + N;
-  }
-
-
-  template <size_t N>
-  bool strequal(const char (&s)[N], const char *p, size_t n)
-  {
-    return N == n + 1 && crpcut::wrapped::strncmp(s, p, n) == 0;
-  }
-
-
   template <typename A, typename B>
   crpcut::output::formatter&
   select_output_formatter(crpcut::output::buffer &buffer,
