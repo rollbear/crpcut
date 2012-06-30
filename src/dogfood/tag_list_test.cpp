@@ -26,15 +26,17 @@
 
 
 #include <crpcut.hpp>
+#include "../tag_filter.hpp"
 #include <sstream>
+
+#define S(x) crpcut::datatypes::fixed_string::make(x)
 
 namespace {
   class test_list : public crpcut::tag_list_root
   {
     virtual crpcut::datatypes::fixed_string get_name() const
     {
-      abort();
-      return crpcut::datatypes::fixed_string::make("");
+      return S("");
     }
   };
   class test_tag : public crpcut::tag
@@ -52,34 +54,145 @@ namespace {
     crpcut::datatypes::fixed_string name_;
   };
 
+  struct fix
+  {
+    fix() : apa("apa", &list), lemur("lemur", &list), ko("ko", &list),
+            longish("a_rather_longish_and_unpleasant_kind_of_name", &list){}
+    test_list list;
+    test_tag apa;
+    test_tag lemur;
+    test_tag ko;
+    test_tag longish;
+  };
+
+
+  struct tag_result {
+    crpcut::tag             *t;
+    crpcut::tag::importance  i;
+  };
+  template <size_t N>
+  void verify_tags(tag_result (&result)[N], crpcut::tag_list_root &list)
+  {
+    crpcut::tag_list_root::iterator it = list.begin();
+    for (size_t i = 0; i < N; ++i)
+      {
+        INFO << "i=" << i;
+        ASSERT_TRUE(result[i].t == &*it);
+        ASSERT_TRUE(result[i].i == it->get_importance());
+        ++it;
+      }
+  }
 }
+
+
 TESTSUITE(tag_list)
 {
-  TEST(print_of_empty_tag_list_outputs_nothing)
+  TESTSUITE(printing)
   {
-    std::ostringstream os;
+    TEST(empty_list_outputs_nothing)
     {
-      test_list list;
-      list.print_to(os);
+      std::ostringstream os;
+      {
+        test_list list;
+        list.print_to(os);
+      }
+      ASSERT_TRUE(os.str() == "");
     }
-    ASSERT_TRUE(os.str() == "");
+
+    TEST(populated_list_is_printed_by_line_in_order_of_registration)
+      {
+        std::ostringstream os;
+      {
+        fix f;
+        f.list.print_to(os);
+      }
+      static const char expected[] =
+          "apa\n"
+          "lemur\n"
+          "ko\n"
+          "a_rather_longish_and_unpleasant_kind_of_name\n";
+      ASSERT_TRUE(os.str() == expected);
+    }
   }
 
-  TEST(print_of_populated_tags_prints_them_by_line_in_order_of_registration)
+
+  TESTSUITE(configuring)
   {
-    std::ostringstream os;
+    TEST(null_specification_makes_all_tags_critical, fix)
     {
-      test_list list;
-      test_tag apa("apa", &list);
-      test_tag lemur("lemur", &list);
-      test_tag ko("ko", &list);
-      list.print_to(os);
+      list.configure_importance(0);
+      tag_result r[] =
+      {
+       { &apa, crpcut::tag::critical },
+       { &lemur, crpcut::tag::critical },
+       { &ko, crpcut::tag::critical },
+       { &longish, crpcut::tag::critical },
+       { &list, crpcut::tag::critical }
+      };
+      verify_tags(r, list);
     }
-    static const char expected[] =
-        "apa\n"
-        "lemur\n"
-        "ko\n";
-    ASSERT_TRUE(os.str() == expected);
+
+    TEST(selected_tags_are_critical_the_rest_ignored, fix)
+    {
+      list.configure_importance("ko,apa");
+      tag_result r[] =
+      {
+        { &apa, crpcut::tag::critical },
+        { &lemur, crpcut::tag::ignored },
+        { &ko, crpcut::tag::critical },
+        { &longish, crpcut::tag::ignored },
+        { &list, crpcut::tag::ignored }
+      };
+      verify_tags(r, list);
+    }
+
+    TEST(deselected_tags_are_ignored_the_rest_are_critical, fix)
+    {
+      list.configure_importance("-apa,ko");
+      tag_result r[] =
+      {
+       { &apa, crpcut::tag::ignored },
+       { &lemur, crpcut::tag::critical },
+       { &ko, crpcut::tag::ignored },
+       { &longish, crpcut::tag::critical },
+       { &list, crpcut::tag::critical }
+      };
+      verify_tags(r, list);
+    }
+
+    TEST(marked_non_critical_are_non_critical_the_rest_as_selected, fix)
+    {
+      list.configure_importance("-apa/ko,lemur");
+      tag_result r[] =
+      {
+        { &apa, crpcut::tag::ignored },
+        { &lemur, crpcut::tag::non_critical },
+        { &ko, crpcut::tag::non_critical },
+        { &longish, crpcut::tag::critical },
+        { &list, crpcut::tag::critical }
+      };
+      verify_tags(r, list);
+    }
+
+    TEST(unmarked_non_critical_are_as_selected_the_rest_non_critical, fix)
+    {
+      list.configure_importance("-apa/-ko,lemur");
+      tag_result r[] =
+      {
+        { &apa, crpcut::tag::ignored },
+        { &lemur, crpcut::tag::critical },
+        { &ko, crpcut::tag::critical },
+        { &longish, crpcut::tag::non_critical },
+        { &list, crpcut::tag::critical }
+      };
+      verify_tags(r, list);
+    }
+
+    TEST(illegal_specification_throws, fix)
+    {
+      ASSERT_THROW(list.configure_importance("//"),
+                   crpcut::tag_filter::spec_error);
+    }
   }
 }
 

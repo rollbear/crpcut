@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-
+#include "tag_filter.hpp"
 namespace crpcut {
   void
   tag_list_root
@@ -35,6 +35,24 @@ namespace crpcut {
       {
         os << i->get_name().str << "\n";
       }
+  }
+
+  void
+  tag_list_root
+  ::configure_importance(const char *specification)
+  {
+    if (specification == 0) return;
+    tag_filter filter(specification);
+    filter.assert_names(*this);
+    // tag.end() refers to the defaulted nameless tag which
+    // we want to include in this loop, hence the odd appearence
+    tag_list::iterator ti = begin();
+    do
+      {
+        tag::importance i = filter.lookup(ti->get_name());
+        ti->set_importance(i);
+      }
+    while (ti++ != end());
 
   }
 }

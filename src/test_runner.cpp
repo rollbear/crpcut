@@ -360,23 +360,6 @@ namespace crpcut {
     throw cli_exception(0);
   }
 
-  void configure_tags(const char *specification, crpcut::tag_list_root &tags)
-  {
-    if (specification == 0) return;
-    tag_filter filter(specification);
-    filter.assert_names(tags);
-    // tag.end() refers to the defaulted nameless tag which
-    // we want to include in this loop, hence the odd appearence
-    tag_list::iterator ti = tags.begin();
-    tag_list::iterator end = tags.end();
-    do
-      {
-        tag::importance i = filter.lookup(ti->get_name());
-        ti->set_importance(i);
-      }
-    while (ti++ != end);
-  }
-
   unsigned
   make_tentative_test_list(registrator_list &reg,
                            registrator_list *tentative)
@@ -620,7 +603,7 @@ namespace crpcut {
             tags.print_to(std::cout);
             throw cli_exception(0);
           }
-        configure_tags(cli_->tag_specification(), tags);
+        tags.configure_importance(cli_->tag_specification());
         if (cli_->list_tests()) list_tests(test_names, tags, err_os);
         if (cli_->working_dir())
           {

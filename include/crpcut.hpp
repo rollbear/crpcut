@@ -1022,6 +1022,7 @@ namespace crpcut {
     iterator begin() { return iterator(next()); }
     iterator end() { return iterator(this); }
     void print_to(std::ostream &) const;
+    void configure_importance(const char *specification);
   private:
     int longest_tag_name_;
   };
