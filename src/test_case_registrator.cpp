@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-#include "test_case_factory.hpp"
+#include "test_runner.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #include "filesystem_operations.hpp"
 #include "process_control.hpp"
@@ -123,7 +123,7 @@ namespace crpcut {
     timeboxed::set_deadline(phase_ == running
                             ? crpcut_calc_deadline(ts)
                             : ts);
-    factory_->set_deadline(this);
+    runner_->set_deadline(this);
   }
 
   crpcut_test_case_registrator
@@ -139,7 +139,7 @@ namespace crpcut {
       dirnum_(~0U),
       phase_(creating),
       cputime_limit_ms_(0),
-      factory_(0),
+      runner_(0),
       env_(0),
       reporter_(0),
       process_(0),
@@ -154,7 +154,7 @@ namespace crpcut {
                                  comm::reporter        *reporter,
                                  process_control       *process,
                                  filesystem_operations *filesystem,
-                                 test_case_factory     *factory)
+                                 test_runner           *runner)
     : name_(name),
       ns_info_(&ns),
       suite_list_(0),
@@ -166,13 +166,13 @@ namespace crpcut {
       dirnum_(~0U),
       phase_(creating),
       cputime_limit_ms_(cputime_timeout_ms),
-      factory_(factory),
+      runner_(runner),
       env_(0),
       reporter_(reporter),
       process_(process),
       filesystem_(filesystem)
   {
-    link_before(factory_->reg_);
+    link_before(runner_->reg_);
   }
 
   void
@@ -181,7 +181,7 @@ namespace crpcut {
   {
     assert(pid_ == 0);
     pid_ = pid;
-    factory_->introduce_test(pid, this);
+    runner_->introduce_test(pid, this);
 
   }
   void
@@ -292,7 +292,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::clear_deadline()
   {
-    factory_->clear_deadline(this);
+    runner_->clear_deadline(this);
     timeboxed::clear_deadline();
   }
 
@@ -394,7 +394,7 @@ namespace crpcut {
     if (!crpcut_failed()) phase_ = post_mortem;
     stream::toastream<1024> tcname;
     tcname << *this << '\0';
-    factory_->present(pid_, comm::dir, phase_, 0, 0);
+    runner_->present(pid_, comm::dir, phase_, 0, 0);
     filesystem_->rename(dirname, tcname.begin());
     crpcut_register_success(false);
     return true;
@@ -406,7 +406,7 @@ namespace crpcut {
   {
     ::siginfo_t info = get_siginfo(pid_, process_);
 
-    unsigned long cputime_ms = factory_->calc_cputime(cpu_time_at_start_);
+    unsigned long cputime_ms = runner_->calc_cputime(cpu_time_at_start_);
     if (!killed_ && deadline_is_set())
       {
         clear_deadline();
@@ -459,11 +459,11 @@ namespace crpcut {
       {
         t = comm::exit_fail;
       }
-    factory_->present(pid_, t, phase_, out.size(), out.begin());
+    runner_->present(pid_, t, phase_, out.size(), out.begin());
     crpcut_register_success(t == comm::exit_ok);
-    factory_->return_dir(dirnum_);
+    runner_->return_dir(dirnum_);
     bool critical = crpcut_tag().get_importance() == tag::critical;
-    factory_->present(pid_,
+    runner_->present(pid_,
                       comm::end_test,
                       phase_,
                       sizeof(critical), (const char*)&critical);

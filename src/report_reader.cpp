@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-#include "test_case_factory.hpp"
+#include "test_runner.hpp"
 #include "clocks/clocks.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
@@ -154,7 +154,7 @@ namespace crpcut {
           break; // silence warning
         }
 
-      test_case_factory::obj().present(reg_->get_pid(),
+      test_runner::obj().present(reg_->get_pid(),
                                        t,
                                        reg_->get_phase(),
                                        len, buff);

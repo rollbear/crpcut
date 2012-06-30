@@ -24,8 +24,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef TEST_CASE_FACTORY_HPP_
-#define TEST_CASE_FACTORY_HPP_
+#ifndef TEST_RUNNER_HPP_
+#define TEST_RUNNER_HPP_
 
 #include <crpcut.hpp>
 #include "registrator_list.hpp"
@@ -38,13 +38,13 @@ namespace crpcut {
   class test_case_registrator;
   class test_environment;
 
-  class test_case_factory
+  class test_runner
   {
   protected:
-    test_case_factory();
+    test_runner();
   public:
-    static test_case_factory& obj();
-    virtual ~test_case_factory();
+    static test_runner& obj();
+    virtual ~test_runner();
     virtual void introduce_test(pid_t                               pid,
                                 const crpcut_test_case_registrator *reg);
     virtual void present(pid_t pid, comm::type t, test_phase phase,

@@ -113,10 +113,10 @@ file(GLOB LIB_SRCS
      src/tag_filter.cpp
      src/tag_info.cpp
      src/test_case_base.cpp
-     src/test_case_factory.cpp
      src/test_case_registrator.cpp
      src/test_case_result.cpp
      src/test_environment.cpp
+     src/test_runner.cpp
      src/test_suite_base.cpp
      src/test_wrapper.cpp
      src/text_writer.cpp
@@ -172,6 +172,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/show_value_test.cpp
      src/dogfood/tag_filter_test.cpp
      src/dogfood/test_case_registrator_test.cpp
+     src/dogfood/test_runner_test.cpp
      src/dogfood/test_wrapper_test.cpp
      src/dogfood/working_dir_allocator_test.cpp
 )

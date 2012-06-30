@@ -26,8 +26,8 @@
 
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
-#include "../test_case_factory.hpp"
 #include "../poll.hpp"
+#include "../registrator_list.hpp"
 
 namespace {
   class mock_poll : public crpcut::poll<crpcut::fdreader>

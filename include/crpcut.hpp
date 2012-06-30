@@ -332,7 +332,7 @@ namespace crpcut {
     const T& gen();
   }
 
-  class test_case_factory;
+  class test_runner;
 
   typedef enum { verbatim, uppercase, lowercase } case_convert_type;
   template <case_convert_type>
@@ -1686,7 +1686,7 @@ namespace crpcut {
       static bool is_enabled() { return enabled; }
     private:
       static void enable();
-      friend class ::crpcut::test_case_factory;
+      friend class ::crpcut::test_runner;
       static bool enabled;
     };
 
@@ -1813,7 +1813,7 @@ namespace crpcut {
   filesystem_operations *filesystem_operations_root();
 
   class test_environment;
-  test_case_factory *test_case_factory_root();
+  test_runner *default_test_runner();
   class test_suite_base;
   class crpcut_test_case_registrator
     : public virtual policies::deaths::crpcut_none,
@@ -1830,7 +1830,7 @@ namespace crpcut {
                                  comm::reporter *reporter = &comm::report,
                                  process_control *process = process_control_root(),
                                  filesystem_operations *fsops = filesystem_operations_root(),
-                                 test_case_factory *factory = test_case_factory_root());
+                                 test_runner *runner = default_test_runner());
     friend std::ostream &operator<<(std::ostream &os,
                                     const crpcut_test_case_registrator &t)
     {
@@ -1890,7 +1890,7 @@ namespace crpcut {
     unsigned                      dirnum_;
     test_phase                    phase_;
     const unsigned long           cputime_limit_ms_;
-    test_case_factory            *factory_;
+    test_runner                  *runner_;
     test_environment             *env_;
     comm::reporter               *reporter_;
     process_control              *process_;

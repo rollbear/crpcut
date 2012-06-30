@@ -26,7 +26,7 @@
 
 
 #include <crpcut.hpp>
-#include "test_case_factory.hpp"
+#include "test_runner.hpp"
 
 namespace crpcut {
 
@@ -69,75 +69,75 @@ namespace crpcut {
   int
   run(int argc, char *argv[], std::ostream &os)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    return test_runner::run_test(argc, argv, os);
   }
 
   int
   run(int argc, const char *argv[], std::ostream &os)
   {
-    return test_case_factory::run_test(argc, argv, os);
+    return test_runner::run_test(argc, argv, os);
   }
 
   const char *
   get_parameter(const char *name)
   {
-    return test_case_factory::obj().environment().get_parameter(name);
+    return test_runner::obj().environment().get_parameter(name);
   }
 
   const char *get_start_dir()
   {
-    return test_case_factory::obj().environment().get_start_dir();
+    return test_runner::obj().environment().get_start_dir();
   }
 
   void set_charset(const char *charset)
   {
-    return test_case_factory::obj().environment().set_charset(charset);
+    return test_runner::obj().environment().set_charset(charset);
   }
 
   bool timeouts_are_enabled()
   {
-    return test_case_factory::obj().environment().timeouts_enabled();
+    return test_runner::obj().environment().timeouts_enabled();
   }
 
   unsigned timeout_multiplier()
   {
-    return test_case_factory::obj().environment().timeout_multiplier();
+    return test_runner::obj().environment().timeout_multiplier();
   }
 
   bool tests_as_child_processes()
   {
-    return test_case_factory::obj().environment().tests_as_child_procs();
+    return test_runner::obj().environment().tests_as_child_procs();
   }
 
   void present_test_data(pid_t pid, comm::type t, test_phase phase,
                          size_t len, const char *buff)
   {
-    test_case_factory::obj().present(pid, t, phase, len, buff);
+    test_runner::obj().present(pid, t, phase, len, buff);
   }
 
   bool is_backtrace_enabled()
   {
-    return test_case_factory::obj().environment().is_backtrace_enabled();
+    return test_runner::obj().environment().is_backtrace_enabled();
   }
 
   const char *get_output_charset()
   {
-    return test_case_factory::obj().environment().get_output_charset();
+    return test_runner::obj().environment().get_output_charset();
   }
 
   const char *get_illegal_char_representation()
   {
-    return test_case_factory::obj().environment().get_illegal_rep();
+    return test_runner::obj().environment().get_illegal_rep();
   }
 
   const char *get_program_charset()
   {
-    return test_case_factory::obj().environment().get_charset();
+    return test_runner::obj().environment().get_charset();
   }
 
-  test_case_factory* test_case_factory_root()
+  test_runner* default_test_runner()
   {
-    return &test_case_factory::obj();
+    return &test_runner::obj();
   }
 } // namespace crpcut
 

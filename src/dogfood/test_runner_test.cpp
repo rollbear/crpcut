@@ -26,7 +26,7 @@
 
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
-#include "../test_case_factory.hpp"
+#include "../test_runner.hpp"
 #include "../process_control.hpp"
 #include "../filesystem_operations.hpp"
 #include "../poll.hpp"
@@ -41,7 +41,7 @@ extern "C"
 TESTSUITE(test_case_registrator)
 {
   using namespace testing;
-  class mock_factory : public crpcut::test_case_factory
+  class mock_runner : public crpcut::test_runner
   {
   public:
     MOCK_METHOD2(introduce_test, void(pid_t,
@@ -113,7 +113,7 @@ TESTSUITE(test_case_registrator)
                      crpcut::comm::reporter        *reporter,
                      crpcut::process_control       *proc,
                      crpcut::filesystem_operations *fsops,
-                     crpcut::test_case_factory     *factory)
+                     crpcut::test_runner     *factory)
     : crpcut_test_case_registrator(name, ns, cpulimit, reporter, proc, fsops, factory)
     {
     }
@@ -153,21 +153,21 @@ TESTSUITE(test_case_registrator)
   {
     fix()
     : default_out(),
-      factory(),
+      runner(),
       reporter(default_out),
       process_control(),
       fsops(),
       top_namespace(0,0),
       current_namespace("apa", &top_namespace),
       reg("test", current_namespace, cpulimit,
-          &reporter, &process_control, &fsops, &factory)
+          &reporter, &process_control, &fsops, &runner)
     {
       reg.set_test_environment(&env);
     }
     void setup(pid_t pid)
     {
       StrictMock<mock_poll> poller;
-      EXPECT_CALL(factory, introduce_test(pid, &reg));
+      EXPECT_CALL(runner, introduce_test(pid, &reg));
       reg.setup(poller, pid, -1, -1, -1, -1);
     }
     void prepare_siginfo(pid_t pid, int status, int code, Sequence s)
@@ -188,7 +188,7 @@ TESTSUITE(test_case_registrator)
 
     std::ostringstream                   default_out;
     StrictMock<mock_environment>         env;
-    StrictMock<mock_factory>             factory;
+    StrictMock<mock_runner>              runner;
     mock_reporter                        reporter;
     StrictMock<mock_process_control>     process_control;
     StrictMock<mock_fsops>               fsops;
@@ -468,7 +468,7 @@ TESTSUITE(test_case_registrator)
       reg.set_phase(crpcut::destroying);
       prepare_siginfo(test_pid, 0, CLD_EXITED, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(10U));
 
       EXPECT_CALL(reg, crpcut_is_expected_exit(0)).
@@ -477,14 +477,14 @@ TESTSUITE(test_case_registrator)
 
       EXPECT_CALL(reg, crpcut_on_ok_action(_));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_ok,
-                                   crpcut::destroying,
-                                   0, _)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_ok,
+                                  crpcut::destroying,
+                                  0, _)).
           InSequence(s);
 
-      EXPECT_CALL(factory, return_dir(9));
+      EXPECT_CALL(runner, return_dir(9));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test,
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test,
                                    crpcut::destroying,
                                    sizeof(bool), _)).
           InSequence(s);
@@ -507,23 +507,23 @@ TESTSUITE(test_case_registrator)
         prepare_siginfo(test_pid, 0, CLD_DUMPED, s);
 
 
-        EXPECT_CALL(factory, calc_cputime(_)).
+        EXPECT_CALL(runner, calc_cputime(_)).
             WillOnce(Return(10U));
 
-        EXPECT_CALL(factory, present(test_pid,
+        EXPECT_CALL(runner, present(test_pid,
                                      crpcut::comm::dir,
                                      crpcut::running,
                                      0, 0)).
            InSequence(s);
         EXPECT_CALL(fsops, rename(StrEq("99"), StrEq("apa::test")));
-        EXPECT_CALL(factory, present(test_pid,
+        EXPECT_CALL(runner, present(test_pid,
                                      crpcut::comm::exit_fail,
                                      crpcut::running,
                                      19, StartsWith("Died with core dump"))).
            InSequence(s);
-        EXPECT_CALL(factory, return_dir(99));
+        EXPECT_CALL(runner, return_dir(99));
 
-        EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test,
+        EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test,
                                      crpcut::running,
                                      sizeof(bool), _)).
            InSequence(s);
@@ -556,7 +556,7 @@ TESTSUITE(test_case_registrator)
       SET_WD(3);
       prepare_siginfo(test_pid, 3, CLD_EXITED, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(10U));
 
       EXPECT_CALL(reg, crpcut_is_expected_exit(3)).
@@ -567,16 +567,16 @@ TESTSUITE(test_case_registrator)
           InSequence(s).
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
           With(Args<4,3>(ElementsAreArray(S(Exited with code 3\nExpected exit 0)))).
           InSequence(s);
 
-      EXPECT_CALL(factory, return_dir(3));
+      EXPECT_CALL(runner, return_dir(3));
 
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
       reg.manage_death();
@@ -594,7 +594,7 @@ TESTSUITE(test_case_registrator)
       SET_WD(100);
       prepare_siginfo(test_pid, 15, CLD_KILLED, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(10U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(15)).
@@ -605,16 +605,16 @@ TESTSUITE(test_case_registrator)
           InSequence(s).
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
           With(Args<4,3>(ElementsAreArray(S(Died on signal 15\nExpected exit 0)))).
           InSequence(s);
 
-      EXPECT_CALL(factory, return_dir(100));
+      EXPECT_CALL(runner, return_dir(100));
 
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
       reg.manage_death();
@@ -637,7 +637,7 @@ TESTSUITE(test_case_registrator)
 
       prepare_siginfo(test_pid, 9, CLD_KILLED, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(1000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(9)).
@@ -648,16 +648,16 @@ TESTSUITE(test_case_registrator)
           InSequence(s).
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
           With(Args<4,3>(ElementsAreArray(S(Timed out - killed\nExpected exit 0)))).
           InSequence(s);
 
-      EXPECT_CALL(factory, return_dir(1));
+      EXPECT_CALL(runner, return_dir(1));
 
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
       reg.kill();
@@ -678,7 +678,7 @@ TESTSUITE(test_case_registrator)
 
       prepare_siginfo(test_pid, 6, CLD_KILLED, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(1000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
@@ -688,16 +688,16 @@ TESTSUITE(test_case_registrator)
       EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(true));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
           With(Args<4,3>(ElementsAreArray(S(Test consumed 1000ms CPU-time\nLimit was 100ms)))).
           InSequence(s);
 
-      EXPECT_CALL(factory, return_dir(1));
+      EXPECT_CALL(runner, return_dir(1));
 
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
       reg.manage_death();
@@ -717,7 +717,7 @@ TESTSUITE(test_case_registrator)
 
       prepare_siginfo(test_pid, 6, CLD_KILLED, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(1000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
@@ -728,15 +728,15 @@ TESTSUITE(test_case_registrator)
       EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(false));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).
           InSequence(s);
 
-      EXPECT_CALL(factory, return_dir(1));
+      EXPECT_CALL(runner, return_dir(1));
 
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
       reg.manage_death();
@@ -756,7 +756,7 @@ TESTSUITE(test_case_registrator)
 
       prepare_siginfo(test_pid, 6, CLD_DUMPED, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(1000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
@@ -767,15 +767,15 @@ TESTSUITE(test_case_registrator)
       EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(false));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).
           InSequence(s);
 
-      EXPECT_CALL(factory, return_dir(1));
+      EXPECT_CALL(runner, return_dir(1));
 
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
       reg.manage_death();
@@ -795,19 +795,19 @@ TESTSUITE(test_case_registrator)
 
       prepare_siginfo(test_pid, 6, CLD_DUMPED, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(1000U));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
           With(Args<4,3>(ElementsAreArray(S(Died with core dump)))).
           InSequence(s);
 
-      EXPECT_CALL(factory, return_dir(1));
+      EXPECT_CALL(runner, return_dir(1));
 
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
       reg.manage_death();
@@ -827,22 +827,22 @@ TESTSUITE(test_case_registrator)
 
       prepare_siginfo(test_pid, 0, -1, s);
 
-      EXPECT_CALL(factory, calc_cputime(_)).
+      EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(1000U));
 
-      EXPECT_CALL(factory, present(test_pid,
+      EXPECT_CALL(runner, present(test_pid,
                                    crpcut::comm::exit_fail,
                                    phase, _, _)).
         With(Args<4,3>(ElementsAreArray(S(Died for unknown reason, code=-1)))).
         InSequence(s);
 
 
-      EXPECT_CALL(factory, return_dir(1));
+      EXPECT_CALL(runner, return_dir(1));
 
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
 
-      EXPECT_CALL(factory, present(test_pid, crpcut::comm::end_test, phase, _,_)).
+      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
           InSequence(s);
 
       reg.manage_death();

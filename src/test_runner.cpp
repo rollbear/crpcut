@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include "test_case_factory.hpp"
+#include "test_runner.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
 #include "tag_filter.hpp"
@@ -135,8 +135,8 @@ namespace {
 }
 
 namespace crpcut {
-  test_case_factory
-  ::test_case_factory()
+  test_runner
+  ::test_runner()
     : env_(0),
       cli_(0),
       current_pid_(0),
@@ -148,15 +148,15 @@ namespace crpcut {
     lib::strcpy(dirbase_, "/tmp/crpcutXXXXXX");
   }
 
-  test_case_factory
-  ::~test_case_factory()
+  test_runner
+  ::~test_runner()
   {
   }
 
 
 
   void
-  test_case_factory
+  test_runner
   ::manage_children(std::size_t max_pending_children, poll<fdreader> &poller)
   {
     while (num_pending_children_ >= max_pending_children)
@@ -191,7 +191,7 @@ namespace crpcut {
 
 
   void
-  test_case_factory
+  test_runner
   ::start_test(crpcut_test_case_registrator *i, poll<fdreader>& poller)
   {
     pipe_pair c2p("communication pipe test-case to main process");
@@ -247,7 +247,7 @@ namespace crpcut {
   }
 
   void
-  test_case_factory
+  test_runner
   ::introduce_test(pid_t pid, const crpcut_test_case_registrator *reg)
   {
     const comm::type t   = comm::begin_test;
@@ -262,14 +262,14 @@ namespace crpcut {
   }
 
   int
-  test_case_factory
+  test_runner
   ::run_test(int argc, char *argv[], std::ostream &os)
   {
     return run_test(argc, const_cast<const char**>(argv), os);
   }
 
   int
-  test_case_factory
+  test_runner
   ::run_test(int, const char *argv[], std::ostream &os)
   {
     try {
@@ -284,16 +284,16 @@ namespace crpcut {
   }
 
 
-  test_case_factory&
-  test_case_factory
+  test_runner&
+  test_runner
   ::obj()
   {
-    static test_case_factory f;
+    static test_runner f;
     return f;
   }
 
   void
-  test_case_factory
+  test_runner
   ::set_deadline(crpcut_test_case_registrator *i)
   {
     assert(i->deadline_is_set());
@@ -301,7 +301,7 @@ namespace crpcut {
   }
 
   void
-  test_case_factory
+  test_runner
   ::clear_deadline(crpcut_test_case_registrator *i)
   {
     assert(i->deadline_is_set());
@@ -310,7 +310,7 @@ namespace crpcut {
 
 
   void
-  test_case_factory
+  test_runner
   ::return_dir(unsigned num)
   {
     working_dirs_->free(num);
@@ -319,7 +319,7 @@ namespace crpcut {
 
 
   void
-  test_case_factory
+  test_runner
   ::present(pid_t       pid,
             comm::type  t,
             test_phase  phase,
@@ -339,7 +339,7 @@ namespace crpcut {
 
 
   void
-  test_case_factory
+  test_runner
   ::list_tests(const char *const*names,
                tag_list_root &tags,
                std::ostream &err_os)
@@ -562,7 +562,7 @@ namespace crpcut {
       }
   }
 
-  void test_case_factory
+  void test_runner
   ::schedule_tests(std::size_t num_parallel, poll<fdreader> &poller)
   {
     for (;;)
@@ -594,7 +594,7 @@ namespace crpcut {
   }
 
   int
-  test_case_factory::spawn_test_runner()
+  test_runner::spawn_test_runner()
   {
     pipe_pair p("communication pipe for presenter process");
 
@@ -633,7 +633,7 @@ namespace crpcut {
   }
 
   int
-  test_case_factory::do_run(cli::interpreter *cli,
+  test_runner::do_run(cli::interpreter *cli,
                             std::ostream& err_os,
                             tag_list_root& tags)
   {
@@ -735,7 +735,7 @@ namespace crpcut {
   }
 
   unsigned long
-  test_case_factory::calc_cputime(const struct timeval& t)
+  test_runner::calc_cputime(const struct timeval& t)
   {
     struct rusage usage;
     int rv = wrapped::getrusage(RUSAGE_CHILDREN, &usage);
@@ -752,7 +752,7 @@ namespace crpcut {
 
 
   test_environment&
-  test_case_factory
+  test_runner
   ::environment() const
   {
     return *env_;
