@@ -55,6 +55,35 @@ namespace {
     MOCK_CONST_METHOD0(get_importance, importance());
   };
 
+  class test_tag_list_root : public crpcut::tag_list_root
+  {
+  public:
+    crpcut::datatypes::fixed_string get_name() const
+    {
+      static crpcut::datatypes::fixed_string n = { "", 0 };
+      return n;
+    }
+    importance get_importance() const { return critical; }
+  };
+
+  template <crpcut::tag::importance I>
+  class test_tag : public crpcut::tag
+  {
+  public:
+    template <std::size_t N>
+    test_tag(const char (&f)[N], crpcut::tag_list_root* root)
+      : crpcut::tag(int(N-1), root)
+    {
+      name_.str = f;
+      name_.len = N - 1;
+    }
+    virtual crpcut::datatypes::fixed_string get_name() const { return name_; }
+    virtual importance get_importance() const { return I; }
+  private:
+    crpcut::datatypes::fixed_string name_;
+  };
+
+
   typedef crpcut::registrator_list list;
 
   struct fix
@@ -66,32 +95,57 @@ namespace {
       apa("apa", &unnamed_namespace),
       katt("katt", &unnamed_namespace),
       ko("ko", &unnamed_namespace),
+      lemur("lemur", &unnamed_namespace),
       reptil_orm("orm", &reptil_namespace),
       reptil_krokodil("krokodil", &reptil_namespace),
       insekt_mygga("mygga", &insekt_namespace),
-      insekt_bi("bi", &insekt_namespace)
+      insekt_bi("bi", &insekt_namespace),
+      unnamed_tag(),
+      tamdjur("tam", &unnamed_tag),
+      giftiga("giftiga", &unnamed_tag),
+      ignored("ignorerad", &unnamed_tag),
+      disabled("", &unnamed_tag)
     {
       apa.link_before(the_list);
       katt.link_before(the_list);
       ko.link_before(the_list);
+      lemur.link_before(the_list);
       reptil_orm.link_before(the_list);
       reptil_krokodil.link_before(the_list);
       insekt_mygga.link_before(the_list);
       insekt_bi.link_before(the_list);
       EXPECT_CALL(apa, get_importance()).
-        WillRepeatedly(testing::Return(crpcut::tag::critical));
+        WillRepeatedly(testing::Return(unnamed_tag.get_importance()));
+      EXPECT_CALL(apa, crpcut_tag()).
+        WillRepeatedly(testing::ReturnRef(unnamed_tag));
       EXPECT_CALL(katt, get_importance()).
-        WillRepeatedly(testing::Return(crpcut::tag::ignored));
+        WillRepeatedly(testing::Return(tamdjur.get_importance()));
+      EXPECT_CALL(katt, crpcut_tag()).
+        WillRepeatedly(testing::ReturnRef(tamdjur));
       EXPECT_CALL(ko, get_importance()).
-        WillRepeatedly(testing::Return(crpcut::tag::disabled));
+        WillRepeatedly(testing::Return(tamdjur.get_importance()));
+      EXPECT_CALL(ko, crpcut_tag()).
+        WillRepeatedly(testing::ReturnRef(tamdjur));
+      EXPECT_CALL(lemur, get_importance()).
+        WillRepeatedly(testing::Return(disabled.get_importance()));
+      EXPECT_CALL(lemur, crpcut_tag()).
+        WillRepeatedly(testing::ReturnRef(disabled));
       EXPECT_CALL(reptil_orm, get_importance()).
-        WillRepeatedly(testing::Return(crpcut::tag::non_critical));
+        WillRepeatedly(testing::Return(giftiga.get_importance()));
+      EXPECT_CALL(reptil_orm, crpcut_tag()).
+        WillRepeatedly(testing::ReturnRef(giftiga));
       EXPECT_CALL(reptil_krokodil, get_importance()).
-        WillRepeatedly(testing::Return(crpcut::tag::non_critical));
+        WillRepeatedly(testing::Return(ignored.get_importance()));
+      EXPECT_CALL(reptil_krokodil, crpcut_tag()).
+        WillRepeatedly(testing::ReturnRef(ignored));
       EXPECT_CALL(insekt_mygga, get_importance()).
-        WillRepeatedly(testing::Return(crpcut::tag::critical));
+        WillRepeatedly(testing::Return(giftiga.get_importance()));
+      EXPECT_CALL(insekt_mygga, crpcut_tag()).
+        WillRepeatedly(testing::ReturnRef(giftiga));
       EXPECT_CALL(insekt_bi, get_importance()).
-        WillRepeatedly(testing::Return(crpcut::tag::critical));
+        WillRepeatedly(testing::Return(giftiga.get_importance()));
+      EXPECT_CALL(insekt_bi, crpcut_tag()).
+        WillRepeatedly(testing::ReturnRef(giftiga));
     }
     list the_list;
     crpcut::namespace_info unnamed_namespace;
@@ -100,11 +154,18 @@ namespace {
     StrictMock<mock_test_reg> apa;
     StrictMock<mock_test_reg> katt;
     StrictMock<mock_test_reg> ko;
+    StrictMock<mock_test_reg> lemur;
     StrictMock<mock_test_reg> reptil_orm;
     StrictMock<mock_test_reg> reptil_krokodil;
     StrictMock<mock_test_reg> insekt_mygga;
     StrictMock<mock_test_reg> insekt_bi;
+    test_tag_list_root        unnamed_tag;
+    test_tag<crpcut::tag::non_critical> tamdjur;
+    test_tag<crpcut::tag::critical>     giftiga;
+    test_tag<crpcut::tag::ignored>      ignored;
+    test_tag<crpcut::tag::disabled>     disabled;
   };
+
 
   template <typename T, typename U>
   void match_and_remove(T& t, U u)
@@ -122,7 +183,15 @@ namespace {
       {
         match_and_remove(t, i);
       }
-    ASSERT_TRUE(t.size() == 0U);
+    if (t.size())
+      {
+        std::ostringstream os;
+        for (typename T::iterator i = t.begin(); i != t.end(); ++i)
+          {
+            os << **i << " ";
+          }
+        FAIL << os.str() << " were not counted for";
+      }
   }
 }
 
@@ -182,15 +251,16 @@ TESTSUITE(registrator_list)
       const char * const p = 0;
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(&p, os, 1);
-      ASSERT_TRUE(rv.first == 7U);
-      ASSERT_TRUE(rv.second == 7U);
+      ASSERT_TRUE(rv.first == 8U);
+      ASSERT_TRUE(rv.second == 8U);
       std::vector<reg*> expected;
       expected.push_back(&apa);
+      expected.push_back(&katt);
       expected.push_back(&ko);
       expected.push_back(&reptil_orm);
-      expected.push_back(&reptil_krokodil);
       expected.push_back(&insekt_mygga);
       expected.push_back(&insekt_bi);
+      expected.push_back(&lemur);
       match_all(expected, the_list);
     }
 
@@ -201,7 +271,7 @@ TESTSUITE(registrator_list)
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(p, os, 1);
       ASSERT_TRUE(rv.first == 2U);
-      ASSERT_TRUE(rv.second == 7U);
+      ASSERT_TRUE(rv.second == 8U);
       std::vector<reg*> expected;
       expected.push_back(&insekt_mygga);
       expected.push_back(&insekt_bi);
@@ -215,7 +285,7 @@ TESTSUITE(registrator_list)
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(p, os, 1);
       ASSERT_TRUE(rv.first == 3U);
-      ASSERT_TRUE(rv.second == 7U);
+      ASSERT_TRUE(rv.second == 8U);
       std::vector<reg*> expected;
       expected.push_back(&reptil_orm);
       expected.push_back(&insekt_mygga);
@@ -234,9 +304,48 @@ TESTSUITE(registrator_list)
     TEST(unmatched_names_throws_with_pluralis_msg_form, fix)
     {
       std::ostringstream os;
-      const char *p[] = { "reptil", "insekt", "tupp", "lemur", 0 };
+      const char *p[] = { "reptil", "insekt", "tupp", "daggmask", 0 };
       ASSERT_THROW(the_list.filter_out_or_throw(p, os, 1), int);
-      ASSERT_TRUE(os.str() == "tupp, lemur do not match any test names\n");
+      ASSERT_TRUE(os.str() == "tupp, daggmask do not match any test names\n");
+    }
+  }
+
+  TESTSUITE(listing)
+  {
+    TEST(list_all_tests_unfiltered_gives_full_header_and_tag_names, fix)
+    {
+      std::ostringstream os;
+      the_list.list_tests_to(os, 7U);
+      static const char result[] =
+          "     tag : test-name\n"
+          "====================\n"
+          "!        : apa\n"
+          "?    tam : katt\n"
+          "?    tam : ko\n"
+          "-        : lemur\n"
+          "!giftiga : reptil::orm\n"
+    //    "*        : reptil::krokodil\n"
+          "!giftiga : insekt::mygga\n"
+          "!giftiga : insekt::bi\n";
+       ASSERT_TRUE(os.str() == result);
+    }
+
+    TEST(list_all_tests_unfiltered_with_no_tag_margin_gives_name_list_only,
+         fix)
+    {
+      std::ostringstream os;
+      the_list.list_tests_to(os, 0U);
+      static const char result[] =
+          "!apa\n"
+          "?katt\n"
+          "?ko\n"
+          "-lemur\n"
+          "!reptil::orm\n"
+    //    "*reptil::krokodil\n"
+          "!insekt::mygga\n"
+          "!insekt::bi\n";
+       ASSERT_TRUE(os.str() == result);
+
     }
   }
 }

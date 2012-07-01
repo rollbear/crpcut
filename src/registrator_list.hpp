@@ -42,6 +42,7 @@ namespace crpcut {
     std::pair<unsigned, unsigned> filter_out_or_throw(const char *const *names,
                                                       std::ostream      &err_or,
                                                       E                  e);
+    void list_tests_to(std::ostream &os, unsigned tag_margin) const;
   private:
     virtual std::pair<unsigned, unsigned>
             filter_out_unused(const char *const *names,

@@ -127,4 +127,37 @@ namespace crpcut {
     return std::make_pair(num_selected_tests, num_registered_tests);
 
   }
+
+  void
+  registrator_list
+  ::list_tests_to(std::ostream &os, unsigned tag_margin) const
+  {
+    if (tag_margin)
+      {
+        os << ' ' << std::setw(tag_margin) << "tag"
+        << " : test-name\n="
+        << std::setfill('=')
+        << std::setw(tag_margin)
+        << "==="
+        << "============\n"
+        << std::setfill(' ');
+      }
+    for (const crpcut_test_case_registrator *i = next();
+        i != this; i = i->next())
+      {
+        tag::importance importance = i->get_importance();
+
+        if (importance == tag::ignored) continue;
+
+        os << importance;
+        if (tag_margin)
+          {
+            os << std::setw(tag_margin)
+               << i->crpcut_tag().get_name().str
+               << " : ";
+          }
+        os << *i << '\n';
+      }
+  }
+
 }

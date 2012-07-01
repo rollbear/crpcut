@@ -49,13 +49,6 @@ namespace crpcut {
                                 const crpcut_test_case_registrator *reg);
     virtual void present(pid_t pid, comm::type t, test_phase phase,
                          size_t len, const char *buff);
-  private:
-    void show_summary(unsigned       num_selected_tests,
-                      tag_list_root &tags) const;
-    void list_tests(const char *const *names,
-                    tag_list_root     &tags,
-                    std::ostream      &os);
-
   public:
     static int run_test(int argc, char *argv[],
                         std::ostream &os = std::cerr);

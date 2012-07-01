@@ -308,58 +308,6 @@ namespace crpcut {
       }
   }
 
-
-  void
-  test_runner
-  ::list_tests(const char *const*names,
-               tag_list_root &tags,
-               std::ostream &err_os)
-  {
-    if (*names && **names == '-')
-      {
-        err_os
-        << "-l must be followed by a (possibly empty) test case list"
-        "\n";
-        throw cli_exception();
-      }
-    int longest_tag_len = tags.longest_tag_name();
-    if (longest_tag_len > 0)
-      {
-        std::cout << ' ' << std::setw(longest_tag_len) << "tag"
-        << " : test-name\n="
-        << std::setfill('=')
-        << std::setw(longest_tag_len)
-        << "==="
-        << "============\n"
-        << std::setfill(' ');
-      }
-    for (crpcut_test_case_registrator *i = reg_.next();
-        i != &reg_; i = i->next())
-      {
-        tag::importance importance = i->get_importance();
-
-        if (importance == tag::ignored) continue;
-
-        bool matched = !*names;
-        for (const char *const*name = names; !matched && *name; ++name)
-          {
-            matched = i->match_name(*name);
-          }
-        if (matched)
-          {
-            std::cout << importance;
-            if (longest_tag_len > 0)
-              {
-                std::cout << std::setw(longest_tag_len)
-                << i->crpcut_tag().get_name().str
-                << " : ";
-              }
-            std::cout << *i << '\n';
-          }
-      }
-    throw cli_exception(0);
-  }
-
   void setup_dirbase(const char   *program_name,
                      const char   *working_dir,
                      char         *dirbase,
@@ -491,8 +439,8 @@ namespace crpcut {
 
   int
   test_runner::do_run(cli::interpreter *cli,
-                            std::ostream& err_os,
-                            tag_list_root& tags)
+                      std::ostream& err_os,
+                      tag_list_root& tags)
   {
     cli_ = cli;
     test_environment env(cli_);
@@ -507,15 +455,20 @@ namespace crpcut {
             throw cli_exception(0);
           }
         tags.configure_importance(cli_->tag_specification());
-        if (cli_->list_tests()) list_tests(test_names, tags, err_os);
-        if (cli_->working_dir())
-          {
-            lib::strcpy(dirbase_, cli_->working_dir());
-          }
         std::pair<unsigned, unsigned> rv =
             reg_.filter_out_or_throw(test_names, err_os, cli_exception(-1));
         unsigned num_selected_tests = rv.first;
         unsigned num_registered_tests = rv.second;
+
+        if (cli_->list_tests())
+          {
+            reg_.list_tests_to(err_os, tags.longest_tag_name());
+            throw cli_exception(0);
+          }
+        if (cli_->working_dir())
+          {
+            lib::strcpy(dirbase_, cli_->working_dir());
+          }
 
         if (cli_->single_shot_mode())
           {
