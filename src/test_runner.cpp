@@ -462,7 +462,7 @@ namespace crpcut {
 
         if (cli_->list_tests())
           {
-            reg_.list_tests_to(err_os, tags.longest_tag_name());
+            reg_.list_tests_to(std::cout, tags.longest_tag_name());
             throw cli_exception(0);
           }
         if (cli_->working_dir())
