@@ -130,7 +130,7 @@ namespace crpcut {
 
   void
   registrator_list
-  ::list_tests_to(std::ostream &os, unsigned tag_margin) const
+  ::list_tests_to(std::ostream &os, int tag_margin) const
   {
     if (tag_margin)
       {
