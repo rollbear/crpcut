@@ -54,7 +54,7 @@ namespace crpcut {
                         std::ostream &os = std::cerr);
     static int run_test(int argc, const char *argv[],
                         std::ostream &os = std::cerr);
-    virtual test_environment &environment() const;
+    virtual test_environment *environment() const;
   private:
     virtual void set_deadline(crpcut_test_case_registrator *i);
     virtual void clear_deadline(crpcut_test_case_registrator *i);

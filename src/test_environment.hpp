@@ -55,11 +55,13 @@ namespace crpcut {
     virtual bool is_backtrace_enabled() const;
     virtual const char *get_start_dir() const;
     virtual const char *get_parameter(const char *name) const;
+    static void set_default_charset(const char *charset);
   private:
 
     cli::interpreter *cli_;
     const char       *charset_;
     char              homedir_[PATH_MAX];
+    static const char *default_charset;
   };
 }
 

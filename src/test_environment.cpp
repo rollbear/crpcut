@@ -28,10 +28,12 @@
 #include "cli/interpreter.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 namespace crpcut {
+
+  const char *test_environment::default_charset = "UTF-8";
   test_environment
   ::test_environment(cli::interpreter *cli)
   : cli_(cli),
-    charset_("UTF-8")
+    charset_(default_charset)
   {
     wrapped::getcwd(homedir_, sizeof(homedir_));
   }
@@ -118,6 +120,12 @@ namespace crpcut {
     return charset_;
   }
 
+  void
+  test_environment
+  ::set_default_charset(const char *charset)
+  {
+    default_charset = charset;
+  }
 }
 
 

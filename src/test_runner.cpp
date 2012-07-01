@@ -564,10 +564,10 @@ namespace crpcut {
   }
 
 
-  test_environment&
+  test_environment*
   test_runner
   ::environment() const
   {
-    return *env_;
+    return env_;
   }
 }

@@ -27,7 +27,20 @@
 
 #include <crpcut.hpp>
 #include "test_runner.hpp"
+#include "test_environment.hpp"
 
+namespace {
+  template <typename T>
+  T ensure(T t, const char *func_name)
+  {
+    if (!t)
+      {
+        std::cerr << func_name << " can only be called in a test context\n";
+        crpcut::wrapped::abort();
+      }
+    return t;
+  }
+}
 namespace crpcut {
 
   void hexdump(std::ostream &os, std::size_t bytes, const void *addr)
@@ -81,32 +94,37 @@ namespace crpcut {
   const char *
   get_parameter(const char *name)
   {
-    return test_runner::obj().environment().get_parameter(name);
+    test_environment *env = ensure(test_runner::obj().environment(),
+                                   "crpcut::get_parameter()");
+    return env->get_parameter(name);
   }
 
   const char *get_start_dir()
   {
-    return test_runner::obj().environment().get_start_dir();
+    test_environment *env = ensure(test_runner::obj().environment(),
+                                   "crpcut::get_start_dir()");
+    return env->get_start_dir();
   }
 
-  void set_charset(const char *charset)
+  void set_charset(const char *s)
   {
-    return test_runner::obj().environment().set_charset(charset);
+    test_environment *env = test_runner::obj().environment();
+    if (env) env->set_charset(s); else test_environment::set_default_charset(s);
   }
 
   bool timeouts_are_enabled()
   {
-    return test_runner::obj().environment().timeouts_enabled();
+    return test_runner::obj().environment()->timeouts_enabled();
   }
 
   unsigned timeout_multiplier()
   {
-    return test_runner::obj().environment().timeout_multiplier();
+    return test_runner::obj().environment()->timeout_multiplier();
   }
 
   bool tests_as_child_processes()
   {
-    return test_runner::obj().environment().tests_as_child_procs();
+    return test_runner::obj().environment()->tests_as_child_procs();
   }
 
   void present_test_data(pid_t pid, comm::type t, test_phase phase,
@@ -117,22 +135,22 @@ namespace crpcut {
 
   bool is_backtrace_enabled()
   {
-    return test_runner::obj().environment().is_backtrace_enabled();
+    return test_runner::obj().environment()->is_backtrace_enabled();
   }
 
   const char *get_output_charset()
   {
-    return test_runner::obj().environment().get_output_charset();
+    return test_runner::obj().environment()->get_output_charset();
   }
 
   const char *get_illegal_char_representation()
   {
-    return test_runner::obj().environment().get_illegal_rep();
+    return test_runner::obj().environment()->get_illegal_rep();
   }
 
   const char *get_program_charset()
   {
-    return test_runner::obj().environment().get_charset();
+    return test_runner::obj().environment()->get_charset();
   }
 
   test_runner* default_test_runner()
