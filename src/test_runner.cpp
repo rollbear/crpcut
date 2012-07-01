@@ -360,103 +360,6 @@ namespace crpcut {
     throw cli_exception(0);
   }
 
-  unsigned
-  make_tentative_test_list(registrator_list &reg,
-                           registrator_list *tentative)
-  {
-    unsigned num_registered_tests = 0U;
-    crpcut_test_case_registrator *next;
-    for (crpcut_test_case_registrator *i = reg.next();
-        i != &reg;
-        i = next)
-      {
-        next = i->next();
-        tag::importance importance = i->get_importance();
-        if (importance == tag::ignored)
-          {
-            i->crpcut_uninhibit_dependants();
-            i->unlink();
-            continue;
-          }
-        if (importance == tag::disabled)
-          {
-            i->crpcut_uninhibit_dependants();
-          }
-        ++num_registered_tests;
-        if (tentative)
-          {
-            i->unlink();
-            i->link_after(*tentative);
-          }
-      }
-    return num_registered_tests;
-  }
-
-  unsigned
-  filter_out_tests_by_name(const char *const *names,
-                           registrator_list  &from,
-                           registrator_list  &to,
-                           std::ostream      &err_os)
-  {
-    unsigned num_selected_tests = 0U;
-    unsigned mismatches = 0;
-    typedef crpcut_test_case_registrator reg;
-    for (const char *const*name = names; *name; ++name)
-      {
-        unsigned matches = 0;
-        for (reg *i = from.next(); i != &from;)
-          {
-            reg *next = i->next();
-            if (i->match_name(*name))
-              {
-                ++matches;
-                ++num_selected_tests;
-                i->unlink();
-                i->link_after(to);
-              }
-            i = next;
-          }
-        if (matches == 0)
-          {
-            if (mismatches++)
-              {
-                err_os << ", ";
-              }
-            err_os << *name;
-          }
-      }
-    if (mismatches)
-      {
-        err_os << (mismatches == 1 ? " does" : " do")
-               << " not match any test names\n";
-        throw cli_exception(-1);
-      }
-    for (reg *i = from.next(); i != &from; i = i->next())
-      {
-        i->crpcut_uninhibit_dependants();
-      }
-    return num_selected_tests;
-  }
-
-  std::pair<unsigned, unsigned>
-  select_tests(const char *const *names,
-               registrator_list  &reg,
-               std::ostream      &err_os)
-  {
-    crpcut::registrator_list tentative;
-    unsigned num_registered_tests = make_tentative_test_list(reg,
-                                                             *names
-                                                             ? &tentative
-                                                             : 0);
-    unsigned num_selected_tests = *names
-                                ? filter_out_tests_by_name(names,
-                                                      tentative,
-                                                      reg,
-                                                      err_os)
-                                : num_registered_tests;
-    return std::make_pair(num_selected_tests, num_registered_tests);
-  }
-
   void setup_dirbase(const char   *program_name,
                      const char   *working_dir,
                      char         *dirbase,
@@ -609,9 +512,8 @@ namespace crpcut {
           {
             lib::strcpy(dirbase_, cli_->working_dir());
           }
-        std::pair<unsigned, unsigned> rv = select_tests(test_names,
-                                                        reg_,
-                                                        err_os);
+        std::pair<unsigned, unsigned> rv =
+            reg_.filter_out_or_throw(test_names, err_os, cli_exception(-1));
         unsigned num_selected_tests = rv.first;
         unsigned num_registered_tests = rv.second;
 

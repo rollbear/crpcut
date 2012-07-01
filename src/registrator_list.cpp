@@ -55,4 +55,76 @@ namespace crpcut {
   {
     wrapped::abort();
   }
+
+  std::pair<unsigned, unsigned>
+  registrator_list
+  ::filter_out_unused(const char *const *names,
+                      std::ostream &err_os)
+  {
+    unsigned num_registered_tests = 0U;
+    typedef crpcut_test_case_registrator reg;
+
+    {
+      reg *n;
+      for (reg *i = next(); i != this; i = n)
+        {
+          n = i->next();
+          ++num_registered_tests;
+          switch (i->get_importance())
+            {
+            case tag::ignored:
+              i->unlink();
+              // no break
+            case tag::disabled:
+              i->crpcut_uninhibit_dependants();
+              break;
+            default:
+              break; // stupid eclipse!
+            }
+        }
+      }
+    if (*names == 0)
+      {
+        return std::make_pair(num_registered_tests, num_registered_tests);
+      }
+    registrator_list result;
+    unsigned num_selected_tests = 0U;
+    unsigned mismatches = 0U;
+    for (const char *const*name = names; *name; ++name)
+      {
+        unsigned matches = 0;
+        reg *n;
+        for (reg *i = next(); i != this; i = n)
+          {
+            n = i->next();
+            if (i->match_name(*name))
+              {
+                ++matches;
+                ++num_selected_tests;
+                i->unlink();
+                i->link_before(result);
+                i->crpcut_uninhibit_dependants();
+             }
+          }
+        if (matches == 0)
+          {
+            if (mismatches++)
+              {
+                err_os << ", ";
+              }
+            err_os << *name;
+          }
+      }
+    if (mismatches)
+      {
+        err_os << (mismatches == 1U ? " does" : " do")
+               << " not match any test names\n";
+        return std::make_pair(1U,0U);
+      }
+    unlink();
+    link_after(result);
+    result.unlink();
+    return std::make_pair(num_selected_tests, num_registered_tests);
+
+  }
 }

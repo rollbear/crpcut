@@ -38,7 +38,27 @@ namespace crpcut {
     virtual tag& crpcut_tag() const;
     virtual tag::importance get_importance() const;
     virtual void setup(poll<fdreader>    &, pid_t, int, int, int, int);
+    template <typename E>
+    std::pair<unsigned, unsigned> filter_out_or_throw(const char *const *names,
+                                                      std::ostream      &err_or,
+                                                      E                  e);
+  private:
+    virtual std::pair<unsigned, unsigned>
+            filter_out_unused(const char *const *names,
+                              std::ostream &err_os);
   };
+
+  template <typename E>
+  std::pair<unsigned, unsigned>
+  registrator_list
+  ::filter_out_or_throw(const char *const *names,
+                        std::ostream      &err_os,
+                        E                  e)
+  {
+    std::pair<unsigned, unsigned> rv = filter_out_unused(names, err_os);
+    if (rv.first > rv.second) throw e;
+    return rv;
+  }
 }
 
 #endif // REGISTRATOR_LIST_HPP

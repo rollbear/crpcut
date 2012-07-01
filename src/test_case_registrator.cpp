@@ -127,9 +127,9 @@ namespace crpcut {
   }
 
   crpcut_test_case_registrator
-  ::crpcut_test_case_registrator()
-    : name_(0),
-      ns_info_(0),
+  ::crpcut_test_case_registrator(const char *name, namespace_info *ns)
+    : name_(name),
+      ns_info_(ns),
       suite_list_(0),
       active_readers_(0),
       killed_(false),

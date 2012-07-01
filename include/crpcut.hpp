@@ -1867,7 +1867,7 @@ namespace crpcut {
     bool has_death_note() const;
     void set_death_note();
   protected:
-    crpcut_test_case_registrator();
+    crpcut_test_case_registrator(const char *name = 0, namespace_info *ns = 0);
     void manage_test_case_execution(crpcut_test_case_base*);
     void prepare_destruction(unsigned long ms);
     void prepare_construction(unsigned long ms);
