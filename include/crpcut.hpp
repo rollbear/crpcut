@@ -1782,14 +1782,13 @@ namespace crpcut {
   class report_reader : public fdreader
   {
   public:
-    report_reader(crpcut_test_case_registrator *r);
-    virtual void close();
-    void set_fds(int in_fd, int out_fd, poll<fdreader> *read_poller);
+    report_reader(crpcut_test_case_registrator *r, comm::data_writer &response);
+    using fdreader::set_fd;
   private:
     void set_timeout(void *buff, size_t len);
     void cancel_timeout();
     virtual bool do_read_data(bool do_reply);
-    comm::wfile_descriptor response_fd;
+    comm::data_writer &response_;
   };
 
   class timeboxed
@@ -4139,6 +4138,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
         public virtual test_case_name::crpcut_core_dump_handler         \
     {                                                                   \
       using crpcut_core_dump_handler::crpcut_core_dumps_allowed;        \
+      crpcut::comm::wfile_descriptor       report_response_fd_;         \
       crpcut::report_reader                report_reader_;              \
       crpcut::reader<crpcut::comm::stdout> stdout_reader_;              \
       crpcut::reader<crpcut::comm::stderr> stderr_reader_;              \
@@ -4155,7 +4155,8 @@ extern crpcut::namespace_info crpcut_current_namespace;
       {                                                                 \
         stdout_reader_.set_fd(stdout_fd, &poller);                      \
         stderr_reader_.set_fd(stderr_fd, &poller);                      \
-        report_reader_.set_fds(in_fd, out_fd, &poller);                 \
+        report_reader_.set_fd(in_fd, &poller);                          \
+        crpcut::comm::wfile_descriptor(out_fd).swap(report_response_fd_); \
         set_pid(pid);                                                   \
       }                                                                 \
     public:                                                             \
@@ -4163,7 +4164,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
          : crpcut_registrator_base(#test_case_name,                     \
                                    crpcut_current_namespace,            \
                                    crpcut_cputime_timeout_ms),          \
-           report_reader_(this),                                        \
+           report_reader_(this, report_response_fd_),                   \
            stdout_reader_(this),                                        \
            stderr_reader_(this)                                         \
          {                                                              \

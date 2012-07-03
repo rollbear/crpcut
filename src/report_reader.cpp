@@ -33,25 +33,10 @@
 namespace crpcut {
 
   report_reader
-  ::report_reader(crpcut_test_case_registrator *r)
-    : fdreader(r)
+  ::report_reader(crpcut_test_case_registrator *r, comm::data_writer &response)
+    : fdreader(r),
+      response_(response)
   {
-  }
-
-  void
-  report_reader
-  ::set_fds(int in_fd, int out_fd, poll<fdreader>* read_poller)
-  {
-    fdreader::set_fd(in_fd, read_poller);
-    comm::wfile_descriptor(out_fd).swap(response_fd);;
-  }
-
-  void
-  report_reader
-  ::close()
-  {
-    fdreader::close();
-    comm::wfile_descriptor().swap(response_fd);
   }
 
   void
@@ -112,7 +97,7 @@ namespace crpcut {
         }
       if (do_reply)
         {
-          response_fd.write_loop(&len, sizeof(len));
+          response_.write_loop(&len, sizeof(len));
         }
 
       switch (t)
