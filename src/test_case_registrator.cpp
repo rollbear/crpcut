@@ -92,7 +92,15 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::set_death_note()
   {
+    clear_deadline();
     death_note_ = true;
+  }
+
+  void
+  crpcut_test_case_registrator
+  ::send_to_presentation(comm::type t, size_t len, const char *buff) const
+  {
+    runner_->present(get_pid(), t, get_phase(), len, buff);
   }
 
   bool
@@ -292,8 +300,11 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::clear_deadline()
   {
-    runner_->clear_deadline(this);
-    timeboxed::clear_deadline();
+    if (deadline_is_set())
+      {
+        runner_->clear_deadline(this);
+        timeboxed::clear_deadline();
+      }
   }
 
   void
@@ -394,7 +405,7 @@ namespace crpcut {
     if (!crpcut_failed()) phase_ = post_mortem;
     stream::toastream<1024> tcname;
     tcname << *this << '\0';
-    runner_->present(pid_, comm::dir, phase_, 0, 0);
+    send_to_presentation(comm::dir, 0, 0);
     filesystem_->rename(dirname, tcname.begin());
     crpcut_register_success(false);
     return true;
@@ -459,14 +470,12 @@ namespace crpcut {
       {
         t = comm::exit_fail;
       }
-    runner_->present(pid_, t, phase_, out.size(), out.begin());
+    send_to_presentation(t, out.size(), out.begin());
     crpcut_register_success(t == comm::exit_ok);
     runner_->return_dir(dirnum_);
     bool critical = crpcut_tag().get_importance() == tag::critical;
-    runner_->present(pid_,
-                      comm::end_test,
-                      phase_,
-                      sizeof(critical), (const char*)&critical);
+    send_to_presentation(comm::end_test,
+                         sizeof(critical), (const char*)&critical);
     assert(crpcut_succeeded() || crpcut_failed());
   }
 

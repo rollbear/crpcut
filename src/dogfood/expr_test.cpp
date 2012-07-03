@@ -137,13 +137,13 @@ TESTSUITE(expr)
     TEST(class_static_const_plus_unsigned_equals_long_yields_correct_value_and_string_rep)
     {
       const unsigned m = 3;
-      ASSERT_VALUE(s::n + m == 14L, true, "11 + 3 == 14");
+      ASSERT_VALUE(s::n + m == 14UL, true, "11 + 3 == 14");
     }
 
     TEST(unsigned_plus_class_static_const_equals_long_is_computed_and_displayed_correctly)
     {
       const unsigned m = 3;
-      ASSERT_VALUE(m + s::n == 14L, true, "3 + 11 == 14");
+      ASSERT_VALUE(m + s::n == 14UL, true, "3 + 11 == 14");
     }
 
     TEST(short_plus_int_equals_class_static_const_is_computed_and_displayed_correctly)

@@ -1866,6 +1866,7 @@ namespace crpcut {
     void set_cputime_at_start(const struct timeval &t);
     bool has_death_note() const;
     void set_death_note();
+    void send_to_presentation(comm::type t, size_t len, const char *buff) const;
   protected:
     crpcut_test_case_registrator(const char *name = 0, namespace_info *ns = 0);
     void manage_test_case_execution(crpcut_test_case_base*);
@@ -2994,9 +2995,6 @@ namespace crpcut {
     static type make_value(const char *n);
   };
 
-  void present_test_data(pid_t pid, comm::type t, test_phase phase,
-                         size_t len, const char *buff);
-
   bool timeouts_are_enabled();
   unsigned timeout_multiplier();
   bool is_backtrace_enabled();
@@ -3415,9 +3413,7 @@ namespace crpcut {
             assert(errno == EINTR);
             continue;
           }
-        present_test_data(reg_->get_pid(), t,
-                          reg_->get_phase(),
-                          size_t(rv), buff);
+        reg_->send_to_presentation(t, size_t(rv), buff);
         break;
       }
     return true;

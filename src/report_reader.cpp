@@ -62,10 +62,8 @@ namespace crpcut {
     assert(len == sizeof(timestamp));
     timestamp *ts = static_cast<timestamp*>(buff);
 
-    if (reg_->deadline_is_set())
-      {
-        reg_->clear_deadline();
-      }
+    cancel_timeout();
+
     *ts+= clocks::monotonic::timestamp_ms_absolute();
     reg_->set_timeout(*ts);
     assert(reg_->deadline_is_set());
@@ -75,10 +73,7 @@ namespace crpcut {
   report_reader
   ::cancel_timeout()
   {
-    if (!reg_->has_death_note())
-      {
-        reg_->clear_deadline();
-      }
+    reg_->clear_deadline();
   }
 
   bool
@@ -154,16 +149,9 @@ namespace crpcut {
           break; // silence warning
         }
 
-      test_runner::obj().present(reg_->get_pid(),
-                                       t,
-                                       reg_->get_phase(),
-                                       len, buff);
-        if (t == comm::exit_ok || t == comm::exit_fail)
+      reg_->send_to_presentation(t, len, buff);
+      if (t == comm::exit_ok || t == comm::exit_fail)
         {
-          if (!reg_->has_death_note() && reg_->deadline_is_set())
-            {
-              reg_->clear_deadline();
-            }
           reg_->set_death_note();
         }
     }
