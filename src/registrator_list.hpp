@@ -31,13 +31,11 @@
 
 namespace crpcut {
 
-  class registrator_list : public crpcut_test_case_registrator
+
+  class registrator_list
+    : public crpcut::datatypes::list_elem<crpcut_test_case_registrator>
   {
   public:
-    virtual void run_test_case();
-    virtual tag& crpcut_tag() const;
-    virtual tag::importance get_importance() const;
-    virtual void setup(poll<fdreader>    &, pid_t, int, int, int, int);
     template <typename E>
     std::pair<unsigned, unsigned> filter_out_or_throw(const char *const *names,
                                                       std::ostream      &err_or,

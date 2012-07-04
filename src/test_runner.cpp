@@ -375,7 +375,7 @@ namespace crpcut {
         bool progress = false;
         typedef crpcut_test_case_registrator reg;
         reg *next;
-        for (reg *i = reg_.next(); i != &reg_;i = next)
+        for (reg *i = reg_.next(); !reg_.is_this(i); i = next)
           {
             next = i->next();
             if (   (cli_->honour_dependencies() && !i->crpcut_can_run())

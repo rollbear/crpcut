@@ -75,7 +75,7 @@ namespace crpcut {
     poller_.del_fd(&fd_);
     comm::rfile_descriptor().swap(fd_);
     for (crpcut_test_case_registrator *i = reg_.next();
-         i != &reg_;
+         !reg_.is_this(i);
          i = i->next())
       {
         std::ostringstream os;

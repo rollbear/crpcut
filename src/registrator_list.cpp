@@ -28,33 +28,6 @@
 
 namespace crpcut {
 
-  void
-  registrator_list
-  ::run_test_case()
-  {
-    wrapped::abort();
-  }
-
-  tag&
-  registrator_list
-  ::crpcut_tag() const
-  {
-    return wrapped::abort(), crpcut_tag_info<crpcut::crpcut_none>::obj();
-  }
-
-  tag::importance
-  registrator_list
-  ::get_importance() const
-  {
-    return wrapped::abort(), tag::disabled;
-  }
-
-  void
-  registrator_list
-  ::setup(poll<fdreader> &, pid_t, int, int, int, int)
-  {
-    wrapped::abort();
-  }
 
   std::pair<unsigned, unsigned>
   registrator_list
@@ -66,7 +39,7 @@ namespace crpcut {
 
     {
       reg *n;
-      for (reg *i = next(); i != this; i = n)
+      for (reg *i = next(); !is_this(i); i = n)
         {
           n = i->next();
           ++num_registered_tests;
@@ -94,7 +67,7 @@ namespace crpcut {
       {
         unsigned matches = 0;
         reg *n;
-        for (reg *i = next(); i != this; i = n)
+        for (reg *i = next(); !is_this(i); i = n)
           {
             n = i->next();
             if (i->match_name(*name))
@@ -143,7 +116,7 @@ namespace crpcut {
         << std::setfill(' ');
       }
     for (const crpcut_test_case_registrator *i = next();
-        i != this; i = i->next())
+         !is_this(i); i = i->next())
       {
         tag::importance importance = i->get_importance();
 

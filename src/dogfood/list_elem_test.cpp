@@ -230,4 +230,69 @@ TESTSUITE(list_elem)
     ASSERT_TRUE(root.next() == &root);
     ASSERT_TRUE(root.prev() == &root);
   }
+
+  TEST(two_lists_can_be_joined_with_link_after)
+  {
+    C list1;
+    C l1e1;
+    C l1e2;
+    l1e1.link_after(list1);
+    l1e2.link_after(l1e1);
+
+    C list2;
+    C l2e1;
+    C l2e2;
+
+    l2e1.link_after(list2);
+    l2e2.link_after(l2e1);
+
+    list2.link_after(l1e2);
+
+    ASSERT_TRUE(list1.next() == &l1e1);
+    ASSERT_TRUE(l1e1.next() == &l1e2);
+    ASSERT_TRUE(l1e2.next() == &list2);
+    ASSERT_TRUE(list2.next() == &l2e1);
+    ASSERT_TRUE(l2e1.next() == &l2e2);
+    ASSERT_TRUE(l2e2.next() == &list1);
+
+    ASSERT_TRUE(list1.prev() == &l2e2);
+    ASSERT_TRUE(l2e2.prev() == &l2e1);
+    ASSERT_TRUE(l2e1.prev() == &list2);
+    ASSERT_TRUE(list2.prev() == &l1e2);
+    ASSERT_TRUE(l1e2.prev() == &l1e1);
+    ASSERT_TRUE(l1e1.prev() == &list1);
+
+  }
+
+  TEST(two_lists_can_be_joined_with_link_before)
+  {
+    C list1;
+    C l1e1;
+    C l1e2;
+    l1e1.link_before(list1);
+    l1e2.link_before(l1e1);
+
+    C list2;
+    C l2e1;
+    C l2e2;
+
+    l2e1.link_before(list2);
+    l2e2.link_before(l2e1);
+
+    list2.link_before(l1e2);
+
+    ASSERT_TRUE(list1.prev() == &l1e1);
+    ASSERT_TRUE(l1e1.prev() == &l1e2);
+    ASSERT_TRUE(l1e2.prev() == &list2);
+    ASSERT_TRUE(list2.prev() == &l2e1);
+    ASSERT_TRUE(l2e1.prev() == &l2e2);
+    ASSERT_TRUE(l2e2.prev() == &list1);
+
+    ASSERT_TRUE(list1.next() == &l2e2);
+    ASSERT_TRUE(l2e2.next() == &l2e1);
+    ASSERT_TRUE(l2e1.next() == &list2);
+    ASSERT_TRUE(list2.next() == &l1e2);
+    ASSERT_TRUE(l1e2.next() == &l1e1);
+    ASSERT_TRUE(l1e1.next() == &list1);
+  }
 }

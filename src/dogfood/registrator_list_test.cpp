@@ -179,7 +179,7 @@ namespace {
   template <typename T>
   void match_all(T& t, list &r)
   {
-    for (reg *i = r.next(); i != &r; i = i->next())
+    for (reg *i = r.next(); !r.is_this(i); i = i->next())
       {
         match_and_remove(t, i);
       }
@@ -203,45 +203,6 @@ TESTSUITE(registrator_list)
     list l;
   }
 
-  TESTSUITE(illegal_ops, DEPENDS_ON(construction_does_nothing))
-  {
-    TEST(run_test_case_aborts,
-       DEPENDS_ON(construction_does_nothing),
-       EXPECT_SIGNAL_DEATH(SIGABRT),
-       NO_CORE_FILE)
-    {
-      list l;
-      l.run_test_case();
-    }
-
-    TEST(crpcut_tag_aborts,
-         DEPENDS_ON(construction_does_nothing),
-         EXPECT_SIGNAL_DEATH(SIGABRT),
-         NO_CORE_FILE)
-    {
-      list l;
-      l.crpcut_tag();
-    }
-
-    TEST(get_importance_aborts,
-         DEPENDS_ON(construction_does_nothing),
-         EXPECT_SIGNAL_DEATH(SIGABRT),
-         NO_CORE_FILE)
-    {
-      list l;
-      l.get_importance();
-    }
-
-    TEST(setup_aborts,
-         DEPENDS_ON(construction_does_nothing),
-         EXPECT_SIGNAL_DEATH(SIGABRT),
-         NO_CORE_FILE)
-    {
-      list l;
-      StrictMock<mock_poll> poller;
-      l.setup(poller, pid_t(1), 1,2,3,4);
-    }
-  }
 
   TESTSUITE(filtering)
   {

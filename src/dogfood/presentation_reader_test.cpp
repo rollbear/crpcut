@@ -24,7 +24,6 @@
  * SUCH DAMAGE.
  */
 
-
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
 #include "../presentation_reader.hpp"
@@ -184,7 +183,7 @@ TESTSUITE(presentation_reader)
   {
     typedef crpcut::crpcut_test_case_registrator R;
   public:
-    registrator_mock(const char *name) : R(name, top, 100), top(0,0) {}
+    registrator_mock(const char *name) : R(name, &top), top(0,0) {}
     MOCK_METHOD6(setup, void(crpcut::poll<crpcut::fdreader>&,
                              pid_t,
                              int, int, int, int));
@@ -216,8 +215,8 @@ TESTSUITE(presentation_reader)
         ko("ko"),
         reader(poll, fd, fmt, summary_fmt, verbose, "directory/subdir", list)
     {
-      list.link_after(ko);
-      list.link_after(apa_katt);
+      ko.link_before(list);
+      apa_katt.link_before(list);
     }
     Sequence                     in;
     Sequence                     out;
@@ -269,6 +268,7 @@ TESTSUITE(presentation_reader)
     while (!reader.read())
       ;
   }
+
   TEST(nonempty_dir_with_pid_0_reports_to_formatter_immediately, fix<true>)
   {
     fd.nonempty_dir(0, crpcut::running, "apa\0");
@@ -354,6 +354,10 @@ TESTSUITE(presentation_reader)
       .InSequence(in);
     EXPECT_CALL(summary_fmt, blocked_test(crpcut::tag::critical, "ko"))
       .InSequence(in);
+    EXPECT_CALL(fmt, blocked_test(crpcut::tag::non_critical, "apa::katt"))
+      .InSequence(in);
+    EXPECT_CALL(summary_fmt, blocked_test(crpcut::tag::non_critical, "apa::katt"))
+      .InSequence(in);
     EXPECT_CALL(fmt, statistics(0,0)).InSequence(in);
     EXPECT_CALL(summary_fmt, statistics(0,0));
     reader.exception();
@@ -376,9 +380,5 @@ TESTSUITE(presentation_reader)
     reader.write();
   }
 }
-
-
-
-
 
 

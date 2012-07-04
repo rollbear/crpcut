@@ -838,19 +838,23 @@ namespace crpcut {
     template <typename T>
     inline void list_elem<T>::link_after(list_elem& r)
     {
-      next_ = r.next_;
-      prev_ = static_cast<T*>(&r);
-      next_->prev_ = static_cast<T*>(this);
+      T *p = prev_;
+      T *r_n = r.next_;
+      p->next_ = r_n;
+      r_n->prev_ = p;
       r.next_ = static_cast<T*>(this);
+      prev_ = static_cast<T*>(&r);
     }
 
     template <typename T>
     inline void list_elem<T>::link_before(list_elem &r)
     {
-      prev_ = r.prev_;
-      next_ = static_cast<T*>(&r);
-      prev_->next_ = static_cast<T*>(this);
+      T *n = next_;
+      T *r_p = r.prev_;
+      n->prev_ = r_p;
+      r_p->next_ = n;
       r.prev_ = static_cast<T*>(this);
+      next_ = static_cast<T*>(&r);
     }
 
     template <typename T>
