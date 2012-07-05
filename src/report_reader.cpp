@@ -34,7 +34,7 @@
 namespace crpcut {
 
   report_reader
-  ::report_reader(crpcut_test_case_registrator *r)
+  ::report_reader(crpcut_test_monitor *r)
     : fdreader(r)
   {
   }
@@ -50,15 +50,15 @@ namespace crpcut {
     cancel_timeout();
 
     *ts+= clocks::monotonic::timestamp_ms_absolute();
-    reg_->set_timeout(*ts);
-    assert(reg_->deadline_is_set());
+    mon_->set_timeout(*ts);
+    assert(mon_->deadline_is_set());
   }
 
   void
   report_reader
   ::cancel_timeout()
   {
-    reg_->clear_deadline();
+    mon_->clear_deadline();
   }
 
   bool
@@ -74,7 +74,7 @@ namespace crpcut {
       t = static_cast < comm::type >(t & ~kill_mask);
       if (t == comm::exit_fail || t == comm::fail || kill_mask)
         {
-          reg_->crpcut_register_success(false);
+          mon_->crpcut_register_success(false);
         }
       size_t len = 0;
       read_loop(&len, sizeof(len));
@@ -92,8 +92,8 @@ namespace crpcut {
               len = sizeof(msg) - 1;
             }
           t = comm::exit_fail;
-          reg_->set_phase(child);
-          reg_->kill();
+          mon_->set_phase(child);
+          mon_->kill();
         }
       switch (t)
         {
@@ -105,17 +105,18 @@ namespace crpcut {
           cancel_timeout();
           return true;
         case comm::begin_test:
-          reg_->set_phase(running);
+          mon_->set_phase(running);
           {
             void *addr = buff;
+            assert(len == sizeof(struct timeval));
             struct timeval *start_time = static_cast<struct timeval*>(addr);
-            reg_->set_cputime_at_start(*start_time);
+            mon_->set_cputime_at_start(*start_time);
           }
           return true;
         case comm::end_test:
-          if (!reg_->crpcut_failed())
+          if (!mon_->crpcut_failed())
             {
-              reg_->set_phase(destroying);
+              mon_->set_phase(destroying);
               return true;
             }
           {
@@ -129,10 +130,10 @@ namespace crpcut {
           break; // silence warning
         }
 
-      reg_->send_to_presentation(t, len, buff);
+      mon_->send_to_presentation(t, len, buff);
       if (t == comm::exit_ok || t == comm::exit_fail)
         {
-          reg_->set_death_note();
+          mon_->set_death_note();
         }
     }
     catch (posix_error &e)

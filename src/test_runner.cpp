@@ -150,10 +150,10 @@ namespace crpcut {
         if (read_failed || desc.hup())
           {
             desc->close();
-            crpcut_test_case_registrator *r = desc->get_registrator();
-            if (!r->has_active_readers())
+            crpcut_test_monitor *m = desc->get_monitor();
+            if (!m->has_active_readers())
               {
-                r->manage_death();
+                m->manage_death();
                 --num_pending_children_;
               }
           }

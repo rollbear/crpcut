@@ -283,7 +283,7 @@ namespace crpcut {
       }
     if (!env_->tests_as_child_procs())
       {
-        crpcut_register_success();
+        crpcut_register_success(true);
       }
   }
 

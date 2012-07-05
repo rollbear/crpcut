@@ -169,6 +169,7 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/printer_test.cpp
      src/dogfood/regex_test.cpp
      src/dogfood/registrator_list_test.cpp
+     src/dogfood/report_reader_test.cpp
      src/dogfood/scope/time_test.cpp
      src/dogfood/show_value_test.cpp
      src/dogfood/tag_filter_test.cpp

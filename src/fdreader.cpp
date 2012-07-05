@@ -36,11 +36,11 @@ namespace crpcut {
     return do_read_data();
   }
 
-  crpcut_test_case_registrator *
+  crpcut_test_monitor *
   fdreader
-  ::get_registrator() const
+  ::get_monitor() const
   {
-    return reg_;
+    return mon_;
   }
 
   void
@@ -51,29 +51,29 @@ namespace crpcut {
   }
 
   fdreader
-  ::fdreader(crpcut_test_case_registrator *r, int fd)
+  ::fdreader(crpcut_test_monitor *r, int fd)
     : rfile_descriptor(fd),
-      reg_(r),
+      mon_(r),
       poller_(0)
   {
   }
 
   void fdreader::set_fd(int fd, poll<fdreader> *poller)
   {
-    assert(reg_ != 0);
+    assert(mon_ != 0);
     assert(!poller_);
     assert(poller);
     rfile_descriptor(fd).swap(*this);
     poller_ = poller;
     poller_->add_fd(this);
-    reg_->activate_reader();
+    mon_->activate_reader();
   }
 
   void fdreader::unregister()
   {
     assert(poller_);
-    assert(reg_ != 0);
-    reg_->deactivate_reader();
+    assert(mon_ != 0);
+    mon_->deactivate_reader();
     poller_->del_fd(this);
     rfile_descriptor().swap(*this);;
     poller_ = 0;

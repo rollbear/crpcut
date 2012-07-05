@@ -1754,18 +1754,37 @@ namespace crpcut {
     namespace_info *parent;
   };
 
+  class crpcut_test_monitor
+  {
+  public:
+    virtual ~crpcut_test_monitor() {}
+    virtual void set_timeout(unsigned long ts) = 0;
+    virtual bool deadline_is_set() const = 0;
+    virtual void clear_deadline() = 0;
+    virtual void crpcut_register_success(bool value = true) = 0;
+    virtual void set_phase(test_phase) = 0;
+    virtual void kill() = 0;
+    virtual bool crpcut_failed() const = 0;
+    virtual void set_cputime_at_start(const struct timeval&) = 0;
+    virtual void send_to_presentation(comm::type, size_t len, const char*) const = 0;
+    virtual void set_death_note() = 0;
+    virtual void activate_reader() = 0;
+    virtual void deactivate_reader() = 0;
+    virtual bool has_active_readers() const = 0;
+    virtual void manage_death() = 0;
+  };
   class fdreader : public comm::rfile_descriptor
   {
   public:
     bool read_data();
-    crpcut_test_case_registrator *get_registrator() const;
+    crpcut_test_monitor *get_monitor() const;
     virtual void close();
     void unregister();
     virtual ~fdreader() { }
   protected:
-    fdreader(crpcut_test_case_registrator *r, int fd = -1);
+    fdreader(crpcut_test_monitor *r, int fd = -1);
     void set_fd(int fd, poll<fdreader> *poller);
-    crpcut_test_case_registrator *const reg_;
+    crpcut_test_monitor *const mon_;
   private:
     virtual bool do_read_data() = 0;
     poll<fdreader> *poller_;
@@ -1775,7 +1794,7 @@ namespace crpcut {
   class reader : public fdreader
   {
   public:
-    reader(crpcut_test_case_registrator *r, int fd = -1);
+    reader(crpcut_test_monitor *r, int fd = -1);
     using fdreader::set_fd;
   private:
     virtual bool do_read_data();
@@ -1784,7 +1803,7 @@ namespace crpcut {
   class report_reader : public fdreader
   {
   public:
-    report_reader(crpcut_test_case_registrator *r);
+    report_reader(crpcut_test_monitor *r);
     using fdreader::set_fd;
   private:
     void set_timeout(void *buff, size_t len);
@@ -1822,7 +1841,8 @@ namespace crpcut {
       public virtual policies::dependencies::crpcut_base,
       public virtual policies::core_dumps::crpcut_default_handler,
       public timeboxed,
-      public datatypes::list_elem<crpcut_test_case_registrator>
+      public datatypes::list_elem<crpcut_test_case_registrator>,
+      public crpcut_test_monitor
   {
     friend class test_suite_base;
   public:
@@ -1838,6 +1858,9 @@ namespace crpcut {
     {
       return t.print_name(os);
     }
+    bool deadline_is_set() const { return timeboxed::deadline_is_set(); }
+    void crpcut_register_success(bool v) { crpcut_base::crpcut_register_success(v); }
+    bool crpcut_failed() const { return crpcut_base::crpcut_failed(); }
     std::size_t full_name_len() const;
     bool match_name(const char *name) const;
     virtual void setup(poll<fdreader> &poller,
@@ -3396,7 +3419,7 @@ namespace crpcut {
 
   template <comm::type t>
   inline
-  reader<t>::reader(crpcut_test_case_registrator *r, int fd)
+  reader<t>::reader(crpcut_test_monitor *r, int fd)
     : fdreader(r, fd)
   {
   }
@@ -3413,7 +3436,7 @@ namespace crpcut {
             assert(errno == EINTR);
             continue;
           }
-        reg_->send_to_presentation(t, size_t(rv), buff);
+        mon_->send_to_presentation(t, size_t(rv), buff);
         break;
       }
     return true;
