@@ -124,7 +124,7 @@ TESTSUITE(test_case_registrator)
     using crpcut::crpcut_test_case_registrator::prepare_destruction;
     void setup(crpcut::poll<crpcut::fdreader> &,
                pid_t pid,
-               int, int, int, int)
+               int, int, int)
     {
       set_pid(pid);
     }
@@ -168,7 +168,7 @@ TESTSUITE(test_case_registrator)
     {
       StrictMock<mock_poll> poller;
       EXPECT_CALL(runner, introduce_test(pid, &reg));
-      reg.setup(poller, pid, -1, -1, -1, -1);
+      reg.setup(poller, pid, -1, -1, -1);
     }
     void prepare_siginfo(pid_t pid, int status, int code, Sequence s)
     {

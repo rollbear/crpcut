@@ -29,13 +29,13 @@
 #include "clocks/clocks.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #include "posix_error.hpp"
+#include "sigignore.hpp"
 
 namespace crpcut {
 
   report_reader
-  ::report_reader(crpcut_test_case_registrator *r, comm::data_writer &response)
-    : fdreader(r),
-      response_(response)
+  ::report_reader(crpcut_test_case_registrator *r)
+    : fdreader(r)
   {
   }
 
@@ -63,14 +63,14 @@ namespace crpcut {
 
   bool
   report_reader
-  ::do_read_data(bool do_reply)
+  ::do_read_data()
   {
     comm::type t;
     int kill_mask = 0;
+    sigignore ignore(SIGPIPE);
     try {
       read_loop(&t, sizeof(t));
       kill_mask = t & comm::kill_me;
-      if (kill_mask) do_reply = false; // unconditionally
       t = static_cast < comm::type >(t & ~kill_mask);
       if (t == comm::exit_fail || t == comm::fail || kill_mask)
         {
@@ -95,11 +95,6 @@ namespace crpcut {
           reg_->set_phase(child);
           reg_->kill();
         }
-      if (do_reply)
-        {
-          response_.write_loop(&len, sizeof(len));
-        }
-
       switch (t)
         {
         case comm::set_timeout:

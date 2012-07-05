@@ -49,7 +49,7 @@ TESTSUITE(test_wrapper)
   {
   public:
     ~mock_registrator();
-    void setup(crpcut::poll<crpcut::fdreader>&,pid_t,int,int,int,int) {};
+    void setup(crpcut::poll<crpcut::fdreader>&,pid_t,int,int,int) {};
     MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag&());
     MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
     MOCK_METHOD0(run_test_case, void());

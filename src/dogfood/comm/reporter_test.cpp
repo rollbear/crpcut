@@ -49,17 +49,6 @@ TESTSUITE(comm)
       MOCK_CONST_METHOD2(write, ssize_t(const void*, std::size_t));
     };
 
-    class reader_mock : public crpcut::comm::data_reader
-    {
-    public:
-      MOCK_CONST_METHOD3(read_loop, void(char *, std::size_t, const char*));
-      void read_loop(void *addr, std::size_t len, const char *context) const
-      {
-        read_loop(static_cast<char*>(addr), len, context);
-      }
-      MOCK_CONST_METHOD2(read, ssize_t(void*, std::size_t));
-    };
-
     TEST(reporter_without_current_process_prints_on_stream)
     {
        std::ostringstream os;
@@ -79,7 +68,14 @@ TESTSUITE(comm)
       r(crpcut::comm::exit_fail, "apa");
     }
 
-    TEST(naughty_children_are_killed_by_starvation,
+    template <typename T>
+    void *set_to(void *addr, T t)
+    {
+      *static_cast<T*>(addr) = t;
+      return static_cast<char*>(addr) + sizeof(T);
+    }
+
+    TEST(naughty_children_requests_testicide_end_exits,
          EXPECT_EXIT(1))
     {
       class env : public crpcut::current_process
@@ -91,38 +87,33 @@ TESTSUITE(comm)
 
       env                     e;
       StrictMock<writer_mock> wfd;
-      StrictMock<reader_mock> rfd;
       std::ostringstream      os;
       crpcut::comm::reporter  r(os);
 
       r.set_process_control(&e);
       r.set_writer(&wfd);
-      r.set_reader(&rfd);
-      EXPECT_CALL(wfd, write_loop(_, _, _)).
-        WillOnce(ReturnRef(wfd));
-      EXPECT_CALL(rfd, read_loop(_,_,_)).
-        WillOnce(Throw(3));
+
+      using namespace crpcut::comm;
+      char request[sizeof(type) + sizeof(size_t) + 3];
+      void *addr = set_to(request, type(fail | kill_me));
+      char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
+      *p++='a'; *p++='p'; *p++='a';
+      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
+        .With(Args<0,1>(ElementsAreArray(request)))
+        .WillOnce(ReturnRef(wfd));
       r(crpcut::comm::fail, "apa");
     }
 
-    template <typename T>
-    void *set_to(void *addr, T t)
-    {
-      *static_cast<T*>(addr) = t;
-      return static_cast<char*>(addr) + sizeof(T);
-    }
 
     struct fix
     {
-      fix() : e(), wfd(), rfd(), r(fake_cout)
+      fix() : e(), wfd(), r(fake_cout)
       {
         r.set_process_control(&e);
         r.set_writer(&wfd);
-        r.set_reader(&rfd);
       }
       crpcut::current_process  e;
       StrictMock<writer_mock>  wfd;
-      StrictMock<reader_mock>  rfd;
       std::ostringstream       fake_cout;
       crpcut::comm::reporter   r;
     };
@@ -137,10 +128,6 @@ TESTSUITE(comm)
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
-      char response[sizeof(std::size_t)];
-      set_to(response, std::size_t(3));
-      EXPECT_CALL(rfd, read_loop(_,_,_)).
-          WillOnce(SetArrayArgument<0>(&response[0], response + sizeof(size_t)));
       r(crpcut::comm::exit_fail, "apa");
     }
 
@@ -153,10 +140,6 @@ TESTSUITE(comm)
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
-      char response[sizeof(std::size_t)];
-      set_to(response, std::size_t(3));
-      EXPECT_CALL(rfd, read_loop(_,_,_)).
-          WillOnce(SetArrayArgument<0>(&response[0], response + sizeof(size_t)));
       std::ostringstream os;
       os << "apa";
       r(crpcut::comm::fail, os);
@@ -171,10 +154,6 @@ TESTSUITE(comm)
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
-      char response[sizeof(std::size_t)];
-      set_to(response, std::size_t(3));
-      EXPECT_CALL(rfd, read_loop(_,_,_)).
-          WillOnce(SetArrayArgument<0>(&response[0], response + sizeof(size_t)));
 
       crpcut::stream::toastream<3> os;
       os << "apa";
@@ -190,25 +169,8 @@ TESTSUITE(comm)
       EXPECT_CALL(wfd, write_loop(_, sizeof(request), _))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
-      char response[sizeof(std::size_t)];
-      set_to(response, std::size_t(3));
-      EXPECT_CALL(rfd, read_loop(_,_,_))
-        .WillOnce(SetArrayArgument<0>(&response[0], response + sizeof(size_t)));
       static const char apa[] = "apa";
       r(crpcut::comm::info, apa);
-    }
-
-    TEST(reporter_aborts_on_wrong_response, fix,
-         EXPECT_SIGNAL_DEATH(SIGABRT),
-         NO_CORE_FILE)
-    {
-      EXPECT_CALL(wfd, write_loop(_,_,_))
-        .WillOnce(ReturnRef(wfd));
-      char response[sizeof(std::size_t)];
-      set_to(response, std::size_t(4));
-      EXPECT_CALL(rfd, read_loop(_,_,_)).
-        WillOnce(SetArrayArgument<0>(&response[0], response + sizeof(size_t)));
-      r(crpcut::comm::fail, "apa");
     }
   }
 }

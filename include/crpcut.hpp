@@ -1210,7 +1210,6 @@ namespace crpcut {
 
 
     // protocol is type -> size_t(length) -> char[length]. length may be 0.
-    // reader acknowledges with length.
 
     class reporter
     {
@@ -1222,7 +1221,6 @@ namespace crpcut {
       virtual ~reporter();
       reporter(std::ostream &default_out = std::cout);
       void set_process_control(current_process *current_test);
-      void set_reader(data_reader *r);
       void set_writer(data_writer *w);
       void operator()(type t, const std::ostringstream &os) const;
       template <size_t N>
@@ -1759,7 +1757,7 @@ namespace crpcut {
   class fdreader : public comm::rfile_descriptor
   {
   public:
-    bool read_data(bool do_reply);
+    bool read_data();
     crpcut_test_case_registrator *get_registrator() const;
     virtual void close();
     void unregister();
@@ -1769,7 +1767,7 @@ namespace crpcut {
     void set_fd(int fd, poll<fdreader> *poller);
     crpcut_test_case_registrator *const reg_;
   private:
-    virtual bool do_read_data(bool do_reply) = 0;
+    virtual bool do_read_data() = 0;
     poll<fdreader> *poller_;
   };
 
@@ -1780,19 +1778,18 @@ namespace crpcut {
     reader(crpcut_test_case_registrator *r, int fd = -1);
     using fdreader::set_fd;
   private:
-    virtual bool do_read_data(bool do_reply);
+    virtual bool do_read_data();
   };
 
   class report_reader : public fdreader
   {
   public:
-    report_reader(crpcut_test_case_registrator *r, comm::data_writer &response);
+    report_reader(crpcut_test_case_registrator *r);
     using fdreader::set_fd;
   private:
     void set_timeout(void *buff, size_t len);
     void cancel_timeout();
-    virtual bool do_read_data(bool do_reply);
-    comm::data_writer &response_;
+    virtual bool do_read_data();
   };
 
   class timeboxed
@@ -1843,11 +1840,11 @@ namespace crpcut {
     }
     std::size_t full_name_len() const;
     bool match_name(const char *name) const;
-    virtual void setup(poll<fdreader>    &poller,
-                       pid_t              pid,
-                       int in_fd, int out_fd,
-                       int stdout_fd,
-                       int stderr_fd) = 0;
+    virtual void setup(poll<fdreader> &poller,
+                       pid_t           pid,
+                       int             in_fd,
+                       int             stdout_fd,
+                       int             stderr_fd) = 0;
     void set_test_environment(test_environment *env);
     void manage_death();
     using datatypes::list_elem<crpcut_test_case_registrator>::unlink;
@@ -3404,7 +3401,7 @@ namespace crpcut {
   {
   }
   template <comm::type t>
-  bool reader<t>::do_read_data(bool)
+  bool reader<t>::do_read_data()
   {
     static char buff[1024];
     for (;;)
@@ -4142,7 +4139,6 @@ extern crpcut::namespace_info crpcut_current_namespace;
         public virtual test_case_name::crpcut_core_dump_handler         \
     {                                                                   \
       using crpcut_core_dump_handler::crpcut_core_dumps_allowed;        \
-      crpcut::comm::wfile_descriptor       report_response_fd_;         \
       crpcut::report_reader                report_reader_;              \
       crpcut::reader<crpcut::comm::stdout> stdout_reader_;              \
       crpcut::reader<crpcut::comm::stderr> stderr_reader_;              \
@@ -4151,16 +4147,15 @@ extern crpcut::namespace_info crpcut_current_namespace;
         crpcut_registrator_base;                                        \
       static const unsigned long crpcut_cputime_timeout_ms              \
         =test_case_name::crpcut_cputime_enforcer::crpcut_cputime_timeout_ms; \
-      void setup(crpcut::poll<crpcut::fdreader>   &poller,              \
-                 pid_t              pid,                                \
-                 int in_fd, int out_fd,                                 \
-                 int stdout_fd,                                         \
-                 int stderr_fd)                                         \
+      void setup(crpcut::poll<crpcut::fdreader> &poller,                \
+                 pid_t                           pid,                   \
+                 int                             in_fd,                 \
+                 int                             stdout_fd,             \
+                 int                             stderr_fd)             \
       {                                                                 \
         stdout_reader_.set_fd(stdout_fd, &poller);                      \
         stderr_reader_.set_fd(stderr_fd, &poller);                      \
         report_reader_.set_fd(in_fd, &poller);                          \
-        crpcut::comm::wfile_descriptor(out_fd).swap(report_response_fd_); \
         set_pid(pid);                                                   \
       }                                                                 \
     public:                                                             \
@@ -4168,7 +4163,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
          : crpcut_registrator_base(#test_case_name,                     \
                                    crpcut_current_namespace,            \
                                    crpcut_cputime_timeout_ms),          \
-           report_reader_(this, report_response_fd_),                   \
+           report_reader_(this),                                        \
            stdout_reader_(this),                                        \
            stderr_reader_(this)                                         \
          {                                                              \

@@ -48,8 +48,8 @@ namespace {
     typedef crpcut::tag::importance importance;
     mock_test_reg(const char *name, crpcut::namespace_info *ns)
     : reg(name, ns) {}
-    MOCK_METHOD6(setup, void(crpcut::poll<crpcut::fdreader>&, pid_t,
-                             int, int, int, int));
+    MOCK_METHOD5(setup, void(crpcut::poll<crpcut::fdreader>&, pid_t,
+                             int, int, int));
     MOCK_METHOD0(run_test_case, void());
     MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag&());
     MOCK_CONST_METHOD0(get_importance, importance());

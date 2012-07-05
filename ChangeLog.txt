@@ -6,6 +6,9 @@
          * Fixed a bug where INFO and FAIL would throw std::bad_alloc
            when the heap space was configured too low in a test.
 
+         * Improved performance and robustness by simplifying communication
+           between test and test runner.
+
 2012-06-12 1.8.1
 
          * --timeout-multiplier=factor now also has effect on fixture

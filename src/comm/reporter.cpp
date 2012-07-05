@@ -28,6 +28,7 @@
 #include <crpcut.hpp>
 #include "../current_process.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
+#include "../sigignore.hpp"
 
 namespace crpcut {
 
@@ -58,11 +59,8 @@ namespace crpcut {
       p+= sizeof(len);
 
       wrapped::memcpy(p, msg, len);
+      sigignore ignore(SIGPIPE);
       writer_->write_loop(report_addr, len + header_size);
-
-      size_t bytes_written;
-      read(bytes_written);
-      assert(len == bytes_written);
     }
 
     void reporter::report(type t, const char *msg, size_t len) const
@@ -81,17 +79,17 @@ namespace crpcut {
         }
 
       try {
-
-        if (current_test_->is_naughty_child())
+        bool testicide = current_test_->is_naughty_child();
+        if (testicide)
           {
             t = static_cast<type>(t | kill_me);
           }
 
         send_message(t, msg, len);
 
-        if (t == comm::exit_fail)
+        if (t == comm::exit_fail || testicide)
           {
-            wrapped::_Exit(0);
+            wrapped::_Exit(testicide);
           }
       }
       catch (...)
@@ -106,13 +104,6 @@ namespace crpcut {
         current_test_(0),
         default_out_(default_out)
     {
-    }
-
-    void
-    reporter::set_reader(data_reader *r)
-    {
-      assert(reader_ == 0);
-      reader_ = r;
     }
 
     void

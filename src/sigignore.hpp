@@ -24,58 +24,46 @@
  * SUCH DAMAGE.
  */
 
-#include <crpcut.hpp>
-#include "poll.hpp"
+#ifndef SIGIGNORE_HPP
+#define SIGIGNORE_HPP
+
+extern "C"
+{
+#  include <signal.h>
+}
+
+#include <cassert>
+
 namespace crpcut {
-
-
-  bool
-  fdreader::
-  read_data()
+  class sigignore
   {
-    return do_read_data();
+  public:
+    sigignore(int signum);
+    ~sigignore();
+  private:
+    sigignore(const sigignore&);
+    sigignore& operator=(const sigignore&);
+
+    int sig;
+    sighandler_t old_handler;
+  };
+
+  inline
+  sigignore
+  ::sigignore(int signum)
+    : sig(signum),
+      old_handler(signal(sig, SIG_IGN))
+  {
+    assert(old_handler != SIG_ERR);
   }
 
-  crpcut_test_case_registrator *
-  fdreader
-  ::get_registrator() const
+  inline
+  sigignore
+  ::~sigignore()
   {
-    return reg_;
-  }
-
-  void
-  fdreader
-  ::close()
-  {
-    unregister();
-  }
-
-  fdreader
-  ::fdreader(crpcut_test_case_registrator *r, int fd)
-    : rfile_descriptor(fd),
-      reg_(r),
-      poller_(0)
-  {
-  }
-
-  void fdreader::set_fd(int fd, poll<fdreader> *poller)
-  {
-    assert(reg_ != 0);
-    assert(!poller_);
-    assert(poller);
-    rfile_descriptor(fd).swap(*this);
-    poller_ = poller;
-    poller_->add_fd(this);
-    reg_->activate_reader();
-  }
-
-  void fdreader::unregister()
-  {
-    assert(poller_);
-    assert(reg_ != 0);
-    reg_->deactivate_reader();
-    poller_->del_fd(this);
-    rfile_descriptor().swap(*this);;
-    poller_ = 0;
+    signal(sig, old_handler);
   }
 }
+
+
+#endif // SIGIGNORE_HPP

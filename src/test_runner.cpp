@@ -145,7 +145,7 @@ namespace crpcut {
         bool read_failed = false;
         if (desc.read())
           {
-            read_failed = !desc->read_data(!desc.hup());
+            read_failed = !desc->read_data();
           }
         if (read_failed || desc.hup())
           {
@@ -166,7 +166,6 @@ namespace crpcut {
   ::start_test(crpcut_test_case_registrator *i, poll<fdreader>& poller)
   {
     pipe_pair c2p("communication pipe test-case to main process");
-    pipe_pair p2c("communication pipe main process to test-case");
     pipe_pair stderr("communication pipe for test-case stderr");
     pipe_pair stdout("communication pipe for test-case stdout");
 
@@ -184,18 +183,12 @@ namespace crpcut {
           typedef comm::wfile_descriptor wfd;
           wfd report_fd(c2p.for_writing(pipe_pair::release_ownership));
           comm::report.set_writer(&report_fd);
-
-          typedef comm::rfile_descriptor rfd;
-          rfd response_fd(p2c.for_reading(pipe_pair::release_ownership));
-          comm::report.set_reader(&response_fd);
-
           current_process current_test;
           comm::report.set_process_control(&current_test);
           wrapped::dup2(stdout.for_writing(), 1);
           wrapped::dup2(stderr.for_writing(), 2);
           stdout.close();
           stderr.close();
-          p2c.close();
           c2p.close();
           current_pid_ = wrapped::getpid();
           i->goto_wd();
@@ -212,7 +205,6 @@ namespace crpcut {
     ++num_pending_children_;
     i->setup(poller, pid,
              c2p.for_reading(pipe_pair::release_ownership),
-             p2c.for_writing(pipe_pair::release_ownership),
              stdout.for_reading(pipe_pair::release_ownership),
              stderr.for_reading(pipe_pair::release_ownership));
   }
