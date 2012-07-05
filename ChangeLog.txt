@@ -1,3 +1,5 @@
+2012-07-05 1.8.2
+
          * Fixed a bug where the elements in expressions in ASSERT_TRUE(),
            ASSERT_FALSE(), VERIFY_TRUE() and VERIFY_FALSE() had to be
            available by reference (and thus could not be used for
