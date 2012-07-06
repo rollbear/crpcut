@@ -83,7 +83,7 @@ namespace crpcut {
 
       if (kill_mask)
         {
-          if (len == 0)
+          if (len == 0 || t == comm::set_timeout || t == comm::begin_test)
             {
               static char msg[] =
                   "A child process spawned from the test has misbehaved. "
