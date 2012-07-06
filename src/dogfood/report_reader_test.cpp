@@ -29,10 +29,8 @@
 #include "../poll.hpp"
 #include <deque>
 #include "../clocks/clocks.hpp"
-using testing::StrictMock;
-using testing::_;
-using testing::Return;
-using testing::Sequence;
+
+using namespace testing;
 
 namespace {
   class test_reader : public crpcut::report_reader
@@ -93,6 +91,17 @@ namespace {
     fix() : reader(&monitor) {}
     StrictMock<mock_monitor>      monitor;
     StrictMock<test_reader>      reader;
+
+    void verify_naughty_child()
+    {
+      EXPECT_CALL(monitor, crpcut_register_success(false));
+      EXPECT_CALL(monitor, set_phase(crpcut::child));
+      EXPECT_CALL(monitor, kill());
+      EXPECT_CALL(monitor, set_death_note());
+      ASSERT_FALSE(reader.read_data());
+      ASSERT_TRUE(reader.buffer.size() == 0U);
+    }
+
   };
 }
 TESTSUITE(report_reader)
@@ -100,6 +109,21 @@ TESTSUITE(report_reader)
   TEST(construction_and_immediate_destruction_does_nothing)
   {
      fix f;
+  }
+
+
+
+  TEST(begin_test_sets_phase_running_and_records_cputime,
+       fix)
+  {
+    reader.buffer.push_back(crpcut::comm::begin_test);
+    struct timeval tv = { 10, 1 };
+    reader.buffer.push_back(sizeof(tv));
+    reader.buffer.push_back(tv);
+    EXPECT_CALL(monitor, set_phase(crpcut::running));
+    EXPECT_CALL(monitor, set_cputime_at_start(_));
+    ASSERT_TRUE(reader.read_data());
+    ASSERT_TRUE(reader.buffer.size() == 0U);
   }
 
   TEST(set_timeout_forwards_timeout_to_monitor_without_any_other_effects,
@@ -125,6 +149,205 @@ TESTSUITE(report_reader)
     EXPECT_CALL(monitor, clear_deadline());
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
+  }
+
+  TEST(exit_fail_marks_the_test_as_failed_notes_death_and_presents,
+       fix)
+  {
+    static const char apa[] = { 'a', 'p', 'a' };
+    reader.buffer.push_back(crpcut::comm::exit_fail);
+    reader.buffer.push_back(sizeof(apa));
+    reader.buffer.push_back(apa);
+    EXPECT_CALL(monitor, set_death_note());
+    EXPECT_CALL(monitor, crpcut_register_success(false));
+    EXPECT_CALL(monitor, send_to_presentation(crpcut::comm::exit_fail, _, _)).
+      With(Args<2,1>(ElementsAreArray(apa)));
+    ASSERT_TRUE(reader.read_data());
+    ASSERT_TRUE(reader.buffer.size() == 0U);
+  }
+
+  TEST(fail_marks_the_test_as_failed_and_presents,
+       fix)
+  {
+    static const char apa[] = { 'a', 'p', 'a' };
+    reader.buffer.push_back(crpcut::comm::fail);
+    reader.buffer.push_back(sizeof(apa));
+    reader.buffer.push_back(apa);
+    EXPECT_CALL(monitor, crpcut_register_success(false));
+    EXPECT_CALL(monitor, send_to_presentation(crpcut::comm::fail, _, _)).
+      With(Args<2, 1>(ElementsAreArray(apa)));
+    ASSERT_TRUE(reader.read_data());
+    ASSERT_TRUE(reader.buffer.size() == 0U);
+  }
+
+  TEST(end_test_and_not_failed_sets_phase_destroying,
+       fix)
+  {
+    Sequence s;
+    reader.buffer.push_back(crpcut::comm::end_test);
+    reader.buffer.push_back(size_t(0));
+    EXPECT_CALL(monitor, crpcut_failed()).
+      InSequence(s).
+      WillOnce(Return(false));
+    EXPECT_CALL(monitor, set_phase(crpcut::destroying)).
+      InSequence(s);
+    ASSERT_TRUE(reader.read_data());
+    ASSERT_TRUE(reader.buffer.size() == 0U);
+  }
+
+  TEST(end_test_and_failed_presents_exit_fail_w_Earlier_VERIFY_msg,
+       fix)
+  {
+    Sequence s;
+    reader.buffer.push_back(crpcut::comm::end_test);
+    reader.buffer.push_back(size_t(0));
+    EXPECT_CALL(monitor, crpcut_failed()).
+      InSequence(s).
+      WillOnce(Return(true));
+    EXPECT_CALL(monitor,
+                send_to_presentation(crpcut::comm::exit_fail,
+                                     _,
+                                     StartsWith("Earlier VERIFY"))).
+      InSequence(s);
+    EXPECT_CALL(monitor, set_death_note());
+    ASSERT_TRUE(reader.read_data());
+    ASSERT_TRUE(reader.buffer.size() == 0U);
+  }
+
+  TEST(exit_ok_sends_to_presentation_and_sets_death_note,
+       fix)
+  {
+    reader.buffer.push_back(crpcut::comm::exit_ok);
+    reader.buffer.push_back(size_t(0));
+    EXPECT_CALL(monitor, send_to_presentation(crpcut::comm::exit_ok, 0U, _));
+    EXPECT_CALL(monitor, set_death_note());
+    ASSERT_TRUE(reader.read_data());
+    ASSERT_TRUE(reader.buffer.size() == 0U);
+  }
+
+  TESTSUITE(kill_mask)
+  {
+    TEST(info_marks_test_as_failed_sets_phase_child_kills_and_presents_exit_fail,
+       fix)
+    {
+      using namespace crpcut::comm;
+      static const char apa[] = { 'a', 'p', 'a' };
+      reader.buffer.push_back(type(info | kill_me));
+      reader.buffer.push_back(sizeof(apa));
+      reader.buffer.push_back(apa);
+      EXPECT_CALL(monitor, send_to_presentation(exit_fail, _, _)).
+        With(Args<2, 1>(ElementsAreArray(apa)));
+      verify_naughty_child();
+    }
+
+    TEST(begin_test_marks_as_failed_kills_and_presents_as_exit_fail_naughty,
+         fix)
+    {
+      using namespace crpcut::comm;
+      reader.buffer.push_back(type(begin_test | kill_me));
+      struct timeval cpu = { 10, 1 };
+      reader.buffer.push_back(sizeof(cpu));
+      reader.buffer.push_back(cpu);
+      EXPECT_CALL(monitor,
+                  send_to_presentation(exit_fail,
+                                       _,
+                                       StartsWith("A child process spawned")));
+      verify_naughty_child();
+    }
+
+    TEST(set_timeout_marks_as_failed_kills_and_presents_as_exit_fail_naughty,
+         fix)
+    {
+      using namespace crpcut::comm;
+      reader.buffer.push_back(type(set_timeout | kill_me));
+      crpcut::clocks::monotonic::timestamp now = 100;
+      reader.buffer.push_back(sizeof(now));
+      reader.buffer.push_back(now);
+      EXPECT_CALL(monitor,
+                  send_to_presentation(exit_fail,
+                                       _,
+                                       StartsWith("A child process spawned")));
+      verify_naughty_child();
+    }
+
+    TEST(cancel_timeout_marks_as_failed_kills_and_presents_as_exit_fail_naughty,
+         fix)
+    {
+      using namespace crpcut::comm;
+      reader.buffer.push_back(type(cancel_timeout | kill_me));
+      reader.buffer.push_back(size_t(0));
+      EXPECT_CALL(monitor,
+                  send_to_presentation(exit_fail,
+                                       _,
+                                       StartsWith("A child process spawned")));
+      verify_naughty_child();
+    }
+
+    TEST(end_test_marks_as_failed_kills_and_presents_as_exit_fail_naughty,
+         fix)
+    {
+      using namespace crpcut::comm;
+      reader.buffer.push_back(type(end_test | kill_me));
+      reader.buffer.push_back(size_t(0));
+      EXPECT_CALL(monitor,
+                  send_to_presentation(exit_fail,
+                                       _,
+                                       StartsWith("A child process spawned")));
+      verify_naughty_child();
+    }
+
+    TEST(info_marks_as_failed_kills_and_presents_as_exit_fail_w_msg,
+         fix)
+    {
+      using namespace crpcut::comm;
+      static const char apa[] = { 'a', 'p', 'a' };
+      reader.buffer.push_back(type(info | kill_me));
+      reader.buffer.push_back(sizeof(apa));
+      reader.buffer.push_back(apa);
+      EXPECT_CALL(monitor, send_to_presentation(exit_fail, _, _)).
+        With(Args<2,1>(ElementsAreArray(apa)));
+      verify_naughty_child();
+    }
+
+    TEST(fail_marks_as_failed_kills_and_presents_as_exit_fail_w_msg,
+         fix)
+    {
+      using namespace crpcut::comm;
+      static const char apa[] = { 'a', 'p', 'a' };
+      reader.buffer.push_back(type(fail | kill_me));
+      reader.buffer.push_back(sizeof(apa));
+      reader.buffer.push_back(apa);
+      EXPECT_CALL(monitor, send_to_presentation(exit_fail, _, _)).
+        With(Args<2,1>(ElementsAreArray(apa)));
+      verify_naughty_child();
+    }
+
+    TEST(exit_ok_marks_as_failed_kills_and_presents_as_exit_fail_naughty,
+         fix)
+    {
+      using namespace crpcut::comm;
+      reader.buffer.push_back(type(exit_ok | kill_me));
+      reader.buffer.push_back(size_t(0));
+      EXPECT_CALL(monitor,
+                  send_to_presentation(exit_fail,
+                                       _,
+                                       StartsWith("A child process spawned")));
+      verify_naughty_child();
+    }
+
+    TEST(exit_fail_marks_as_failed_kills_and_presents_as_exit_fail_w_msg,
+         fix)
+    {
+      using namespace crpcut::comm;
+      static const char apa[] = { 'a', 'p', 'a' };
+      reader.buffer.push_back(type(exit_fail | kill_me));
+      reader.buffer.push_back(sizeof(apa));
+      reader.buffer.push_back(apa);
+      EXPECT_CALL(monitor,
+                  send_to_presentation(exit_fail, _, _)).
+        With(Args<2,1>(ElementsAreArray(apa)));
+      verify_naughty_child();
+    }
   }
 }
 
