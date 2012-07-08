@@ -33,15 +33,15 @@ namespace crpcut {
   }
 
   timeboxed::timeboxed()
-    : crpcut_absolute_deadline_ms_(0U),
+    : crpcut_absolute_deadline_us_(0U),
       crpcut_deadline_set_(false)
   {
   }
 
-  void timeboxed::set_deadline(unsigned long absolute_ms)
+  void timeboxed::set_deadline(unsigned long absolute_us)
   {
     assert(!crpcut_deadline_set_);
-    crpcut_absolute_deadline_ms_ = absolute_ms;
+    crpcut_absolute_deadline_us_ = absolute_us;
     crpcut_deadline_set_ = true;
   }
 
@@ -59,7 +59,7 @@ namespace crpcut {
   unsigned long timeboxed::absolute_deadline() const
   {
     assert(crpcut_deadline_set_);
-    return crpcut_absolute_deadline_ms_;
+    return crpcut_absolute_deadline_us_;
   }
 
   bool timeboxed::compare(const timeboxed *lh,
@@ -69,8 +69,8 @@ namespace crpcut {
     assert(rh->crpcut_deadline_set_);
 
     long diff
-      = long(lh->crpcut_absolute_deadline_ms_
-           - rh->crpcut_absolute_deadline_ms_);
+      = long(lh->crpcut_absolute_deadline_us_
+           - rh->crpcut_absolute_deadline_us_);
     return diff > 0;
   }
 }

@@ -126,11 +126,11 @@ namespace crpcut {
 
   void
   crpcut_test_case_registrator
-  ::set_timeout(unsigned long ts)
+  ::set_timeout(unsigned long ts_us)
   {
     timeboxed::set_deadline(phase_ == running
-                            ? crpcut_calc_deadline(ts)
-                            : ts);
+                            ? crpcut_calc_deadline(ts_us)
+                            : ts_us);
     runner_->set_deadline(this);
   }
 
@@ -146,7 +146,7 @@ namespace crpcut {
       cpu_time_at_start_(),
       dirnum_(~0U),
       phase_(creating),
-      cputime_limit_ms_(0),
+      cputime_limit_us_(0),
       runner_(0),
       env_(0),
       reporter_(0),
@@ -158,7 +158,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::crpcut_test_case_registrator(const char            *name,
                                  const namespace_info  &ns,
-                                 unsigned long         cputime_timeout_ms,
+                                 unsigned long         cputime_timeout_us,
                                  comm::reporter        *reporter,
                                  process_control       *process,
                                  filesystem_operations *filesystem,
@@ -173,7 +173,7 @@ namespace crpcut {
       cpu_time_at_start_(),
       dirnum_(~0U),
       phase_(creating),
-      cputime_limit_ms_(cputime_timeout_ms),
+      cputime_limit_us_(cputime_timeout_us),
       runner_(runner),
       env_(0),
       reporter_(reporter),
@@ -194,11 +194,11 @@ namespace crpcut {
   }
   void
   crpcut_test_case_registrator
-  ::prepare_construction(unsigned long deadline)
+  ::prepare_construction(unsigned long deadline_us)
   {
     if (env_->timeouts_enabled())
       {
-        unsigned long req = deadline*env_->timeout_multiplier();
+        unsigned long req = deadline_us*env_->timeout_multiplier();
         (*reporter_)(comm::set_timeout, req);
       }
   }
@@ -212,11 +212,11 @@ namespace crpcut {
 
   void
   crpcut_test_case_registrator
-  ::prepare_destruction(unsigned long deadline)
+  ::prepare_destruction(unsigned long deadline_us)
   {
     if (env_->timeouts_enabled())
       {
-        unsigned long req = deadline*env_->timeout_multiplier();
+        unsigned long req = deadline_us*env_->timeout_multiplier();
         (*reporter_)(comm::set_timeout, req);
       }
   }
@@ -334,11 +334,11 @@ namespace crpcut {
 
   bool
   crpcut_test_case_registrator
-  ::cputime_timeout(unsigned long ms) const
+  ::cputime_timeout(unsigned long us) const
   {
     return env_->timeouts_enabled()
-      && cputime_limit_ms_
-      && ms > cputime_limit_ms_;
+      && cputime_limit_us_
+      && us > cputime_limit_us_;
   }
 
 
@@ -356,7 +356,7 @@ namespace crpcut {
 
   bool
   crpcut_test_case_registrator
-  ::check_signal_status(int signo, unsigned long cputime_ms, std::ostream &out)
+  ::check_signal_status(int signo, unsigned long cputime_us, std::ostream &out)
   {
     if (crpcut_failed()) return false;
 
@@ -377,12 +377,12 @@ namespace crpcut {
         return true;
       }
 
-    if (cputime_timeout(cputime_ms))
+    if (cputime_timeout(cputime_us))
       {
         crpcut_register_success(false);
         out << "Test consumed "
-            << cputime_ms << "ms CPU-time\nLimit was "
-            << cputime_limit_ms_ << "ms";
+            << cputime_us / 1000 << "ms CPU-time\nLimit was "
+            << cputime_limit_us_ / 1000 << "ms";
         return true;
       }
     return false;
@@ -417,7 +417,7 @@ namespace crpcut {
   {
     ::siginfo_t info = get_siginfo(pid_, process_);
 
-    unsigned long cputime_ms = runner_->calc_cputime(cpu_time_at_start_);
+    unsigned long cputime_us = runner_->calc_cputime(cpu_time_at_start_);
     if (!killed_ && deadline_is_set())
       {
         clear_deadline();
@@ -444,7 +444,7 @@ namespace crpcut {
               }
             // no break - fall through
           case CLD_KILLED:
-            if (check_signal_status(info.si_status, cputime_ms, out))
+            if (check_signal_status(info.si_status, cputime_us, out))
               {
                 t = comm::exit_fail;
               }

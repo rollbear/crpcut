@@ -96,8 +96,8 @@ namespace crpcut {
   deadline_monitor::ms_until_deadline(const clocks::monotonic &clock) const
   {
     if (size() == 0) return -1;
-    int delta =  int(front()->absolute_deadline() - clock.now());
-    return delta < 0 ? 0 : delta;
+    int delta_us =  int(front()->absolute_deadline() - clock.now());
+    return delta_us < 0 ? 0 : delta_us / 1000;
   }
 }
 

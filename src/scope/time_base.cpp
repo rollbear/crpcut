@@ -65,7 +65,7 @@ namespace crpcut {
 
     unsigned long time_base::realtime::now()
     {
-      return clocks::monotonic::timestamp_ms_absolute();
+      return clocks::monotonic::timestamp_absolute();
     }
 
     const char *time_base::cputime::name()
@@ -74,7 +74,7 @@ namespace crpcut {
     }
     unsigned long time_base::cputime::now()
     {
-      return clocks::cputime::timestamp_ms_absolute();
+      return clocks::cputime::timestamp_absolute();
     }
   }
 }

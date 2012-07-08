@@ -1321,19 +1321,19 @@ namespace crpcut {
     namespace timeout {
       typedef enum { realtime, cputime } type;
 
-      template <type t, unsigned long ms>
+      template <type t, unsigned long us>
       class enforcer;
 
-      template <unsigned long ms>
+      template <unsigned long us>
       struct constructor_enforcer
       {
-        static const unsigned long crpcut_constructor_timeout_ms = ms;
+        static const unsigned long crpcut_constructor_timeout_us = us;
       };
 
-      template <unsigned long ms>
+      template <unsigned long us>
       struct destructor_enforcer
       {
-        static const unsigned long crpcut_destructor_timeout_ms = ms;
+        static const unsigned long crpcut_destructor_timeout_us = us;
       };
 
     }
@@ -1348,12 +1348,12 @@ namespace crpcut {
 
       typedef dependencies::crpcut_none crpcut_dependency;
 
-      typedef timeout::enforcer<timeout::realtime,2000> crpcut_realtime_enforcer;
+      typedef timeout::enforcer<timeout::realtime,2000000U> crpcut_realtime_enforcer;
       typedef timeout::enforcer<timeout::cputime, 0> crpcut_cputime_enforcer;
 
-      typedef timeout::constructor_enforcer<1000>
+      typedef timeout::constructor_enforcer<1000000U>
       crpcut_constructor_timeout_enforcer;
-      typedef timeout::destructor_enforcer<1000>
+      typedef timeout::destructor_enforcer<1000000U>
       crpcut_destructor_timeout_enforcer;
     };
 
@@ -1411,7 +1411,7 @@ namespace crpcut {
         virtual void crpcut_expected_death(std::ostream &os) const;
       };
 
-      template <unsigned long N>
+      template <unsigned long US>
       class timeout : public virtual crpcut_none
       {
       public:
@@ -1455,13 +1455,13 @@ namespace crpcut {
       typedef deaths::exit<N, action>  crpcut_expected_death_cause;
     };
 
-    template <unsigned long N>
+    template <unsigned long US>
     class realtime_timeout_death : protected virtual crpcut_default_policy
     {
     public:
       typedef deaths::timeout_wrapper crpcut_run_wrapper;
-      typedef deaths::timeout<N>      crpcut_expected_death_cause;
-      typedef timeout::enforcer<timeout::realtime, N> crpcut_realtime_enforcer;
+      typedef deaths::timeout<US>      crpcut_expected_death_cause;
+      typedef timeout::enforcer<timeout::realtime, US> crpcut_realtime_enforcer;
     };
 
     class any_exception_wrapper;
@@ -1573,41 +1573,41 @@ namespace crpcut {
 
     namespace timeout {
 
-      template <type t, unsigned long timeout_ms>
+      template <type t, unsigned long timeout_us>
       class enforcer;
 
       class cputime_enforcer
       {
       public:
-        cputime_enforcer(unsigned long timeout_ms);
+        cputime_enforcer(unsigned long timeout_us);
         ~cputime_enforcer();
       private:
 
-        unsigned long duration_ms;
-        unsigned long start_timestamp_ms;
+        unsigned long duration_us;
+        unsigned long start_timestamp_us;
       };
 
       class monotonic_enforcer
       {
       protected:
-        monotonic_enforcer(unsigned long timeout_ms);
+        monotonic_enforcer(unsigned long timeout_us);
         ~monotonic_enforcer();
       private:
 
-        unsigned long duration_ms;
-        unsigned long start_timestamp_ms;
+        unsigned long duration_us;
+        unsigned long start_timestamp_us;
       };
 
-      template <unsigned long timeout_ms>
-      class enforcer<cputime, timeout_ms>
+      template <unsigned long timeout_us>
+      class enforcer<cputime, timeout_us>
       {
       public:
-        static const unsigned long crpcut_cputime_timeout_ms = timeout_ms;
+        static const unsigned long crpcut_cputime_timeout_us = timeout_us;
       };
 
 
-      template <unsigned long timeout_ms>
-      class enforcer<realtime, timeout_ms> : public monotonic_enforcer
+      template <unsigned long timeout_us>
+      class enforcer<realtime, timeout_us> : public monotonic_enforcer
       {
       public:
         enforcer();
@@ -1616,39 +1616,39 @@ namespace crpcut {
     } // namespace timeout
 
 
-    template <timeout::type t, unsigned long timeout_ms>
+    template <timeout::type t, unsigned long timeout_us>
     class timeout_policy;
 
-    template <unsigned long timeout_ms>
-    class timeout_policy<timeout::realtime, timeout_ms>
+    template <unsigned long timeout_us>
+    class timeout_policy<timeout::realtime, timeout_us>
       : protected virtual crpcut_default_policy
     {
     public:
-      typedef timeout::enforcer<timeout::realtime, timeout_ms>
+      typedef timeout::enforcer<timeout::realtime, timeout_us>
       crpcut_realtime_enforcer;
     };
 
-    template <unsigned long timeout_ms>
-    class timeout_policy<timeout::cputime, timeout_ms>
+    template <unsigned long timeout_us>
+    class timeout_policy<timeout::cputime, timeout_us>
       : protected virtual crpcut_default_policy
     {
     public:
-      typedef timeout::enforcer<timeout::cputime, timeout_ms>
+      typedef timeout::enforcer<timeout::cputime, timeout_us>
       crpcut_cputime_enforcer;
     };
 
 
-    template <unsigned long ms>
+    template <unsigned long us>
     struct constructor_timeout_policy : public virtual crpcut_default_policy
     {
-      typedef timeout::constructor_enforcer<ms>
+      typedef timeout::constructor_enforcer<us>
       crpcut_constructor_timeout_enforcer;
     };
 
-    template <unsigned long ms>
+    template <unsigned long us>
     struct destructor_timeout_policy : public virtual crpcut_default_policy
     {
-      typedef timeout::destructor_enforcer<ms>
+      typedef timeout::destructor_enforcer<us>
       crpcut_destructor_timeout_enforcer;
     };
 
@@ -1758,7 +1758,7 @@ namespace crpcut {
   {
   public:
     virtual ~crpcut_test_monitor() {}
-    virtual void set_timeout(unsigned long ts) = 0;
+    virtual void set_timeout(unsigned long ts_us) = 0;
     virtual bool deadline_is_set() const = 0;
     virtual void clear_deadline() = 0;
     virtual void crpcut_register_success(bool value = true) = 0;
@@ -1815,7 +1815,7 @@ namespace crpcut {
   {
   public:
     virtual ~timeboxed();
-    void set_deadline(unsigned long absolute_ms);
+    void set_deadline(unsigned long absolute_us);
     void clear_deadline();
     bool deadline_is_set() const;
     virtual void kill() = 0;
@@ -1824,7 +1824,7 @@ namespace crpcut {
   protected:
     timeboxed();
   private:
-    unsigned long crpcut_absolute_deadline_ms_;
+    unsigned long crpcut_absolute_deadline_us_;
     bool          crpcut_deadline_set_;
   };
 
@@ -1848,7 +1848,7 @@ namespace crpcut {
   public:
     crpcut_test_case_registrator(const char *name,
                                  const namespace_info &ns,
-                                 unsigned long cputime_limit_ms,
+                                 unsigned long cputime_limit_us,
                                  comm::reporter *reporter = &comm::report,
                                  process_control *process = process_control_root(),
                                  filesystem_operations *fsops = filesystem_operations_root(),
@@ -1893,16 +1893,16 @@ namespace crpcut {
   protected:
     crpcut_test_case_registrator(const char *name = 0, namespace_info *ns = 0);
     void manage_test_case_execution(crpcut_test_case_base*);
-    void prepare_destruction(unsigned long ms);
-    void prepare_construction(unsigned long ms);
+    void prepare_destruction(unsigned long us);
+    void prepare_construction(unsigned long us);
     void set_pid(pid_t pid);
   private:
      bool check_signal_status(int            signo,
-                             unsigned long  cputime_ms,
-                             std::ostream  &out);
+                              unsigned long  cputime_us,
+                              std::ostream  &out);
     bool check_exit_status(int status, std::ostream &out);
     bool report_nonempty_working_dir(const char* dirname);
-    bool cputime_timeout(unsigned long ms) const;
+    bool cputime_timeout(unsigned long us) const;
     std::ostream &print_name(std::ostream &) const ;
 
     const char                   *name_;
@@ -1915,7 +1915,7 @@ namespace crpcut {
     struct timeval                cpu_time_at_start_;
     unsigned                      dirnum_;
     test_phase                    phase_;
-    const unsigned long           cputime_limit_ms_;
+    const unsigned long           cputime_limit_us_;
     test_runner                  *runner_;
     test_environment             *env_;
     comm::reporter               *reporter_;
@@ -2400,11 +2400,11 @@ namespace crpcut {
   };
 
 #ifdef CRPCUT_SUPPORTS_VTEMPLATES
-  template <int N, typename ...T>
+  template <int US, typename ...T>
   class param_holder;
 
-  template <int N>
-  class param_holder<N>
+  template <int US>
+  class param_holder<US>
   {
   public:
     param_holder() {}
@@ -2415,22 +2415,22 @@ namespace crpcut {
     void print_to(std::ostream &) const { }
   };
 
-  template <int N, typename T, typename ...Tail>
-  class param_holder<N, T, Tail...> : public param_holder<N+1, Tail...>
+  template <int US, typename T, typename ...Tail>
+  class param_holder<US, T, Tail...> : public param_holder<US+1, Tail...>
   {
   public:
     param_holder(const T& v, const Tail&...tail)
-      : param_holder<N+1,Tail...>(tail...),
+      : param_holder<US+1,Tail...>(tail...),
         val(v)
     {
     }
     template <typename P, typename ...V>
     bool apply(P& func, const V&...v) const {
-      return param_holder<N+1,Tail...>::apply(func, v..., val);
+      return param_holder<US+1,Tail...>::apply(func, v..., val);
     }
     void print_to(std::ostream &os) const {
-      os << "  param" << N << " = " << val << '\n';
-      param_holder<N+1, Tail...>::print_to(os);
+      os << "  param" << US << " = " << val << '\n';
+      param_holder<US+1, Tail...>::print_to(os);
     }
   private:
     const T& val;
@@ -3289,25 +3289,25 @@ namespace crpcut {
       }
 
 
-      template <unsigned long N>
+      template <unsigned long US>
       bool
-      timeout<N>::crpcut_is_expected_signal(int code) const
+      timeout<US>::crpcut_is_expected_signal(int code) const
       {
         return !timeouts_are_enabled() || code == SIGKILL || code == SIGXCPU;
       }
 
-      template <unsigned long N>
+      template <unsigned long US>
       void
-      timeout<N>::crpcut_expected_death(std::ostream &os) const
+      timeout<US>::crpcut_expected_death(std::ostream &os) const
       {
-        os << N << "ms realtime timeout";
+        os << US / 1000 << "ms realtime timeout";
       }
 
-      template <unsigned long N>
+      template <unsigned long US>
       unsigned long
-      timeout<N>::crpcut_calc_deadline(unsigned long ts) const
+      timeout<US>::crpcut_calc_deadline(unsigned long ts_us) const
       {
-        return ts;
+        return ts_us;
       }
 
     } // namespace deaths
@@ -3323,9 +3323,9 @@ namespace crpcut {
     } // namespace dependencies
 
     namespace timeout {
-      template <unsigned long timeout_ms>
-      enforcer<realtime, timeout_ms>::enforcer()
-        : monotonic_enforcer(timeout_ms)
+      template <unsigned long timeout_us>
+      enforcer<realtime, timeout_us>::enforcer()
+        : monotonic_enforcer(timeout_us)
       {
       }
     } // namespace timeout
@@ -4081,41 +4081,42 @@ namespace crpcut {
     class time : public time_base
     {
     public:
-      time(unsigned long ms, const char *file, size_t line,
+      time(unsigned long us, const char *file, size_t line,
            comm::reporter &reporter = comm::report)
-        : time_base(clock::now() + ms * crpcut::timeout_multiplier(), file, line),
-          limit_(ms),
+        : time_base(clock::now() + us * crpcut::timeout_multiplier(), file, line),
+          limit_us_(us),
           reporter_(reporter)
       {
       }
       ~time()
       {
-        if (limit_ + 1 > 0) // wrap around to 0 signals disabled
+        if (limit_us_ + 1 > 0) // wrap around to 0 signals disabled
           {
             unsigned long t = clock::now();
             if (timeouts_are_enabled() && cond::busted(t, deadline_))
               {
+                unsigned long duration_ms = (t - deadline_ + limit_us_) / 1000;
                 comm::direct_reporter<action>(reporter_)
                   << filename_ << ":" << line_ << "\n"
                   << crpcut_check_name<action>::string()
                   << "_SCOPE_" << cond::name()
-                  << "_" << clock::name() << "_MS(" << limit_ << ")"
-                  "\nActual time used was " << t - deadline_ + limit_ << "ms";
+                  << "_" << clock::name() << "_MS(" << limit_us_ / 1000 << ")"
+                  "\nActual time used was " << duration_ms << "ms";
               }
           }
       }
       time(const time& r)
         : time_base(r),
-          limit_(r.limit_),
+          limit_us_(r.limit_us_),
           reporter_(r.reporter_)
       {
         static const unsigned long zero(0UL);
-        r.limit_ = ~zero;
+        r.limit_us_ = ~zero;
       }
     private:
       time& operator=(const time&);
 
-      unsigned long mutable limit_;
+      unsigned long mutable limit_us_;
       comm::reporter       &reporter_;
     };
   }
@@ -4141,7 +4142,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
     {                                                                   \
       crpcut_realtime_enforcer rt;                                      \
       using crpcut::policies::timeout::cputime_enforcer;                \
-      cputime_enforcer ct(crpcut_cputime_enforcer::crpcut_cputime_timeout_ms); \
+      cputime_enforcer ct(crpcut_cputime_enforcer::crpcut_cputime_timeout_us); \
       (void)rt; /* silence warning */                                   \
       (void)ct; /* silence warning */                                   \
       crpcut::test_wrapper<crpcut_run_wrapper>::run(this, crpcut::comm::report); \
@@ -4168,8 +4169,8 @@ extern crpcut::namespace_info crpcut_current_namespace;
                                                                         \
       typedef crpcut::crpcut_test_case_registrator                      \
         crpcut_registrator_base;                                        \
-      static const unsigned long crpcut_cputime_timeout_ms              \
-        =test_case_name::crpcut_cputime_enforcer::crpcut_cputime_timeout_ms; \
+      static const unsigned long crpcut_cputime_timeout_us              \
+        =test_case_name::crpcut_cputime_enforcer::crpcut_cputime_timeout_us; \
       void setup(crpcut::poll<crpcut::fdreader> &poller,                \
                  pid_t                           pid,                   \
                  int                             in_fd,                 \
@@ -4185,7 +4186,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
        crpcut_registrator()                                             \
          : crpcut_registrator_base(#test_case_name,                     \
                                    crpcut_current_namespace,            \
-                                   crpcut_cputime_timeout_ms),          \
+                                   crpcut_cputime_timeout_us),          \
            report_reader_(this),                                        \
            stdout_reader_(this),                                        \
            stderr_reader_(this)                                         \
@@ -4196,10 +4197,10 @@ extern crpcut::namespace_info crpcut_current_namespace;
        virtual void run_test_case()                                     \
        {                                                                \
          CRPCUT_DEFINE_REPORTER;                                        \
-         prepare_construction(crpcut_constructor_timeout_ms);           \
+         prepare_construction(crpcut_constructor_timeout_us);           \
          crpcut_test_class obj;                                         \
          manage_test_case_execution(&obj);                              \
-         prepare_destruction(crpcut_destructor_timeout_ms);             \
+         prepare_destruction(crpcut_destructor_timeout_us);             \
        }                                                                \
        virtual crpcut::tag& crpcut_tag() const                          \
        {                                                                \
@@ -4280,7 +4281,7 @@ namespace crpcut {
   protected virtual crpcut::policies::exit_death<__VA_ARGS__>
 
 #define EXPECT_REALTIME_TIMEOUT_MS(time) \
-  protected virtual crpcut::policies::realtime_timeout_death<time>
+  protected virtual crpcut::policies::realtime_timeout_death<time*1000UL>
 
 #define EXPECT_SIGNAL_DEATH(...) \
   protected virtual crpcut::policies::signal_death<__VA_ARGS__>
@@ -4335,15 +4336,15 @@ namespace crpcut {
 
 
 #define DEADLINE_CPU_MS(time) \
-  crpcut::policies::timeout_policy<crpcut::policies::timeout::cputime, time>
+  crpcut::policies::timeout_policy<crpcut::policies::timeout::cputime, time*1000UL>
 
 #define FIXTURE_CONSTRUCTION_DEADLINE_REALTIME_MS(time) \
-  public crpcut::policies::constructor_timeout_policy<time>
+  public crpcut::policies::constructor_timeout_policy<time*1000UL>
 #define FIXTURE_DESTRUCTION_DEADLINE_REALTIME_MS(time) \
-  public crpcut::policies::destructor_timeout_policy<time>
+  public crpcut::policies::destructor_timeout_policy<time*1000UL>
 
 #define DEADLINE_REALTIME_MS(time) \
-  crpcut::policies::timeout_policy<crpcut::policies::timeout::realtime, time>
+  crpcut::policies::timeout_policy<crpcut::policies::timeout::realtime, time*1000UL>
 
 #define CRPCUT_WRAP_FUNC(lib, name, rv, param_list, param)              \
   extern "C" typedef rv (*f_ ## name ## _t) param_list;                 \
@@ -4589,7 +4590,7 @@ namespace crpcut
   if (const crpcut::scope::time_base& CRPCUT_LOCAL_NAME(time_scope)     \
       = crpcut::scope::time<crpcut::comm::action,                       \
                             crpcut::scope::time_base::type,             \
-                            crpcut::scope::time_base::clock>(ms*crpcut::timeout_multiplier(), \
+                            crpcut::scope::time_base::clock>(ms*1000UL*crpcut::timeout_multiplier(), \
                                                              __FILE__,  \
                                                              __LINE__)) \
     { CRPCUT_LOCAL_NAME(time_scope).silence_warning(); } else           \

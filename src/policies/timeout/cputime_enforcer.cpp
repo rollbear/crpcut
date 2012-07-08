@@ -33,14 +33,14 @@ namespace crpcut {
     namespace timeout {
 
       cputime_enforcer
-      ::cputime_enforcer(unsigned long timeout_ms)
-        : duration_ms(timeout_ms * timeout_multiplier()),
-          start_timestamp_ms(clocks::cputime::timestamp_ms_absolute())
+      ::cputime_enforcer(unsigned long timeout_us)
+        : duration_us(timeout_us * timeout_multiplier()),
+          start_timestamp_us(clocks::cputime::timestamp_absolute())
       {
-        if (timeout_ms && timeouts_are_enabled())
+        if (timeout_us && timeouts_are_enabled())
           {
-            rlimit r = { (duration_ms + 1500) / 1000,
-                         (duration_ms + 2500) / 1000 };
+            rlimit r = { (duration_us + 1500000) / 1000000,
+                         (duration_us + 2500000) / 1000000 };
             wrapped::setrlimit(RLIMIT_CPU, &r);
           }
       }
@@ -48,17 +48,17 @@ namespace crpcut {
       cputime_enforcer
       ::~cputime_enforcer()
       {
-        if (!timeouts_are_enabled() || duration_ms == 0) return;
+        if (!timeouts_are_enabled() || duration_us == 0) return;
 
         clocks::cputime::timestamp now
-          = clocks::cputime::timestamp_ms_absolute();
-        unsigned long diff = now - start_timestamp_ms;
-        if  (diff > duration_ms)
+          = clocks::cputime::timestamp_absolute();
+        unsigned long diff = now - start_timestamp_us;
+        if  (diff > duration_us)
           {
             stream::toastream<128> os;
-            os << "CPU-time timeout " << duration_ms
-               << "ms exceeded.\n  Actual time to completion was " << diff
-               << "ms";
+            os << "CPU-time timeout " << duration_us / 1000
+               << "ms exceeded.\n  Actual time to completion was "
+               << diff / 1000 << "ms";
             comm::report(comm::exit_fail, os.begin(), os.size());
           }
       }

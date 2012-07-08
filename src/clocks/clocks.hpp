@@ -35,7 +35,7 @@ namespace crpcut {
       virtual ~monotonic();
       typedef unsigned long timestamp;
       virtual timestamp now() const;
-      static timestamp timestamp_ms_absolute() { return func(); }
+      static timestamp timestamp_absolute() { return func(); }
       static const char *get_name() { return name; }
       typedef timestamp (*timestamp_func)();
     private:
@@ -59,7 +59,7 @@ namespace crpcut {
     {
     public:
       typedef unsigned long timestamp;
-      static timestamp timestamp_ms_absolute() { return func(); }
+      static timestamp timestamp_absolute() { return func(); }
       static const char *get_name() { return name; }
       typedef timestamp (*timestamp_func)();
     private:

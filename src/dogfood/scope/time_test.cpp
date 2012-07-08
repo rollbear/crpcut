@@ -33,13 +33,13 @@ TESTSUITE(scope)
     class test_clock {
     public:
       static const char *name() { return  "TEST_TIME"; }
-      static unsigned long now() { return value; }
-      static void set_timestamp(unsigned long v) { value = v; }
+      static unsigned long now() { return ts_us_absolute; }
+      static void set_timestamp_us(unsigned long us) { ts_us_absolute = us; }
     private:
-      static unsigned long value;
+      static unsigned long ts_us_absolute;
     };
 
-    unsigned long test_clock::value = 0;
+    unsigned long test_clock::ts_us_absolute = 0;
 
     struct fix
     {
@@ -80,7 +80,7 @@ TESTSUITE(scope)
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::max max;
         time<fail, max, test_clock> t(0, "apa", 3, r);
-        test_clock::set_timestamp(1UL);
+        test_clock::set_timestamp_us(1000UL);
       }
       static const char report[] =
           "\napa:3\n"
@@ -97,7 +97,7 @@ TESTSUITE(scope)
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::min min;
         time<fail, min, test_clock> t(0, "apa", 3, r);
-        test_clock::set_timestamp(1UL);
+        test_clock::set_timestamp_us(1000UL);
       }
       ASSERT_TRUE(os.str() == "");
     }
@@ -109,7 +109,7 @@ TESTSUITE(scope)
         using crpcut::comm::fail;
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::min min;
-        time<fail, min, test_clock> t(1, "apa", 3, r);
+        time<fail, min, test_clock> t(1000, "apa", 3, r);
       }
       static const char report[] =
           "\napa:3\n"
@@ -126,7 +126,7 @@ TESTSUITE(scope)
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::max max;
         time<fail, max, test_clock> t(0, "apa", 3, r);
-        test_clock::set_timestamp(1UL);
+        test_clock::set_timestamp_us(1000UL);
         crpcut::scope::time<fail, max, test_clock> t2(t);
         crpcut::scope::time<fail, max, test_clock> t3(t2);
       }

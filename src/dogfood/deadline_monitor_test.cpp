@@ -35,7 +35,7 @@ TESTSUITE(deadline_monitor)
   {
   public:
     test_clock()  {}
-    virtual unsigned long now() const { return 50UL; }
+    virtual unsigned long now() const { return 50000UL; }
   private:
   };
 
@@ -48,10 +48,10 @@ TESTSUITE(deadline_monitor)
 
   struct fix
   {
-    fix() : t1(101),   t2(102),  t3(103),  t4(104),
-            t5(105),   t6(106),  t7(107),  t8(108),
-            t9(109),  t10(110), t11(111), t12(112),
-            t13(113), t14(114), t15(115), t16(116)
+    fix() : t1(101000),   t2(102000),  t3(103000),  t4(104000),
+            t5(105000),   t6(106000),  t7(107000),  t8(108000),
+            t9(109000),  t10(110000), t11(111000), t12(112000),
+            t13(113000), t14(114000), t15(115000), t16(116000)
     {
     }
     timeboxed t1;

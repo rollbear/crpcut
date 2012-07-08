@@ -38,7 +38,7 @@ extern "C"
 #  include <sys/stat.h>
 #  include <fcntl.h>
 }
-TESTSUITE(test_case_registrator)
+TESTSUITE(test_runner)
 {
   using namespace testing;
   class mock_runner : public crpcut::test_runner
@@ -159,7 +159,7 @@ TESTSUITE(test_case_registrator)
       fsops(),
       top_namespace(0,0),
       current_namespace("apa", &top_namespace),
-      reg("test", current_namespace, cpulimit,
+      reg("test", current_namespace, cpulimit * 1000,
           &reporter, &process_control, &fsops, &runner)
     {
       reg.set_test_environment(&env);
@@ -638,7 +638,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 9, CLD_KILLED, s);
 
       EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000U));
+          WillOnce(Return(1000000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(9)).
           InSequence(s).
@@ -679,7 +679,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 6, CLD_KILLED, s);
 
       EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000U));
+          WillOnce(Return(1000000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
           InSequence(s).
@@ -718,7 +718,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 6, CLD_KILLED, s);
 
       EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000U));
+          WillOnce(Return(1000000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
           InSequence(s).
@@ -757,7 +757,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 6, CLD_DUMPED, s);
 
       EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000U));
+          WillOnce(Return(1000000U));
 
       EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
           InSequence(s).
@@ -796,7 +796,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 6, CLD_DUMPED, s);
 
       EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000U));
+          WillOnce(Return(1000000U));
 
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
           With(Args<4,3>(ElementsAreArray(S(Died with core dump)))).
@@ -828,7 +828,7 @@ TESTSUITE(test_case_registrator)
       prepare_siginfo(test_pid, 0, -1, s);
 
       EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000U));
+          WillOnce(Return(1000000U));
 
       EXPECT_CALL(runner, present(test_pid,
                                    crpcut::comm::exit_fail,

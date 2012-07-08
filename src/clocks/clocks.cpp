@@ -67,8 +67,8 @@ namespace crpcut {
     unsigned long get_mach_high_res_timestamp()
     {
       static mach_timebase_info_data_t conv = getconv();
-      uint64_t ts_ms = mach_absolute_time()/1000000*conv.numer/conv.denom;
-      return static_cast<unsigned long>(ts_ms);
+      uint64_t ts_us = mach_absolute_time()/1000*conv.numer/conv.denom;
+      return static_cast<unsigned long>(ts_us);
     }
   }
 
@@ -95,7 +95,7 @@ namespace crpcut {
       struct timespec ts;
       int rv = crpcut::wrapped::clock_gettime(CLOCK_MONOTONIC, &ts);
       assert(rv == 0);
-      return (unsigned long)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+      return (unsigned long)(ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
     }
   }
 
@@ -124,7 +124,7 @@ namespace crpcut {
       struct timespec ts;
       int rv = crpcut::wrapped::clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
       assert(rv == 0);
-      return (unsigned long)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+      return (unsigned long)(ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
     }
   }
 
@@ -277,8 +277,8 @@ namespace crpcut {
       struct timeval tv;
       int rv = crpcut::wrapped::gettimeofday(&tv, 0);
       assert(rv == 0);
-      return (unsigned long)(tv.tv_sec)*1000UL
-           + (unsigned long)(tv.tv_usec)/1000UL;
+      return (unsigned long)(tv.tv_sec)*1000000UL
+           + (unsigned long)(tv.tv_usec);
     }
   }
 

@@ -32,9 +32,9 @@ namespace crpcut {
 
       unsigned long
       crpcut_none
-      ::crpcut_calc_deadline(unsigned long ts) const
+      ::crpcut_calc_deadline(unsigned long ts_us) const
       {
-        return ts + 1000;
+        return ts_us + 1000000UL;
       }
 
       void

@@ -551,8 +551,8 @@ namespace crpcut {
     timersub(&accumulated_cputime_, &prev, &child_time);
     struct timeval child_test_time;
     timersub(&child_time, &t, &child_test_time);
-    return (unsigned long)(((child_test_time.tv_sec))) * 1000UL
-           + (unsigned long)(((child_test_time.tv_usec))) / 1000UL;
+    return (unsigned long)(((child_test_time.tv_sec))) * 1000000UL
+           + (unsigned long)(((child_test_time.tv_usec)));
   }
 
 

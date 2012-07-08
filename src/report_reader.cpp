@@ -45,12 +45,12 @@ namespace crpcut {
   {
     typedef clocks::monotonic::timestamp timestamp;
     assert(len == sizeof(timestamp));
-    timestamp *ts = static_cast<timestamp*>(buff);
+    timestamp *ts_us = static_cast<timestamp*>(buff);
 
     cancel_timeout();
 
-    *ts+= clocks::monotonic::timestamp_ms_absolute();
-    mon_->set_timeout(*ts);
+    *ts_us+= clocks::monotonic::timestamp_absolute();
+    mon_->set_timeout(*ts_us);
     assert(mon_->deadline_is_set());
   }
 

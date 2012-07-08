@@ -33,13 +33,13 @@ namespace crpcut {
 
       monotonic_enforcer
       ::monotonic_enforcer(unsigned long timeout_ms)
-        : duration_ms(timeout_ms * timeout_multiplier()),
-          start_timestamp_ms(clocks::monotonic::timestamp_ms_absolute())
+        : duration_us(timeout_ms * timeout_multiplier()),
+          start_timestamp_us(clocks::monotonic::timestamp_absolute())
       {
 
         if (timeouts_are_enabled())
           {
-            clocks::monotonic::timestamp deadline = duration_ms;
+            clocks::monotonic::timestamp deadline = duration_us;
             comm::report(comm::set_timeout, deadline);
           }
       }
@@ -49,17 +49,17 @@ namespace crpcut {
       {
         if (!timeouts_are_enabled()) return;
         typedef clocks::monotonic mono;
-        mono::timestamp now  = mono::timestamp_ms_absolute();
-        unsigned long diff = now - start_timestamp_ms;
-        if (diff <= duration_ms)
+        mono::timestamp now  = mono::timestamp_absolute();
+        unsigned long diff = now - start_timestamp_us;
+        if (diff <= duration_us)
           {
             const char *nullstr = 0;
             comm::report(comm::cancel_timeout, nullstr, 0);
             return;
           }
         stream::toastream<128> os;
-        os << "Realtime timeout " << duration_ms
-            << "ms exceeded.\n  Actual time to completion was " << diff
+        os << "Realtime timeout " << duration_us / 1000
+            << "ms exceeded.\n  Actual time to completion was " << diff / 1000
             << "ms";
         comm::report(comm::exit_fail, os.begin(), os.size());
       }

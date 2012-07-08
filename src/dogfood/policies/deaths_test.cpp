@@ -37,7 +37,7 @@ TESTSUITE(policies)
         const crpcut::policies::deaths::crpcut_none obj;
         for (unsigned long i = 10; i < 2010; i+=100)
           {
-            ASSERT_TRUE(obj.crpcut_calc_deadline(i) == i + 1000);
+            ASSERT_TRUE(obj.crpcut_calc_deadline(i) == i + 1000000);
           }
       }
 
