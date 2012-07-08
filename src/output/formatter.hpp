@@ -37,9 +37,10 @@ namespace crpcut {
     class formatter
     {
     public:
-      virtual void begin_case(std::string name,
-                              bool        result,
-                              bool        critical) = 0;
+      virtual void begin_case(std::string   name,
+                              bool          result,
+                              bool          critical,
+                              unsigned long duration_us) = 0;
       virtual void end_case()  = 0;
       virtual void terminate(test_phase              phase,
                              datatypes::fixed_string msg,

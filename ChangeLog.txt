@@ -1,3 +1,9 @@
+         * Added an attribute "duration_us:unsignedInt" to each test
+           in the XML-formatted reports. The time measured is the number of
+           microseconds (real time) from starting the fixture construction
+           up until handling the death of the test process. Currently the
+           duration is only shown in XML-reports.
+
 2012-07-05 1.8.2
 
          * Fixed a bug where the elements in expressions in ASSERT_TRUE(),

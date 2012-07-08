@@ -558,7 +558,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", true, true);
+        obj.begin_case("apa", true, true, 100);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<P>PASSED!: apa\n<>=*\n"),
                     test_buffer.os.str());
@@ -577,7 +577,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", true, false);
+        obj.begin_case("apa", true, false, 100);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<NP>PASSED?: apa\n<>=*\n"),
                     test_buffer.os.str());
@@ -596,7 +596,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", false, true);
+        obj.begin_case("apa", false, true, 100);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<F>FAILED!: apa\n<>=*\n"),
                     test_buffer.os.str());
@@ -615,7 +615,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", false, false);
+        obj.begin_case("apa", false, false, 100);
         obj.end_case();
         ASSERT_PRED(crpcut::regex("^<NF>FAILED?: apa\n<>=*\n"),
                     test_buffer.os.str());
@@ -634,7 +634,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", false, false);
+        obj.begin_case("apa", false, false, 100);
         obj.terminate(crpcut::destroying, s("katt"), "");
         obj.end_case();
         const char re[] =
@@ -660,7 +660,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", false, false);
+        obj.begin_case("apa", false, false, 100);
         obj.terminate(crpcut::creating, s("katt"), "/tmp/tmpfile");
         obj.end_case();
         const char re[] =
@@ -687,7 +687,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", false, false);
+        obj.begin_case("apa", false, false, 100);
         obj.print(s("type"),
                   s("the quick brown fox jumps over the lazy dog"));
         obj.print(s("morse"),
@@ -732,7 +732,7 @@ TESTSUITE(output)
                                            32,32,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", false, false);
+        obj.begin_case("apa", false, false, 100);
         obj.terminate(crpcut::creating, s("katt"), "/tmp/tmpdir/hoppla");
         obj.end_case();
 
@@ -773,7 +773,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            "ASCII");
-        obj.begin_case("apa", false, false);
+        obj.begin_case("apa", false, false, 100);
 
         char buff[255];
         for (size_t i = 0; i < sizeof(buff); ++i)
@@ -839,7 +839,7 @@ TESTSUITE(output)
                                            1,1,
                                            test_modifier,
                                            no_char_conversion);
-        obj.begin_case("apa", false, false);
+        obj.begin_case("apa", false, false, 100);
 
         char buff[255];
         for (size_t i = 0; i < sizeof(buff); ++i)

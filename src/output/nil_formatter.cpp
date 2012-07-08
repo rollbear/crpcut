@@ -47,9 +47,10 @@ namespace crpcut {
 
     void
     nil_formatter
-    ::begin_case(std::string /*name*/,
-                 bool        /*result*/,
-                 bool        /*critical*/)
+    ::begin_case(std::string   /*name*/,
+                 bool          /*result*/,
+                 bool          /*critical*/,
+                 unsigned long /* duration_us*/)
     {
     }
 

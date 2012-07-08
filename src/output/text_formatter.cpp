@@ -90,9 +90,10 @@ namespace crpcut {
 
     void
     text_formatter
-    ::begin_case(std::string name,
-                 bool        result,
-                 bool        critical)
+    ::begin_case(std::string     name,
+                 bool            result,
+                 bool            critical,
+                 unsigned long /*duration_us*/)
     {
       modifier_.write_to(*this, violation_mods[result][critical]);
       did_output_ = false;

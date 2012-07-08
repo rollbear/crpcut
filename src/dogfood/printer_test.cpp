@@ -33,7 +33,7 @@ TESTSUITE(printer)
   class test_formatter : public crpcut::output::formatter
   {
   public:
-    MOCK_METHOD3(begin_case, void(std::string, bool, bool));
+    MOCK_METHOD4(begin_case, void(std::string, bool, bool, unsigned long));
     MOCK_METHOD0(end_case, void());
     MOCK_METHOD3(terminate,
                  void(crpcut::test_phase,
@@ -55,8 +55,8 @@ TESTSUITE(printer)
     using namespace testing;
     StrictMock<test_formatter> fmt;
 
-    EXPECT_CALL(fmt, begin_case("apa", false, true)).Times(1);
-    crpcut::printer p(fmt, "apa", false, true);
+    EXPECT_CALL(fmt, begin_case("apa", false, true, 100)).Times(1);
+    crpcut::printer p(fmt, "apa", false, true, 100);
     Mock::VerifyAndClearExpectations(&fmt);
     EXPECT_CALL(fmt, end_case()).Times(1);
   }

@@ -105,11 +105,11 @@ TESTSUITE(output)
                                           tags,
                                           100,
                                           10);
-          f.begin_case("tupp::lemur", true, true);
+          f.begin_case("tupp::lemur", true, true, 100);
           f.print(s("info"), s("apa"));
           f.terminate(crpcut::running, s("failed"), std::string());
           f.end_case();
-          f.begin_case("ko::orm", true, true);
+          f.begin_case("ko::orm", true, true, 100);
           f.terminate(crpcut::destroying, s("ouch"), "apa");
           f.end_case();
           f.nonempty_dir("/ttt");

@@ -43,9 +43,10 @@ namespace crpcut {
                     std::size_t);
 
       ~nil_formatter();
-      virtual void begin_case(std::string name,
-                              bool        result,
-                              bool        critical);
+      virtual void begin_case(std::string   name,
+                              bool          result,
+                              bool          critical,
+                              unsigned long duration_us);
       virtual void end_case();
       virtual void terminate(test_phase              phase,
                              datatypes::fixed_string msg,

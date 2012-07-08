@@ -29,13 +29,14 @@
 
 namespace crpcut {
   printer
-  ::printer(output::formatter      &o,
-            std::string             name,
-            bool                    result,
-            bool                    critical)
+  ::printer(output::formatter &o,
+            std::string        name,
+            bool               result,
+            bool               critical,
+            unsigned long      duration_us)
     : o_(o)
   {
-    o_.begin_case(name, result, critical);
+    o_.begin_case(name, result, critical, duration_us);
   }
 
   printer

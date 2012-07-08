@@ -49,7 +49,6 @@ namespace crpcut {
 
     cancel_timeout();
 
-    *ts_us+= clocks::monotonic::timestamp_absolute();
     mon_->set_timeout(*ts_us);
     assert(mon_->deadline_is_set());
   }

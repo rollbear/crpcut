@@ -128,10 +128,23 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::set_timeout(unsigned long ts_us)
   {
+    clocks::monotonic::timestamp now = clocks::monotonic::timestamp_absolute();
+    ts_us+= now;
+    if (phase_ == creating)
+      {
+        real_time_at_start_ = now;
+      }
     timeboxed::set_deadline(phase_ == running
                             ? crpcut_calc_deadline(ts_us)
                             : ts_us);
     runner_->set_deadline(this);
+  }
+
+  unsigned long
+  crpcut_test_case_registrator
+  ::duration_us() const
+  {
+    return clocks::monotonic::timestamp_absolute() - real_time_at_start_;
   }
 
   crpcut_test_case_registrator
@@ -143,6 +156,7 @@ namespace crpcut {
       killed_(false),
       death_note_(false),
       pid_(0),
+      real_time_at_start_(),
       cpu_time_at_start_(),
       dirnum_(~0U),
       phase_(creating),
@@ -170,6 +184,7 @@ namespace crpcut {
       killed_(false),
       death_note_(false),
       pid_(0),
+      real_time_at_start_(),
       cpu_time_at_start_(),
       dirnum_(~0U),
       phase_(creating),
@@ -473,9 +488,14 @@ namespace crpcut {
     send_to_presentation(t, out.size(), out.begin());
     crpcut_register_success(t == comm::exit_ok);
     runner_->return_dir(dirnum_);
-    bool critical = crpcut_tag().get_importance() == tag::critical;
+    struct {
+      bool critical;
+      unsigned long duration_us;
+    } end_msg;
+    end_msg.critical = crpcut_tag().get_importance() == tag::critical;
+    end_msg.duration_us = duration_us();
     send_to_presentation(comm::end_test,
-                         sizeof(critical), (const char*)&critical);
+                         sizeof(end_msg), (const char*)&end_msg);
     assert(crpcut_succeeded() || crpcut_failed());
   }
 

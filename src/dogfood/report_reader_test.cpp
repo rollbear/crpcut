@@ -68,6 +68,7 @@ namespace {
   {
   public:
     MOCK_METHOD1(set_timeout, void(unsigned long));
+    MOCK_CONST_METHOD0(duration_us, unsigned long());
     MOCK_CONST_METHOD0(deadline_is_set, bool());
     MOCK_METHOD0(clear_deadline, void());
     MOCK_METHOD1(crpcut_register_success, void(bool));

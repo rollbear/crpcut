@@ -457,6 +457,11 @@ TESTSUITE(test_runner)
     name ## _tag name(&tag_root)
     TAG(apa);
 
+    struct end_data
+    {
+      bool          importance;
+      unsigned long duration_us;
+    };
     TEST(expected_exit_without_prior_fail_reports_success, fix<10U>)
     {
 
@@ -486,7 +491,7 @@ TESTSUITE(test_runner)
 
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test,
                                    crpcut::destroying,
-                                   sizeof(bool), _)).
+                                   sizeof(end_data), _)).
           InSequence(s);
       EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));
@@ -525,7 +530,7 @@ TESTSUITE(test_runner)
 
         EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test,
                                      crpcut::running,
-                                     sizeof(bool), _)).
+                                     sizeof(end_data), _)).
            InSequence(s);
         EXPECT_CALL(reg, crpcut_tag()).
           WillRepeatedly(ReturnRef(apa));

@@ -79,13 +79,22 @@ TESTSUITE(presentation_reader)
       add_data(sizeof(test));
       add_data(test);
     }
-    void end_test(pid_t id, crpcut::test_phase phase, bool critical)
+    struct end_data
+    {
+      bool          critical;
+      unsigned long duration;
+    };
+    void end_test(pid_t              id,
+                  crpcut::test_phase phase,
+                  bool               critical,
+                  unsigned long      duration)
     {
       add_data(id);
       add_data(crpcut::comm::end_test);
       add_data(phase);
-      add_data(sizeof(critical));
-      add_data(critical);
+      end_data m = { critical, duration };
+      add_data(sizeof(m));
+      add_data(m);
     }
     template <size_t N>
     void nonempty_dir(pid_t id, crpcut::test_phase phase, const char (&name)[N])
@@ -138,7 +147,7 @@ TESTSUITE(presentation_reader)
   class fmt_mock : public crpcut::output::formatter
   {
   public:
-    MOCK_METHOD3(begin_case, void(std::string,bool,bool));
+    MOCK_METHOD4(begin_case, void(std::string,bool,bool, unsigned long));
     MOCK_METHOD0(end_case, void());
     MOCK_METHOD3(terminate, void(crpcut::test_phase, std::string, std::string));
     void terminate(crpcut::test_phase phase,
@@ -239,11 +248,11 @@ TESTSUITE(presentation_reader)
     fd.stderr(101, crpcut::running, "stderr");
     fd.stdout(101, crpcut::running, "stdout");
     fd.exit_ok(101, crpcut::post_mortem, "");
-    fd.end_test(101, crpcut::post_mortem, true);
+    fd.end_test(101, crpcut::post_mortem, true, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
-    EXPECT_CALL(fmt, begin_case("apa::katt",true, true)).InSequence(out);
+    EXPECT_CALL(fmt, begin_case("apa::katt",true, true, 100)).InSequence(out);
     EXPECT_CALL(fmt, print("info", "INFO << info")).InSequence(out);
     EXPECT_CALL(fmt, print("stderr", "stderr"));
     EXPECT_CALL(fmt, print("stdout", "stdout"));
@@ -257,11 +266,11 @@ TESTSUITE(presentation_reader)
     fd.begin_test(101, crpcut::creating, &apa_katt);
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
     fd.nonempty_dir(101, crpcut::running, "");
-    fd.end_test(101, crpcut::running, true);
+    fd.end_test(101, crpcut::running, true, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
-    EXPECT_CALL(fmt, begin_case("apa::katt", false, true)).InSequence(out);
+    EXPECT_CALL(fmt, begin_case("apa::katt", false, true, 100)).InSequence(out);
     EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm",
                                "directory/subdir/apa::katt")).InSequence(out);
     EXPECT_CALL(fmt, end_case()).InSequence(out);
@@ -285,19 +294,19 @@ TESTSUITE(presentation_reader)
     fd.begin_test(20, crpcut::creating, &ko);
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
     fd.fail(20, crpcut::running, "VERIFY_APA");
-    fd.end_test(101, crpcut::running, true);
+    fd.end_test(101, crpcut::running, true, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
     EXPECT_CALL(ko, crpcut_tag())
       .WillOnce(ReturnRef(tags));
-    EXPECT_CALL(fmt, begin_case("apa::katt", false, true)).InSequence(out);
+    EXPECT_CALL(fmt, begin_case("apa::katt", false, true, 100)).InSequence(out);
     EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "")).InSequence(out);
     EXPECT_CALL(fmt, end_case()).InSequence(out);
 
-    fd.end_test(20, crpcut::running, false);
+    fd.end_test(20, crpcut::running, false, 100);
 
-    EXPECT_CALL(fmt, begin_case("ko", false, false)).InSequence(out);
+    EXPECT_CALL(fmt, begin_case("ko", false, false, 100)).InSequence(out);
     EXPECT_CALL(fmt, print("fail", "VERIFY_APA")).InSequence(out);
     EXPECT_CALL(fmt, terminate(crpcut::running, "", "")).InSequence(out);
     EXPECT_CALL(fmt, end_case()).InSequence(out);
@@ -311,7 +320,7 @@ TESTSUITE(presentation_reader)
     fd.info(101, crpcut::running, "INFO");
     fd.stdout(101, crpcut::running, "stdout");
     fd.stderr(101, crpcut::running, "stderr");
-    fd.end_test(101, crpcut::destroying, true);
+    fd.end_test(101, crpcut::destroying, true, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
@@ -326,11 +335,11 @@ TESTSUITE(presentation_reader)
     fd.stdout(101, crpcut::running, "stdout");
     fd.stderr(101, crpcut::running, "stderr");
     fd.exit_fail(101, crpcut::running, "FAIL << orm");
-    fd.end_test(101, crpcut::running, false);
+    fd.end_test(101, crpcut::running, false, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
-    EXPECT_CALL(fmt, begin_case("apa::katt", false, false)).InSequence(out);
+    EXPECT_CALL(fmt, begin_case("apa::katt", false, false, 100)).InSequence(out);
     EXPECT_CALL(fmt, print("info", "INFO")).InSequence(out);
     EXPECT_CALL(fmt, print("stdout", "stdout")).InSequence(out);
     EXPECT_CALL(fmt, print("stderr", "stderr")).InSequence(out);

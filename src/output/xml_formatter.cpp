@@ -158,14 +158,19 @@ namespace crpcut {
 
     void
     xml_formatter
-    ::begin_case(std::string name,
-                 bool        result,
-                 bool        critical)
+    ::begin_case(std::string   name,
+                 bool          result,
+                 bool          critical,
+                 unsigned long duration_us)
     {
       write("  <test name=\"");
       write(name, translated);
       write("\" critical=\"");
       write(critical ? "true" : "false");
+      write("\" duration_us=\"");
+      std::ostringstream os;
+      os << duration_us;
+      write(os.str());
       write("\" result=");
       static const char *rstring[] = { "\"FAILED\"", "\"PASSED\"" };
       write(rstring[result]);

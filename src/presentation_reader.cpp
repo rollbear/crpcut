@@ -132,9 +132,13 @@ namespace crpcut {
 
     size_t len;
     fd_.read_loop(&len, sizeof(len));
-    bool critical;
-    assert(len == sizeof(critical));
-    fd_.read_loop(&critical, len);
+    struct
+    {
+      bool critical;
+      unsigned long duration_us;
+    } msg;
+    assert(len == sizeof(msg));
+    fd_.read_loop(&msg, len);
 
     const bool pass = s->success && !s->explicit_fail;
     tag &t = s->test->crpcut_tag();
@@ -146,7 +150,7 @@ namespace crpcut {
 
         std::ostringstream name;
         name << *s->test;
-        printer print(fmt_, name.str(), pass, critical);
+        printer print(fmt_, name.str(), pass, msg.critical, msg.duration_us);
 
         for (event *i = s->history.next();
             i != static_cast<event*>(&s->history);

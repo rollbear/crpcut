@@ -37,10 +37,11 @@ namespace crpcut {
   class printer
   {
   public:
-    printer(output::formatter      &o,
-            std::string             name,
-            bool                    result,
-            bool                    critical);
+    printer(output::formatter &o,
+            std::string        name,
+            bool               result,
+            bool               critical,
+            unsigned long      duration_us);
     ~printer();
   private:
     output::formatter &o_;

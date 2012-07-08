@@ -44,6 +44,7 @@
     </xs:sequence>
     <xs:attribute name="name" type="identifier" use="required"/>
     <xs:attribute name="critical" type="xs:boolean" use="required"/>
+    <xs:attribute name="duration_us" type="xs:unsignedInt" use="required"/>
     <xs:attribute name="result" type="result" use="required"/>
   </xs:complexType>
 

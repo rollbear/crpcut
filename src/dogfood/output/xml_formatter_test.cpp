@@ -342,15 +342,17 @@ TESTSUITE(output)
                   test_buffer.os.str());
     }
 
-#define XML_TEST(name, critical, result) \
+#define XML_TEST(name, critical, duration, result)  \
     _ "<" _ "test" S "name" _ "=" _ "\"" #name "\"" \
       S "critical" _ "=" _ "\"" #critical "\""      \
+      S "duration_us" _ "=" _ "\"" #duration "\""   \
       S "result" _ "=" _ "\"" #result "\""
-#define XML_CLOSED_TEST(name, critical, result) \
-    XML_TEST(name, critical, result) _ "/>"
 
-#define XML_OPEN_TEST(name, critical, result) \
-    XML_TEST(name, critical, result) _ ">"
+#define XML_CLOSED_TEST(name, critical, duration, result) \
+    XML_TEST(name, critical, duration, result) _ "/>"
+
+#define XML_OPEN_TEST(name, critical, duration, result) \
+    XML_TEST(name, critical, duration, result) _ ">"
 
     TEST(report_with_blocked_tests_and_tag_summary, fix)
     {
@@ -382,9 +384,9 @@ TESTSUITE(output)
                                           tags,
                                           12,12);
 
-        obj.begin_case("tupp", true, true);
+        obj.begin_case("tupp", true, true, 100);
         obj.end_case();
-        obj.begin_case("lemur", false, true);
+        obj.begin_case("lemur", false, true, 100);
         obj.print(s(stderr), s(ehepp));
         obj.terminate(crpcut::running,
                       fixed_string::make("Died on signal 6\n"
@@ -398,8 +400,8 @@ TESTSUITE(output)
       }
       static const char re[] =
         XML_HEADER
-        XML_CLOSED_TEST(tupp, true, PASSED)
-        XML_OPEN_TEST(lemur, true, FAILED)
+        XML_CLOSED_TEST(tupp, true, 100, PASSED)
+        XML_OPEN_TEST(lemur, true, 100, FAILED)
         _ "<log>"
         _ XML_DATA_FIELD(stderr, ehepp)
         _ "<violation" S "phase" _ "=" _ "\"running\"" _ ">Died on signal 6\n"
@@ -436,7 +438,7 @@ TESTSUITE(output)
                                   ":;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                   "[\\]^_` abcdefghijklmnopqrstuvwxyz"
                                   "{|}~";
-        obj.begin_case("tupp", true, true);
+        obj.begin_case("tupp", true, true, 100);
         obj.print(s(info),
                   crpcut::datatypes::fixed_string::make(msg, sizeof(msg) - 1));
         obj.end_case();
@@ -444,7 +446,7 @@ TESTSUITE(output)
       }
       static const char re[] =
         XML_HEADER
-        XML_OPEN_TEST(tupp, true, PASSED)
+        XML_OPEN_TEST(tupp, true, 100, PASSED)
         _ "<log>"
         _ "<info>"
         "\t\n\r!&quot;#\\$%&amp;&apos;\\(\\)\\*\\+,-\\./0123456789"
@@ -479,7 +481,7 @@ TESTSUITE(output)
           {
             msg[i] = char(i);
           }
-        obj.begin_case("tupp", true, true);
+        obj.begin_case("tupp", true, true, 100);
         obj.print(s(info),
                   crpcut::datatypes::fixed_string::make(msg));
         obj.end_case();
@@ -490,7 +492,7 @@ TESTSUITE(output)
 
       static const char re[] =
         XML_HEADER
-        XML_OPEN_TEST(tupp, true, PASSED)
+        XML_OPEN_TEST(tupp, true, 100, PASSED)
         _ "<log>"
         _ "<info>"
         IL IL IL IL IL IL IL IL IL "\t\n" IL IL "\r" IL IL IL IL IL IL IL IL IL
@@ -531,7 +533,7 @@ TESTSUITE(output)
                                           vec,
                                           tags,
                                           0,0);
-        obj.begin_case("tupp", false, true);
+        obj.begin_case("tupp", false, true, 100);
         obj.terminate(crpcut::post_mortem,
                       s(),
                       "/tmp/crpcut02342/tests::tupp");
@@ -544,7 +546,7 @@ TESTSUITE(output)
 
       static const char re[] =
         XML_HEADER
-        XML_OPEN_TEST(tupp, true, FAILED)
+        XML_OPEN_TEST(tupp, true, 100, FAILED)
         _ "<log>"
         _ "<violation" S "phase" _ "=" _ "\"post_mortem\""
         S "nonempty_dir" _ "=" _ "\"/tmp/crpcut02342/tests::tupp\"" _ "/>"

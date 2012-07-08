@@ -1759,6 +1759,7 @@ namespace crpcut {
   public:
     virtual ~crpcut_test_monitor() {}
     virtual void set_timeout(unsigned long ts_us) = 0;
+    virtual unsigned long duration_us() const = 0;
     virtual bool deadline_is_set() const = 0;
     virtual void clear_deadline() = 0;
     virtual void crpcut_register_success(bool value = true) = 0;
@@ -1883,6 +1884,7 @@ namespace crpcut {
     void deactivate_reader();
     void activate_reader();
     void set_timeout(unsigned long);
+    unsigned long duration_us() const;
     virtual void run_test_case() = 0;
     virtual tag& crpcut_tag() const = 0;
     virtual tag::importance get_importance() const = 0;
@@ -1912,6 +1914,7 @@ namespace crpcut {
     bool                          killed_;
     bool                          death_note_;
     pid_t                         pid_;
+    unsigned long                 real_time_at_start_;
     struct timeval                cpu_time_at_start_;
     unsigned                      dirnum_;
     test_phase                    phase_;
