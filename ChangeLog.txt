@@ -1,8 +1,15 @@
-         * Added an attribute "duration_us:unsignedInt" to each test
-           in the XML-formatted reports. The time measured is the number of
-           microseconds (real time) from starting the fixture construction
-           up until handling the death of the test process. Currently the
-           duration is only shown in XML-reports.
+         * Added an attribute "duration_us:unsignedInt" to each "test"
+           element in the XML-formatted reports. The time measured is the
+           number of microseconds (real time) from starting the fixture
+           construction up until handling the death of the test process.
+           Currently the duration is only shown in XML-reports.
+           
+         * Added an XML element "duration_ms" to the statistics element of
+           XML-formatted reports. The time measured is the number of
+           milliseconds (real time) from beginning the test-run until the
+           last test has finished, but excludes the time required for global
+           constructors and destructors. Currently the duration is only
+           shown in XML-reports.
 
 2012-07-05 1.8.2
 

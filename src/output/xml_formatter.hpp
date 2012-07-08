@@ -71,6 +71,7 @@ namespace crpcut {
       const tag_list_root &tags_;
       std::size_t          num_registered_;
       std::size_t          num_selected_;
+      unsigned long        start_timestamp_us_;
     };
   }
 }

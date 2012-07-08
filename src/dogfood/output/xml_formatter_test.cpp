@@ -79,6 +79,7 @@ namespace {
   _ XML_DATA_FIELD(run_test_cases, run)                                 \
   _ XML_DATA_FIELD(failed_test_cases, failed)                           \
   _ XML_DATA_FIELD(failed_non_critical_test_cases, failed_nc)           \
+  _ XML_DATA_FIELD(duration_ms, [0-9]*)                                 \
   _ "</statistics>"
 
 #define ARG_COUNT(...) GET_ARG_COUNT(__VA_ARGS__, 10,9,8,7,6,5,4,3,2,1,0)

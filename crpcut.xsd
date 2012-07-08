@@ -86,6 +86,7 @@
       <xs:element name="run_test_cases" type="xs:unsignedInt"/>
       <xs:element name="failed_test_cases" type="xs:unsignedInt"/>
       <xs:element name="failed_non_critical_test_cases" type="xs:unsignedInt"/>
+      <xs:element name="duration_ms" type="xs:unsignedInt"/>
     </xs:sequence>
   </xs:complexType>
 

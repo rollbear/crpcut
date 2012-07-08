@@ -27,6 +27,7 @@
 #include "xml_formatter.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
 #include "../posix_error.hpp"
+#include "../clocks/clocks.hpp"
 
 namespace {
   inline const char *xml_replacement(const char *p)
@@ -65,7 +66,8 @@ namespace crpcut {
         tag_summary_(false),
         tags_(tags),
         num_registered_(num_registered),
-        num_selected_(num_selected)
+        num_selected_(num_selected),
+        start_timestamp_us_(clocks::monotonic::timestamp_absolute())
     {
       char machine_string[HOST_NAME_MAX + 1];
       int rv = wrapped::gethostname(machine_string, sizeof(machine_string));
@@ -252,6 +254,8 @@ namespace crpcut {
           write("  </tag_summary>\n");
         }
 
+      unsigned long now_us = clocks::monotonic::timestamp_absolute();
+      unsigned long duration_us = now_us - start_timestamp_us_;
       write("  <statistics>\n"
             "    <registered_test_cases>");
       write(num_registered_);
@@ -271,6 +275,9 @@ namespace crpcut {
             "    <failed_non_critical_test_cases>");
       write(non_critical_fail_sum_);
       write("</failed_non_critical_test_cases>\n"
+            "    <duration_ms>");
+      write(duration_us / 1000UL);
+      write("</duration_ms>\n"
             "  </statistics>\n"
             "</crpcut>\n");
     }
