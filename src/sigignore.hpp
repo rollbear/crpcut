@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,10 +27,8 @@
 #ifndef SIGIGNORE_HPP
 #define SIGIGNORE_HPP
 
-extern "C"
-{
-#  include <signal.h>
-}
+#include "wrapped/posix_encapsulation.hpp"
+
 
 #include <cassert>
 
@@ -52,7 +50,7 @@ namespace crpcut {
   sigignore
   ::sigignore(int signum)
     : sig(signum),
-      old_handler(signal(sig, SIG_IGN))
+      old_handler(wrapped::signal(sig, SIG_IGN))
   {
     assert(old_handler != SIG_ERR);
   }
@@ -61,7 +59,7 @@ namespace crpcut {
   sigignore
   ::~sigignore()
   {
-    signal(sig, old_handler);
+    wrapped::signal(sig, old_handler);
   }
 }
 

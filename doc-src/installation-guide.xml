@@ -155,6 +155,7 @@
         <listitem><function>rmdir</function>()</listitem>
         <listitem><function>select</function>()</listitem>
         <listitem><function>setpgid</function>()</listitem>
+        <listitem><function>signal</function>()</listitem>
         <listitem><function>waitid</function>()</listitem>
         <listitem><function>write</function>()</listitem>
       </itemizedlist>

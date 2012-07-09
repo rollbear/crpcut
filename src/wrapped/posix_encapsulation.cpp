@@ -220,6 +220,7 @@ namespace crpcut {
                      int,
                      (int n, const struct rlimit *r),
                      (n, r))
+    CRPCUT_WRAP_FUNC(libc, signal, sighandler_t, (int s, sighandler_t h), (s, h))
     CRPCUT_WRAP_FUNC(libc, vsnprintf,
                      int,
                      (char *d, size_t s, const char *f, va_list ap),

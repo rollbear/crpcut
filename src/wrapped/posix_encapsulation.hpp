@@ -32,6 +32,7 @@
 extern "C" {
 #  include <stdarg.h>
 #  include <dirent.h>
+#  include <signal.h>
 }
 
 #include "../posix_write.hpp"
@@ -69,6 +70,7 @@ namespace crpcut {
     int                  select(int, fd_set*, fd_set*, fd_set*, timeval *);
     int                  setpgid(pid_t pid, pid_t pgid);
     int                  setrlimit(int, const struct rlimit*);
+    sighandler_t         signal(int, sighandler_t);
     int                  snprintf(char *s, size_t si, const char *f, ...);
     int                  strncmp(const char *s1, const char *s2, size_t n);
     char *               strchr(const char *, int);
