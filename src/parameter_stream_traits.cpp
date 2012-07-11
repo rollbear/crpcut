@@ -34,7 +34,7 @@ namespace {
     if (!p)
       {
         static const char msg[] = "No parameter named \"";
-        const size_t len = sizeof(msg) + wrapped::strlen(n) + 1;
+        const size_t len = sizeof(msg) + wrapped::strlen(n);
         char *buff = static_cast<char*>(alloca(len+1));
         lib::strcpy(lib::strcpy(lib::strcpy(buff, msg), n), "\"");
         comm::report(comm::exit_fail, buff, len);
