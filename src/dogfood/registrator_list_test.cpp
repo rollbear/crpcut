@@ -29,7 +29,8 @@
 #include "../poll.hpp"
 #include "../registrator_list.hpp"
 
-using testing::StrictMock;
+using namespace testing;
+
 namespace {
 
   class mock_poll : public crpcut::poll<crpcut::fdreader>

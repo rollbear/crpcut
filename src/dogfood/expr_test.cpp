@@ -174,7 +174,7 @@ TESTSUITE(expr)
     public:
       unstreamable(T t) : t_(t) {}
       unstreamable(const unstreamable& t) : t_(t.t_) {}
-      unstreamable& operator=(const T& t) { t_ = t.t_; }
+      unstreamable& operator=(const T& t) { t_ = t.t_; return *this;}
       operator T() const { return t_; }
     private:
       T t_;

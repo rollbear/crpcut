@@ -31,8 +31,10 @@
 #include "../posix_write.hpp"
 #include "../output/buffer.hpp"
 #include "../io.hpp"
+
+using namespace testing;
+
 namespace {
-  using namespace testing;
   class test_poller : public crpcut::poll<crpcut::io>
   {
   public:
