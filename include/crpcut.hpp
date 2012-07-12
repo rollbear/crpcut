@@ -27,7 +27,7 @@
 #ifndef CRPCUT_HPP
 #define CRPCUT_HPP
 
-#if defined(GMOCK_INCLUDE_GMOCK_GMOCK_H_) || defined(CRPCUT_GMOCK_IN_ECLIPSE)
+#if defined(GMOCK_INCLUDE_GMOCK_GMOCK_H_)  || defined(__CDT_PARSER__)
 #undef ADD_FAILURE
 #undef ASSERT_ANY_THROW
 #undef ASSERT_DEATH
@@ -4284,7 +4284,7 @@ namespace crpcut {
   protected virtual crpcut::policies::exit_death<__VA_ARGS__>
 
 #define EXPECT_REALTIME_TIMEOUT_MS(time) \
-  protected virtual crpcut::policies::realtime_timeout_death<time*1000UL>
+  protected virtual crpcut::policies::realtime_timeout_death<(time)*1000UL>
 
 #define EXPECT_SIGNAL_DEATH(...) \
   protected virtual crpcut::policies::signal_death<__VA_ARGS__>
@@ -4339,12 +4339,12 @@ namespace crpcut {
 
 
 #define DEADLINE_CPU_MS(time) \
-  crpcut::policies::timeout_policy<crpcut::policies::timeout::cputime, time*1000UL>
+  crpcut::policies::timeout_policy<crpcut::policies::timeout::cputime, (time)*1000UL>
 
 #define FIXTURE_CONSTRUCTION_DEADLINE_REALTIME_MS(time) \
-  public crpcut::policies::constructor_timeout_policy<time*1000UL>
+  public crpcut::policies::constructor_timeout_policy<(time)*1000UL>
 #define FIXTURE_DESTRUCTION_DEADLINE_REALTIME_MS(time) \
-  public crpcut::policies::destructor_timeout_policy<time*1000UL>
+  public crpcut::policies::destructor_timeout_policy<(time)*1000UL>
 
 #define DEADLINE_REALTIME_MS(time) \
   crpcut::policies::timeout_policy<crpcut::policies::timeout::realtime, time*1000UL>
@@ -4588,12 +4588,11 @@ namespace crpcut
 #define VERIFY_PRED(pred, ...)                                          \
   CRPCUT_CHECK_PRED(fail, pred, __VA_ARGS__)
 
-
 #define CRPCUT_CHECK_SCOPE_TYPE_TIME_MS(action, type, clock, ms)        \
   if (const crpcut::scope::time_base& CRPCUT_LOCAL_NAME(time_scope)     \
       = crpcut::scope::time<crpcut::comm::action,                       \
                             crpcut::scope::time_base::type,             \
-                            crpcut::scope::time_base::clock>(ms*1000UL*crpcut::timeout_multiplier(), \
+                            crpcut::scope::time_base::clock>((ms)*1000UL*crpcut::timeout_multiplier(), \
                                                              __FILE__,  \
                                                              __LINE__)) \
     { CRPCUT_LOCAL_NAME(time_scope).silence_warning(); } else           \
