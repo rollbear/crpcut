@@ -235,6 +235,7 @@ namespace crpcut {
           s = new test_case_result(test_case_id);
           s->link_after(messages_);
         }
+      assert(test_case_id || t == comm::dir);
 
       int mask = t & comm::kill_me;
       t = static_cast<comm::type>(t & ~mask);
