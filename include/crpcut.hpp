@@ -4249,12 +4249,63 @@ extern crpcut::namespace_info crpcut_current_namespace;
   }                                                                     \
   void test_case_name::test()
 
-#define CRPCUT_CONCAT(a, b) a ## b
+#define CRPCUT_ARG_COUNT_( _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, \
+                          _11,_12,_13,_14,_15,_16,_17,_18,_19,_20, \
+                          N, ...) N
+#define CRPCUT_ARG_COUNT(...) CRPCUT_ARG_COUNT_(__VA_ARGS__,    \
+                                                20,19,18,17,16, \
+                                                15,14,13,12,11, \
+                                                10, 9, 8, 7, 6, \
+                                                 5, 4, 3, 2, 1, 0)
 
-#define CRPCUT_CONCAT_(a, b) CRPCUT_CONCAT(a,b)
+#define CRPCUT_APPLY(pred, ...) pred(__VA_ARGS__)
+
+#define CRPCUT_JOIN(a, b) a ## b
+#define CRPCUT_CONCAT1(a) a
+#define CRPCUT_CONCAT2(a, b) a ## b
+#define CRPCUT_CONCAT3(a, b, ...) \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT4(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT5(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT6(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT7(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT8(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT9(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT10(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT11(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT12(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT13(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT14(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT15(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT16(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT17(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT18(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT19(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+#define CRPCUT_CONCAT20(a, b, ...)                                        \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(a ## b, __VA_ARGS__))(a ## b, __VA_ARGS__)
+
+
+#define CRPCUT_CONCAT(...) \
+  CRPCUT_APPLY(CRPCUT_JOIN, CRPCUT_CONCAT, CRPCUT_ARG_COUNT(__VA_ARGS__))(__VA_ARGS__)
 
 #define CRPCUT_LOCAL_NAME(prefix) \
-  CRPCUT_CONCAT_(crpcut_local_  ## prefix ## _, __LINE__)
+  CRPCUT_CONCAT(crpcut_local_, prefix, __LINE__)
 
 #define CRPCUT_STRINGIZE(...) #__VA_ARGS__
 #define CRPCUT_STRINGIZE_(...) CRPCUT_STRINGIZE(__VA_ARGS__)

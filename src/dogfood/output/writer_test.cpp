@@ -181,17 +181,11 @@ TESTSUITE(output)
       ASSERT_TRUE(rv == N - 1);
     }
 
-#define APPLY(x, ...) x(__VA_ARGS__)
-#define COUNT_(a0,a1,n, ...) n
-#define COUNT(...) COUNT_(__VA_ARGS__,2,1,0)
-#define FIRST(n, ...) n
-
-#define CONCAT1(a) a
-#define CONCAT2(a,b) a ## b
-#define CONCAT(...) APPLY(CRPCUT_CONCAT, CONCAT, COUNT(__VA_ARGS__))(__VA_ARGS__)
-#define ASSERT_INTEGER_WRITE(t, ...)                                    \
-    assert_integer_write((t)(CONCAT(__VA_ARGS__)),                      \
-                         APPLY(CRPCUT_STRINGIZE, FIRST(__VA_ARGS__, dummy)))
+#define FIRST(x, ...) x
+#define ASSERT_INTEGER_WRITE(t, ...)                                  \
+    assert_integer_write((t)(CRPCUT_CONCAT(__VA_ARGS__)),             \
+                         CRPCUT_APPLY(CRPCUT_STRINGIZE,               \
+                                      FIRST(__VA_ARGS__, dummy)))
 
     TEST(integer_writes)
     {
