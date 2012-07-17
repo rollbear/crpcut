@@ -1,3 +1,6 @@
+         * Fixed a cosmetic bug where disabled tests would show up in a
+           test listing, even though they did not match the tag filter.
+
          * Added an attribute "duration_us:unsignedInt" to each test
            in the XML-formatted reports. The time measured is the number of
            microseconds (real time) from starting the fixture construction
