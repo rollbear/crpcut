@@ -43,16 +43,16 @@ namespace crpcut {
         {
           n = i->next();
           ++num_registered_tests;
-          switch (i->get_importance())
+          tag &t = i->crpcut_tag();
+          if (t.get_importance() == tag::ignored)
             {
-            case tag::ignored:
               i->unlink();
-              // no break
-            case tag::disabled:
               i->crpcut_uninhibit_dependants();
-              break;
-            default:
-              break; // stupid eclipse!
+              continue;
+            }
+          if (i->get_importance() == tag::disabled)
+            {
+              i->crpcut_uninhibit_dependants();
             }
         }
       }
