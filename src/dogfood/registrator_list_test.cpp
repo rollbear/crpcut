@@ -101,11 +101,13 @@ namespace {
       reptil_krokodil("krokodil", &reptil_namespace),
       insekt_mygga("mygga", &insekt_namespace),
       insekt_bi("bi", &insekt_namespace),
+      trilobit("trilobit", &unnamed_namespace),
       unnamed_tag(),
       tamdjur("tam", &unnamed_tag),
       giftiga("giftiga", &unnamed_tag),
       ignored("ignorerad", &unnamed_tag),
-      disabled("", &unnamed_tag)
+      anonymous_disabled("", &unnamed_tag),
+      ignored_disabled("disabled", &unnamed_tag)
     {
       apa.link_before(the_list);
       katt.link_before(the_list);
@@ -115,6 +117,7 @@ namespace {
       reptil_krokodil.link_before(the_list);
       insekt_mygga.link_before(the_list);
       insekt_bi.link_before(the_list);
+      trilobit.link_before(the_list);
       EXPECT_CALL(apa, get_importance()).
         WillRepeatedly(testing::Return(unnamed_tag.get_importance()));
       EXPECT_CALL(apa, crpcut_tag()).
@@ -128,9 +131,9 @@ namespace {
       EXPECT_CALL(ko, crpcut_tag()).
         WillRepeatedly(testing::ReturnRef(tamdjur));
       EXPECT_CALL(lemur, get_importance()).
-        WillRepeatedly(testing::Return(disabled.get_importance()));
+        WillRepeatedly(testing::Return(crpcut::tag::disabled));
       EXPECT_CALL(lemur, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(disabled));
+        WillRepeatedly(testing::ReturnRef(anonymous_disabled));
       EXPECT_CALL(reptil_orm, get_importance()).
         WillRepeatedly(testing::Return(giftiga.get_importance()));
       EXPECT_CALL(reptil_orm, crpcut_tag()).
@@ -147,6 +150,11 @@ namespace {
         WillRepeatedly(testing::Return(giftiga.get_importance()));
       EXPECT_CALL(insekt_bi, crpcut_tag()).
         WillRepeatedly(testing::ReturnRef(giftiga));
+
+      EXPECT_CALL(trilobit, get_importance()).
+          WillRepeatedly(testing::Return(crpcut::tag::disabled));
+      EXPECT_CALL(trilobit, crpcut_tag()).
+          WillRepeatedly(testing::ReturnRef(ignored_disabled));
     }
     list the_list;
     crpcut::namespace_info unnamed_namespace;
@@ -160,11 +168,13 @@ namespace {
     StrictMock<mock_test_reg> reptil_krokodil;
     StrictMock<mock_test_reg> insekt_mygga;
     StrictMock<mock_test_reg> insekt_bi;
+    StrictMock<mock_test_reg> trilobit;
     test_tag_list_root        unnamed_tag;
     test_tag<crpcut::tag::non_critical> tamdjur;
     test_tag<crpcut::tag::critical>     giftiga;
     test_tag<crpcut::tag::ignored>      ignored;
-    test_tag<crpcut::tag::disabled>     disabled;
+    test_tag<crpcut::tag::critical>     anonymous_disabled;
+    test_tag<crpcut::tag::ignored>      ignored_disabled;
   };
 
 
@@ -213,8 +223,8 @@ TESTSUITE(registrator_list)
       const char * const p = 0;
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(&p, os, 1);
-      ASSERT_TRUE(rv.first == 8U);
-      ASSERT_TRUE(rv.second == 8U);
+      ASSERT_TRUE(rv.first == 9U);
+      ASSERT_TRUE(rv.second == 9U);
       std::vector<reg*> expected;
       expected.push_back(&apa);
       expected.push_back(&katt);
@@ -233,7 +243,7 @@ TESTSUITE(registrator_list)
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(p, os, 1);
       ASSERT_TRUE(rv.first == 2U);
-      ASSERT_TRUE(rv.second == 8U);
+      ASSERT_TRUE(rv.second == 9U);
       std::vector<reg*> expected;
       expected.push_back(&insekt_mygga);
       expected.push_back(&insekt_bi);
@@ -247,11 +257,34 @@ TESTSUITE(registrator_list)
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(p, os, 1);
       ASSERT_TRUE(rv.first == 3U);
-      ASSERT_TRUE(rv.second == 8U);
+      ASSERT_TRUE(rv.second == 9U);
       std::vector<reg*> expected;
       expected.push_back(&reptil_orm);
       expected.push_back(&insekt_mygga);
       expected.push_back(&insekt_bi);
+      match_all(expected, the_list);
+    }
+
+    TEST(lookup_disabled_ignored_throws, fix)
+    {
+      std::ostringstream os;
+      const char *p[] = { "trilobit", 0 };
+      ASSERT_THROW(the_list.filter_out_or_throw(p, os, 1), int);
+    }
+
+    TEST(multiple_names_excludes_non_matching_disabled, fix)
+    {
+      std::ostringstream os;
+      const char *p[] = { "insekt", "lemur", "reptil::orm", 0 };
+      std::pair<unsigned, unsigned> rv =
+          the_list.filter_out_or_throw(p, os, 1);
+      ASSERT_TRUE(rv.first == 4U);
+      ASSERT_TRUE(rv.second == 9U);
+      std::vector<reg*> expected;
+      expected.push_back(&insekt_mygga);
+      expected.push_back(&insekt_bi);
+      expected.push_back(&reptil_orm);
+      expected.push_back(&lemur);
       match_all(expected, the_list);
     }
 
@@ -277,18 +310,19 @@ TESTSUITE(registrator_list)
     TEST(list_all_tests_unfiltered_gives_full_header_and_tag_names, fix)
     {
       std::ostringstream os;
-      the_list.list_tests_to(os, 7U);
+      the_list.list_tests_to(os, 8U);
       static const char result[] =
-          "     tag : test-name\n"
-          "====================\n"
-          "!        : apa\n"
-          "?    tam : katt\n"
-          "?    tam : ko\n"
-          "-        : lemur\n"
-          "!giftiga : reptil::orm\n"
-    //    "*        : reptil::krokodil\n"
-          "!giftiga : insekt::mygga\n"
-          "!giftiga : insekt::bi\n";
+          "      tag : test-name\n"
+          "=====================\n"
+          "!         : apa\n"
+          "?     tam : katt\n"
+          "?     tam : ko\n"
+          "-         : lemur\n"
+          "! giftiga : reptil::orm\n"
+    //    "*         : reptil::krokodil\n"
+          "! giftiga : insekt::mygga\n"
+          "! giftiga : insekt::bi\n"
+          "-disabled : trilobit\n";
        ASSERT_TRUE(os.str() == result);
     }
 
@@ -305,7 +339,8 @@ TESTSUITE(registrator_list)
           "!reptil::orm\n"
     //    "*reptil::krokodil\n"
           "!insekt::mygga\n"
-          "!insekt::bi\n";
+          "!insekt::bi\n"
+          "-trilobit\n";
        ASSERT_TRUE(os.str() == result);
 
     }
