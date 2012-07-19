@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-
+#include "test_runner.hpp"
 namespace {
   const char *get_parameter_string(const char *n)
   {
@@ -33,11 +33,10 @@ namespace {
     const char *p = get_parameter(n);
     if (!p)
       {
-        static const char msg[] = "No parameter named \"";
-        const size_t len = sizeof(msg) + wrapped::strlen(n);
-        char *buff = static_cast<char*>(alloca(len+1));
-        lib::strcpy(lib::strcpy(lib::strcpy(buff, msg), n), "\"");
-        comm::report(comm::exit_fail, buff, len);
+        std::ostringstream os;
+        os << comm::report.get_location()
+           << "\nNo parameter named \"" << n << "\"";
+        comm::report(comm::exit_fail, os);
       }
     return p;
   }

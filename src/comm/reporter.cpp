@@ -45,6 +45,12 @@ namespace crpcut {
       current_test_ = pc;
     }
 
+    datatypes::fixed_string
+    reporter::get_location() const
+    {
+      return current_test_->get_location();
+    }
+
     void reporter::send_message(type t, const char *msg, size_t len) const
     {
       const size_t header_size = sizeof(t) + sizeof(len);

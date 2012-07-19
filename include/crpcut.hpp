@@ -128,12 +128,16 @@
         {                                                               \
           crpcut::heap::set_limit(crpcut::heap::system);                \
           std::ostringstream os;                                        \
-          if (result.file_name())                                       \
+          if (result.file_name() && result.line_number() > 0)           \
             {                                                           \
               os << result.file_name()                                  \
                  << ":"                                                 \
                  << result.line_number()                                \
                  << "\n";                                               \
+            }                                                           \
+          else                                                          \
+            {                                                           \
+              os << __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__) "\n";      \
             }                                                           \
           os << result.summary() << result.message();                   \
           crpcut::comm::report(crpcut::comm::exit_fail, os);            \
@@ -772,6 +776,10 @@ namespace crpcut {
       {
         return !(*this == s);
       }
+      friend std::ostream &operator<<(std::ostream &os, const fixed_string &s)
+      {
+        return os << std::string(s.str, s.len);
+      }
     };
 
     template <template <typename> class envelope, typename T>
@@ -1222,6 +1230,7 @@ namespace crpcut {
       reporter(std::ostream &default_out = std::cout);
       void set_process_control(current_process *current_test);
       void set_writer(data_writer *w);
+      datatypes::fixed_string get_location() const;
       void operator()(type t, const std::ostringstream &os) const;
       template <size_t N>
       void operator()(type t, const stream::toastream<N> &os) const;
@@ -1773,6 +1782,7 @@ namespace crpcut {
     virtual void deactivate_reader() = 0;
     virtual bool has_active_readers() const = 0;
     virtual void manage_death() = 0;
+    virtual datatypes::fixed_string get_location() const = 0;
   };
   class fdreader : public comm::rfile_descriptor
   {
@@ -1848,6 +1858,7 @@ namespace crpcut {
     friend class test_suite_base;
   public:
     crpcut_test_case_registrator(const char *name,
+                                 datatypes::fixed_string location,
                                  const namespace_info &ns,
                                  unsigned long cputime_limit_us,
                                  comm::reporter *reporter = &comm::report,
@@ -1870,6 +1881,7 @@ namespace crpcut {
                        int             stdout_fd,
                        int             stderr_fd) = 0;
     void set_test_environment(test_environment *env);
+    datatypes::fixed_string get_location() const;
     void manage_death();
     using datatypes::list_elem<crpcut_test_case_registrator>::unlink;
     void kill();
@@ -1908,6 +1920,7 @@ namespace crpcut {
     std::ostream &print_name(std::ostream &) const ;
 
     const char                   *name_;
+    const datatypes::fixed_string location_;
     const namespace_info         *ns_info_;
     crpcut_test_case_registrator *suite_list_;
     unsigned                      active_readers_;
@@ -1950,15 +1963,16 @@ namespace crpcut {
       }
       catch (...)
         {
-          std::string s = "Unexpectedly caught "
-            + policies::crpcut_exception_translator::try_all();
-          size_t length = s.length();
-          char *buff = static_cast<char*>(alloca(length));
-          s.copy(buff, length);
-          std::string().swap(s);
-          report_obj(comm::exit_fail, buff, length);
+          std::ostringstream os;
+          os << report_obj.get_location()
+             << "\nUnexpectedly caught "
+             << policies::crpcut_exception_translator::try_all();
+          report_obj(comm::exit_fail, os);
         }
-      report_obj(comm::exit_fail, "Unexpectedly did not throw");
+      std::ostringstream os;
+      os << report_obj.get_location()
+         << "\nUnexpectedly did not throw";
+        report_obj(comm::exit_fail, os);
     }
   };
   template <typename T,
@@ -3793,10 +3807,9 @@ namespace crpcut {
             return;
           }
       }
-    size_t len = 80 + wrapped::strlen(name) + (v ? wrapped::strlen(v) : 0);
-    char *msg_str = static_cast<char*>(alloca(len));
-    stream::oastream msg(msg_str, msg_str + len);
-    msg << "Parameter " << name << " with ";
+    std::ostringstream msg;
+    msg << comm::report.get_location()
+        << "\nParameter " << name << " with ";
     if (v)
       {
         msg << "value \"" << v << "\"";
@@ -4188,6 +4201,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
     public:                                                             \
        crpcut_registrator()                                             \
          : crpcut_registrator_base(#test_case_name,                     \
+                                   crpcut::datatypes::fixed_string::make(__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__)), \
                                    crpcut_current_namespace,            \
                                    crpcut_cputime_timeout_us),          \
            report_reader_(this),                                        \

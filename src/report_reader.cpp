@@ -68,6 +68,7 @@ namespace crpcut {
     int kill_mask = 0;
     sigignore ignore(SIGPIPE);
     try {
+      std::string msg;
       read_loop(&t, sizeof(t));
       kill_mask = t & comm::kill_me;
       t = static_cast < comm::type >(t & ~kill_mask);
@@ -84,11 +85,13 @@ namespace crpcut {
         {
           if (len == 0 || t == comm::set_timeout || t == comm::begin_test)
             {
-              static char msg[] =
-                  "A child process spawned from the test has misbehaved. "
-                  "Process group killed";
-              buff = msg;
-              len = sizeof(msg) - 1;
+              std::ostringstream os;
+              os << mon_->get_location()
+                 << "\nA child process spawned from the test has misbehaved. "
+                "Process group killed";
+              os.str().swap(msg);
+              buff = const_cast<char*>(msg.c_str());
+              len = msg.length();
             }
           t = comm::exit_fail;
           mon_->set_phase(child);
@@ -119,9 +122,12 @@ namespace crpcut {
               return true;
             }
           {
-            static char msg[] = "Earlier VERIFY failed";
-            buff = msg;
-            len = sizeof(msg) - 1;
+            std::ostringstream os;
+            os << mon_->get_location()
+               <<"\nEarlier VERIFY failed";
+            os.str().swap(msg);
+            buff = const_cast<char*>(msg.c_str());
+            len = msg.length();
             t = comm::exit_fail;
             break;
           }

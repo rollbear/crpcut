@@ -81,6 +81,10 @@ TESTSUITE(comm)
       class env : public crpcut::current_process
       {
       public:
+        env()
+          : current_process(crpcut::datatypes::fixed_string::make("apa:3"))
+        {
+        }
         bool is_naughty_child() const { return true; }
         void freeze() const { exit(1); }
       };
@@ -107,7 +111,10 @@ TESTSUITE(comm)
 
     struct fix
     {
-      fix() : e(), wfd(), r(fake_cout)
+      fix()
+        : e(crpcut::datatypes::fixed_string::make("apa:3")),
+            wfd(),
+            r(fake_cout)
       {
         r.set_process_control(&e);
         r.set_writer(&wfd);

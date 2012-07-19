@@ -183,7 +183,7 @@ namespace crpcut {
           typedef comm::wfile_descriptor wfd;
           wfd report_fd(c2p.for_writing(pipe_pair::release_ownership));
           comm::report.set_writer(&report_fd);
-          current_process current_test;
+          current_process current_test(i->get_location());
           comm::report.set_process_control(&current_test);
           wrapped::dup2(stdout.for_writing(), 1);
           wrapped::dup2(stderr.for_writing(), 2);

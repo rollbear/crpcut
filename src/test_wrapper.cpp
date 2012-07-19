@@ -31,13 +31,25 @@ namespace {
   report_unexpected_survive(crpcut::crpcut_test_case_base *t,
                             crpcut::comm::reporter        &report)
   {
-    crpcut::stream::toastream<128> os;
-    os << "Unexpectedly survived\nExpected ";
+    crpcut::heap::set_limit(crpcut::heap::system);
+    std::ostringstream os;
+    os << t->crpcut_get_reg().get_location()
+       << "\nUnexpectedly survived\nExpected ";
     t->crpcut_get_reg().crpcut_expected_death(os);
     report(crpcut::comm::exit_fail, os);
   }
 
-  const char did_not_throw[] = "Unexpectedly did not throw";
+  void
+  report_did_not_throw(crpcut::crpcut_test_case_base *t,
+                       crpcut::comm::reporter        &report)
+  {
+    crpcut::heap::set_limit(crpcut::heap::system);
+    std::ostringstream os;
+    os << t->crpcut_get_reg().get_location()
+       << "\nUnexpectedly did not throw";
+    report(crpcut::comm::exit_fail, os);
+
+  }
 }
 namespace crpcut {
   template <>
@@ -81,11 +93,12 @@ namespace crpcut {
     catch (...) {
       heap::set_limit(heap::system);
       std::ostringstream out;
-      out << "Unexpectedly caught "
+      out << t->crpcut_get_reg().get_location()
+          << "\nUnexpectedly caught "
           << policies::crpcut_exception_translator::try_all();
       report(comm::exit_fail, out);
     }
-    report(comm::exit_fail, did_not_throw);
+    report_did_not_throw(t, report);
   }
 
   template <>
@@ -99,6 +112,6 @@ namespace crpcut {
     catch (...) {
       return;
     }
-    report(comm::exit_fail, did_not_throw);
+    report_did_not_throw(t, report);
   }
 }

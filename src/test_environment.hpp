@@ -58,10 +58,10 @@ namespace crpcut {
     static void set_default_charset(const char *charset);
   private:
 
-    cli::interpreter *cli_;
-    const char       *charset_;
-    char              homedir_[PATH_MAX];
-    static const char *default_charset;
+    cli::interpreter       *cli_;
+    const char             *charset_;
+    char                    homedir_[PATH_MAX];
+    static const char      *default_charset;
   };
 }
 

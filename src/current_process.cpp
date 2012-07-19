@@ -29,8 +29,9 @@
 
 namespace crpcut {
 
-  current_process::current_process()
-    : pid_(wrapped::getpid())
+  current_process::current_process(datatypes::fixed_string location)
+    : pid_(wrapped::getpid()),
+      location_(location)
   {
   }
 
@@ -43,6 +44,12 @@ namespace crpcut {
   {
     bool rv = pid_ != wrapped::getpid();
     return rv;
+  }
+
+  datatypes::fixed_string
+  current_process::get_location() const
+  {
+    return location_;
   }
 
   void

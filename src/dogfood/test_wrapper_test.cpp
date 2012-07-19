@@ -26,7 +26,7 @@
 
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
-
+#include "../current_process.hpp"
 #define S(...) #__VA_ARGS__, (sizeof(#__VA_ARGS__) - 1)
 TESTSUITE(test_wrapper)
 {
@@ -50,6 +50,7 @@ TESTSUITE(test_wrapper)
   public:
     ~mock_registrator();
     void setup(crpcut::poll<crpcut::fdreader>&,pid_t,int,int,int) {};
+    MOCK_CONST_METHOD0(get_location, crpcut::datatypes::fixed_string());
     MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag&());
     MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
     MOCK_METHOD0(run_test_case, void());
@@ -60,12 +61,28 @@ TESTSUITE(test_wrapper)
     MOCK_CONST_METHOD1(crpcut_expected_death, void(std::ostream&));
   };
 
+  class mock_process : public crpcut::current_process
+  {
+  public:
+	mock_process()
+	: crpcut::current_process(crpcut::datatypes::fixed_string::make(""))
+	{
+	}
+	MOCK_CONST_METHOD0(get_location, crpcut::datatypes::fixed_string());
+	MOCK_CONST_METHOD0(is_naughty_child, bool());
+	MOCK_CONST_METHOD0(freeze, void());
+  };
+
+
   mock_registrator::~mock_registrator() {}
   struct fix
   {
-    StrictMock<mock_reporter> reporter;
-    StrictMock<mock_test> test_case;
-    StrictMock<mock_registrator> registrator;
+	fix() : loc(crpcut::datatypes::fixed_string::make("apa:3")) {}
+	crpcut::datatypes::fixed_string loc;
+    StrictMock<mock_reporter>       reporter;
+    StrictMock<mock_test>           test_case;
+    StrictMock<mock_registrator>    registrator;
+    StrictMock<mock_process>        process;
   };
 
   struct my_error {};
@@ -91,12 +108,14 @@ TESTSUITE(test_wrapper)
   {
     EXPECT_CALL(test_case, test());
     EXPECT_CALL(test_case, crpcut_get_reg()).
-      WillOnce(ReturnRef(registrator));
+      WillRepeatedly(ReturnRef(registrator));
+    EXPECT_CALL(registrator, get_location()).
+    		WillOnce(Return(loc));
     EXPECT_CALL(registrator, crpcut_expected_death(_)).
       WillOnce(Invoke(expected_death_report));
     EXPECT_CALL(reporter, report(crpcut::comm::exit_fail, _, _)).
       With(Args<1,2>(ElementsAreArray(
-                     S(Unexpectedly survived\nExpected signal 9))));
+                     S(apa:3\nUnexpectedly survived\nExpected signal 9))));
     typedef crpcut::test_wrapper<crpcut::policies::deaths::wrapper> wrapper;
     wrapper::run(&test_case, reporter);
   }
@@ -114,9 +133,12 @@ TESTSUITE(test_wrapper)
   TEST(any_exception_wrapper_reports_when_test_returns, fix)
   {
     EXPECT_CALL(test_case, test());
-
+    EXPECT_CALL(test_case, crpcut_get_reg()).
+      WillRepeatedly(ReturnRef(registrator));
+    EXPECT_CALL(registrator, get_location()).
+      WillOnce(Return(loc));
     EXPECT_CALL(reporter, report(crpcut::comm::exit_fail, _, _)).
-      With(Args<1,2>(ElementsAreArray(S(Unexpectedly did not throw))));
+      With(Args<1,2>(ElementsAreArray(S(apa:3\nUnexpectedly did not throw))));
     typedef crpcut::test_wrapper<crpcut::policies::any_exception_wrapper> w;
     w::run(&test_case, reporter);
   }
@@ -125,7 +147,6 @@ TESTSUITE(test_wrapper)
   {
     EXPECT_CALL(test_case, test()).
       WillOnce(Throw(my_error()));
-
     typedef crpcut::test_wrapper<crpcut::policies::any_exception_wrapper> w;
     w::run(&test_case, reporter);
   }
@@ -143,9 +164,13 @@ TESTSUITE(test_wrapper)
   TEST(std_exception_wrapper_reports_when_test_returns, fix)
   {
     EXPECT_CALL(test_case, test());
-
+    EXPECT_CALL(test_case, crpcut_get_reg()).
+      WillRepeatedly(ReturnRef(registrator));
+    EXPECT_CALL(process, get_location()).
+      WillOnce(Return(loc));
+    reporter.set_process_control(&process);
     EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,_,_)).
-      With(Args<1,2>(ElementsAreArray(S(Unexpectedly did not throw))));
+      With(Args<1,2>(ElementsAreArray(S(apa:3\nUnexpectedly did not throw))));
 
     typedef crpcut::policies::exception_wrapper<std::exception> policy;
     typedef crpcut::test_wrapper<policy > w;
@@ -155,8 +180,13 @@ TESTSUITE(test_wrapper)
   TEST(exception_wrapper_reports_when_test_returns, fix)
   {
     EXPECT_CALL(test_case, test());
+    EXPECT_CALL(test_case, crpcut_get_reg()).
+      WillRepeatedly(ReturnRef(registrator));
+    EXPECT_CALL(process, get_location()).
+      WillOnce(Return(loc));
+    reporter.set_process_control(&process);
     EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,_,_)).
-        With(Args<1,2>(ElementsAreArray(S(Unexpectedly did not throw))));
+        With(Args<1,2>(ElementsAreArray(S(apa:3\nUnexpectedly did not throw))));
     typedef crpcut::policies::exception_wrapper<my_error> policy;
     typedef crpcut::test_wrapper<policy> w;
     w::run(&test_case, reporter);

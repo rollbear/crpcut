@@ -108,13 +108,21 @@ TESTSUITE(test_runner)
   {
   public:
     test_registrator(const char                    *name,
+                     
                      const crpcut::namespace_info  &ns,
                      unsigned long                  cpulimit,
                      crpcut::comm::reporter        *reporter,
                      crpcut::process_control       *proc,
                      crpcut::filesystem_operations *fsops,
                      crpcut::test_runner     *factory)
-    : crpcut_test_case_registrator(name, ns, cpulimit, reporter, proc, fsops, factory)
+    : crpcut_test_case_registrator(name,
+                                   crpcut::datatypes::fixed_string::make(""),
+                                   ns,
+                                   cpulimit,
+                                   reporter,
+                                   proc,
+                                   fsops,
+                                   factory)
     {
     }
     using crpcut::crpcut_test_case_registrator::set_test_environment;
@@ -128,6 +136,7 @@ TESTSUITE(test_runner)
     {
       set_pid(pid);
     }
+    MOCK_CONST_METHOD0(get_location, crpcut::datatypes::fixed_string());
     MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag&());
     MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
     MOCK_METHOD0(run_test_case, void());
@@ -152,7 +161,8 @@ TESTSUITE(test_runner)
   struct fix
   {
     fix()
-    : default_out(),
+    : loc(crpcut::datatypes::fixed_string::make("apa:3")),
+      default_out(),
       runner(),
       reporter(default_out),
       process_control(),
@@ -186,6 +196,7 @@ TESTSUITE(test_runner)
           WillOnce(SetErrnoAndReturn(ECHILD, -1));
     }
 
+    crpcut::datatypes::fixed_string      loc;
     std::ostringstream                   default_out;
     StrictMock<mock_environment>         env;
     StrictMock<mock_runner>              runner;
@@ -295,9 +306,11 @@ TESTSUITE(test_runner)
       EXPECT_CALL(fsops, mkdir(_,_)).WillOnce(Return(0));
       EXPECT_CALL(fsops, chdir(StrEq("101"))).
         WillOnce(SetErrnoAndReturn(EACCES, -1));
+      EXPECT_CALL(reg, get_location()).
+        WillOnce(Return(loc));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
-                                   StrEq("Couldn't chdir working dir"),
-                                   26)).
+                                   StrEq("apa:3\nCouldn't chdir working dir"),
+                                   32)).
         WillOnce(Throw(my_exit()));
       reg.set_wd(101);
       ASSERT_THROW(reg.goto_wd(), my_exit);
@@ -311,9 +324,11 @@ TESTSUITE(test_runner)
       EXPECT_CALL(fsops, mkdir(_,_)).WillOnce(Return(0));
       EXPECT_CALL(fsops, chdir(StrEq("101"))).
         WillOnce(SetErrnoAndReturn(EACCES, -1));
+      EXPECT_CALL(reg, get_location()).
+    	WillOnce(Return(loc));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
-                                   StrEq("Couldn't chdir working dir"),
-                                   26));
+                                   StrEq("apa:3\nCouldn't chdir working dir"),
+                                   32));
       reg.set_wd(101);
       reg.goto_wd();
     }
@@ -520,11 +535,13 @@ TESTSUITE(test_runner)
                                      crpcut::running,
                                      0, 0)).
            InSequence(s);
+        EXPECT_CALL(reg, get_location()).
+          WillOnce(Return(loc));
         EXPECT_CALL(fsops, rename(StrEq("99"), StrEq("apa::test")));
         EXPECT_CALL(runner, present(test_pid,
                                      crpcut::comm::exit_fail,
                                      crpcut::running,
-                                     19, StartsWith("Died with core dump"))).
+                                     25, StartsWith("apa:3\nDied with core dump"))).
            InSequence(s);
         EXPECT_CALL(runner, return_dir(99));
 
@@ -572,8 +589,10 @@ TESTSUITE(test_runner)
           InSequence(s).
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
+      EXPECT_CALL(reg, get_location()).
+    	WillOnce(Return(loc));
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(Exited with code 3\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(S(apa:3\nExited with code 3\nExpected exit 0)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(3));
@@ -606,12 +625,14 @@ TESTSUITE(test_runner)
           InSequence(s).
           WillOnce(Return(false));
 
+      EXPECT_CALL(reg, get_location()).
+        WillOnce(Return(loc));
       EXPECT_CALL(reg, crpcut_expected_death(_)).
           InSequence(s).
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(Died on signal 15\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(S(apa:3\nDied on signal 15\nExpected exit 0)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(100));
@@ -649,12 +670,15 @@ TESTSUITE(test_runner)
           InSequence(s).
           WillOnce(Return(false));
 
+      EXPECT_CALL(reg, get_location()).
+    	WillOnce(Return(loc));
+
       EXPECT_CALL(reg, crpcut_expected_death(_)).
           InSequence(s).
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(Timed out - killed\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(S(apa:3\nTimed out - killed\nExpected exit 0)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -690,11 +714,13 @@ TESTSUITE(test_runner)
           InSequence(s).
           WillOnce(Return(true));
 
+      EXPECT_CALL(reg, get_location()).
+        WillOnce(Return(loc));
       EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(true));
 
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(Test consumed 1000ms CPU-time\nLimit was 100ms)))).
+          With(Args<4,3>(ElementsAreArray(S(apa:3\nTest consumed 1000ms CPU-time\nLimit was 100ms)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -803,8 +829,10 @@ TESTSUITE(test_runner)
       EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(1000000U));
 
+      EXPECT_CALL(reg, get_location()).
+    	WillOnce(Return(loc));
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(Died with core dump)))).
+          With(Args<4,3>(ElementsAreArray(S(apa:3\nDied with core dump)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -835,10 +863,13 @@ TESTSUITE(test_runner)
       EXPECT_CALL(runner, calc_cputime(_)).
           WillOnce(Return(1000000U));
 
+      EXPECT_CALL(reg, get_location()).
+        WillOnce(Return(loc));
+
       EXPECT_CALL(runner, present(test_pid,
                                    crpcut::comm::exit_fail,
                                    phase, _, _)).
-        With(Args<4,3>(ElementsAreArray(S(Died for unknown reason, code=-1)))).
+        With(Args<4,3>(ElementsAreArray(S(apa:3\nDied for unknown reason, code=-1)))).
         InSequence(s);
 
 

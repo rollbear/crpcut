@@ -57,11 +57,12 @@ namespace crpcut {
             comm::report(comm::cancel_timeout, nullstr, 0);
             return;
           }
-        stream::toastream<128> os;
-        os << "Realtime timeout " << duration_us / 1000
-            << "ms exceeded.\n  Actual time to completion was " << diff / 1000
-            << "ms";
-        comm::report(comm::exit_fail, os.begin(), os.size());
+        std::ostringstream os;
+        os << comm::report.get_location()
+           << "\nRealtime timeout " << duration_us / 1000
+           << "ms exceeded.\n  Actual time to completion was " << diff / 1000
+           << "ms";
+        comm::report(comm::exit_fail, os);
       }
     }
   }

@@ -31,7 +31,12 @@ namespace crpcut {
   &istream_wrapper
   ::assert_stream_extraction(std::istream &is, const char *msg)
   {
-    if (!is) comm::report(comm::exit_fail, msg);
+    if (!is)
+      {
+        std::ostringstream os;
+        os << comm::report.get_location() << "\n" << msg;
+        comm::report(comm::exit_fail, os);
+      }
     return *this;
   }
 }

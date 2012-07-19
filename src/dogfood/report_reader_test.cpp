@@ -70,6 +70,7 @@ namespace {
     MOCK_METHOD1(set_timeout, void(unsigned long));
     MOCK_CONST_METHOD0(duration_us, unsigned long());
     MOCK_CONST_METHOD0(deadline_is_set, bool());
+    MOCK_CONST_METHOD0(get_location, crpcut::datatypes::fixed_string());
     MOCK_METHOD0(clear_deadline, void());
     MOCK_METHOD1(crpcut_register_success, void(bool));
     MOCK_METHOD1(set_phase, void(crpcut::test_phase));
@@ -89,9 +90,11 @@ namespace {
   struct fix
   {
     typedef crpcut::clocks::monotonic::timestamp ts;
-    fix() : reader(&monitor) {}
-    StrictMock<mock_monitor>      monitor;
-    StrictMock<test_reader>      reader;
+    fix() : loc(crpcut::datatypes::fixed_string::make("apa:3")),
+    		reader(&monitor) {}
+    crpcut::datatypes::fixed_string loc;
+    StrictMock<mock_monitor>        monitor;
+    StrictMock<test_reader>         reader;
 
     void verify_naughty_child()
     {
@@ -205,10 +208,12 @@ TESTSUITE(report_reader)
     EXPECT_CALL(monitor, crpcut_failed()).
       InSequence(s).
       WillOnce(Return(true));
+    EXPECT_CALL(monitor, get_location()).
+      WillOnce(Return(crpcut::datatypes::fixed_string::make("apa:3")));
     EXPECT_CALL(monitor,
                 send_to_presentation(crpcut::comm::exit_fail,
                                      _,
-                                     StartsWith("Earlier VERIFY"))).
+                                     StartsWith("apa:3\nEarlier VERIFY"))).
       InSequence(s);
     EXPECT_CALL(monitor, set_death_note());
     ASSERT_TRUE(reader.read_data());
@@ -249,10 +254,12 @@ TESTSUITE(report_reader)
       struct timeval cpu = { 10, 1 };
       reader.buffer.push_back(sizeof(cpu));
       reader.buffer.push_back(cpu);
+      EXPECT_CALL(monitor, get_location()).
+        WillOnce(Return(loc));
       EXPECT_CALL(monitor,
                   send_to_presentation(exit_fail,
                                        _,
-                                       StartsWith("A child process spawned")));
+                                       StartsWith("apa:3\nA child process spawned")));
       verify_naughty_child();
     }
 
@@ -264,10 +271,12 @@ TESTSUITE(report_reader)
       crpcut::clocks::monotonic::timestamp now = 100;
       reader.buffer.push_back(sizeof(now));
       reader.buffer.push_back(now);
+      EXPECT_CALL(monitor, get_location()).
+        WillOnce(Return(loc));
       EXPECT_CALL(monitor,
                   send_to_presentation(exit_fail,
                                        _,
-                                       StartsWith("A child process spawned")));
+                                       StartsWith("apa:3\nA child process spawned")));
       verify_naughty_child();
     }
 
@@ -277,10 +286,12 @@ TESTSUITE(report_reader)
       using namespace crpcut::comm;
       reader.buffer.push_back(type(cancel_timeout | kill_me));
       reader.buffer.push_back(size_t(0));
+      EXPECT_CALL(monitor, get_location()).
+        WillOnce(Return(loc));
       EXPECT_CALL(monitor,
                   send_to_presentation(exit_fail,
                                        _,
-                                       StartsWith("A child process spawned")));
+                                       StartsWith("apa:3\nA child process spawned")));
       verify_naughty_child();
     }
 
@@ -290,10 +301,12 @@ TESTSUITE(report_reader)
       using namespace crpcut::comm;
       reader.buffer.push_back(type(end_test | kill_me));
       reader.buffer.push_back(size_t(0));
+      EXPECT_CALL(monitor, get_location()).
+        WillOnce(Return(loc));
       EXPECT_CALL(monitor,
                   send_to_presentation(exit_fail,
                                        _,
-                                       StartsWith("A child process spawned")));
+                                       StartsWith("apa:3\nA child process spawned")));
       verify_naughty_child();
     }
 
@@ -329,10 +342,12 @@ TESTSUITE(report_reader)
       using namespace crpcut::comm;
       reader.buffer.push_back(type(exit_ok | kill_me));
       reader.buffer.push_back(size_t(0));
+      EXPECT_CALL(monitor, get_location()).
+    	WillOnce(Return(loc));
       EXPECT_CALL(monitor,
                   send_to_presentation(exit_fail,
                                        _,
-                                       StartsWith("A child process spawned")));
+                                       StartsWith("apa:3\nA child process spawned")));
       verify_naughty_child();
     }
 

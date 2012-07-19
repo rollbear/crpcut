@@ -55,11 +55,12 @@ namespace crpcut {
         unsigned long diff = now - start_timestamp_us;
         if  (diff > duration_us)
           {
-            stream::toastream<128> os;
-            os << "CPU-time timeout " << duration_us / 1000
+            std::ostringstream os;
+            os << comm::report.get_location()
+               << "\nCPU-time timeout " << duration_us / 1000
                << "ms exceeded.\n  Actual time to completion was "
                << diff / 1000 << "ms";
-            comm::report(comm::exit_fail, os.begin(), os.size());
+            comm::report(comm::exit_fail, os);
           }
       }
     }

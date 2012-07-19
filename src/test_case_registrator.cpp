@@ -96,6 +96,13 @@ namespace crpcut {
     death_note_ = true;
   }
 
+  datatypes::fixed_string
+  crpcut_test_case_registrator
+  ::get_location() const
+  {
+    return location_;
+  }
+
   void
   crpcut_test_case_registrator
   ::send_to_presentation(comm::type t, size_t len, const char *buff) const
@@ -150,6 +157,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::crpcut_test_case_registrator(const char *name, namespace_info *ns)
     : name_(name),
+      location_(),
       ns_info_(ns),
       suite_list_(0),
       active_readers_(0),
@@ -170,14 +178,16 @@ namespace crpcut {
   }
 
   crpcut_test_case_registrator
-  ::crpcut_test_case_registrator(const char            *name,
-                                 const namespace_info  &ns,
-                                 unsigned long         cputime_timeout_us,
-                                 comm::reporter        *reporter,
-                                 process_control       *process,
-                                 filesystem_operations *filesystem,
-                                 test_runner           *runner)
+  ::crpcut_test_case_registrator(const char             *name,
+                                 datatypes::fixed_string location,
+                                 const namespace_info   &ns,
+                                 unsigned long           cputime_timeout_us,
+                                 comm::reporter         *reporter,
+                                 process_control        *process,
+                                 filesystem_operations  *filesystem,
+                                 test_runner            *runner)
     : name_(name),
+      location_(location),
       ns_info_(&ns),
       suite_list_(0),
       active_readers_(0),
@@ -292,7 +302,7 @@ namespace crpcut {
       {
         heap::set_limit(heap::system);
         std::ostringstream out;
-        out << "Unexpectedly caught "
+        out << get_location() << "\nUnexpectedly caught "
             << policies::crpcut_exception_translator::try_all();
         (*reporter_)(comm::exit_fail, out);
       }
@@ -342,7 +352,9 @@ namespace crpcut {
     name << dirnum_ << '\0';
     if (filesystem_->chdir(name.begin()) != 0)
       {
-        (*reporter_)(comm::exit_fail, "Couldn't chdir working dir");
+        std::ostringstream os;
+        os << get_location() << "\nCouldn't chdir working dir";
+        (*reporter_)(comm::exit_fail, os);
         assert("unreachable code reached" == 0);
       }
   }
@@ -364,7 +376,7 @@ namespace crpcut {
     if (crpcut_failed() || crpcut_is_expected_exit(status)) return false;
 
     crpcut_register_success(false);
-    out << "Exited with code " << status << "\nExpected ";
+    out << get_location() << "\nExited with code " << status << "\nExpected ";
     crpcut_expected_death(out);
     return true;
    }
@@ -380,11 +392,11 @@ namespace crpcut {
         crpcut_register_success(false);
         if (killed_)
           {
-            out << "Timed out - killed";
+            out << get_location() << "\nTimed out - killed";
           }
         else
           {
-            out << "Died on signal "
+            out << get_location() << "\nDied on signal "
                 << signo;
           }
         out << "\nExpected ";
@@ -395,7 +407,7 @@ namespace crpcut {
     if (cputime_timeout(cputime_us))
       {
         crpcut_register_success(false);
-        out << "Test consumed "
+        out << get_location() << "\nTest consumed "
             << cputime_us / 1000 << "ms CPU-time\nLimit was "
             << cputime_limit_us_ / 1000 << "ms";
         return true;
@@ -439,7 +451,7 @@ namespace crpcut {
       }
     comm::type t = comm::exit_ok;
 
-    stream::toastream<1024> out;
+    std::ostringstream out;
     if (!death_note_)
       {
         switch (info.si_code)
@@ -453,7 +465,7 @@ namespace crpcut {
           case CLD_DUMPED:
             if (crpcut_core_dumps_allowed())
               {
-                out << "Died with core dump";
+                out << get_location() << "\nDied with core dump";
                 t = comm::exit_fail;
                 break;
               }
@@ -465,7 +477,7 @@ namespace crpcut {
               }
             break;
           default:
-            out << "Died for unknown reason, code=" << info.si_code;
+            out << get_location() << "\nDied for unknown reason, code=" << info.si_code;
             t = comm::exit_fail;
             break;
         }
@@ -485,7 +497,8 @@ namespace crpcut {
       {
         t = comm::exit_fail;
       }
-    send_to_presentation(t, out.size(), out.begin());
+    std::string s = out.str();
+    send_to_presentation(t, s.length(), s.c_str());
     crpcut_register_success(t == comm::exit_ok);
     runner_->return_dir(dirnum_);
     struct {

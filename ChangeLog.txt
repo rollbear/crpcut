@@ -1,3 +1,8 @@
+         * Added file:line as first line of all reports, except info, stderr
+           and stdout. When an exact location for the error can't be found,
+           for example if the test has exited unexpectedly, the location
+           refers to the beginning of the test definition. 
+
          * Fixed a cosmetic bug where disabled tests would show up in a
            test listing, even though they did not match the tag filter.
 

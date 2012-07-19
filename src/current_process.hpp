@@ -29,6 +29,7 @@
 #ifndef CURRENT_PROCESS_HPP_
 #define CURRENT_PROCESS_HPP_
 
+#include <crpcut.hpp>
 extern "C" {
 #  include <sys/types.h>
 }
@@ -36,14 +37,17 @@ namespace crpcut {
   class current_process
   {
   public:
-    current_process();
+    current_process(datatypes::fixed_string location);
+    virtual datatypes::fixed_string get_location() const;
     virtual ~current_process();
     virtual bool is_naughty_child() const;
     virtual void freeze() const;
   private:
     current_process(const current_process&);
     current_process& operator=(const current_process&);
-    pid_t pid_;
+
+    pid_t                   pid_;
+    datatypes::fixed_string location_;
   };
 }
 
