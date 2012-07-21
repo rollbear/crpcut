@@ -81,7 +81,7 @@ TESTSUITE(presentation_reader)
     }
     struct end_data
     {
-      bool          critical;
+      unsigned long critical;
       unsigned long duration;
     };
     void end_test(pid_t              id,

@@ -134,7 +134,7 @@ namespace crpcut {
     fd_.read_loop(&len, sizeof(len));
     struct
     {
-      bool critical;
+      unsigned long critical;
       unsigned long duration_us;
     } msg;
     assert(len == sizeof(msg));

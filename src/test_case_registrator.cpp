@@ -518,7 +518,7 @@ namespace crpcut {
     crpcut_register_success(t == comm::exit_ok);
     runner_->return_dir(dirnum_);
     struct {
-      bool critical;
+      unsigned long critical;
       unsigned long duration_us;
     } end_msg;
     end_msg.critical = crpcut_tag().get_importance() == tag::critical;
