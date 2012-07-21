@@ -38,7 +38,6 @@ extern "C"
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <dirent.h>
-#include <stdarg.h>
 }
 #include "posix_encapsulation.hpp"
 #include "../heap.hpp"
@@ -221,21 +220,6 @@ namespace crpcut {
                      (int n, const struct rlimit *r),
                      (n, r))
     CRPCUT_WRAP_FUNC(libc, signal, sighandler_t, (int s, sighandler_t h), (s, h))
-    CRPCUT_WRAP_FUNC(libc, vsnprintf,
-                     int,
-                     (char *d, size_t s, const char *f, va_list ap),
-                     (d, s, f, ap))
-
-    int snprintf(char *s, size_t si, const char *f, ...)
-    {
-      va_list ap;
-      va_start(ap, f);
-      int r = wrapped::vsnprintf(s, si, f, ap);
-      va_end(ap);
-      return r;
-    }
-
-
     CRPCUT_WRAP_FUNC(libc, strcmp, int, (const char *l, const char *r), (l, r))
     CRPCUT_WRAP_FUNC(libc, strerror, char *, (int n), (n))
     CRPCUT_WRAP_FUNC(libc, strlen, size_t, (const char *p), (p))

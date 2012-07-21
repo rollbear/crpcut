@@ -27,7 +27,7 @@
 #include "xml_formatter.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
 #include "../posix_error.hpp"
-
+#include <iomanip>
 namespace {
   inline const char *xml_replacement(const char *p)
   {
@@ -77,17 +77,21 @@ namespace crpcut {
       struct tm *tmdata = wrapped::gmtime(&now);
       assert(tmdata);
 
-      char time_string[sizeof("2009-01-09T23:59:59Z")];
-      int len = wrapped::snprintf(time_string, sizeof(time_string),
-                                  "%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2dZ",
-                                  tmdata->tm_year + 1900,
-                                  tmdata->tm_mon + 1,
-                                  tmdata->tm_mday,
-                                  tmdata->tm_hour,
-                                  tmdata->tm_min,
-                                  tmdata->tm_sec);
-      assert(len < int(sizeof(time_string)));
-      assert(time_string[len] == 0);
+      stream::toastream<sizeof("2009-01-09T23:59:59Z")> timestamp;
+      timestamp << std::setfill('0')
+                << std::setw(4) << tmdata->tm_year + 1900
+                << '-'
+                << std::setw(2) << tmdata->tm_mon + 1
+                << '-'
+                << std::setw(2) << tmdata->tm_mday
+                << 'T'
+                << std::setw(2) << tmdata->tm_hour
+                << ':'
+                << std::setw(2) << tmdata->tm_min
+                << ':'
+                << std::setw(2) << tmdata->tm_sec
+                << 'Z';
+      assert(timestamp.size() == 20U);
 
       write("<?xml version=\"1.0\"?>\n\n"
             "<crpcut xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
@@ -96,7 +100,7 @@ namespace crpcut {
             CRPCUT_VERSION_STRING
             ".xsd\""
             "\n        starttime=\"");
-      write(time_string);
+      write(timestamp);
 
       write("\"\n        host=\"");
       write(machine_string, wrapped::strlen(machine_string), translated);

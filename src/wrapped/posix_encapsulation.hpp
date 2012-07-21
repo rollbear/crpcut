@@ -30,7 +30,6 @@
 
 #include <crpcut.hpp>
 extern "C" {
-#  include <stdarg.h>
 #  include <dirent.h>
 #  include <signal.h>
 }
@@ -71,12 +70,10 @@ namespace crpcut {
     int                  setpgid(pid_t pid, pid_t pgid);
     int                  setrlimit(int, const struct rlimit*);
     sighandler_t         signal(int, sighandler_t);
-    int                  snprintf(char *s, size_t si, const char *f, ...);
     int                  strncmp(const char *s1, const char *s2, size_t n);
     char *               strchr(const char *, int);
     char *               strstr(const char *, const char *);
     time_t               time(time_t *t);
-    int                  vsnprintf(char *s, size_t si, const char *f, va_list);
     int                  waitid(idtype_t t, id_t i, siginfo_t *si, int o);
   }
 
