@@ -32,14 +32,16 @@ namespace crpcut {
     namespace timeout {
 
       monotonic_enforcer
-      ::monotonic_enforcer(unsigned long timeout_ms)
-        : duration_us(timeout_ms * timeout_multiplier()),
-          start_timestamp_us(clocks::monotonic::timestamp_absolute())
+      ::monotonic_enforcer(unsigned long timeout_ms,
+                           const crpcut_test_monitor *current_test)
+        : duration_us_(timeout_ms * timeout_multiplier()),
+          start_timestamp_us_(clocks::monotonic::timestamp_absolute()),
+          current_test_(current_test)
       {
 
         if (timeouts_are_enabled())
           {
-            clocks::monotonic::timestamp deadline = duration_us;
+            clocks::monotonic::timestamp deadline = duration_us_;
             comm::report(comm::set_timeout, deadline);
           }
       }
@@ -50,16 +52,16 @@ namespace crpcut {
         if (!timeouts_are_enabled()) return;
         typedef clocks::monotonic mono;
         mono::timestamp now  = mono::timestamp_absolute();
-        unsigned long diff = now - start_timestamp_us;
-        if (diff <= duration_us)
+        unsigned long diff = now - start_timestamp_us_;
+        if (diff <= duration_us_)
           {
             const char *nullstr = 0;
-            comm::report(comm::cancel_timeout, nullstr, 0);
+            comm::report(comm::cancel_timeout, nullstr, 0U, current_test_);
             return;
           }
         std::ostringstream os;
-        os << comm::report.get_location()
-           << "\nRealtime timeout " << duration_us / 1000
+        os << current_test_->get_location()
+           << "\nRealtime timeout " << duration_us_ / 1000
            << "ms exceeded.\n  Actual time to completion was " << diff / 1000
            << "ms";
         comm::report(comm::exit_fail, os);

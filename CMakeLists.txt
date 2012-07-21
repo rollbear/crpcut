@@ -68,7 +68,6 @@ file(GLOB LIB_SRCS
      src/comm/reporter.cpp
      src/convert_traits.cpp
      src/crpcut.cpp
-     src/current_process.cpp
      src/deadline_monitor.cpp
      src/event.cpp
      src/failed_check_reporter.cpp
@@ -117,6 +116,7 @@ file(GLOB LIB_SRCS
      src/test_case_registrator.cpp
      src/test_case_result.cpp
      src/test_environment.cpp
+     src/test_monitor.cpp
      src/test_runner.cpp
      src/test_suite_base.cpp
      src/test_wrapper.cpp

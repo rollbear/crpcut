@@ -41,7 +41,7 @@
 #include "buffer_vector.hpp"
 #include "working_dir_allocator.hpp"
 #include "deadline_monitor.hpp"
-#include "current_process.hpp"
+
 extern "C" {
 #  include <sys/time.h>
 #  include <fcntl.h>
@@ -110,7 +110,6 @@ namespace crpcut {
   ::test_runner()
     : env_(0),
       cli_(0),
-      current_pid_(0),
       num_pending_children_(0),
       presenter_pipe_(-1),
       deadlines_(0),
@@ -183,14 +182,13 @@ namespace crpcut {
           typedef comm::wfile_descriptor wfd;
           wfd report_fd(c2p.for_writing(pipe_pair::release_ownership));
           comm::report.set_writer(&report_fd);
-          current_process current_test(i->get_location());
-          comm::report.set_process_control(&current_test);
+          crpcut_test_monitor::make_current(i);
           wrapped::dup2(stdout.for_writing(), 1);
           wrapped::dup2(stderr.for_writing(), 2);
           stdout.close();
           stderr.close();
           c2p.close();
-          current_pid_ = wrapped::getpid();
+          i->set_pid(wrapped::getpid());
           i->goto_wd();
           i->run_test_case();
         }
@@ -203,10 +201,12 @@ namespace crpcut {
 
     // parent
     ++num_pending_children_;
-    i->setup(poller, pid,
+    i->set_pid(pid);
+    i->setup(poller,
              c2p.for_reading(pipe_pair::release_ownership),
              stdout.for_reading(pipe_pair::release_ownership),
              stderr.for_reading(pipe_pair::release_ownership));
+    introduce_test(pid, i);
   }
 
   void

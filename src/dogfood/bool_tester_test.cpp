@@ -28,7 +28,7 @@
 
 #define CHECK(name, expr, r)                                            \
   do {                                                                  \
-    crpcut::bool_tester<crpcut::comm::fail>tester_obj("location", r);   \
+    crpcut::bool_tester<crpcut::comm::fail>tester_obj("location", r, 0);\
     tester_obj.name((expr), #expr);                                     \
   } while (0)
 

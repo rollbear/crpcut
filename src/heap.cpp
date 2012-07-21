@@ -398,7 +398,7 @@ namespace crpcut
               show_stack(msg, "\nAlloc stack:", p->stack, p->stack_size);
               show_stack(msg, "\nNow at:", 0, 0);
               comm::direct_reporter<crpcut::comm::exit_fail>()
-                << comm::report.get_location()
+                << crpcut_test_monitor::current_test()->get_location()
                 << "\nDEALLOC FAIL\n"
                 << free_name[type] << " " << addr << " was allocated using "
                 << alloc_name[current_type]
@@ -562,7 +562,7 @@ namespace crpcut
             {
               size_t now_bytes = bytes;
               comm::direct_reporter<crpcut::comm::exit_fail>()
-                << comm::report.get_location()
+                << crpcut_test_monitor::current_test()->get_location()
                 << "\nheap::set_limit(" << n
                 << ") is below current use of " << now_bytes
                 << " bytes";

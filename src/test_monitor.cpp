@@ -24,47 +24,23 @@
  * SUCH DAMAGE.
  */
 
-#include "current_process.hpp"
-#include "wrapped/posix_encapsulation.hpp"
+#include <crpcut.hpp>
 
+namespace {
+  crpcut::crpcut_test_monitor *current = 0;
+}
 namespace crpcut {
-
-  current_process::current_process(datatypes::fixed_string location)
-    : pid_(wrapped::getpid()),
-      location_(location)
+  crpcut_test_monitor *
+  crpcut_test_monitor
+  ::current_test()
   {
-  }
-
-  current_process::~current_process()
-  {
-  }
-
-  bool
-  current_process::is_naughty_child() const
-  {
-    bool rv = pid_ != wrapped::getpid();
-    return rv;
-  }
-
-  datatypes::fixed_string
-  current_process::get_location() const
-  {
-    return location_;
+    return current;
   }
 
   void
-  current_process::freeze() const
+  crpcut_test_monitor
+  ::make_current(crpcut_test_monitor *p)
   {
-    for (;;)
-      {
-        wrapped::select(0,0,0,0,0);
-      }
+    current = p;
   }
 }
-
-
-
-
-
-
-

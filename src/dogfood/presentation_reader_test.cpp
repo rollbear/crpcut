@@ -193,8 +193,7 @@ TESTSUITE(presentation_reader)
     typedef crpcut::crpcut_test_case_registrator R;
   public:
     registrator_mock(const char *name) : R(name, &top), top(0,0) {}
-    MOCK_METHOD5(setup, void(crpcut::poll<crpcut::fdreader>&,
-                             pid_t,
+    MOCK_METHOD4(setup, void(crpcut::poll<crpcut::fdreader>&,
                              int, int, int));
     MOCK_METHOD0(run_test_case, void());
     MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag &());

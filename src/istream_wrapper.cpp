@@ -34,7 +34,8 @@ namespace crpcut {
     if (!is)
       {
         std::ostringstream os;
-        os << comm::report.get_location() << "\n" << msg;
+        crpcut_test_monitor *current_test = crpcut_test_monitor::current_test();
+        os << current_test->get_location() << "\n" << msg;
         comm::report(comm::exit_fail, os);
       }
     return *this;

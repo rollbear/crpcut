@@ -1135,8 +1135,6 @@ namespace crpcut {
   template <typename T>
   class poll;
 
-  class current_process;
-
   namespace comm {
 
 #define CRPCUT_COMM_MSGS(translator)             \
@@ -1156,6 +1154,39 @@ namespace crpcut {
       CRPCUT_COMM_MSGS(CRPCUT_VERBATIM),
       kill_me = 0x100
     } type;
+
+  }
+
+  class crpcut_test_monitor
+  {
+  public:
+    virtual ~crpcut_test_monitor() {}
+    virtual void set_timeout(unsigned long ts_us) = 0;
+    virtual unsigned long duration_us() const = 0;
+    virtual bool deadline_is_set() const = 0;
+    virtual void clear_deadline() = 0;
+    virtual void crpcut_register_success(bool value = true) = 0;
+    virtual void set_phase(test_phase) = 0;
+    virtual void kill() = 0;
+    virtual bool crpcut_failed() const = 0;
+    virtual void set_cputime_at_start(const struct timeval&) = 0;
+    virtual void send_to_presentation(comm::type, size_t len, const char*) const = 0;
+    virtual void set_death_note() = 0;
+    virtual void activate_reader() = 0;
+    virtual void deactivate_reader() = 0;
+    virtual bool has_active_readers() const = 0;
+    virtual void manage_death() = 0;
+    virtual bool is_naughty_child() const = 0;
+    virtual void freeze() const = 0;
+    virtual datatypes::fixed_string get_location() const = 0;
+    static crpcut_test_monitor *current_test();
+  private:
+    friend class test_runner;
+    static void make_current(crpcut_test_monitor *p);
+  };
+
+
+  namespace comm {
 
     class file_descriptor
     {
@@ -1221,28 +1252,45 @@ namespace crpcut {
 
     class reporter
     {
-      data_writer *writer_;
-      data_reader *reader_;
-      current_process *current_test_;
-      std::ostream     &default_out_;
+      data_writer  *writer_;
+      data_reader  *reader_;
+      std::ostream &default_out_;
+
+      typedef crpcut_test_monitor tm;
     public:
       virtual ~reporter();
       reporter(std::ostream &default_out = std::cout);
-      void set_process_control(current_process *current_test);
       void set_writer(data_writer *w);
-      datatypes::fixed_string get_location() const;
-      void operator()(type t, const std::ostringstream &os) const;
+      void operator()(type                       t,
+                      const std::ostringstream  &os,
+                      const crpcut_test_monitor *mon = tm::current_test()) const;
       template <size_t N>
-      void operator()(type t, const stream::toastream<N> &os) const;
-      void operator()(type t, const stream::oastream &os) const;
-      void operator()(type t, const char *msg) const;
-      void operator()(type t, const char *msg, size_t len) const;
+      void operator()(type                       t,
+                      const stream::toastream<N>&os,
+                      const crpcut_test_monitor *mon = tm::current_test()) const;
+      void operator()(type                       t,
+                      const stream::oastream    &os,
+                      const crpcut_test_monitor *mon = tm::current_test()) const;
+      void operator()(type                       t,
+                      const char                *msg,
+                      const crpcut_test_monitor *mon = tm::current_test()) const;
+      void operator()(type t,
+                      const char                *msg,
+                      size_t                     len,
+                      const crpcut_test_monitor *mon = tm::current_test()) const;
       template <size_t N>
-      void operator()(type t, const char (&msg)[N]) const;
+      void operator()(type                       t,
+                      const char               (&msg)[N],
+                      const crpcut_test_monitor *mon = tm::current_test()) const;
       template <typename T>
-      void operator()(type t, const T& data) const;
+      void operator()(type                       t,
+                      const T                   &data,
+                      const crpcut_test_monitor *mon = tm::current_test()) const;
     private:
-      virtual void report(type t, const char *msg, size_t len) const;
+      virtual void report(type                       t,
+                          const char                *msg,
+                          size_t                     len,
+                          const crpcut_test_monitor *mon) const;
       void send_message(type t, const char *msg, size_t len) const;
 
       template <typename T>
@@ -1255,7 +1303,8 @@ namespace crpcut {
     class direct_reporter
     {
     public:
-      direct_reporter(reporter &r = report);
+      direct_reporter(reporter                  &r = report,
+                      const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
       template <typename V>
       direct_reporter& operator<<(V& v);
       template <typename V>
@@ -1280,9 +1329,11 @@ namespace crpcut {
     private:
       direct_reporter(const direct_reporter &);
       direct_reporter& operator=(const direct_reporter&);
-      size_t heap_limit;
-      std::ostringstream os;
-      reporter& report_;
+
+      size_t                     heap_limit;
+      std::ostringstream         os;
+      reporter                  &report_;
+      const crpcut_test_monitor *mon_;
     };
 
   } // namespace comm
@@ -1588,23 +1639,27 @@ namespace crpcut {
       class cputime_enforcer
       {
       public:
-        cputime_enforcer(unsigned long timeout_us);
+        cputime_enforcer(unsigned long              timeout_us,
+                         const crpcut_test_monitor *current_test);
         ~cputime_enforcer();
       private:
 
-        unsigned long duration_us;
-        unsigned long start_timestamp_us;
+        unsigned long              duration_us_;
+        unsigned long              start_timestamp_us_;
+        const crpcut_test_monitor *current_test_;
       };
 
       class monotonic_enforcer
       {
       protected:
-        monotonic_enforcer(unsigned long timeout_us);
+        monotonic_enforcer(unsigned long              timeout_us,
+                           const crpcut_test_monitor *current_test);
         ~monotonic_enforcer();
       private:
 
-        unsigned long duration_us;
-        unsigned long start_timestamp_us;
+        unsigned long              duration_us_;
+        unsigned long              start_timestamp_us_;
+        const crpcut_test_monitor *current_test_;
       };
 
       template <unsigned long timeout_us>
@@ -1619,7 +1674,7 @@ namespace crpcut {
       class enforcer<realtime, timeout_us> : public monotonic_enforcer
       {
       public:
-        enforcer();
+        enforcer(const crpcut_test_monitor*);
       };
 
     } // namespace timeout
@@ -1763,27 +1818,6 @@ namespace crpcut {
     namespace_info *parent;
   };
 
-  class crpcut_test_monitor
-  {
-  public:
-    virtual ~crpcut_test_monitor() {}
-    virtual void set_timeout(unsigned long ts_us) = 0;
-    virtual unsigned long duration_us() const = 0;
-    virtual bool deadline_is_set() const = 0;
-    virtual void clear_deadline() = 0;
-    virtual void crpcut_register_success(bool value = true) = 0;
-    virtual void set_phase(test_phase) = 0;
-    virtual void kill() = 0;
-    virtual bool crpcut_failed() const = 0;
-    virtual void set_cputime_at_start(const struct timeval&) = 0;
-    virtual void send_to_presentation(comm::type, size_t len, const char*) const = 0;
-    virtual void set_death_note() = 0;
-    virtual void activate_reader() = 0;
-    virtual void deactivate_reader() = 0;
-    virtual bool has_active_readers() const = 0;
-    virtual void manage_death() = 0;
-    virtual datatypes::fixed_string get_location() const = 0;
-  };
   class fdreader : public comm::rfile_descriptor
   {
   public:
@@ -1876,7 +1910,6 @@ namespace crpcut {
     std::size_t full_name_len() const;
     bool match_name(const char *name) const;
     virtual void setup(poll<fdreader> &poller,
-                       pid_t           pid,
                        int             in_fd,
                        int             stdout_fd,
                        int             stderr_fd) = 0;
@@ -1890,6 +1923,8 @@ namespace crpcut {
     void set_wd(unsigned n);
     void goto_wd() const;
     pid_t get_pid() const;
+    bool is_naughty_child() const;
+    void freeze() const;
     test_phase get_phase() const;
     void set_phase(test_phase p);
     bool has_active_readers() const;
@@ -1904,12 +1939,12 @@ namespace crpcut {
     bool has_death_note() const;
     void set_death_note();
     void send_to_presentation(comm::type t, size_t len, const char *buff) const;
+    void set_pid(pid_t pid);
   protected:
     crpcut_test_case_registrator(const char *name = 0, namespace_info *ns = 0);
     void manage_test_case_execution(crpcut_test_case_base*);
     void prepare_destruction(unsigned long us);
     void prepare_construction(unsigned long us);
-    void set_pid(pid_t pid);
   private:
      bool check_signal_status(int            signo,
                               unsigned long  cputime_us,
@@ -1953,8 +1988,9 @@ namespace crpcut {
   template <typename exc>
   struct test_wrapper<policies::exception_wrapper<exc> >
   {
-    static void run(crpcut_test_case_base* t, comm::reporter &report_obj)
+    static void run(crpcut_test_case_base *t, comm::reporter &report_obj)
     {
+      crpcut_test_monitor &current_test = t->crpcut_get_reg();
       try {
         t->test();
       }
@@ -1964,15 +2000,15 @@ namespace crpcut {
       catch (...)
         {
           std::ostringstream os;
-          os << report_obj.get_location()
+          os << current_test.get_location()
              << "\nUnexpectedly caught "
              << policies::crpcut_exception_translator::try_all();
-          report_obj(comm::exit_fail, os);
+          report_obj(comm::exit_fail, os, &current_test);
         }
       std::ostringstream os;
-      os << report_obj.get_location()
+      os << current_test.get_location()
          << "\nUnexpectedly did not throw";
-        report_obj(comm::exit_fail, os);
+        report_obj(comm::exit_fail, os, &current_test);
     }
   };
   template <typename T,
@@ -2161,8 +2197,11 @@ namespace crpcut {
   class tester_base
   {
   protected:
-    tester_base(const char *loc, const char *ops, comm::reporter &report)
-      : location_(loc), op_(ops), report_(report)
+    tester_base(const char *loc,
+                const char *ops,
+                comm::reporter &report,
+                const crpcut_test_monitor *mon)
+      : location_(loc), op_(ops), report_(report), mon_(mon)
     {
     }
     template <comm::type action, typename T1, typename T2>
@@ -2188,13 +2227,14 @@ namespace crpcut {
           std::string().swap(s);
           os.~ostringstream();
           new (&os) ostringstream();
-          this->report_(action, p, len);
+          this->report_(action, p, len, mon_);
         }
       }
   private:
-    const char *location_;
-    const char *op_;
-    comm::reporter &report_;
+    const char                *location_;
+    const char                *op_;
+    comm::reporter            &report_;
+    const crpcut_test_monitor *mon_;
   };
 
   template <comm::type action, typename T1, typename T2>
@@ -2203,8 +2243,11 @@ namespace crpcut {
     typedef typename param_traits<T1>::type type1;
     typedef typename param_traits<T2>::type type2;
   public:
-    tester_t(const char *loc, const char *ops, comm::reporter &report)
-      : tester_base(loc, ops, report)
+    tester_t(const char                *loc,
+             const char                *ops,
+             comm::reporter            &report,
+             const crpcut_test_monitor *mon)
+      : tester_base(loc, ops, report, mon)
     {
     }
     void EQ(type1 v1, const char *n1, type2 v2, const char *n2) const
@@ -2238,8 +2281,11 @@ namespace crpcut {
   {
     typedef typename param_traits<T1>::type type1;
   public:
-    tester_t(const char *loc, const char *ops, comm::reporter &report)
-      : tester_base(loc, ops, report)
+    tester_t(const char                *loc,
+             const char                *ops,
+             comm::reporter            &report,
+             const crpcut_test_monitor *mon)
+      : tester_base(loc, ops, report, mon)
     {
     }
     template <typename T2>
@@ -2279,8 +2325,11 @@ namespace crpcut {
   {
     typedef typename param_traits<T2>::type type2;
   public:
-    tester_t(const char *loc, const char *ops, comm::reporter &report)
-      : tester_base(loc, ops, report)
+    tester_t(const char                *loc,
+             const char                *ops,
+             comm::reporter            &report,
+             const crpcut_test_monitor *mon)
+      : tester_base(loc, ops, report, mon)
     {
     }
     template <typename T1>
@@ -2319,11 +2368,14 @@ namespace crpcut {
   tester_t<action,
            typename if_else<null1, void, T1>::type,
            typename if_else<null2, void, T2>::type>
-  tester(const char *loc, const char *op, comm::reporter & report = comm::report)
+  tester(const char *loc,
+         const char *op,
+         comm::reporter & report = comm::report,
+         const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
   {
     tester_t<action,
              typename if_else<null1, void, T1>::type,
-             typename if_else<null2, void, T2>::type> v(loc, op, report);
+             typename if_else<null2, void, T2>::type> v(loc, op, report, mon);
     return v;
   }
 
@@ -2342,9 +2394,12 @@ namespace crpcut {
   {
     const char *loc_;
   public:
-    bool_tester(const char *loc, comm::reporter &reporter = comm::report)
+    bool_tester(const char                *loc,
+                comm::reporter            &reporter = comm::report,
+                const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
       : loc_(loc),
-        report_(reporter)
+        report_(reporter),
+        mon_(mon)
     {
     }
     template <typename T>
@@ -2370,10 +2425,11 @@ namespace crpcut {
                                     name,
                                     vn),
                              v);
-      this->report_(action, os);
+      this->report_(action, os, mon_);
     }
 
-    comm::reporter &report_;
+    comm::reporter            &report_;
+    const crpcut_test_monitor *mon_;
   };
 
   template <case_convert_type converter>
@@ -3015,14 +3071,14 @@ namespace crpcut {
   struct parameter_stream_traits
   {
     typedef T type;
-    static T make_value(const char *n);
+    static T make_value(const char *n, crpcut_test_monitor *current_test);
   };
 
   template <>
   struct parameter_stream_traits<std::istream>
   {
     typedef istream_wrapper type;
-    static type make_value(const char *n);
+    static type make_value(const char *n, crpcut_test_monitor *current_test);
   };
 
   template <typename T>
@@ -3032,7 +3088,7 @@ namespace crpcut {
   struct parameter_stream_traits<relaxed<std::istream> >
   {
     typedef stream::iastream type;
-    static type make_value(const char *n);
+    static type make_value(const char *n, crpcut_test_monitor *current_test);
   };
 
   bool timeouts_are_enabled();
@@ -3341,8 +3397,9 @@ namespace crpcut {
 
     namespace timeout {
       template <unsigned long timeout_us>
-      enforcer<realtime, timeout_us>::enforcer()
-        : monotonic_enforcer(timeout_us)
+      enforcer<realtime, timeout_us>
+      ::enforcer(const crpcut_test_monitor *current_test)
+        : monotonic_enforcer(timeout_us, current_test)
       {
       }
     } // namespace timeout
@@ -3354,26 +3411,32 @@ namespace crpcut {
 
     template <size_t N>
     void
-    reporter::operator()(type t, const stream::toastream<N> &os) const
+    reporter::operator()(type                        t,
+                         const stream::toastream<N> &os,
+                         const crpcut_test_monitor  *mon) const
     {
       const stream::oastream &os_(os);
-      operator()(t, os_);
+      operator()(t, os_, mon);
     }
 
     template <size_t N>
     void
-    reporter::operator()(type t, const char (&array)[N]) const
+    reporter::operator()(type                       t,
+                         const char               (&array)[N],
+                         const crpcut_test_monitor *mon) const
     {
-      operator()(t, array, N - 1);
+      operator()(t, array, N - 1, mon);
     }
 
     template <typename T>
     void
-    reporter::operator()(comm::type t, const T& data) const
+    reporter::operator()(comm::type                 t,
+                         const T                   &data,
+                         const crpcut_test_monitor *mon) const
     {
       assert(tests_as_child_processes());
       const void *addr = &data;
-      report(t, static_cast<const char*>(addr), sizeof(data));
+      report(t, static_cast<const char*>(addr), sizeof(data), mon);
     }
 
     template <typename T>
@@ -3386,9 +3449,12 @@ namespace crpcut {
     }
 
     template <comm::type type>
-    direct_reporter<type>::direct_reporter(reporter &r)
+    direct_reporter<type>
+    ::direct_reporter(reporter                  &r,
+                      const crpcut_test_monitor *mon)
       : heap_limit(heap::set_limit(heap::system)),
-        report_(r)
+        report_(r),
+        mon_(mon)
     {
     }
 
@@ -3418,7 +3484,7 @@ namespace crpcut {
       char *p = static_cast<char*>(alloca(len));
       s.copy(p, len);
       std::string().swap(s);
-      report_(type, p, len);
+      report_(type, p, len, mon_);
       heap::set_limit(heap_limit);
     }
 
@@ -3808,7 +3874,7 @@ namespace crpcut {
           }
       }
     std::ostringstream msg;
-    msg << comm::report.get_location()
+    msg << crpcut_test_monitor::current_test()->get_location()
         << "\nParameter " << name << " with ";
     if (v)
       {
@@ -3828,11 +3894,12 @@ namespace crpcut {
   typename parameter_stream_traits<T>::type
   get_parameter(const char *name)
   {
-    return parameter_stream_traits<T>::make_value(name);
+    typedef parameter_stream_traits<T> rt;
+    return rt::make_value(name, crpcut_test_monitor::current_test());
   }
 
   template <typename T>
-  T parameter_stream_traits<T>::make_value(const char *n)
+  T parameter_stream_traits<T>::make_value(const char *n, crpcut_test_monitor*)
   {
     T rv;
     get_parameter(n, rv);
@@ -4098,10 +4165,12 @@ namespace crpcut {
     {
     public:
       time(unsigned long us, const char *file, size_t line,
-           comm::reporter &reporter = comm::report)
+           comm::reporter &reporter = comm::report,
+           const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
         : time_base(clock::now() + us * crpcut::timeout_multiplier(), file, line),
           limit_us_(us),
-          reporter_(reporter)
+          reporter_(reporter),
+          mon_(mon)
       {
       }
       ~time()
@@ -4112,7 +4181,7 @@ namespace crpcut {
             if (timeouts_are_enabled() && cond::busted(t, deadline_))
               {
                 unsigned long duration_ms = (t - deadline_ + limit_us_) / 1000;
-                comm::direct_reporter<action>(reporter_)
+                comm::direct_reporter<action>(reporter_, mon_)
                   << filename_ << ":" << line_ << "\n"
                   << crpcut_check_name<action>::string()
                   << "_SCOPE_" << cond::name()
@@ -4124,7 +4193,8 @@ namespace crpcut {
       time(const time& r)
         : time_base(r),
           limit_us_(r.limit_us_),
-          reporter_(r.reporter_)
+          reporter_(r.reporter_),
+          mon_(r.mon_)
       {
         static const unsigned long zero(0UL);
         r.limit_us_ = ~zero;
@@ -4132,8 +4202,9 @@ namespace crpcut {
     private:
       time& operator=(const time&);
 
-      unsigned long mutable limit_us_;
-      comm::reporter       &reporter_;
+      unsigned long mutable      limit_us_;
+      comm::reporter            &reporter_;
+      const crpcut_test_monitor *mon_;
     };
   }
 
@@ -4156,9 +4227,10 @@ extern crpcut::namespace_info crpcut_current_namespace;
     test_case_name() {}                                                 \
     virtual void crpcut_run_test()                                      \
     {                                                                   \
-      crpcut_realtime_enforcer rt;                                      \
+      crpcut_realtime_enforcer rt(&crpcut_get_reg());                   \
       using crpcut::policies::timeout::cputime_enforcer;                \
-      cputime_enforcer ct(crpcut_cputime_enforcer::crpcut_cputime_timeout_us); \
+      cputime_enforcer ct(crpcut_cputime_enforcer::crpcut_cputime_timeout_us,\
+                          &crpcut_get_reg());                            \
       (void)rt; /* silence warning */                                   \
       (void)ct; /* silence warning */                                   \
       crpcut::test_wrapper<crpcut_run_wrapper>::run(this, crpcut::comm::report); \
@@ -4188,7 +4260,6 @@ extern crpcut::namespace_info crpcut_current_namespace;
       static const unsigned long crpcut_cputime_timeout_us              \
         =test_case_name::crpcut_cputime_enforcer::crpcut_cputime_timeout_us; \
       void setup(crpcut::poll<crpcut::fdreader> &poller,                \
-                 pid_t                           pid,                   \
                  int                             in_fd,                 \
                  int                             stdout_fd,             \
                  int                             stderr_fd)             \
@@ -4196,7 +4267,6 @@ extern crpcut::namespace_info crpcut_current_namespace;
         stdout_reader_.set_fd(stdout_fd, &poller);                      \
         stderr_reader_.set_fd(stderr_fd, &poller);                      \
         report_reader_.set_fd(in_fd, &poller);                          \
-        set_pid(pid);                                                   \
       }                                                                 \
     public:                                                             \
        crpcut_registrator()                                             \

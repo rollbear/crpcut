@@ -26,7 +26,6 @@
 
 
 #include <crpcut.hpp>
-#include "../current_process.hpp"
 #include "../wrapped/posix_encapsulation.hpp"
 #include "../sigignore.hpp"
 
@@ -37,18 +36,6 @@ namespace crpcut {
 
     reporter::~reporter()
     {
-    }
-
-    void reporter::set_process_control(current_process *pc)
-    {
-      assert(current_test_ == 0);
-      current_test_ = pc;
-    }
-
-    datatypes::fixed_string
-    reporter::get_location() const
-    {
-      return current_test_->get_location();
     }
 
     void reporter::send_message(type t, const char *msg, size_t len) const
@@ -69,9 +56,13 @@ namespace crpcut {
       writer_->write_loop(report_addr, len + header_size);
     }
 
-    void reporter::report(type t, const char *msg, size_t len) const
+    void reporter
+    ::report(type                       t,
+             const char                *msg,
+             size_t                     len,
+             const crpcut_test_monitor *current_test) const
     {
-      if (!current_test_)
+      if (!current_test || !writer_)
         {
           if (len)
             {
@@ -85,7 +76,7 @@ namespace crpcut {
         }
 
       try {
-        bool testicide = current_test_->is_naughty_child();
+        bool testicide = current_test->is_naughty_child();
         if (testicide)
           {
             t = static_cast<type>(t | kill_me);
@@ -100,14 +91,13 @@ namespace crpcut {
       }
       catch (...)
         {
-          current_test_->freeze();
+          current_test->freeze();
         }
     }
 
     reporter::reporter(std::ostream &default_out)
       : writer_(0),
         reader_(0),
-        current_test_(0),
         default_out_(default_out)
     {
     }
@@ -120,28 +110,37 @@ namespace crpcut {
     }
 
     void
-    reporter::operator()(type t, const stream::oastream &os) const
+    reporter::operator()(type                       t,
+                         const stream::oastream    &os,
+                         const crpcut_test_monitor *mon) const
     {
-      report(t, os.begin(), os.size());
+      report(t, os.begin(), os.size(), mon);
     }
 
     void
-    reporter::operator()(type t, const std::ostringstream &os) const
+    reporter::operator()(type                       t,
+                         const std::ostringstream  &os,
+                         const crpcut_test_monitor *mon) const
     {
       const std::string &s = os.str();
-      report(t, s.c_str(), s.length());
+      report(t, s.c_str(), s.length(), mon);
     }
 
     void
-    reporter::operator()(type t, const char *msg) const
+    reporter::operator()(type                       t,
+                         const char                *msg,
+                         const crpcut_test_monitor *mon) const
     {
-      report(t, msg, wrapped::strlen(msg));
+      report(t, msg, wrapped::strlen(msg), mon);
     }
 
     void
-    reporter::operator()(type t, const char *msg, size_t len) const
+    reporter::operator()(type                       t,
+                         const char                *msg,
+                         size_t                     len,
+                         const crpcut_test_monitor *mon) const
     {
-      report(t, msg, len);
+      report(t, msg, len, mon);
     }
   }
 

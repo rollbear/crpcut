@@ -84,6 +84,8 @@ namespace {
     MOCK_METHOD0(deactivate_reader, void());
     MOCK_CONST_METHOD0(has_active_readers, bool());
     MOCK_METHOD0(manage_death, void());
+    MOCK_CONST_METHOD0(is_naughty_child, bool());
+    MOCK_CONST_METHOD0(freeze, void());
   };
 
 

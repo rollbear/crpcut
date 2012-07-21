@@ -71,7 +71,6 @@ namespace crpcut {
     test_environment        *env_;
     cli::interpreter        *cli_;
     struct timeval           accumulated_cputime_;
-    pid_t                    current_pid_;
     registrator_list         reg_;
     unsigned                 num_pending_children_;
     comm::wfile_descriptor   presenter_pipe_;

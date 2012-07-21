@@ -32,11 +32,12 @@ namespace {
                             crpcut::comm::reporter        &report)
   {
     crpcut::heap::set_limit(crpcut::heap::system);
+    crpcut::crpcut_test_case_registrator &current_test = t->crpcut_get_reg();
     std::ostringstream os;
-    os << t->crpcut_get_reg().get_location()
+    os << current_test.get_location()
        << "\nUnexpectedly survived\nExpected ";
-    t->crpcut_get_reg().crpcut_expected_death(os);
-    report(crpcut::comm::exit_fail, os);
+    current_test.crpcut_expected_death(os);
+    report(crpcut::comm::exit_fail, os, &current_test);
   }
 
   void
@@ -45,9 +46,10 @@ namespace {
   {
     crpcut::heap::set_limit(crpcut::heap::system);
     std::ostringstream os;
-    os << t->crpcut_get_reg().get_location()
+    crpcut::crpcut_test_monitor &current_test = t->crpcut_get_reg();
+    os << current_test.get_location()
        << "\nUnexpectedly did not throw";
-    report(crpcut::comm::exit_fail, os);
+    report(crpcut::comm::exit_fail, os, &current_test);
 
   }
 }
@@ -93,10 +95,11 @@ namespace crpcut {
     catch (...) {
       heap::set_limit(heap::system);
       std::ostringstream out;
-      out << t->crpcut_get_reg().get_location()
+      const crpcut_test_monitor &mon = t->crpcut_get_reg();
+      out << mon.get_location()
           << "\nUnexpectedly caught "
           << policies::crpcut_exception_translator::try_all();
-      report(comm::exit_fail, out);
+      report(comm::exit_fail, out, &mon);
     }
     report_did_not_throw(t, report);
   }

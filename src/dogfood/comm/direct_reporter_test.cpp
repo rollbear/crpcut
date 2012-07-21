@@ -41,7 +41,7 @@ TESTSUITE(comm)
     TEST(trivial_output_is_copied_in_verbatim, fix)
     {
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter,0);
         d << "apa" << ' ' << 32;
         ASSERT_TRUE(os.size() == 0U);
       }
@@ -51,7 +51,7 @@ TESTSUITE(comm)
     TEST(output_stream_manipulators_are_forwarded, fix)
     {
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter,0);
         d << std::hex << std::noshowbase << 32 << std::endl
           << std::setw(5) << std::left << 1;
       }
@@ -62,7 +62,7 @@ TESTSUITE(comm)
     {
       {
         crpcut::heap::set_limit(crpcut::heap::allocated_bytes());
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter,0);
         d << "apa\nkatt";
       }
       crpcut::heap::set_limit(crpcut::heap::system);
@@ -72,7 +72,7 @@ TESTSUITE(comm)
     TEST(variables_are_forwarded, fix)
     {
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter,0);
         int c = 3;
         const unsigned u = 8;
         d << c << " " << u;

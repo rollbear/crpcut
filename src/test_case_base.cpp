@@ -40,7 +40,7 @@ namespace crpcut {
   ::crpcut_test_finished()
   {
     crpcut_finished = true;
-    comm::report(comm::end_test, 0, 0);
+    comm::report(comm::end_test, 0, 0, crpcut_test_monitor::current_test());
   }
 
   crpcut_test_case_base
@@ -48,7 +48,7 @@ namespace crpcut {
   {
     if (crpcut_finished)
       {
-        comm::report(comm::exit_ok, 0, 0);
+        comm::report(comm::exit_ok, 0, 0, crpcut_test_monitor::current_test());
       }
   }
 

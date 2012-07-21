@@ -154,6 +154,23 @@ namespace crpcut {
     return clocks::monotonic::timestamp_absolute() - real_time_at_start_;
   }
 
+  bool
+  crpcut_test_case_registrator
+  ::is_naughty_child() const
+  {
+    return pid_ && pid_ != wrapped::getpid();
+  }
+
+  void
+  crpcut_test_case_registrator
+  ::freeze() const
+  {
+    for (;;)
+      {
+        wrapped::select(0,0,0,0,0);
+      }
+  }
+
   crpcut_test_case_registrator
   ::crpcut_test_case_registrator(const char *name, namespace_info *ns)
     : name_(name),
@@ -208,14 +225,13 @@ namespace crpcut {
     link_before(runner_->reg_);
   }
 
+
   void
   crpcut_test_case_registrator
   ::set_pid(pid_t pid)
   {
     assert(pid_ == 0);
     pid_ = pid;
-    runner_->introduce_test(pid, this);
-
   }
   void
   crpcut_test_case_registrator

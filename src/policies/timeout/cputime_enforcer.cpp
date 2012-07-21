@@ -33,14 +33,16 @@ namespace crpcut {
     namespace timeout {
 
       cputime_enforcer
-      ::cputime_enforcer(unsigned long timeout_us)
-        : duration_us(timeout_us * timeout_multiplier()),
-          start_timestamp_us(clocks::cputime::timestamp_absolute())
+      ::cputime_enforcer(unsigned long              timeout_us,
+                         const crpcut_test_monitor *current_test)
+        : duration_us_(timeout_us * timeout_multiplier()),
+          start_timestamp_us_(clocks::cputime::timestamp_absolute()),
+          current_test_(current_test)
       {
         if (timeout_us && timeouts_are_enabled())
           {
-            rlimit r = { (duration_us + 1500000) / 1000000,
-                         (duration_us + 2500000) / 1000000 };
+            rlimit r = { (duration_us_ + 1500000) / 1000000,
+                         (duration_us_ + 2500000) / 1000000 };
             wrapped::setrlimit(RLIMIT_CPU, &r);
           }
       }
@@ -48,16 +50,16 @@ namespace crpcut {
       cputime_enforcer
       ::~cputime_enforcer()
       {
-        if (!timeouts_are_enabled() || duration_us == 0) return;
+        if (!timeouts_are_enabled() || duration_us_ == 0) return;
 
         clocks::cputime::timestamp now
           = clocks::cputime::timestamp_absolute();
-        unsigned long diff = now - start_timestamp_us;
-        if  (diff > duration_us)
+        unsigned long diff = now - start_timestamp_us_;
+        if  (diff > duration_us_)
           {
             std::ostringstream os;
-            os << comm::report.get_location()
-               << "\nCPU-time timeout " << duration_us / 1000
+            os << current_test_->get_location()
+               << "\nCPU-time timeout " << duration_us_ / 1000
                << "ms exceeded.\n  Actual time to completion was "
                << diff / 1000 << "ms";
             comm::report(comm::exit_fail, os);

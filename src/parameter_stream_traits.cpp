@@ -27,14 +27,15 @@
 #include <crpcut.hpp>
 #include "test_runner.hpp"
 namespace {
-  const char *get_parameter_string(const char *n)
+  const char *get_parameter_string(const char *n,
+                                   crpcut::crpcut_test_monitor *current_test)
   {
     using namespace crpcut;
     const char *p = get_parameter(n);
     if (!p)
       {
         std::ostringstream os;
-        os << comm::report.get_location()
+        os << current_test->get_location()
            << "\nNo parameter named \"" << n << "\"";
         comm::report(comm::exit_fail, os);
       }
@@ -45,15 +46,15 @@ namespace {
 namespace crpcut {
   istream_wrapper
   parameter_stream_traits<std::istream>
-  ::make_value(const char *n)
+  ::make_value(const char *n, crpcut_test_monitor *current_test)
   {
-    return istream_wrapper(get_parameter_string(n));
+    return istream_wrapper(get_parameter_string(n, current_test));
   }
 
   stream::iastream
   parameter_stream_traits<relaxed<std::istream> >
-  ::make_value(const char *n)
+  ::make_value(const char *n, crpcut_test_monitor *current_test)
   {
-    return stream::iastream(get_parameter_string(n));
+    return stream::iastream(get_parameter_string(n, current_test));
   }
 }
