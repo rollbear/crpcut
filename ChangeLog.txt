@@ -1,3 +1,5 @@
+2012-07-21 1.8.3
+
          * Added file:line as first line of all reports, except info, stderr
            and stdout. When an exact location for the error can't be found,
            for example if the test has exited unexpectedly, the location
