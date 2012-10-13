@@ -141,6 +141,7 @@ namespace crpcut {
       {
         real_time_at_start_ = now;
       }
+    if (!env_->timeouts_enabled()) return;
     timeboxed::set_deadline(phase_ == running
                             ? crpcut_calc_deadline(ts_us)
                             : ts_us);
@@ -237,11 +238,8 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::prepare_construction(unsigned long deadline_us)
   {
-    if (env_->timeouts_enabled())
-      {
-        unsigned long req = deadline_us*env_->timeout_multiplier();
-        (*reporter_)(comm::set_timeout, req);
-      }
+    unsigned long req = deadline_us*env_->timeout_multiplier();
+    (*reporter_)(comm::set_timeout, req);
   }
 
   void

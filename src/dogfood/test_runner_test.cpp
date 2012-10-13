@@ -342,13 +342,10 @@ TESTSUITE(test_runner)
 
   TESTSUITE(prepare_construction)
   {
-    TEST(reports_deadline_multiplied_if_timeouts_are_enabled, fix<10U>)
+    TEST(reports_deadline_multiplied, fix<10U>)
     {
       unsigned factor = 20;
       unsigned requested_timeout = 100;
-
-      EXPECT_CALL(env, timeouts_enabled()).
-        WillOnce(Return(true));
 
       EXPECT_CALL(env, timeout_multiplier()).
         WillOnce(Return(factor));
@@ -361,13 +358,6 @@ TESTSUITE(test_runner)
                                    _)).
           With(Args<1,2>(ElementsAreArray(result_str, sizeof(result))));
       reg.prepare_construction(requested_timeout);
-    }
-
-    TEST(does_nothing_if_timeouts_are_disabled, fix<10U>)
-    {
-      EXPECT_CALL(env, timeouts_enabled()).
-          WillOnce(Return(false));
-      reg.prepare_construction(100U);
     }
   }
 

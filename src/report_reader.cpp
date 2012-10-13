@@ -50,7 +50,6 @@ namespace crpcut {
     cancel_timeout();
 
     mon_->set_timeout(*ts_us);
-    assert(mon_->deadline_is_set());
   }
 
   void
