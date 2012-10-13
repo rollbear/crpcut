@@ -1401,7 +1401,7 @@ TESTS = {
 
   'output::string_with_illegal_chars_should_succeed' =>
   PassedTest.new().
-  log('info', /.*/me),
+  log('info', //),
   
   'output::should_succeed_user_streamable_shown_as_defined' =>
   PassedTest.new().
