@@ -3434,7 +3434,6 @@ namespace crpcut {
                          const T                   &data,
                          const crpcut_test_monitor *mon) const
     {
-      assert(tests_as_child_processes());
       const void *addr = &data;
       report(t, static_cast<const char*>(addr), sizeof(data), mon);
     }
