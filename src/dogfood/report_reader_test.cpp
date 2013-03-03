@@ -28,6 +28,7 @@
 #include <crpcut.hpp>
 #include "../poll.hpp"
 #include <deque>
+#include <vector>
 #include "../clocks/clocks.hpp"
 
 using namespace testing;
@@ -49,17 +50,19 @@ namespace {
       ASSERT_TRUE(buffer.size() > 0U);
       data current = buffer.front();
       buffer.pop_front();
-      ASSERT_TRUE(current.len == bytes);
-      memcpy(addr, current.addr, bytes);
+      ASSERT_TRUE(current.bytes.size() == bytes);
+      memcpy(addr, &current.bytes[0], bytes);
     }
 
     struct data
     {
-      data(const void *p, size_t l) : addr(p), len(l) {}
+      data(const void *p, size_t l) : bytes(l) { memcpy(&bytes[0], p, l); }
       template <typename T>
-      data(const T& t) : addr(&t), len(sizeof(t)) {}
-      const void *addr;
-      size_t len;
+      data(const T& t) : bytes(sizeof(t))
+      {
+    	memcpy(&bytes[0], &t, sizeof(t));
+      }
+      std::vector<char> bytes;
     };
     mutable std::deque<data> buffer;
   };
