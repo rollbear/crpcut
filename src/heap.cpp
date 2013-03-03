@@ -73,13 +73,27 @@ namespace {
 
 namespace {
   typedef enum { raw, by_malloc, by_new_elem, by_new_array } alloc_type;
-  static const char *alloc_name[] = {
-    "raw", "malloc", "new", "new[]"
-  };
-  static const char *free_name[] = {
-    "raw", "free", "delete", "delete[]"
-  };
-
+  template <typename T, size_t N>
+  T subscript(const T (&array)[N], size_t n)
+  {
+    return n >= N ? 0 : array[n];
+  }
+  const char* alloc_name(int t)
+  {
+    static const char *names[] = {
+        "raw", "malloc", "new", "new[]"
+    };
+    const char *name = subscript(names, t);
+    return name ? name : "<illegal>";
+  }
+  const char *free_name(int t)
+  {
+    static const char *names[] = {
+        "raw", "free", "delete", "delete[]"
+    };
+    const char *name = subscript(names, t);
+    return name ? name : "<illegal>";
+  }
   inline void *zeromem(void *p, size_t n)
   {
     if (p)
@@ -325,7 +339,7 @@ namespace crpcut
           mem_list_element *n = p->next;
           msg << p->mem << " byte";
           if (p->mem != 1) msg << 's';
-          msg << " at " << p+1 << " allocated with " << alloc_name[p->type];
+          msg << " at " << p+1 << " allocated with " << alloc_name(p->type);
           show_stack(msg, "\nAllocated at:", p->stack, p->stack_size);
           valgrind_make_mem_undefined(p, sizeof(mem_list_element));
           if (n != this) msg << '\n';
@@ -400,8 +414,8 @@ namespace crpcut
               comm::direct_reporter<crpcut::comm::exit_fail>()
                 << crpcut_test_monitor::current_test()->get_location()
                 << "\nDEALLOC FAIL\n"
-                << free_name[type] << " " << addr << " was allocated using "
-                << alloc_name[current_type]
+                << free_name(type) << " " << addr << " was allocated using "
+                << alloc_name(current_type)
                 << msg.str();
             }
           else

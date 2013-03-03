@@ -5,7 +5,9 @@
            --single-shot
            
          * Fixed a bug where the duration_us field in XML reports were
-           wrong when run with --disable-timeouts  
+           wrong when run with --disable-timeouts
+           
+         * Improved robustness in heap-error reporting
 
 2012-07-21 1.8.3
 
