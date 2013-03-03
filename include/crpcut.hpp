@@ -245,6 +245,12 @@
 #    define CRPCUT_NO_EXCEPTION_SUPPORT
 #  endif
 #else
+#  if defined(__CDT_PARSER__)
+#    define CRPCUT_DECLTYPE decltype
+#    define CRPCUT_EXPERIMENTAL_CXX0X
+#    define CRPCUT_SUPPORTS_VTEMPLATES
+#    define __GXX_EXPERIMENTAL_CXX0X__
+#  endif
 #  define CRPCUT_NORETURN
 #endif
 
