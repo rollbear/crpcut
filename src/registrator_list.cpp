@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,6 @@ namespace crpcut {
                 ++num_selected_tests;
                 i->unlink();
                 i->link_before(result);
-                i->crpcut_uninhibit_dependants();
              }
           }
         if (matches == 0)
@@ -94,6 +93,17 @@ namespace crpcut {
                << " not match any test names\n";
         return std::make_pair(1U,0U);
       }
+
+    // Ensure that tests not selected for running, do not prevent
+    // selected tests from running
+    for (reg *i = next(); !is_this(i); i = i->next())
+      {
+         if (i->get_importance() != tag::disabled)
+           {
+             i->crpcut_register_success(true);
+           }
+      }
+
     unlink();
     link_after(result);
     result.unlink();
