@@ -119,10 +119,10 @@ namespace crpcut
 
   namespace wrapped
   {
-    CRPCUT_WRAP_FUNC(libc, malloc, void*, (size_t s), (s))
-    CRPCUT_WRAP_V_FUNC(libc, free, void, (const void *p), (p))
-    CRPCUT_WRAP_FUNC(libc, calloc, void *, (size_t n, size_t s), (n, s))
-    CRPCUT_WRAP_FUNC(libc, realloc, void *, (void *m, size_t n), (m, n))
+    CRPCUT_WRAP_FUNC(rtld_next, malloc, void*, (size_t s), (s))
+    CRPCUT_WRAP_V_FUNC(rtld_next, free, void, (const void *p), (p))
+    CRPCUT_WRAP_FUNC(rtld_next, calloc, void *, (size_t n, size_t s), (n, s))
+    CRPCUT_WRAP_FUNC(rtld_next, realloc, void *, (void *m, size_t n), (m, n))
   }
 
 
@@ -445,11 +445,11 @@ namespace crpcut
       static bool has_malloc_sym = false;
       static int recursive = -1;
       recurse_counter recurse_checker(recursive);
-      typedef libwrapper::loader<libs::libc> libc_loader;
+      typedef libwrapper::loader<libs::rtld_next> loader;
 
       if (!use_local_heap)
         {
-          has_malloc_sym |= !recursive && libc_loader::has_symbol("malloc");
+          has_malloc_sym |= !recursive && loader::has_symbol("malloc");
         }
       if (use_local_heap || !has_malloc_sym)
         {
@@ -460,7 +460,6 @@ namespace crpcut
             }
           mem_list_element *p = &vector[current_offset];
           current_offset += blocks + 1;
-          valgrind_mempool_alloc(vector, p+1, s);
           return p;
         }
       const size_t size = s + 2*sizeof(mem_list_element);
@@ -516,6 +515,8 @@ namespace crpcut
           valgrind_make_mem_noaccess(p, sizeof(mem_list_element));
           ++p;
           valgrind_make_mem_undefined(p, s);
+          valgrind_make_mem_noaccess(p + s, sizeof(mem_list_element));
+          valgrind_mempool_alloc(vector, p, s);
         }
       return p;
     }
@@ -524,7 +525,6 @@ namespace crpcut
     {
       if (p >= vector && p < &vector[num_elems])
         {
-          valgrind_mempool_free(vector, p+1);
           return;
         }
       crpcut::wrapped::free(p);
@@ -549,6 +549,7 @@ namespace crpcut
         }
       local_root *root = local_root::current();
       if (root) root->remove_object(p);
+      valgrind_mempool_free(vector, addr);
       free_mem_raw(p);
     }
 

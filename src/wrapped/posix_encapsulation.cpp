@@ -74,6 +74,10 @@ namespace crpcut {
       };
       return name;
     }
+    const char *const * rtld_next()
+    {
+      return 0;
+    }
   }
 
   namespace libwrapper

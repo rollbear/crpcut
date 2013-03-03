@@ -386,6 +386,7 @@ namespace crpcut {
   {
     const char * const * libc();
     const char * const * librt();
+    const char * const * rtld_next();
   }
 
   namespace libwrapper {
@@ -430,6 +431,31 @@ namespace crpcut {
       static bool has_symbol(const char *name)
       {
         return is_loaded() && symbol(libptr(), name);
+      }
+      static loader& obj()
+      {
+        static loader o;
+        return o;
+      }
+    };
+    template <>
+    class loader<libs::rtld_next> : dlloader
+    {
+    public:
+      static bool is_loaded() { return true; }
+      template <typename T>
+      T sym(const char *name)
+      {
+        union {
+          T func;
+          void *addr;
+        } dlr;
+        dlr.addr = symbol(RTLD_NEXT, name);
+        return dlr.func;
+      }
+      static bool has_symbol(const char *name)
+      {
+        return symbol(RTLD_NEXT, name);
       }
       static loader& obj()
       {

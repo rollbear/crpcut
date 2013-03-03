@@ -203,7 +203,7 @@ namespace crpcut {
     fd_.read_loop(&len, sizeof(len));
     if (len == 0) return;
 
-    char *buff = static_cast<char *>(wrapped::malloc(len));
+    char *buff = static_cast<char*>(wrapped::malloc(len));
     fd_.read_loop(buff, len);
 
     if (t == comm::exit_ok || t == comm::exit_fail)

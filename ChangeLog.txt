@@ -1,3 +1,6 @@
+         * Fixed a bug in the heap valgrind instrumentation which made
+           valgrind miss a lot of errors.
+ 
          * Fixed a test-dependency bug, where tests that were not selected
            could prevent selected tests from running.
            
