@@ -1797,7 +1797,7 @@ namespace crpcut {
       mem_list_element        *stack;
       size_t                   stack_size;
       size_t                   mem;
-      int                      type;
+      size_t                   type;
     };
 
     class local_root : public mem_list_element

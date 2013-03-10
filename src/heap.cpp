@@ -78,7 +78,7 @@ namespace {
   {
     return n >= N ? 0 : array[n];
   }
-  const char* alloc_name(int t)
+  const char* alloc_name(size_t t)
   {
     static const char *names[] = {
         "raw", "malloc", "new", "new[]"
@@ -86,7 +86,7 @@ namespace {
     const char *name = subscript(names, t);
     return name ? name : "<illegal>";
   }
-  const char *free_name(int t)
+  const char *free_name(size_t t)
   {
     static const char *names[] = {
         "raw", "free", "delete", "delete[]"
@@ -402,7 +402,7 @@ namespace crpcut
     }
     static void alloc_type_check(mem_list_element *p, alloc_type type) throw ()
     {
-      int current_type = p->type;
+      size_t current_type = p->type;
       if (current_type != type)
         {
           void *addr = p + 1;
