@@ -79,7 +79,7 @@ namespace crpcut {
     typedef typename poll<T>::polltype   polltype;
     static std::size_t space_for(std::size_t capacity)
     {
-      return buffer_vector<T>::space_for(capacity);
+      return buffer_vector<fdinfo>::space_for(capacity);
     }
     poll_buffer_vector(void *p, std::size_t capacity);
     virtual ~poll_buffer_vector();

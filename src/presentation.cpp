@@ -48,8 +48,8 @@ namespace crpcut {
   {
     comm::rfile_descriptor presenter_pipe(presentation_fd);
 
-    void *poll_memory = alloca(poll_buffer_vector<io>::space_for(4));
-    poll_buffer_vector<io> poller(poll_memory, 4);
+    void *poll_memory = alloca(poll_buffer_vector<io>::space_for(3));
+    poll_buffer_vector<io> poller(poll_memory, 3);
     presentation_reader r(poller,
                           presenter_pipe,
                           fmt,
