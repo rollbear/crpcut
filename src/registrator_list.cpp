@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
