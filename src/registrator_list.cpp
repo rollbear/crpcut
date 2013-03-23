@@ -113,17 +113,18 @@ namespace crpcut {
 
   void
   registrator_list
-  ::list_tests_to(std::ostream &os, int tag_margin) const
+  ::list_tests_to(std::ostream &os, size_t tag_margin) const
   {
+    int wmargin = int(tag_margin);
     if (tag_margin)
       {
-        os << ' ' << std::setw(tag_margin) << "tag"
-        << " : test-name\n="
-        << std::setfill('=')
-        << std::setw(tag_margin)
-        << "==="
-        << "============\n"
-        << std::setfill(' ');
+        os << ' ' << std::setw(wmargin) << "tag"
+           << " : test-name\n="
+           << std::setfill('=')
+           << std::setw(wmargin)
+           << "==="
+           << "============\n"
+           << std::setfill(' ');
       }
     for (const crpcut_test_case_registrator *i = next();
          !is_this(i); i = i->next())
@@ -135,7 +136,7 @@ namespace crpcut {
         os << importance;
         if (tag_margin)
           {
-            os << std::setw(tag_margin)
+            os << std::setw(wmargin)
                << i->crpcut_tag().get_name().str
                << " : ";
           }

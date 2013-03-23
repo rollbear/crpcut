@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ namespace crpcut {
     std::pair<unsigned, unsigned> filter_out_or_throw(const char *const *names,
                                                       std::ostream      &err_or,
                                                       E                  e);
-    void list_tests_to(std::ostream &os, int tag_margin) const;
+    void list_tests_to(std::ostream &os, size_t tag_margin) const;
   private:
     virtual std::pair<unsigned, unsigned>
             filter_out_unused(const char *const *names,

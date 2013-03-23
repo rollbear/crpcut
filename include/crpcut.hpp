@@ -1021,7 +1021,7 @@ namespace crpcut {
     friend class tag_list_root;
     tag();
   protected:
-    tag(int len, tag_list_root *list);
+    tag(size_t len, tag_list_root *list);
     virtual ~tag(); // make eclipse happy
   public:
     typedef enum { CRPCUT_TEST_IMPORTANCE(CRPCUT_VERBATIM_FIRST) } importance;
@@ -1043,8 +1043,8 @@ namespace crpcut {
   {
   public:
     tag_list_root() : tag(), longest_tag_name_(0) {}
-    virtual int longest_tag_name() const { return longest_tag_name_; }
-    void store_name_length(int n) { longest_tag_name_ = n; }
+    virtual size_t longest_tag_name() const { return longest_tag_name_; }
+    void store_name_length(size_t n) { longest_tag_name_ = n; }
     template <typename T>
     class iterator_t
     {
@@ -1068,7 +1068,7 @@ namespace crpcut {
     void print_to(std::ostream &) const;
     void configure_importance(const char *specification);
   private:
-    int longest_tag_name_;
+    size_t longest_tag_name_;
   };
 
   template <typename T>
@@ -1099,7 +1099,7 @@ namespace crpcut {
             &crpcut_tag_info<crpcut_none>::obj())
     {
     }
-    int get_name_len() const;
+    size_t get_name_len() const;
     virtual datatypes::fixed_string get_name() const;
   };
 
@@ -3801,7 +3801,6 @@ namespace crpcut {
                     T rh,
                     const must_be_ieee754_fp_type<T> & = 0)
     {
-      typedef typename datatypes::fp_rep<sizeof(T)>::type rep;
       if (lh != lh) return false; // NaN
       if (rh != rh) return false; // NaN
       if (!inf && std::numeric_limits<T>::max() / lh == 0.0) return false;
@@ -4844,11 +4843,11 @@ class crpcut_testsuite_dep
     }                                                           \
     template <>                                                 \
     inline                                                      \
-    int                                                         \
+    size_t                                                      \
     crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
     ::get_name_len() const                                      \
     {                                                           \
-      return sizeof(#tag_name) - 1;                             \
+      return sizeof(#tag_name) - 1U;                            \
     }                                                           \
     template <>                                                 \
     inline                                                      \
@@ -4857,7 +4856,7 @@ class crpcut_testsuite_dep
     ::get_name() const                                          \
     {                                                           \
       using crpcut::datatypes::fixed_string;                    \
-      fixed_string s = { #tag_name, sizeof(#tag_name) - 1};     \
+      fixed_string s = { #tag_name, get_name_len() };           \
       return s;                                                 \
     }                                                           \
   }                                                             \

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ namespace {
     MOCK_CONST_METHOD0(num_failed, size_t());
     MOCK_CONST_METHOD0(num_passed, size_t());
     MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
-    MOCK_CONST_METHOD0(longest_tag_name, int());
+    MOCK_CONST_METHOD0(longest_tag_name, size_t());
     MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
     MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
   };

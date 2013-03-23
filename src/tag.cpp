@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ namespace crpcut {
   {
   }
 
-  tag::tag(int len, tag_list_root *list)
+  tag::tag(size_t len, tag_list_root *list)
     : failed_(0),
       passed_(0),
       importance_(critical)

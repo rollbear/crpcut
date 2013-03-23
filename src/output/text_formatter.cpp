@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -168,7 +168,7 @@ namespace crpcut {
     {
       std::ostringstream os;
       os << " "
-         << std::setw(tags_.longest_tag_name())
+         << std::setw(int(tags_.longest_tag_name()))
          << std::setiosflags(std::ios::left) << "tag"
          << std::resetiosflags(std::ios::left)
          << std::setw(8) << "run"
