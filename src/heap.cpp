@@ -154,9 +154,9 @@ namespace crpcut
       std::new_handler handler;
     };
 
+    mem_list_element global_root = { &global_root, &global_root, 0, 0, 0, 0 };
 
-
-    local_root *local_root::current_root = 0;
+    mem_list_element *local_root::current_root = &global_root;
 
     static mem_list_element *raw_alloc_mem(size_t s) throw ();
 
@@ -300,22 +300,11 @@ namespace crpcut
     local_root::~local_root()
     {
       valgrind_make_mem_defined(this, sizeof(mem_list_element));
-      if (old_root_)
-        {
-          mem_list_element *n = next;
-          mem_list_element *p = prev;
-          valgrind_make_mem_defined(n, sizeof(mem_list_element));
-          valgrind_make_mem_defined(p, sizeof(mem_list_element));
-          n->prev = n;
-          p->next = p;
-          valgrind_make_mem_noaccess(n, sizeof(mem_list_element));
-          valgrind_make_mem_noaccess(p, sizeof(mem_list_element));
-        }
       current_root = old_root_;
       if (file_) assert_empty();
-      remove_object(this);
+      unlink();
     }
-    local_root* local_root::current()
+    mem_list_element* local_root::current()
     {
       return current_root;
     }
@@ -362,23 +351,23 @@ namespace crpcut
       valgrind_make_mem_undefined(const_cast<local_root*>(this), sizeof(*this));
     }
 
-    void local_root::insert_object(mem_list_element *p)
+    void mem_list_element::insert_last(mem_list_element *p)
     {
-      valgrind_make_mem_defined(current_root, sizeof(mem_list_element));
-      p->prev = current_root->prev;
+      valgrind_make_mem_defined(this, sizeof(mem_list_element));
+      p->prev = prev;
       valgrind_make_mem_defined(p->prev, sizeof(mem_list_element));
       p->prev->next = p;
-      current_root->prev = p;
+      prev = p;
       valgrind_make_mem_noaccess(p->prev, sizeof(mem_list_element));
-      valgrind_make_mem_noaccess(current_root, sizeof(mem_list_element));
-      p->next = current_root;
+      valgrind_make_mem_noaccess(this, sizeof(mem_list_element));
+      p->next = this;
     }
 
-    void local_root::remove_object(mem_list_element *p)
+    void mem_list_element::unlink()
     {
-      valgrind_make_mem_defined(p, sizeof(mem_list_element));
-      mem_list_element *next_elem = p->next;
-      mem_list_element *prev_elem = p->prev;
+      valgrind_make_mem_defined(this, sizeof(mem_list_element));
+      mem_list_element *next_elem = next;
+      mem_list_element *prev_elem = prev;
       valgrind_make_mem_defined(next_elem, sizeof(mem_list_element));
       valgrind_make_mem_defined(prev_elem, sizeof(mem_list_element));
       if (next_elem)
@@ -388,7 +377,7 @@ namespace crpcut
         }
       valgrind_make_mem_noaccess(next_elem, sizeof(mem_list_element));
       valgrind_make_mem_noaccess(prev_elem, sizeof(mem_list_element));
-      valgrind_make_mem_noaccess(p, sizeof(mem_list_element));
+      valgrind_make_mem_noaccess(this, sizeof(mem_list_element));
     }
     bool control::enabled;
 
@@ -506,8 +495,8 @@ namespace crpcut
             }
           else
             {
-              local_root *root = local_root::current();
-              if (root) root->insert_object(p);
+              mem_list_element *root = local_root::current();
+              root->insert_last(p);
               bytes += s;
               ++objects;
               save_backtrace(p);
@@ -547,8 +536,7 @@ namespace crpcut
           bytes-= p->mem;
           --objects;
         }
-      local_root *root = local_root::current();
-      if (root) root->remove_object(p);
+      p->unlink();
       valgrind_mempool_free(vector, addr);
       free_mem_raw(p);
     }

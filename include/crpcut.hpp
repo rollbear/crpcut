@@ -1798,6 +1798,8 @@ namespace crpcut {
       size_t                   stack_size;
       size_t                   mem;
       size_t                   type;
+      void insert_last(mem_list_element *p);
+      void unlink();
     };
 
     class local_root : public mem_list_element
@@ -1809,20 +1811,18 @@ namespace crpcut {
       ~local_root();
       operator bool_test() const { return 0; }
       void nonsense_func() const {}
-      void insert_object(mem_list_element *p);
-      void remove_object(mem_list_element *p);
-      static local_root* current();
+      static mem_list_element* current();
     private:
       local_root();
       void assert_empty() const;
       local_root& operator=(const local_root&);
 
-      char      const * const file_;
-      size_t            const line_;
-      mutable local_root     *old_root_;
-      comm::type        const check_type_;
+      char      const * const  file_;
+      size_t            const  line_;
+      mutable mem_list_element*old_root_;
+      comm::type        const  check_type_;
 
-      static local_root      *current_root;
+      static mem_list_element *current_root;
     };
 
   }
