@@ -392,7 +392,7 @@ namespace crpcut
     static void alloc_type_check(mem_list_element *p, alloc_type type) throw ()
     {
       size_t current_type = p->type;
-      if (current_type != type)
+      if (current_type != size_t(type))
         {
           void *addr = p + 1;
           if (control::is_enabled())
