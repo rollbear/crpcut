@@ -1,3 +1,6 @@
+         * garbage (binary timestamp) was printed to stdout when starting
+           a test in --single-shot mode.
+
 2013-03-16 1.8.4
 
          * Fixed a bug in the heap valgrind instrumentation which made

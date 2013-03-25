@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -238,8 +238,11 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::prepare_construction(unsigned long deadline_us)
   {
-    unsigned long req = deadline_us*env_->timeout_multiplier();
-    (*reporter_)(comm::set_timeout, req);
+    if (env_->tests_as_child_procs())
+      {
+        unsigned long req = deadline_us*env_->timeout_multiplier();
+        (*reporter_)(comm::set_timeout, req);
+      }
   }
 
   void

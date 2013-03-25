@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -342,11 +342,13 @@ TESTSUITE(test_runner)
 
   TESTSUITE(prepare_construction)
   {
-    TEST(reports_deadline_multiplied, fix<10U>)
+    TEST(reports_deadline_multiplied_when_run_as_child_process, fix<10U>)
     {
       unsigned factor = 20;
       unsigned requested_timeout = 100;
 
+      EXPECT_CALL(env, tests_as_child_procs()).
+        WillOnce(Return(true));
       EXPECT_CALL(env, timeout_multiplier()).
         WillOnce(Return(factor));
       unsigned long result = requested_timeout*factor;
@@ -359,7 +361,15 @@ TESTSUITE(test_runner)
           With(Args<1,2>(ElementsAreArray(result_str, sizeof(result))));
       reg.prepare_construction(requested_timeout);
     }
-  }
+
+    TEST(does_nothing_when_run_in_single_process, fix<10U>)
+    {
+      EXPECT_CALL(env, tests_as_child_procs()).
+        WillOnce(Return(false));
+      unsigned requested_timeout(100);
+      reg.prepare_construction(requested_timeout);
+    }
+}
 
   TESTSUITE(prepare_destruction)
   {
