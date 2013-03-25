@@ -85,7 +85,7 @@ TESTSUITE(scope)
       static const char report[] =
           "\napa:3\n"
           "VERIFY_SCOPE_MAX_TEST_TIME_MS(0)\n"
-          "Actual time used was 1ms";
+          "Actual time used was 1ms\n";
       ASSERT_TRUE(os.str() == report);
     }
 
@@ -114,7 +114,7 @@ TESTSUITE(scope)
       static const char report[] =
           "\napa:3\n"
           "VERIFY_SCOPE_MIN_TEST_TIME_MS(1)\n"
-          "Actual time used was 0ms";
+          "Actual time used was 0ms\n";
       ASSERT_TRUE(os.str() == report);
     }
 
@@ -133,7 +133,7 @@ TESTSUITE(scope)
       static const char report[] =
           "\napa:3\n"
           "VERIFY_SCOPE_MAX_TEST_TIME_MS(0)\n"
-          "Actual time used was 1ms";
+          "Actual time used was 1ms\n";
       ASSERT_TRUE(os.str() == report);
     }
 

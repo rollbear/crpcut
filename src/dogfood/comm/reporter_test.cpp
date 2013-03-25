@@ -78,7 +78,7 @@ TESTSUITE(comm)
          const crpcut::crpcut_test_monitor *no_monitor = 0;
          r(crpcut::comm::info, "apa", no_monitor);
        }
-       ASSERT_TRUE(os.str() == "\napa");
+       ASSERT_TRUE(os.str() == "\napa\n");
     }
 
     TEST(reporter_without_current_process_prints_and_aborts_for_exit_fail,

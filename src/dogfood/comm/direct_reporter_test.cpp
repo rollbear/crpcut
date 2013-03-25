@@ -45,7 +45,7 @@ TESTSUITE(comm)
         d << "apa" << ' ' << 32;
         ASSERT_TRUE(os.size() == 0U);
       }
-      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa 32");
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa 32\n");
     }
 
     TEST(output_stream_manipulators_are_forwarded, fix)
@@ -55,7 +55,7 @@ TESTSUITE(comm)
         d << std::hex << std::noshowbase << 32 << std::endl
           << std::setw(5) << std::left << 1;
       }
-      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\n20\n1    ");
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\n20\n1    \n");
     }
 
     TEST(output_works_in_limited_heap, fix)
@@ -66,7 +66,7 @@ TESTSUITE(comm)
         d << "apa\nkatt";
       }
       crpcut::heap::set_limit(crpcut::heap::system);
-      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa\nkatt");
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa\nkatt\n");
     }
 
     TEST(variables_are_forwarded, fix)
@@ -77,7 +77,7 @@ TESTSUITE(comm)
         const unsigned u = 8;
         d << c << " " << u;
       }
-      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\n3 8");
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\n3 8\n");
     }
 
   }

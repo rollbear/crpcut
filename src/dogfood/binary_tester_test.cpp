@@ -67,7 +67,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_EQ(p, s)\n"
         "  where p = apa\n"
-        "        s = katt";
+        "        s = katt\n";
       CHECK(EQ, p, s, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -80,7 +80,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_EQ(s, p)\n"
         "  where s = apa\n"
-        "        p = katt";
+        "        p = katt\n";
       CHECK(EQ, s, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -91,7 +91,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_EQ(p, 0)\n"
-        "  where p = apa";
+        "  where p = apa\n";
       CHECK(EQ, p, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -124,7 +124,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_EQ(0, p)\n"
-        "  where p = apa";
+        "  where p = apa\n";
       CHECK(EQ, 0, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -137,7 +137,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_EQ(p, q)\n"
         "  where p = apa\n"
-        "        q = apa";
+        "        q = apa\n";
       CHECK(EQ, p, q, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -153,7 +153,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_NE(p, s)\n"
         "  where p = apa\n"
-        "        s = apa";
+        "        s = apa\n";
       CHECK(NE, p, s, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -166,7 +166,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_NE(s, p)\n"
         "  where s = apa\n"
-        "        p = apa";
+        "        p = apa\n";
       CHECK(NE, s, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -200,7 +200,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_NE(p, 0)\n"
-        "  where p = ";
+        "  where p = \n";
       CHECK(NE, p, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -213,7 +213,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_NE(p, q)\n"
         "  where p = apa\n"
-        "        q = apa";
+        "        q = apa\n";
       CHECK(NE, p, q, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -224,7 +224,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_NE(0, p)\n"
-        "  where p = ";
+        "  where p = \n";
       CHECK(NE, 0, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -253,7 +253,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_GT(0, n)\n"
-        "  where n = 3";
+        "  where n = 3\n";
       CHECK(GT, 0, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -264,7 +264,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_GT(n, 0)\n"
-        "  where n = -3";
+        "  where n = -3\n";
       CHECK(GT, n, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -277,7 +277,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GT(p, s)\n"
         "  where p = apa\n"
-        "        s = apa";
+        "        s = apa\n";
       CHECK(GT, p, s, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -290,7 +290,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GT(s, p)\n"
         "  where s = apa\n"
-        "        p = apa";
+        "        p = apa\n";
       CHECK(GT, s, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -303,7 +303,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GT(p, s)\n"
         "  where p = apa\n"
-        "        s = katt";
+        "        s = katt\n";
       CHECK(GT, p, s, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -316,7 +316,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GT(s, p)\n"
         "  where s = apa\n"
-        "        p = katt";
+        "        p = katt\n";
       CHECK(GT, s, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -330,7 +330,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_GE(0, n)\n"
-        "  where n = 3";
+        "  where n = 3\n";
       CHECK(GE, 0, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -341,7 +341,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_GE(n, 0)\n"
-        "  where n = -3";
+        "  where n = -3\n";
       CHECK(GE, n, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -370,7 +370,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GE(p, s)\n"
         "  where p = apa\n"
-        "        s = katt";
+        "        s = katt\n";
       CHECK(GE, p, s, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -383,7 +383,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GE(s, p)\n"
         "  where s = apa\n"
-        "        p = katt";
+        "        p = katt\n";
       CHECK(GE, s, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -397,7 +397,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_LT(0, n)\n"
-        "  where n = -3";
+        "  where n = -3\n";
       CHECK(LT, 0, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -408,7 +408,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_LT(n, 0)\n"
-        "  where n = 3";
+        "  where n = 3\n";
       CHECK(LT, n, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -421,7 +421,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_LT(p, s)\n"
         "  where p = apa\n"
-        "        s = apa";
+        "        s = apa\n";
       CHECK(LT, p, s, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -434,7 +434,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_LT(s, p)\n"
         "  where s = apa\n"
-        "        p = apa";
+        "        p = apa\n";
       CHECK(LT, s, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -464,7 +464,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_LE(0, n)\n"
-        "  where n = -3";
+        "  where n = -3\n";
       CHECK(LE, 0, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -475,7 +475,7 @@ TESTSUITE(binary_tester)
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_LE(n, 0)\n"
-        "  where n = 3";
+        "  where n = 3\n";
       CHECK(LE, n, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }

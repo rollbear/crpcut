@@ -66,7 +66,7 @@ TESTSUITE(bool_tester)
         "\nlocation\n"
         "VERIFY_TRUE(p)\n"
         "  is evaluated as:\n"
-        "    ";
+        "    \n";
       CHECK(check_true, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -78,7 +78,7 @@ TESTSUITE(bool_tester)
         "\nlocation\n"
         "VERIFY_TRUE(n)\n"
         "  is evaluated as:\n"
-        "    0";
+        "    0\n";
       CHECK(check_true, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -111,7 +111,7 @@ TESTSUITE(bool_tester)
         "\nlocation\n"
         "VERIFY_TRUE(obj)\n"
         "  is evaluated as:\n"
-        "    truth<false>";
+        "    truth<false>\n";
       CHECK(check_true, obj, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -140,7 +140,7 @@ TESTSUITE(bool_tester)
         "\nlocation\n"
         "VERIFY_FALSE(p)\n"
         "  is evaluated as:\n"
-        "    apa";
+        "    apa\n";
       CHECK(check_false, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -152,7 +152,7 @@ TESTSUITE(bool_tester)
         "\nlocation\n"
         "VERIFY_FALSE(n)\n"
         "  is evaluated as:\n"
-        "    5";
+        "    5\n";
       CHECK(check_false, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
@@ -164,7 +164,7 @@ TESTSUITE(bool_tester)
         "\nlocation\n"
         "VERIFY_FALSE(obj)\n"
         "  is evaluated as:\n"
-        "    truth<true>";
+        "    truth<true>\n";
       CHECK(check_false, obj, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }

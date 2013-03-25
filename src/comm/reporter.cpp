@@ -66,7 +66,10 @@ namespace crpcut {
         {
           if (len)
             {
-              default_out_ << "\n" << std::string(msg, len) << std::flush;
+              default_out_.put('\n');
+              default_out_.write(msg, len);
+              default_out_.put('\n');
+              default_out_.flush();
             }
           if (t == exit_fail)
             {
