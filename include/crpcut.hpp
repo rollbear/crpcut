@@ -1781,15 +1781,6 @@ namespace crpcut {
     size_t allocated_objects();
     size_t set_limit(size_t n); // must be higher than allocated_bytes()
 
-    class control {
-    public:
-      static bool is_enabled() { return enabled; }
-    private:
-      static void enable();
-      friend class ::crpcut::test_runner;
-      static bool enabled;
-    };
-
     struct mem_list_element
     {
       mem_list_element        *next;

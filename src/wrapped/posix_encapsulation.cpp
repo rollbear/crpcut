@@ -40,7 +40,10 @@ extern "C"
 #include <dirent.h>
 }
 #include "posix_encapsulation.hpp"
-#include "../heap.hpp"
+
+namespace crpcut {
+  unsigned use_local_heap = 0;
+}
 namespace {
   template <typename T, std::size_t N>
   inline T* begin(T (&array)[N])
@@ -53,6 +56,24 @@ namespace {
   {
     return array + N;
   }
+
+  class global_heap_disabler
+  {
+  public:
+    global_heap_disabler()
+    {
+      assert(!crpcut::use_local_heap);
+      ++crpcut::use_local_heap;
+    }
+    ~global_heap_disabler()
+    {
+      assert(crpcut::use_local_heap);
+      --crpcut::use_local_heap;
+    }
+  private:
+    global_heap_disabler(const global_heap_disabler&);
+    global_heap_disabler& operator=(const global_heap_disabler);
+  };
 }
 namespace crpcut {
   namespace libs {
@@ -89,7 +110,7 @@ namespace crpcut {
         RTLD_NOW
       };
       void *libp = 0;
-      heap::global_heap_disabler disabler_obj;
+      global_heap_disabler disabler_obj;
       for (const int *pf = begin(flags); pf != end(flags); ++pf)
         {
           for (const char * const *name = lib; *name; ++name)
@@ -103,13 +124,13 @@ namespace crpcut {
 
     void *dlloader::symbol(void *libp, const char *name)
     {
-      heap::global_heap_disabler disabler_obj;
+      global_heap_disabler disabler_obj;
       return libp ? ::dlsym(libp, name) : 0;
     }
 
     void dlloader::unload(void *libp)
     {
-      heap::global_heap_disabler disabler_obj;
+      global_heap_disabler disabler_obj;
       (void)::dlclose(libp); // nothing much to do in case of error.
     }
 
@@ -160,6 +181,11 @@ namespace crpcut {
 
 namespace crpcut {
   namespace wrapped {
+    CRPCUT_WRAP_FUNC(rtld_next, malloc, void*, (size_t s), (s))
+    CRPCUT_WRAP_V_FUNC(rtld_next, free, void, (const void *p), (p))
+    CRPCUT_WRAP_FUNC(rtld_next, calloc, void *, (size_t n, size_t s), (n, s))
+    CRPCUT_WRAP_FUNC(rtld_next, realloc, void *, (void *m, size_t n), (m, n))
+
     CRPCUT_WRAP_FUNC(libc, chdir, int, (const char *n), (n))
     CRPCUT_WRAP_FUNC(libc, close, int, (int fd), (fd))
     CRPCUT_WRAP_FUNC(libc, closedir, int, (DIR *d), (d))

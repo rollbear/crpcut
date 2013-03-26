@@ -37,6 +37,8 @@ extern "C" {
 #include "../posix_write.hpp"
 
 namespace crpcut {
+  extern unsigned use_local_heap;
+
   namespace wrapped {
     CRPCUT_NORETURN void _Exit(int c);
     CRPCUT_NORETURN void abort();

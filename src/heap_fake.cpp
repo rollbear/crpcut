@@ -1,7 +1,7 @@
 /*
- * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
- *
+
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -24,28 +24,35 @@
  * SUCH DAMAGE.
  */
 
-
-
-#ifndef HEAP_HPP_
-#define HEAP_HPP_
-
+#include <crpcut.hpp>
+#include "heap.hpp"
+namespace {
+void fail()
+{
+  FAIL << "To limit the heap you must link with crpcut_heap";
+}
+}
 namespace crpcut {
   namespace heap {
-
-  class control {
-  public:
-    static bool is_enabled() { return enabled; }
-  private:
-    static void enable();
-    friend class ::crpcut::test_runner;
-    static bool enabled;
-  };
+    size_t allocated_bytes()
+    {
+      fail();
+      return 0U;
+    }
+    size_t allocated_objects()
+    {
+      fail();
+      return 0U;
+    }
+    size_t set_limit(size_t n)
+    {
+      if (n != system) fail();
+      return system;
+    }
+    void control::enable()
+    {
+      enabled = true;
+    }
+    bool control::enabled = false;
   }
 }
-
-
-
-
-
-
-#endif // HEAP_HPP_

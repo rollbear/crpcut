@@ -1,3 +1,14 @@
+         * Moved the heap implementation into a seperate shared library,
+           libcrpcut_heap.so, in order to support testing of code that needs
+           to provide its own heap. If you use the crpcut heap functions,
+           crpcut::heap::set_limit(), crpcut::heap::allocated_objects(),
+           crpcut::heap::allocated_bytes(), or the scope tests
+           ASSERT_SCOPE_HEAP_LEAK_FREE or VERIFY_SCOPE_HEAP_LEAK_FREE,
+           you need to link you program with -lcrpcut_heap and -lcrpcut.
+           
+           The order is important, -lcrpcut_heap must precede -lcrpcut
+           on the link line.
+
          * garbage (binary timestamp) was printed to stdout when starting
            a test in --single-shot mode.
 

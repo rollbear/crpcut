@@ -28,16 +28,24 @@ DIR="$2"
 
 DISABLED=1
 BLOCKED=7
-R=323
+R=296
 RN=$(($R+$BLOCKED))
-F=172
-[ "$3" == "gmock" ] && {
+F=163
+[ "$3" == "gmock" -o "$4" == "gmock" ] && {
   GR=11
   GF=7
   GB=0
   R=$(($R+$GR))
   RN=$(($RN+$GR+$GB))
   F=$(($F+$GF))
+}
+[ "$3" == "heap" -o "$4" == "heap" ] && {
+  HR=27
+  HF=9
+  HB=0
+  R=$(($R+$HR))
+  RN=$(($RN+$HR+$HB))
+  F=$(($F+$HF))
 }
 REG=$(($RN+$DISABLED))
 tests=(

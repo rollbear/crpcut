@@ -1,4 +1,4 @@
-#  Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
+#  Copyright 2009-2013 Bjorn Fahller <bjorn@fahller.se>
 #  All rights reserved
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions
@@ -52,7 +52,9 @@ set(SHAREDIR "share/crpcut-${CRPCUT_LIB_VERSION}")
 if ("${BUILD_SHARED_LIBS}" STREQUAL "")
   set(BUILD_SHARED_LIBS ON)
 endif ()
-
+file(GLOB LIBHEAP_SRCS
+     src/heap.cpp
+)     
 file(GLOB LIB_SRCS
      src/check_name.cpp
      src/cli/activation_param.cpp
@@ -74,7 +76,7 @@ file(GLOB LIB_SRCS
      src/fdreader.cpp
      src/filesystem_operations.cpp
      src/fsfuncs.cpp
-     src/heap.cpp
+     src/heap_fake.cpp
      src/istream_wrapper.cpp
      src/namespace_info.cpp
      src/output/formatter.cpp
@@ -374,6 +376,27 @@ endif (WITH_GOOGLE_MOCK)
 
 include_directories(include)
 
+if (NOT DEFINED LIBRARY_OUTPUT_PATH)
+  if (NOT DEFINED LIB_SUFFIX)
+    if ("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+      set(LIB_SUFFIX 64)
+    endif ("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+  endif (NOT DEFINED LIB_SUFFIX)
+  set(LIBRARY_OUTPUT_PATH "lib${LIB_SUFFIX}")
+endif (NOT DEFINED LIBRARY_OUTPUT_PATH)
+
+if (WITHOUT_HEAP)
+  set(LIBHEAP "")
+else (WITHOUT_HEAP)
+  add_library(crpcut_heap ${LIBHEAP_SRCS})
+  set_target_properties(crpcut_heap PROPERTIES
+    VERSION ${CRPCUT_LIB_VERSION}
+    SOVERSION ${CRPCUT_LIB_SOVERSION})
+  set(LIBHEAP "crpcut_heap")
+  file(GLOB HEAP_TEST_SRCS test-src/heap.cpp)
+  install(TARGETS crpcut_heap DESTINATION ${LIBRARY_OUTPUT_PATH})
+  set(SELFTEST_PARAM ${SELFTEST_PARAM} heap)
+endif (WITHOUT_HEAP)
 add_library(crpcut ${LIB_SRCS})
 set_target_properties(crpcut PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
@@ -402,9 +425,9 @@ file(GLOB TEST_SRCS
      test-src/collate.cpp
      test-src/suite_deps1.cpp
      test-src/suite_deps2.cpp
-     test-src/heap.cpp
      test-src/bad_forks.cpp
      ${GMOCK_TEST_SRCS}
+     ${HEAP_TEST_SRCS}
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FEATURE_SELECTION}")
@@ -425,10 +448,10 @@ if (GMOCK_LIBS)
   else ()
     add_executable(dogfood EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
   endif ()
-  target_link_libraries(dogfood crpcut ${EXTRA_LIBS} ${GMOCK_LIBS})
-  target_link_libraries(testprog crpcut ${GMOCK_LIBS} ${EXTRA_LIBS})
+  target_link_libraries(dogfood ${LIBHEAP} crpcut ${EXTRA_LIBS} ${GMOCK_LIBS})
+  target_link_libraries(testprog ${LIBHEAP} crpcut ${GMOCK_LIBS} ${EXTRA_LIBS})
 else (GMOCK_LIBS)
-  target_link_libraries(testprog crpcut ${EXTRA_LIBS})
+  target_link_libraries(testprog ${LIBHEAP} crpcut ${EXTRA_LIBS})
 endif (GMOCK_LIBS)
 
 find_program(AWK "awk")
@@ -546,7 +569,7 @@ if (WITH_HTML_DOCS)
             PROPERTIES
             COMPILE_FLAGS ${COMPILE_OPT})
         endif()
-        target_link_libraries(${basename} crpcut ${LINK_LIBS} ${EXTRA_LIBS})
+        target_link_libraries(${basename} ${LIBHEAP} crpcut ${LINK_LIBS} ${EXTRA_LIBS})
       endif()
     endfunction(sample_code)
 
@@ -734,7 +757,7 @@ if (WITH_HTML_DOCS)
     file(GLOB SUITE_DEFINE "${DOC_SRC_LIB}/samples/suite_define.cpp")
     add_executable(suite_depend EXCLUDE_FROM_ALL
       ${SUITE_DEPEND} ${SUITE_DEFINE})
-    target_link_libraries(suite_depend crpcut ${EXTRA_LIBS})
+    target_link_libraries(suite_depend ${LIBHEAP} crpcut ${EXTRA_LIBS})
     add_custom_target(
       suite_depend.out
       ${DOC_SRC_LIB}/nondecorated ../test/suite_depend | sed "s/\\(.*\\)/     \\1/g" > suite_depend.out
@@ -904,14 +927,6 @@ if (AWK AND BASH AND XMLLINT)
   add_custom_target(sanitycheck ${BASH} ${CMAKE_SOURCE_DIR}/sanitycheck.sh ${AWK} ${CMAKE_SOURCE_DIR} ${SELFTEST_PARAM} DEPENDS testprog VERBATIM)
 endif (AWK AND BASH AND XMLLINT)
 
-if (NOT DEFINED LIBRARY_OUTPUT_PATH)
-  if (NOT DEFINED LIB_SUFFIX)
-    if ("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-      set(LIB_SUFFIX 64)
-    endif ("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-  endif (NOT DEFINED LIB_SUFFIX)
-  set(LIBRARY_OUTPUT_PATH "lib${LIB_SUFFIX}")
-endif (NOT DEFINED LIBRARY_OUTPUT_PATH)
 
 set(EXECUTABLE_OUTPUT_PATH test)
 

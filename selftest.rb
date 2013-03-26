@@ -1599,6 +1599,19 @@ TESTS = {
   log('violation',
       /wrapped\.cpp:\d+\s+ASSERT_LT\(d, 1\.\d*\)\s+where d = 1\.(1|0999).*/me),
 
+  'bad_forks::fork_and_let_child_hang_should_fail' =>
+  FailedTest.new('running').
+  tag('slow').
+  log('violation',
+      /Timed out - killed/),
+
+  'bad_forks::fork_and_let_child_run_test_code_should_fail' =>
+  FailedTest.new('child').
+  log('violation',
+      /I am child/)
+}
+
+HEAP_TESTS = {
   'heap::should_succeed_allocation_leak' =>
   PassedTest.new().
   log('info',
@@ -1708,17 +1721,6 @@ TESTS = {
 
   'heap::should_succeed_nothrow_new_handler_no_ballast' =>
   PassedTest.new(),
-
-  'bad_forks::fork_and_let_child_hang_should_fail' =>
-  FailedTest.new('running').
-  tag('slow').
-  log('violation',
-      /Timed out - killed/),
-
-  'bad_forks::fork_and_let_child_run_test_code_should_fail' =>
-  FailedTest.new('child').
-  log('violation',
-      /I am child/)
 }
 
 GMOCK_TESTS = {
@@ -1888,8 +1890,9 @@ RUNS= [
 ]
 
 tests=TESTS;
-tests.merge! GMOCK_TESTS if ARGV[0] == 'gmock'
-
+tests.merge! GMOCK_TESTS if ARGV.include?('gmock')
+tests.merge! HEAP_TESTS if ARGV.include?('heap')
+print "ARGV=#{ARGV}"
 File.open("apafil", 'w') { |f| f.write("apa\n") }
 ulimit = open("|bash -c \"ulimit -c\"").read.chomp
 if ulimit != "unlimited" && ulimit.to_i == 0  then

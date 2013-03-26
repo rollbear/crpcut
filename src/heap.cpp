@@ -26,6 +26,7 @@
 
 #include <crpcut.hpp>
 #include "heap.hpp"
+
 #include "wrapped/posix_encapsulation.hpp"
 #ifdef HAVE_VALGRIND
 #include <valgrind/valgrind.h>
@@ -112,35 +113,12 @@ namespace {
     return d;
   }
 
-  unsigned use_local_heap = 0;
 }
 namespace crpcut
 {
 
-  namespace wrapped
-  {
-    CRPCUT_WRAP_FUNC(rtld_next, malloc, void*, (size_t s), (s))
-    CRPCUT_WRAP_V_FUNC(rtld_next, free, void, (const void *p), (p))
-    CRPCUT_WRAP_FUNC(rtld_next, calloc, void *, (size_t n, size_t s), (n, s))
-    CRPCUT_WRAP_FUNC(rtld_next, realloc, void *, (void *m, size_t n), (m, n))
-  }
-
-
   namespace heap
   {
-    global_heap_disabler
-    ::global_heap_disabler()
-    {
-      assert(!use_local_heap);
-      ++use_local_heap;
-    }
-
-    global_heap_disabler
-    ::~global_heap_disabler()
-    {
-      assert(use_local_heap);
-      --use_local_heap;
-    }
 
     class new_handler_caller
     {
@@ -215,13 +193,14 @@ namespace crpcut
         if (stack_addr && size)
           {
             void **bt = static_cast<void**>(stack_addr);
+            valgrind_make_mem_defined(bt, size * sizeof(void*));
             char **alloc_stack = backtrace_symbols.call<char**>(bt, size);
             bool started = false;
             for (size_t i = 1; i < size; ++i)
               {
                 const char *frame = alloc_stack[i];
                 const char *in_libcrpcut = wrapped::strstr(frame,
-                                                           "libcrpcut.so");
+                                                           "libcrpcut");
                 if (!started && !in_libcrpcut)
                   {
                     started = true;
@@ -256,9 +235,8 @@ namespace crpcut
                 if (mem_list_element *sr = raw_alloc_mem(ebytes))
                   {
                     const size_t block_size = sizeof(mem_list_element)+ebytes;
-                    valgrind_make_mem_undefined(sr, block_size);
                     sr->mem = ebytes;
-                    sr->stack = sr->prev = sr->next = 0;
+                    sr->prev = sr->next = 0;
                     sr->type = raw;
                     void *addr = sr+1;
                     void **stack = static_cast<void**>(addr);
