@@ -67,7 +67,7 @@ namespace crpcut {
           if (len)
             {
               default_out_.put('\n');
-              default_out_.write(msg, len);
+              default_out_.write(msg, std::streamsize(len));
               default_out_.put('\n');
               default_out_.flush();
             }
