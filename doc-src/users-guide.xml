@@ -34,9 +34,10 @@
       </para>
       <para>To build the program, make sure you have the correct
         include path to reach <symbol>&lt;crpcut.hpp&gt;</symbol>.
-        Link your test program with <symbol>-lcrpcut</symbol>,
-        and make sure <symbol>libcrpcut.so</symbol> can be found
-        when starting the program.</para>
+        Link your test program with <code>-lcrpcut_heap -lcrpcut</code>,
+        and make sure <code>libcrpcut_heap.so</code> and
+        <code>libcrpcut.so</code> can be found when starting the
+        program.</para>
       <para>Running the test program with the
         <xref linkend="list-tests" xrefstyle="select:title"/> (list)
         command line flag, will list all tests:
@@ -810,10 +811,10 @@ macro.
     with &crpcut; is straight forward. The only important thing to keep in
     mind is to always <symbol>#include &lt;gmock/gmock.h&gt;</symbol>
     before <symbol>#include &lt;crpcut.hpp&gt;</symbol>, and to link
-    your test program with <symbol>-lgmock</symbol>, <symbol>-lgtest</symbol>
-    and, of course also <symbol>-lcrpcut</symbol>. Depending on your version
+    your test program with <code>-lgmock</code>, <code>-lgtest</code>
+    and, of course also <code>-lcrpcut_heap -lcrpcut</code>. Depending on your version
     of <ulink url="http://code.google.com/p/googlemock">google-mock</ulink>
-    you may also need <symbol>-lpthread</symbol>.
+    you may also need <code>-lpthread</code>.
     </para>
     <tip>
       Experience has shown that it's beneficial to use fixtures to set up
@@ -847,6 +848,9 @@ macro.
       out of memory situations even trickier still. With &crpcut; both
       are easy, since &crpcut; provides simple access to query and limit
       the heap.
+      <note>For these to work, you must link your test program with
+      <code>-lcrpcut_heap -lcrpcut</code>. The order of the two libraries
+      is important.</note>
     </para>
     <para>
       The simplest way to assert that your code does not leak heap objects is
@@ -982,17 +986,18 @@ macro.
       versions<footnote><para>You can't easily provide your own
         <function>dlopen</function>(), <function>dlsym</function>() or
         <function>dlclose</function>()
-        however.</para></footnote><footnote><para>Rolling
-        your own <function>malloc</function>(), <function>calloc</function>(),
+        however.</para></footnote><footnote><para>&crpcut; provides its
+        own <function>malloc</function>(), <function>calloc</function>(),
         <function>realloc</function>(), <function>free</function>(),
         <function>operator new</function>(),
         <function>operator delete</function>(),
         <function>operator new</function>[]() and
-        <function>operator delete</function>[]() is not only hard work,
-        but largely unnecessary since &crpcut; provides functions you
-        can control. See the chapter on
-        <xref linkend="heap-management"
-              xrefstyle="select:quotedtitle"/>.</para></footnote>
+        <function>operator delete</function>[]() for instrumentation purposes.
+        See the chapter on <xref linkend="heap-management"
+        xrefstyle="select:quotedtitle"/>.</para>
+        <para>You may use or test your own heap implementation, but then you
+        must not link with <code>-lcrpcut_heap</code> and lose &crpcut;'s
+        instrumentation support.</para></footnote>
     </para>
     <para>
       Sometimes, however, replacing a library function is not what you want,

@@ -273,11 +273,11 @@
           <itemizedlist>
             <listitem><para>
                 <ulink url="http://gcc.gnu.org">gcc</ulink> versions
-                4.2.4, 4.3.6, 4.4.6, 4.5.3 and 4.6.2.
+                4.2.4, 4.3.6, 4.4.7, 4.5.5, 4.6.3, 4.7.2 and 4.8.0.
             </para></listitem>
             <listitem>
               <para><ulink url="http://clang.llvm.org">clang</ulink> version
-            3.0</para></listitem>
+            3.0 and later</para></listitem>
           </itemizedlist>
         </para>
       </answer>
@@ -293,8 +293,8 @@
           <itemizedlist>
             <listitem><ulink url="http://www.gentoo.org">gentoo</ulink> x86</listitem>
             <listitem><ulink url="http://www.gentoo.org">gentoo</ulink> amd64</listitem>
-            <listitem><ulink url="http://www.ubuntu.com">Ubuntu</ulink> Linux 11.10 (oneiric ocelot) and 11.04 (natty narwahl) x86</listitem>
-            <listitem><ulink url="http://www.ubuntu.com">Ubuntu</ulink> Linux 11.10 (oneiric ocelot) and 11.04 (natty narwahl) x86-64</listitem>
+            <listitem><ulink url="http://www.ubuntu.com">Ubuntu</ulink> Linux 12.10 (quantal quetzal) and 12.04 (precise pangolin) x86</listitem>
+            <listitem><ulink url="http://www.ubuntu.com">Ubuntu</ulink> Linux 12.10 (quantal quetzal) and 12.04 (precise pangolin) x86-64</listitem>
           </itemizedlist>
         </para>
       </answer>
@@ -599,6 +599,48 @@
       </answer>
     </qandaentry>
 
+    <qandaentry>
+      <question>
+        <para>Why do I get link errors about undefined references to identifiers in <symbol>crpcut::heap</symbol>?
+        </para>
+      </question>
+      <answer>
+        <para>Your test uses
+        <xref linkend="ASSERT_SCOPE_HEAP_LEAK_FREE" xrefstyle="select:title"/>
+        or <xref linkend="VERIFY_SCOPE_HEAP_LEAK_FREE" xrefstyle="select:title"/>,
+        and for those to work you need to link with <code>-lcrpcut_heap</code>.
+        Note that the link order is important. <code>-lcrpcut_heap</code>
+        must precede <code>-lcrpcut</code> on the link command line.</para>
+      </answer>
+    </qandaentry>
+
+    <qandaentry>
+      <question>
+        <para>Why does my program die due to stack exhaution before even getting to <code>main()</code>?
+        </para>
+      </question>
+      <answer>
+        <para>Most probably you have reversed the link order of
+        <code>-lcrpcut_heap</code> and <code>-lcrpcut</code>. It is important
+        that <code>-lcrpcut_heap</code> precedes <code>-lcrpcut</code>
+        on the link command line.</para>
+      </answer>
+    </qandaentry>
+
+    <qandaentry>
+      <question>
+        <para>How can I prevent &crpcut;'s heap instrumentation from getting in
+        the way of my code that needs to implement its own heap?</para>
+      </question>
+      <answer>
+        <para>&crpcut;'s heap lives in <code>libcrpcut_heap.so</code>.
+        &crpcut; runs fine without it, so link your test program with
+        <code>-lcrpcut</code> only and you won't have any conflict.</para>
+        <para>You will, of course, lose the &crpcut; heap instrumentation
+        functionality if you do.</para>
+      </answer>
+    </qandaentry>
+    
   </qandaset>
 </chapter>
 <chapter id="google-mock">

@@ -426,6 +426,9 @@
     <formalpara><title>Requirement:</title>
     <para>A code block follows immediately after.</para>
     </formalpara>
+    <formalpara><title>Requirement:</title>
+    <para>The test program must be linked with <code>-lcrpcut_heap -lcrpcut</code>
+    </para></formalpara>
     <para>The assertion succeeds if, and only if, all heap objects allocated
     in the code block following are also deallocated in the block, so that
     the objects on the heap are exactly the same before the code of block
@@ -2222,6 +2225,9 @@
     <formalpara><title>Requirement:</title>
     <para>A code block follows immediately after.</para>
     </formalpara>
+    <formalpara><title>Requirement:</title>
+    <para>The test program must be linked with <code>-lcrpcut_heap -lcrpcut</code>
+    </para></formalpara>
     <para>The check succeeds if, and only if, all heap objects allocated
     in the code block following are also deallocated in the block, so that
     the objects on the heap are exactly the same before the code of block
@@ -2783,6 +2789,11 @@
   </section>
   <section id="heap management">
     <title><type>crpcut::heap</type></title>
+    <para>These functions are used for querying the current state of the heap,
+    or to impose limits on the available heap space.
+    <note>The heap management functionality requires linking with
+    <code>-lcrpcut_heap -lcrpcut</code></note>
+    </para>
     <section id="allocated_bytes">
       <title><type>crpcut::heap::</type><function>allocated_bytes()</function></title>
       <para>Return the number of bytes allocated on the heap. This is the
@@ -3236,7 +3247,8 @@ int main(int argc, char *argv[])
             discovered. This is normally off since it slows down execution
             considerably for heap intensive tests.
             <note>This option is only available if &crpcut; is compiled with
-            support for backtrace. See
+            support for backtrace and the program is linked with
+            <code>-lcrpcut_heap -lcrpcut</code>. See
             <xref linkend="backtrace-support" xrefstyle="select:title"/></note>
             </para>
           </listitem>

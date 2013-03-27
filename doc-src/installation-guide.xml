@@ -33,8 +33,7 @@
           <listitem>
             <para>
               Variadic macros are required by C99, and are available on
-              most C++ compilers. They are required by C++-2011 compilers
-              soon.
+              most C++ compilers. They are required by C++-2011.
             </para>
           </listitem>
         </varlistentry>
@@ -67,15 +66,14 @@
         <varlistentry>
           <term><type>uint64_t and uint32_t</type></term>
           <listitem>
-            typedef's mandated by C99 and coming to C++-2011 compliant
-            compilers.
+            typedef's mandated by C99 and C++-2011.
           </listitem>
         </varlistentry>
       </variablelist>
     </para>
     <para><ulink url="http://gcc.gnu.org">GCC</ulink> supports these
       since long, and &crpcut; has been verified to work with versions
-      4.2.4, 4.3.6, 4.4.6, 4.5.3. and 4.6.2
+      4.2.4, 4.3.6, 4.4.7, 4.5.5, 4.6.3, 4.7.2 and 4.8.0
     </para>
     <para><ulink url="http:clang.llvm.org">Clang</ulink> works
     since version 3.0</para>
@@ -238,7 +236,7 @@
     for example:
     <screen>
 
-     bash &gt; CXX="g++-4.1.2" cmake /tmp/download/crpcut
+     bash &gt; CXX="g++-4.6.0" cmake /tmp/download/crpcut
 
 </screen>
     </para>
