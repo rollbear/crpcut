@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+# Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
 # All rights reserved
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,6 +24,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
+program=$1
+shift
+dir=$(mktemp -d /tmp/crpcutXXXXXX)
 CRPCUT_TEXT_DECORATION=$'
 </span>
 BLOCKED=<span style="color:#d338d3">
@@ -36,5 +39,8 @@ BLOCKED_SUM=<span style="color:#ffffff;background-color:#d338d3;font-weight:bold
 '
 export CRPCUT_TEXT_DECORATION
 echo "<html><pre>"
-$@ | sed 's:^:    :1'
+$program -d $dir $* | sed 's:^:    :1'
+rv=$?
 echo "</pre></html>"
+rm -rf $dir
+exit $rv

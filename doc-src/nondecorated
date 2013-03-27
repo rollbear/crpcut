@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+# Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
 # All rights reserved
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,5 +25,14 @@
 # SUCH DAMAGE.
 
 unset CRPCUT_TEXT_DECORATION
-$@
-
+program=$1
+shift
+if ! echo $*|grep -q -- -l
+then
+  dir=$(mktemp -d /tmp/crpcutXXXXXX)
+  dirflag="-d $dir"
+fi
+$program $dirflag $*
+rv=$?
+[ -z "$dir" ] || rm -rf $dir
+exit $rv
