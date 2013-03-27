@@ -113,12 +113,19 @@ namespace {
     return d;
   }
 
+  bool backtrace_enabled = false;
+
 }
 namespace crpcut
 {
 
   namespace heap
   {
+
+    void enable_backtrace()
+    {
+      backtrace_enabled = true;
+    }
 
     class new_handler_caller
     {
@@ -180,7 +187,7 @@ namespace crpcut
                       size_t              size)
       {
 #ifdef USE_BACKTRACE
-        if (!is_backtrace_enabled()) return;
+        if (!backtrace_enabled) return;
         msg << header;
         void *stack_addr = 0;
         if (stack) stack_addr = stack + 1;
@@ -227,14 +234,13 @@ namespace crpcut
 #ifdef USE_BACKTRACE
         if (control::is_enabled())
           {
-            if (is_backtrace_enabled() && backtrace)
+            if (backtrace_enabled && backtrace)
               {
                 static void* buffer[50];
                 size_t const elems  = size_t(backtrace.call<int>(buffer, 50));
                 size_t const ebytes = elems*sizeof(void*);
                 if (mem_list_element *sr = raw_alloc_mem(ebytes))
                   {
-                    const size_t block_size = sizeof(mem_list_element)+ebytes;
                     sr->mem = ebytes;
                     sr->prev = sr->next = 0;
                     sr->type = raw;

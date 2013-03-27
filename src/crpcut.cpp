@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,11 +125,6 @@ namespace crpcut {
   bool tests_as_child_processes()
   {
     return test_runner::obj().environment()->tests_as_child_procs();
-  }
-
-  bool is_backtrace_enabled()
-  {
-    return test_runner::obj().environment()->is_backtrace_enabled();
   }
 
   const char *get_output_charset()

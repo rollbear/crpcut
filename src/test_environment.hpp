@@ -52,7 +52,6 @@ namespace crpcut {
     virtual bool tests_as_child_procs() const;
     virtual bool timeouts_enabled() const;
     virtual unsigned timeout_multiplier() const;
-    virtual bool is_backtrace_enabled() const;
     virtual const char *get_start_dir() const;
     virtual const char *get_parameter(const char *name) const;
     static void set_default_charset(const char *charset);

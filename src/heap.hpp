@@ -40,6 +40,7 @@ namespace crpcut {
     friend class ::crpcut::test_runner;
     static bool enabled;
   };
+  void enable_backtrace();
   }
 }
 

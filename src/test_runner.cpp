@@ -462,7 +462,12 @@ namespace crpcut {
           {
             lib::strcpy(dirbase_, cli_->working_dir());
           }
-
+#ifdef USE_BACKTRACE
+        if (cli_->backtrace_enabled())
+          {
+            heap::enable_backtrace();
+          }
+#endif
         if (cli_->single_shot_mode())
           {
             if (num_selected_tests != 1U)

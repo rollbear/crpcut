@@ -32,10 +32,12 @@ namespace {
       static const char usage[] =
 "Usage: testprog [flags] {testcases}\n"
 "  where flags can be:\n"
+#ifdef USE_BACKTRACE
 "   -b / --backtrace-heap\n"
 "        Store stack backtrace for all heap objects for\n"
 "        better error pinpointing of heap violations (slow)\n"
 "\n"
+#endif
 "   -c number / --children=number\n"
 "        Control number of concurrently running test processes\n"
 "        number must be at least 1\n"

@@ -27,26 +27,27 @@
 #include <crpcut.hpp>
 #include "heap.hpp"
 namespace {
-void fail()
+  const char libname[] = "-lcrpcut_heap";
+void fail(const char *func)
 {
-  FAIL << "To limit the heap you must link with crpcut_heap";
+  FAIL << "To use crpcut::heap::" << func << "() you must link with " << libname;
 }
 }
 namespace crpcut {
   namespace heap {
     size_t allocated_bytes()
     {
-      fail();
+      fail("allocated_bytes");
       return 0U;
     }
     size_t allocated_objects()
     {
-      fail();
+      fail("allocated_objects");
       return 0U;
     }
     size_t set_limit(size_t n)
     {
-      if (n != system) fail();
+      if (n != system) fail("set_limit");
       return system;
     }
     void control::enable()
@@ -54,5 +55,10 @@ namespace crpcut {
       enabled = true;
     }
     bool control::enabled = false;
+    void enable_backtrace()
+    {
+      std::cerr << "Backtrace can only be used when linked with " << libname << '\n';
+      exit(1);
+    }
   }
 }

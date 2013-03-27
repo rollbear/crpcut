@@ -3116,7 +3116,6 @@ namespace crpcut {
 
   bool timeouts_are_enabled();
   unsigned timeout_multiplier();
-  bool is_backtrace_enabled();
   bool tests_as_child_processes();
   const char *get_output_charset();
   const char *get_program_charset();

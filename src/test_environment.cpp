@@ -73,18 +73,6 @@ namespace crpcut {
     return cli_->timeout_multiplier();
   }
 
-  bool
-  test_environment
-  ::is_backtrace_enabled() const
-  {
-#ifdef USE_BACKTRACE
-    return cli_->backtrace_enabled();
-#else
-    return false;
-#endif
-  }
-
-
   const char*
   test_environment
   ::get_start_dir() const

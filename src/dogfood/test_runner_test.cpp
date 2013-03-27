@@ -64,7 +64,6 @@ TESTSUITE(test_runner)
     MOCK_CONST_METHOD0(get_output_charset, const char*());
     MOCK_CONST_METHOD0(get_illegal_rep, const char*());
     MOCK_CONST_METHOD0(timeout_multiplier, unsigned());
-    MOCK_CONST_METHOD0(is_backtrace_enabled, bool());
     MOCK_CONST_METHOD0(get_start_dir, const char *());
     MOCK_CONST_METHOD1(get_parameter, const char *(const char *name));
 
