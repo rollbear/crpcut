@@ -1,3 +1,7 @@
+         * Added an attribute location="file:line" to the XML report
+           entries fail, info and violation. The previous use of file:line
+           as the first line in an entry is discontinued.
+
          * Moved the heap implementation into a seperate shared library,
            libcrpcut_heap.so, in order to support testing of code that needs
            to provide its own heap. If you use the crpcut heap functions,

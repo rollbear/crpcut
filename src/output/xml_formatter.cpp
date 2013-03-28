@@ -212,6 +212,14 @@ namespace crpcut {
           write(dirname, translated);
           write("\"");
         }
+      if (const char *end_of_loc = wrapped::strchr(msg.str, '\n'))
+        {
+          write(" location=\"");
+          write(msg.str, end_of_loc - msg.str, translated);
+          msg.len -= end_of_loc - msg.str + 1;
+          msg.str = end_of_loc + 1;
+          write("\"");
+        }
       if (!msg)
         {
           write("/>\n");
@@ -232,6 +240,17 @@ namespace crpcut {
       make_closed();
       write("    <");
       write(label);
+      if (wrapped::strncmp(label.str, "fail", 4) == 0
+          || wrapped::strncmp(label.str, "info", 4) == 0)
+        {
+          const char *end_of_loc = wrapped::strchr(data.str, '\n');
+          assert(end_of_loc);
+          write(" location=\"");
+          write(data.str, end_of_loc - data.str, translated);
+          data.len -= end_of_loc - data.str + 1;
+          data.str = end_of_loc + 1;
+          write("\"");
+        }
       write(">");
       write(data, translated);
       write("</");

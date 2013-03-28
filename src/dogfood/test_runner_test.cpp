@@ -158,7 +158,7 @@ TESTSUITE(test_runner)
   struct fix
   {
     fix()
-    : loc(crpcut::datatypes::fixed_string::make("apa:3")),
+    : loc(crpcut::datatypes::fixed_string::make("apa.cpp:3")),
       default_out(),
       runner(),
       reporter(default_out),
@@ -306,8 +306,8 @@ TESTSUITE(test_runner)
       EXPECT_CALL(reg, get_location()).
         WillOnce(Return(loc));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
-                                   StrEq("apa:3\nCouldn't chdir working dir"),
-                                   32,
+                                   StrEq("apa.cpp:3\nCouldn't chdir working dir"),
+                                   36,
                                    _)).
         WillOnce(Throw(my_exit()));
       reg.set_wd(101);
@@ -325,8 +325,8 @@ TESTSUITE(test_runner)
       EXPECT_CALL(reg, get_location()).
     	WillOnce(Return(loc));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
-                                   StrEq("apa:3\nCouldn't chdir working dir"),
-                                   32,
+                                   StrEq("apa.cpp:3\nCouldn't chdir working dir"),
+                                   36,
                                    _));
       reg.set_wd(101);
       reg.goto_wd();
@@ -536,17 +536,17 @@ TESTSUITE(test_runner)
             WillOnce(Return(10U));
 
         EXPECT_CALL(runner, present(test_pid,
-                                     crpcut::comm::dir,
-                                     crpcut::running,
-                                     0, 0)).
+                                    crpcut::comm::dir,
+                                    crpcut::running,
+                                    0, 0)).
            InSequence(s);
         EXPECT_CALL(reg, get_location()).
-          WillOnce(Return(loc));
+          WillRepeatedly(Return(loc));
         EXPECT_CALL(fsops, rename(StrEq("99"), StrEq("apa::test")));
         EXPECT_CALL(runner, present(test_pid,
-                                     crpcut::comm::exit_fail,
-                                     crpcut::running,
-                                     25, StartsWith("apa:3\nDied with core dump"))).
+                                    crpcut::comm::exit_fail,
+                                    crpcut::running,
+                                    29, StartsWith("apa.cpp:3\nDied with core dump"))).
            InSequence(s);
         EXPECT_CALL(runner, return_dir(99));
 
@@ -597,7 +597,7 @@ TESTSUITE(test_runner)
       EXPECT_CALL(reg, get_location()).
     	WillOnce(Return(loc));
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa:3\nExited with code 3\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nExited with code 3\nExpected exit 0)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(3));
@@ -637,7 +637,7 @@ TESTSUITE(test_runner)
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa:3\nDied on signal 15\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nDied on signal 15\nExpected exit 0)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(100));
@@ -683,7 +683,7 @@ TESTSUITE(test_runner)
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa:3\nTimed out - killed\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nTimed out - killed\nExpected exit 0)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -725,7 +725,7 @@ TESTSUITE(test_runner)
           WillOnce(Return(true));
 
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa:3\nTest consumed 1000ms CPU-time\nLimit was 100ms)))).
+          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nTest consumed 1000ms CPU-time\nLimit was 100ms)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -837,7 +837,7 @@ TESTSUITE(test_runner)
       EXPECT_CALL(reg, get_location()).
     	WillOnce(Return(loc));
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa:3\nDied with core dump)))).
+          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nDied with core dump)))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -874,7 +874,7 @@ TESTSUITE(test_runner)
       EXPECT_CALL(runner, present(test_pid,
                                    crpcut::comm::exit_fail,
                                    phase, _, _)).
-        With(Args<4,3>(ElementsAreArray(S(apa:3\nDied for unknown reason, code=-1)))).
+        With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nDied for unknown reason, code=-1)))).
         InSequence(s);
 
 

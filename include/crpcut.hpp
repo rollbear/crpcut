@@ -137,7 +137,7 @@
             }                                                           \
           else                                                          \
             {                                                           \
-              os << __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__) "\n";      \
+              os << __FILE__ << ':' << __LINE__ << "\n";      \
             }                                                           \
           os << result.summary() << result.message();                   \
           crpcut::comm::report(crpcut::comm::exit_fail, os);            \
@@ -4700,7 +4700,7 @@ namespace crpcut
 
 #define CRPCUT_CHECK_REPORT_HEAD(action)                                \
   crpcut::comm::direct_reporter<crpcut::comm::action>()                 \
-  << __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__) "\n"                      \
+    << __FILE__ << ':' << __LINE__ << "\n"                              \
     << crpcut::crpcut_check_name<crpcut::comm::action>::string()        \
 
 #define CRPCUT_CHECK_PRED(action, pred, ...)                            \
@@ -4817,10 +4817,11 @@ class crpcut_testsuite_dep
 
 #define TESTSUITE(...) TESTSUITE_DEF(__VA_ARGS__, crpcut::crpcut_none)
 
-#define INFO crpcut::comm::direct_reporter<crpcut::comm::info>()
-#define FAIL crpcut::comm::direct_reporter<crpcut::comm::exit_fail>()   \
-  << __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__)  "\n"
+#define INFO crpcut::comm::direct_reporter<crpcut::comm::info>() \
+  << __FILE__ << ':' << __LINE__  << "\n"
 
+#define FAIL crpcut::comm::direct_reporter<crpcut::comm::exit_fail>()   \
+  << __FILE__ << ':' << __LINE__  << "\n"
 
 
 #define WITH_TEST_TAG(tag_name)                         \

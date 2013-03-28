@@ -8,6 +8,12 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="location">
+    <xs:restriction base="xs:string">
+      <xs:pattern value=".+:[1-9][0-9]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:complexType name="remaining_files">
     <xs:attribute name="nonempty_dir" type="xs:string" use="required"/>
   </xs:complexType>
@@ -16,18 +22,27 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="phase" type="xs:string" use="required"/>
+        <xs:attribute name="location" type="location" use="required"/>
         <xs:attribute name="nonempty_dir" type="xs:string" use="optional"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
 
+  <xs:complexType name="locationEntry">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="location" type="location" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
   <xs:complexType name="log">
     <xs:sequence minOccurs="0" maxOccurs="unbounded">
       <xs:element name="violation" type="violation" minOccurs="0"/>
       <xs:element name="stdout" type="xs:string" minOccurs="0"/>
       <xs:element name="stderr" type="xs:string" minOccurs="0"/>
-      <xs:element name="info" type="xs:string" minOccurs="0"/>
-      <xs:element name="fail" type="xs:string" minOccurs="0"/>
+      <xs:element name="info" type="locationEntry" minOccurs="0"/>
+      <xs:element name="fail" type="locationEntry" minOccurs="0"/>
       <xs:element name="remaining_files" type="remaining_files" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>

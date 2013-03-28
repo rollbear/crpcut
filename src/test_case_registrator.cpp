@@ -512,6 +512,10 @@ namespace crpcut {
       }
     if (report_nonempty_working_dir(dirname.begin()))
       {
+        if (out.str().empty())
+          {
+            out << get_location() << '\n';
+          }
         t = comm::exit_fail;
       }
     std::string s = out.str();

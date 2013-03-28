@@ -84,10 +84,12 @@ class Test
           return "#{dirname} is not a directory" if !isdir
         end
       end
+      reported_location = entry.attributes['location'] || ""
+      reported_location+= "\n" if reported_location
       re = t[log_index[name]]
       log_index[name] = log_index[name] + 1
       return "Too many #{name}'s" if !re
-      return "#{text} doesn't match #{name} #{re}" if !re.match(text)
+      return "#{text} doesn't match #{name} #{re}" if !re.match(reported_location + text)
     end
     return "#{dirname} has unexpected files" if dirname && @files.empty?
     return "#{@files} is missing" if !dirname && !@files.empty?
@@ -1892,7 +1894,6 @@ RUNS= [
 tests=TESTS;
 tests.merge! GMOCK_TESTS if ARGV.include?('gmock')
 tests.merge! HEAP_TESTS if ARGV.include?('heap')
-print "ARGV=#{ARGV}"
 File.open("apafil", 'w') { |f| f.write("apa\n") }
 ulimit = open("|bash -c \"ulimit -c\"").read.chomp
 if ulimit != "unlimited" && ulimit.to_i == 0  then

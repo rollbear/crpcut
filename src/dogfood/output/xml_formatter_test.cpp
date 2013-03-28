@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -389,7 +389,8 @@ TESTSUITE(output)
         obj.begin_case("lemur", false, true, 100);
         obj.print(s(stderr), s(ehepp));
         obj.terminate(crpcut::running,
-                      fixed_string::make("Died on signal 6\n"
+                      fixed_string::make("apa.cpp\n"
+                                         "Died on signal 6\n"
                                          "Expected normal exit"),
                       "");
         obj.end_case();
@@ -404,7 +405,7 @@ TESTSUITE(output)
         XML_OPEN_TEST(lemur, true, 100, FAILED)
         _ "<log>"
         _ XML_DATA_FIELD(stderr, ehepp)
-        _ "<violation" S "phase" _ "=" _ "\"running\"" _ ">Died on signal 6\n"
+        _ "<violation" S "phase" _ "=" _ "\"running\"" S "location" _ "=" _ "\"apa.cpp\"" _ ">Died on signal 6\n"
         "Expected normal exit</violation>"
         _ "</log>"
         _ "</test>"
@@ -434,7 +435,7 @@ TESTSUITE(output)
                                           vec,
                                           tags,
                                           0,0);
-        static const char msg[] = "\t\n\r!\"#$%&'()*+,-./0123456789"
+        static const char msg[] = "apa.cpp\n\t\n\r!\"#$%&'()*+,-./0123456789"
                                   ":;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                   "[\\]^_` abcdefghijklmnopqrstuvwxyz"
                                   "{|}~";
@@ -448,7 +449,7 @@ TESTSUITE(output)
         XML_HEADER
         XML_OPEN_TEST(tupp, true, 100, PASSED)
         _ "<log>"
-        _ "<info>"
+        _ "<info" S "location" _ "=" _ "\"apa.cpp\"" _ ">"
         "\t\n\r!&quot;#\\$%&amp;&apos;\\(\\)\\*\\+,-\\./0123456789"
         ":;&lt;=&gt;\\?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "\\[\\\\]\\^_` abcdefghijklmnopqrstuvwxyz"
@@ -476,10 +477,10 @@ TESTSUITE(output)
                                           vec,
                                           tags,
                                           0,0);
-        char msg[256];
-        for (size_t i = 0; i < sizeof(msg); ++i)
+        char msg[264] = "apa.cpp\n";
+        for (size_t i = 8; i < sizeof(msg); ++i)
           {
-            msg[i] = char(i);
+            msg[i] = char(i - 8U);
           }
         obj.begin_case("tupp", true, true, 100);
         obj.print(s(info),
@@ -494,7 +495,7 @@ TESTSUITE(output)
         XML_HEADER
         XML_OPEN_TEST(tupp, true, 100, PASSED)
         _ "<log>"
-        _ "<info>"
+        _ "<info" S "location" _ "=" _ "\"apa.cpp\"" _ ">"
         IL IL IL IL IL IL IL IL IL "\t\n" IL IL "\r" IL IL IL IL IL IL IL IL IL
         IL IL IL IL IL IL IL IL IL
         " !&quot;#\\$%&amp;&apos;\\(\\)\\*\\+,-\\./0123456789"
@@ -535,7 +536,7 @@ TESTSUITE(output)
                                           0,0);
         obj.begin_case("tupp", false, true, 100);
         obj.terminate(crpcut::post_mortem,
-                      s(),
+                      s(apa.cpp\n),
                       "/tmp/crpcut02342/tests::tupp");
         obj.end_case();
         obj.nonempty_dir("/tmp/crpcut02342");
@@ -549,7 +550,8 @@ TESTSUITE(output)
         XML_OPEN_TEST(tupp, true, 100, FAILED)
         _ "<log>"
         _ "<violation" S "phase" _ "=" _ "\"post_mortem\""
-        S "nonempty_dir" _ "=" _ "\"/tmp/crpcut02342/tests::tupp\"" _ "/>"
+        S "nonempty_dir" _ "=" _ "\"/tmp/crpcut02342/tests::tupp\""
+        S "location" _ "=" _ "\"apa.cpp\"" _ "/>"
         _ "</log>"
         _ "</test>"
         _ "<remaining_files" S "nonempty_dir" _ "=" _ "\"/tmp/crpcut02342\"" _ "/>"
