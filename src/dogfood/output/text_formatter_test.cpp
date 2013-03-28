@@ -635,11 +635,12 @@ TESTSUITE(output)
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case("apa", false, false, 100);
-        obj.terminate(crpcut::destroying, s("katt"), "");
+        obj.terminate(crpcut::destroying, s("katt"), s("apa.cpp"), "");
         obj.end_case();
         const char re[] =
           "^<NF>FAILED?: apa\n"
           "phase=\"destroying\"" _ "-*\n"
+          "apa.cpp\n"
           "katt\n"
           "-*\n"
           "<>=*\n"
@@ -661,12 +662,13 @@ TESTSUITE(output)
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case("apa", false, false, 100);
-        obj.terminate(crpcut::creating, s("katt"), "/tmp/tmpfile");
+        obj.terminate(crpcut::creating, s("katt"), s("apa.cpp"), "/tmp/tmpfile");
         obj.end_case();
         const char re[] =
           "^<NF>FAILED?: apa\n"
           "/tmp/tmpfile is not empty!\n"
           "phase=\"creating\"" _ "-*\n"
+          "apa.cpp\n"
           "katt\n"
           "-*\n"
           "<>=*\n"
@@ -689,10 +691,12 @@ TESTSUITE(output)
                                            no_char_conversion);
         obj.begin_case("apa", false, false, 100);
         obj.print(s("type"),
-                  s("the quick brown fox jumps over the lazy dog"));
+                  s("the quick brown fox jumps over the lazy dog"),
+                  s(""));
         obj.print(s("morse"),
-                  s("jag missade hissen\ni mississippi"));
-        obj.terminate(crpcut::creating, s("katt"), "");
+                  s("jag missade hissen\ni mississippi"),
+                  s("apa.cpp"));
+        obj.terminate(crpcut::creating, s("katt"), s("apa.cpp"), "");
         obj.end_case();
         const char re[] =
           "^<NF>FAILED?: apa\n"
@@ -700,10 +704,12 @@ TESTSUITE(output)
           "the quick brown fox jumps over the lazy dog\n"
           "-*\n"
           "morse-*\n"
+          "apa.cpp\n"
           "jag missade hissen\n"
           "i mississippi\n"
           "-*\n"
           "phase=\"creating\"" _ "-*\n"
+          "apa.cpp\n"
           "katt\n"
           "-*\n"
           "<>=*\n"
@@ -733,7 +739,7 @@ TESTSUITE(output)
                                            test_modifier,
                                            no_char_conversion);
         obj.begin_case("apa", false, false, 100);
-        obj.terminate(crpcut::creating, s("katt"), "/tmp/tmpdir/hoppla");
+        obj.terminate(crpcut::creating, s("katt"), s("apa.cpp"), "/tmp/tmpdir/hoppla");
         obj.end_case();
 
         obj.nonempty_dir("/tmp/tmpdir");
@@ -744,6 +750,7 @@ TESTSUITE(output)
           "^<NF>FAILED?: apa\n"
           "/tmp/tmpdir/hoppla is not empty!\n"
           "phase=\"creating\"" _ "-*\n"
+          "apa.cpp\n"
           "katt\n"
           "-*\n"
           "<>=*\n"
@@ -782,8 +789,9 @@ TESTSUITE(output)
           }
 
         obj.print(s("info"),
-                  crpcut::datatypes::fixed_string::make(buff, 255));
-        obj.terminate(crpcut::creating, s("katt"), "");
+                  crpcut::datatypes::fixed_string::make(buff, 255),
+                  crpcut::datatypes::fixed_string::make(""));
+        obj.terminate(crpcut::creating, s("katt"), s("apa.cpp"), "");
         obj.end_case();
         const char pattern[] =
           "<NF>FAILED?: apa\n"
@@ -797,6 +805,7 @@ TESTSUITE(output)
           "................................................................\n"
           "-------------------------------------------------------------------------------\n"
           "phase=\"creating\"  -------------------------------------------------------------\n"
+          "apa.cpp\n"
           "katt\n"
           "-------------------------------------------------------------------------------\n"
           "<>===============================================================================\n"
@@ -848,8 +857,9 @@ TESTSUITE(output)
           }
 
         obj.print(s("info"),
-                  crpcut::datatypes::fixed_string::make(buff, 255));
-        obj.terminate(crpcut::creating, s("katt"), "");
+                  crpcut::datatypes::fixed_string::make(buff, 255),
+                  crpcut::datatypes::fixed_string::make(""));
+        obj.terminate(crpcut::creating, s("katt"), s("apa.cpp"), "");
         obj.end_case();
         const char pattern[] =
           "<NF>FAILED?: apa\n"
@@ -869,6 +879,7 @@ TESTSUITE(output)
           "\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff\n"
           "-------------------------------------------------------------------------------\n"
           "phase=\"creating\"  -------------------------------------------------------------\n"
+          "apa.cpp\n"
           "katt\n"
           "-------------------------------------------------------------------------------\n"
           "<>===============================================================================\n"

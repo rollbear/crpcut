@@ -106,11 +106,11 @@ TESTSUITE(output)
                                           100,
                                           10);
           f.begin_case("tupp::lemur", true, true, 100);
-          f.print(s("info"), s("apa"));
-          f.terminate(crpcut::running, s("failed"), std::string());
+          f.print(s("info"), s("apa"), s("apa.cpp\n"));
+          f.terminate(crpcut::running, s("failed"), s("apa.cpp"), std::string());
           f.end_case();
           f.begin_case("ko::orm", true, true, 100);
-          f.terminate(crpcut::destroying, s("ouch"), "apa");
+          f.terminate(crpcut::destroying, s("ouch"), s("apa.cpp"), "apa");
           f.end_case();
           f.nonempty_dir("/ttt");
           f.blocked_test(crpcut::tag::critical, "n");

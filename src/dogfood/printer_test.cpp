@@ -38,11 +38,13 @@ TESTSUITE(printer)
   public:
     MOCK_METHOD4(begin_case, void(std::string, bool, bool, unsigned long));
     MOCK_METHOD0(end_case, void());
-    MOCK_METHOD3(terminate,
+    MOCK_METHOD4(terminate,
                  void(crpcut::test_phase,
                       crpcut::datatypes::fixed_string,
+                      crpcut::datatypes::fixed_string,
                       std::string));
-    MOCK_METHOD2(print, void(crpcut::datatypes::fixed_string,
+    MOCK_METHOD3(print, void(crpcut::datatypes::fixed_string,
+                             crpcut::datatypes::fixed_string,
                              crpcut::datatypes::fixed_string));
     MOCK_METHOD2(statistics, void(unsigned, unsigned));
     MOCK_METHOD1(nonempty_dir, void(const char*));

@@ -55,9 +55,11 @@ namespace crpcut {
       virtual void end_case();
       virtual void terminate(test_phase              phase,
                              datatypes::fixed_string msg,
+                             datatypes::fixed_string location,
                              std::string             dirname);
       virtual void print(datatypes::fixed_string label,
-                         datatypes::fixed_string data);
+                         datatypes::fixed_string data,
+                         datatypes::fixed_string location);
       virtual void statistics(unsigned num_run,
                               unsigned num_failed);
       virtual void nonempty_dir(const char *s);

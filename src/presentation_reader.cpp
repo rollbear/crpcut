@@ -31,6 +31,7 @@
 #include "poll.hpp"
 #include "posix_error.hpp"
 #include "registrator_list.hpp"
+#include "wrapped/posix_encapsulation.hpp"
 #include <crpcut.hpp>
 
 namespace {
@@ -136,9 +137,9 @@ namespace crpcut {
     {
       unsigned long critical;
       unsigned long duration_us;
-    } msg;
-    assert(len == sizeof(msg));
-    fd_.read_loop(&msg, len);
+    } info;
+    assert(len == sizeof(info));
+    fd_.read_loop(&info, len);
 
     const bool pass = s->success && !s->explicit_fail;
     tag &t = s->test->crpcut_tag();
@@ -150,26 +151,43 @@ namespace crpcut {
 
         std::ostringstream name;
         name << *s->test;
-        printer print(fmt_, name.str(), pass, msg.critical, msg.duration_us);
+        printer print(fmt_, name.str(), pass, info.critical, info.duration_us);
 
         for (event *i = s->history.next();
             i != static_cast<event*>(&s->history);
             i = i->next())
           {
-
-            fmt_.print(tag_info[i->tag], i->body);
+            datatypes::fixed_string msg(i->body);
+            datatypes::fixed_string location = { 0, 0 };
+            if (i->tag == comm::fail || i->tag == comm::info)
+              {
+                location = msg;
+                const char *loc_end = wrapped::strchr(msg.str, '\n');
+                assert(loc_end);
+                location.len = size_t(loc_end - location.str);
+                msg.len -= location.len + 1;
+                msg.str = loc_end + 1;
+              }
+            fmt_.print(tag_info[i->tag], msg, location);
           }
         if (s->termination || s->nonempty_dir || s->explicit_fail)
           {
+            const char *loc_end = wrapped::strchr(s->termination.str, '\n');
+            assert(loc_end);
+            datatypes::fixed_string location(s->termination);
+            location.len = size_t(loc_end - s->termination.str);
+            datatypes::fixed_string msg(s->termination);
+            msg.len -= size_t(loc_end - s->termination.str + 1);
+            msg.str = loc_end + 1;
             if (s->nonempty_dir)
               {
                 std::ostringstream dirname;
                 dirname << working_dir_ << "/" << *s->test;
-                fmt_.terminate(phase, s->termination, dirname.str());
+                fmt_.terminate(phase, msg, location, dirname.str());
               }
             else
               {
-                fmt_.terminate(phase, s->termination);
+                fmt_.terminate(phase, msg, location);
               }
           }
       }

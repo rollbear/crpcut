@@ -64,6 +64,7 @@ namespace crpcut {
     nil_formatter
     ::terminate(test_phase              /*phase*/,
                 datatypes::fixed_string /*msg*/,
+                datatypes::fixed_string /*location*/,
                 std::string             /*dirname*/)
     {
     }
@@ -71,7 +72,8 @@ namespace crpcut {
     void
     nil_formatter
     ::print(datatypes::fixed_string /*label*/,
-            datatypes::fixed_string /*data*/)
+            datatypes::fixed_string /*data*/,
+            datatypes::fixed_string /*location*/)
     {
     }
 

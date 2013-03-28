@@ -387,11 +387,11 @@ TESTSUITE(output)
         obj.begin_case("tupp", true, true, 100);
         obj.end_case();
         obj.begin_case("lemur", false, true, 100);
-        obj.print(s(stderr), s(ehepp));
+        obj.print(s(stderr), s(ehepp), s());
         obj.terminate(crpcut::running,
-                      fixed_string::make("apa.cpp\n"
-                                         "Died on signal 6\n"
+                      fixed_string::make("Died on signal 6\n"
                                          "Expected normal exit"),
+                      fixed_string::make("apa.cpp"),
                       "");
         obj.end_case();
         obj.blocked_test(crpcut::tag::critical, "apa");
@@ -435,13 +435,14 @@ TESTSUITE(output)
                                           vec,
                                           tags,
                                           0,0);
-        static const char msg[] = "apa.cpp\n\t\n\r!\"#$%&'()*+,-./0123456789"
+        static const char msg[] = "\t\n\r!\"#$%&'()*+,-./0123456789"
                                   ":;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                   "[\\]^_` abcdefghijklmnopqrstuvwxyz"
                                   "{|}~";
         obj.begin_case("tupp", true, true, 100);
         obj.print(s(info),
-                  crpcut::datatypes::fixed_string::make(msg, sizeof(msg) - 1));
+                  crpcut::datatypes::fixed_string::make(msg, sizeof(msg) - 1),
+                  crpcut::datatypes::fixed_string::make("apa.cpp"));
         obj.end_case();
         obj.statistics(0,0);
       }
@@ -477,14 +478,15 @@ TESTSUITE(output)
                                           vec,
                                           tags,
                                           0,0);
-        char msg[264] = "apa.cpp\n";
-        for (size_t i = 8; i < sizeof(msg); ++i)
+        char msg[256];
+        for (size_t i = 0; i < sizeof(msg); ++i)
           {
-            msg[i] = char(i - 8U);
+            msg[i] = char(i);
           }
         obj.begin_case("tupp", true, true, 100);
         obj.print(s(info),
-                  crpcut::datatypes::fixed_string::make(msg));
+                  crpcut::datatypes::fixed_string::make(msg),
+                  crpcut::datatypes::fixed_string::make("apa.cpp"));
         obj.end_case();
         obj.statistics(0,0);
       }
@@ -536,7 +538,8 @@ TESTSUITE(output)
                                           0,0);
         obj.begin_case("tupp", false, true, 100);
         obj.terminate(crpcut::post_mortem,
-                      s(apa.cpp\n),
+                      s(),
+                      s(apa.cpp),
                       "/tmp/crpcut02342/tests::tupp");
         obj.end_case();
         obj.nonempty_dir("/tmp/crpcut02342");

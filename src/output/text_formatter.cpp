@@ -116,6 +116,7 @@ namespace crpcut {
     text_formatter
     ::terminate(test_phase              phase,
                 datatypes::fixed_string msg,
+                datatypes::fixed_string location,
                 std::string             dirname)
     {
       if (did_output_)
@@ -137,6 +138,8 @@ namespace crpcut {
           write(delim + 8 + ps.len,
                 sizeof(delim) - 8 - ps.len - 1,
                 conversion_type_);
+          write(location, conversion_type_);
+          write("\n", conversion_type_);
           write(msg, conversion_type_);
           write("\n", conversion_type_);
           write(delim, conversion_type_);
@@ -146,7 +149,8 @@ namespace crpcut {
     void
     text_formatter
     ::print(datatypes::fixed_string label,
-            datatypes::fixed_string data)
+            datatypes::fixed_string data,
+            datatypes::fixed_string location)
     {
       if (did_output_)
         {
@@ -157,6 +161,11 @@ namespace crpcut {
       if (len < sizeof(delim))
         {
           write(delim + len, sizeof(delim) - len - 1, conversion_type_);
+        }
+      if (location)
+        {
+          write(location, conversion_type_);
+          write("\n", conversion_type_);
         }
       write(data, conversion_type_);
       write("\n", conversion_type_);

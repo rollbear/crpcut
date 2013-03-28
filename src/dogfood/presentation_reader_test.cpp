@@ -149,20 +149,25 @@ TESTSUITE(presentation_reader)
   public:
     MOCK_METHOD4(begin_case, void(std::string,bool,bool, unsigned long));
     MOCK_METHOD0(end_case, void());
-    MOCK_METHOD3(terminate, void(crpcut::test_phase, std::string, std::string));
+    MOCK_METHOD4(terminate, void(crpcut::test_phase, std::string, std::string, std::string));
     void terminate(crpcut::test_phase phase,
-                   crpcut::datatypes::fixed_string s1,
-                   std::string                     s2)
+                   crpcut::datatypes::fixed_string msg,
+                   crpcut::datatypes::fixed_string location,
+                   std::string                     dir)
     {
-      terminate(phase, std::string(s1.str, s1.len), s2);
+      terminate(phase,
+                std::string(msg.str, msg.len),
+                std::string(location.str, location.len),
+                dir);
     }
 
-    MOCK_METHOD2(print, void(std::string, std::string));
+    MOCK_METHOD3(print, void(std::string, std::string, std::string));
     void print(crpcut::datatypes::fixed_string s1,
-               crpcut::datatypes::fixed_string s2)
+               crpcut::datatypes::fixed_string s2,
+               crpcut::datatypes::fixed_string s3)
 
     {
-      print(std::string(s1.str, s1.len), std::string(s2.str, s2.len));
+      print(std::string(s1.str, s1.len), std::string(s2.str, s2.len), std::string(s3.str, s3.len));
     }
     MOCK_METHOD2(statistics, void(unsigned, unsigned));
     MOCK_METHOD1(nonempty_dir, void(const char*));
@@ -243,7 +248,7 @@ TESTSUITE(presentation_reader)
   TEST(passed_critical_verbose_prints_all, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
-    fd.info(101, crpcut::running, "INFO << info");
+    fd.info(101, crpcut::running, "apa.cpp\nINFO << info");
     fd.stderr(101, crpcut::running, "stderr");
     fd.stdout(101, crpcut::running, "stdout");
     fd.exit_ok(101, crpcut::post_mortem, "");
@@ -252,9 +257,9 @@ TESTSUITE(presentation_reader)
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
     EXPECT_CALL(fmt, begin_case("apa::katt",true, true, 100)).InSequence(out);
-    EXPECT_CALL(fmt, print("info", "INFO << info")).InSequence(out);
-    EXPECT_CALL(fmt, print("stderr", "stderr"));
-    EXPECT_CALL(fmt, print("stdout", "stdout"));
+    EXPECT_CALL(fmt, print("info", "INFO << info", "apa.cpp")).InSequence(out);
+    EXPECT_CALL(fmt, print("stderr", "stderr", ""));
+    EXPECT_CALL(fmt, print("stdout", "stdout", ""));
     EXPECT_CALL(fmt, end_case()).InSequence(out);
     while (!reader.read())
       ;
@@ -263,14 +268,14 @@ TESTSUITE(presentation_reader)
   TEST(failed_critical_behaviour_with_nonempty_dir_prints_all, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
-    fd.exit_fail(101, crpcut::running, "FAIL << orm");
+    fd.exit_fail(101, crpcut::running, "apa.cpp\nFAIL << orm");
     fd.nonempty_dir(101, crpcut::running, "");
     fd.end_test(101, crpcut::running, true, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
     EXPECT_CALL(fmt, begin_case("apa::katt", false, true, 100)).InSequence(out);
-    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm",
+    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "apa.cpp",
                                "directory/subdir/apa::katt")).InSequence(out);
     EXPECT_CALL(fmt, end_case()).InSequence(out);
     while (!reader.read())
@@ -291,23 +296,24 @@ TESTSUITE(presentation_reader)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
     fd.begin_test(20, crpcut::creating, &ko);
-    fd.exit_fail(101, crpcut::running, "FAIL << orm");
-    fd.fail(20, crpcut::running, "VERIFY_APA");
+    fd.exit_fail(101, crpcut::running, "apa.cpp\nFAIL << orm");
+    fd.fail(20, crpcut::running, "apa.cpp\nVERIFY_APA");
     fd.end_test(101, crpcut::running, true, 100);
+    fd.exit_fail(20, crpcut::running, "apa.cpp\nEarlier verify failed");
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
     EXPECT_CALL(ko, crpcut_tag())
       .WillOnce(ReturnRef(tags));
     EXPECT_CALL(fmt, begin_case("apa::katt", false, true, 100)).InSequence(out);
-    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "")).InSequence(out);
+    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "apa.cpp", "")).InSequence(out);
     EXPECT_CALL(fmt, end_case()).InSequence(out);
 
     fd.end_test(20, crpcut::running, false, 100);
 
     EXPECT_CALL(fmt, begin_case("ko", false, false, 100)).InSequence(out);
-    EXPECT_CALL(fmt, print("fail", "VERIFY_APA")).InSequence(out);
-    EXPECT_CALL(fmt, terminate(crpcut::running, "", "")).InSequence(out);
+    EXPECT_CALL(fmt, print("fail", "VERIFY_APA", "apa.cpp")).InSequence(out);
+    EXPECT_CALL(fmt, terminate(crpcut::running, "Earlier verify failed", "apa.cpp", "")).InSequence(out);
     EXPECT_CALL(fmt, end_case()).InSequence(out);
     while (!reader.read())
       ;
@@ -330,19 +336,19 @@ TESTSUITE(presentation_reader)
   TEST(stderr_stdout_info_are_shown_in_non_verbose_fail, fix<false>)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
-    fd.info(101, crpcut::running, "INFO");
+    fd.info(101, crpcut::running, "apa.cpp\nINFO");
     fd.stdout(101, crpcut::running, "stdout");
     fd.stderr(101, crpcut::running, "stderr");
-    fd.exit_fail(101, crpcut::running, "FAIL << orm");
+    fd.exit_fail(101, crpcut::running, "apa.cpp\nFAIL << orm");
     fd.end_test(101, crpcut::running, false, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
     EXPECT_CALL(fmt, begin_case("apa::katt", false, false, 100)).InSequence(out);
-    EXPECT_CALL(fmt, print("info", "INFO")).InSequence(out);
-    EXPECT_CALL(fmt, print("stdout", "stdout")).InSequence(out);
-    EXPECT_CALL(fmt, print("stderr", "stderr")).InSequence(out);
-    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "")).InSequence(out);
+    EXPECT_CALL(fmt, print("info", "INFO", "apa.cpp")).InSequence(out);
+    EXPECT_CALL(fmt, print("stdout", "stdout", "")).InSequence(out);
+    EXPECT_CALL(fmt, print("stderr", "stderr", "")).InSequence(out);
+    EXPECT_CALL(fmt, terminate(crpcut::running, "FAIL << orm", "apa.cpp", "")).InSequence(out);
     EXPECT_CALL(fmt, end_case()).InSequence(out);
     while (!reader.read())
       ;

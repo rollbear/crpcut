@@ -199,6 +199,7 @@ namespace crpcut {
     xml_formatter
     ::terminate(test_phase              phase,
                 datatypes::fixed_string msg,
+                datatypes::fixed_string location,
                 std::string             dirname)
     {
       assert(dirname.length() || msg);
@@ -212,14 +213,10 @@ namespace crpcut {
           write(dirname, translated);
           write("\"");
         }
-      if (const char *end_of_loc = wrapped::strchr(msg.str, '\n'))
-        {
-          write(" location=\"");
-          write(msg.str, end_of_loc - msg.str, translated);
-          msg.len -= end_of_loc - msg.str + 1;
-          msg.str = end_of_loc + 1;
-          write("\"");
-        }
+
+      write(" location=\"");
+      write(location, translated);
+      write("\"");
       if (!msg)
         {
           write("/>\n");
@@ -233,22 +230,18 @@ namespace crpcut {
     void
     xml_formatter
     ::print(datatypes::fixed_string label,
-            datatypes::fixed_string data)
+            datatypes::fixed_string data,
+            datatypes::fixed_string location)
     {
       assert(label);
       assert(data);
       make_closed();
       write("    <");
       write(label);
-      if (wrapped::strncmp(label.str, "fail", 4) == 0
-          || wrapped::strncmp(label.str, "info", 4) == 0)
+      if (location)
         {
-          const char *end_of_loc = wrapped::strchr(data.str, '\n');
-          assert(end_of_loc);
           write(" location=\"");
-          write(data.str, end_of_loc - data.str, translated);
-          data.len -= end_of_loc - data.str + 1;
-          data.str = end_of_loc + 1;
+          write(location, translated);
           write("\"");
         }
       write(">");
