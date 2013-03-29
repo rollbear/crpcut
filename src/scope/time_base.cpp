@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,11 +30,9 @@
 namespace crpcut {
   namespace scope {
     time_base::time_base(unsigned long  deadline,
-                         char const    *filename,
-                         size_t         line)
+                         datatypes::fixed_string location)
         : deadline_(deadline),
-          filename_(filename),
-          line_(line)
+          location_(location)
     {
     }
 

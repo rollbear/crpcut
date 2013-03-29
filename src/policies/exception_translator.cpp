@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,19 +31,18 @@ namespace crpcut {
 
 
     void
-    report_unexpected_exception(comm::type action,
-                                const char *location,
-                                const char *check_name,
-                                const char *check_type,
-                                const char *params)
+    report_unexpected_exception(comm::type               action,
+                                datatypes::fixed_string  location,
+                                const char              *check_name,
+                                const char              *check_type,
+                                const char              *params)
     {
       std::string exc = policies::crpcut_exception_translator::try_all();
       std::ostringstream os;
 
-      os << location << "\n"
-         << check_name << "_" << check_type << '(' << params << ")\n"
+      os << check_name << "_" << check_type << '(' << params << ")\n"
          << "  caught " << exc;
-      comm::report(action, os);
+      comm::report(action, os, location);
 
     }
 

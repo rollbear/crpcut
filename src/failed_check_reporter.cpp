@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,13 +31,11 @@ namespace crpcut {
   std::ostringstream&
   failed_check_reporter
   ::prepare(std::ostringstream &os,
-            const char *location,
             const char *check_type,
             const char *check_name,
             const char *expr_string)
   {
-     os << location
-        << "\n" << check_type << "_" << check_name << '('
+     os << check_type << "_" << check_name << '('
         << expr_string << ")\n  is evaluated as:\n    ";
      return os;
   }

@@ -127,20 +127,22 @@
       if (result.failed())                                              \
         {                                                               \
           crpcut::heap::set_limit(crpcut::heap::system);                \
-          std::ostringstream os;                                        \
+          std::ostringstream location;                                  \
           if (result.file_name() && result.line_number() > 0)           \
             {                                                           \
-              os << result.file_name()                                  \
-                 << ":"                                                 \
-                 << result.line_number()                                \
-                 << "\n";                                               \
+              location << result.file_name()                            \
+                       << ":"                                           \
+                       << result.line_number();                         \
             }                                                           \
           else                                                          \
             {                                                           \
-              os << __FILE__ << ':' << __LINE__ << "\n";      \
+              location << CRPCUT_HERE;                                  \
             }                                                           \
+          std::ostringstream os;                                        \
           os << result.summary() << result.message();                   \
-          crpcut::comm::report(crpcut::comm::exit_fail, os);            \
+          std::string loc_str(location.str());                                \
+          crpcut::datatypes::fixed_string loc = { loc_str.c_str(), loc_str.length() }; \
+          crpcut::comm::report(crpcut::comm::exit_fail, os, loc);       \
         }                                                               \
     }                                                                   \
   };                                                                    \
@@ -309,6 +311,7 @@ namespace std {
 #define CRPCUT_VERBATIM(x) x
 #define CRPCUT_STRINGIZE(...) #__VA_ARGS__
 #define CRPCUT_STRINGIZE_(...) CRPCUT_STRINGIZE(__VA_ARGS__)
+#define CRPCUT_HERE __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__)
 
 namespace crpcut {
 
@@ -1188,19 +1191,6 @@ namespace crpcut {
       CRPCUT_COMM_MSGS(CRPCUT_VERBATIM),
       kill_me = 0x100
     } type;
-
-    inline std::ostream& operator<<(std::ostream& os, type t)
-    {
-      if (t & kill_me)
-        {
-          os << '!';
-          t = type(t & ~kill_me);
-        }
-      static const char *names[] = {
-          CRPCUT_COMM_MSGS(CRPCUT_STRINGIZE)
-      };
-      return os << names[t];
-    }
   }
 
   class crpcut_test_monitor
@@ -1309,35 +1299,46 @@ namespace crpcut {
       void set_writer(data_writer *w);
       void operator()(type                       t,
                       const std::ostringstream  &os,
+                      datatypes::fixed_string    location,
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       template <size_t N>
       void operator()(type                       t,
                       const stream::toastream<N>&os,
+                      datatypes::fixed_string    location,
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       void operator()(type                       t,
                       const stream::oastream    &os,
+                      datatypes::fixed_string    location,
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       void operator()(type                       t,
                       const char                *msg,
+                      datatypes::fixed_string    location,
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       void operator()(type t,
                       const char                *msg,
                       size_t                     len,
+                      datatypes::fixed_string    location,
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       template <size_t N>
       void operator()(type                       t,
                       const char               (&msg)[N],
+                      datatypes::fixed_string    location,
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       template <typename T>
       void operator()(type                       t,
                       const T                   &data,
+                      datatypes::fixed_string    location,
                       const crpcut_test_monitor *mon = tm::current_test()) const;
     private:
       virtual void report(type                       t,
                           const char                *msg,
                           size_t                     len,
+                          datatypes::fixed_string    location,
                           const crpcut_test_monitor *mon) const;
-      void send_message(type t, const char *msg, size_t len) const;
+      void send_message(type                    t,
+                        const char             *msg,
+                        size_t                  len,
+                        datatypes::fixed_string location) const;
 
       template <typename T>
       void read(T& t) const;
@@ -1349,7 +1350,12 @@ namespace crpcut {
     class direct_reporter
     {
     public:
-      direct_reporter(reporter                  &r = report,
+      template <size_t N>
+      direct_reporter(const char               (&location)[N],
+                      reporter                  &r = report,
+                      const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
+      direct_reporter(datatypes::fixed_string  location,
+                      reporter                &r = report,
                       const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
       template <typename V>
       direct_reporter& operator<<(V& v);
@@ -1376,10 +1382,11 @@ namespace crpcut {
       direct_reporter(const direct_reporter &);
       direct_reporter& operator=(const direct_reporter&);
 
-      size_t                     heap_limit;
-      std::ostringstream         os;
-      reporter                  &report_;
-      const crpcut_test_monitor *mon_;
+      size_t                         heap_limit;
+      const datatypes::fixed_string  location_;
+      std::ostringstream             os;
+      reporter                      &report_;
+      const crpcut_test_monitor     *mon_;
     };
 
   } // namespace comm
@@ -1405,12 +1412,25 @@ namespace crpcut {
     };
 
     void
-    report_unexpected_exception(comm::type action,
-                                const char *location,
-                                const char *check_name,
-                                const char *check_type,
-                                const char *params);
-
+    report_unexpected_exception(comm::type               action,
+                                datatypes::fixed_string location,
+                                const char              *check_name,
+                                const char              *check_type,
+                                const char              *params);
+    template <size_t N>
+    void
+    report_unexpected_exception(comm::type   action,
+                                const char (&location)[N],
+                                const char  *check_name,
+                                const char  *check_type,
+                                const char  *params)
+    {
+      report_unexpected_exception(action,
+                                  datatypes::fixed_string::make(location),
+                                  check_name,
+                                  check_type,
+                                  params);
+    }
 
     namespace deaths {
       class crpcut_none;
@@ -1583,17 +1603,17 @@ namespace crpcut {
     {
     public:
       typedef exception_wrapper<T> crpcut_run_wrapper;
-      template <comm::type action>
-      static void check_match(const char *, const char *,crpcut_none) { }
+      template <comm::type action, size_t N>
+      static void check_match(const char (&)[N], const char *,crpcut_none) { }
 
-      template <comm::type action>
-      static void check_match(const char *location,
-                              const char *param_string,
-                              const char *p,
+      template <comm::type action, size_t N>
+      static void check_match(const char (&location)[N],
+                              const char *param,
+                              const char *pattern,
                               crpcut_none);
 
-      template <comm::type action, typename M>
-      static void check_match(const char *location,
+      template <comm::type action, size_t N, typename M>
+      static void check_match(const char (&location)[N],
                               const char *param_string,
                               M           m,
                               crpcut_none);
@@ -1811,7 +1831,8 @@ namespace crpcut {
     {
     public:
       typedef const local_root *bool_test;
-      local_root(comm::type type, const char *file, size_t line);
+      template <size_t N>
+      local_root(comm::type type, const char (&location)[N]);
       local_root(const local_root&);
       ~local_root();
       operator bool_test() const { return 0; }
@@ -1822,13 +1843,25 @@ namespace crpcut {
       void assert_empty() const;
       local_root& operator=(const local_root&);
 
-      char      const * const  file_;
-      size_t            const  line_;
-      mutable mem_list_element*old_root_;
-      comm::type        const  check_type_;
+      const datatypes::fixed_string  location_;
+      mutable mem_list_element      *old_root_;
+      comm::type        const        check_type_;
 
       static mem_list_element *current_root;
     };
+
+    template <size_t N>
+    local_root::local_root(comm::type t, const char (&location)[N])
+      : location_(datatypes::fixed_string::make(location)),
+        old_root_(current()),
+        check_type_(t)
+      {
+        current_root = this;
+        next = this;
+        prev = this;
+        stack = 0;
+        type = 0;
+      }
 
   }
 
@@ -2037,15 +2070,14 @@ namespace crpcut {
       catch (...)
         {
           std::ostringstream os;
-          os << current_test.get_location()
-             << "\nUnexpectedly caught "
+          os << "Unexpectedly caught "
              << policies::crpcut_exception_translator::try_all();
-          report_obj(comm::exit_fail, os, &current_test);
+          report_obj(comm::exit_fail, os, current_test.get_location(), &current_test);
         }
-      std::ostringstream os;
-      os << current_test.get_location()
-         << "\nUnexpectedly did not throw";
-        report_obj(comm::exit_fail, os, &current_test);
+      report_obj(comm::exit_fail,
+                 "Unexpectedly did not throw",
+                 current_test.get_location(),
+                 &current_test);
     }
   };
   template <typename T,
@@ -2234,11 +2266,15 @@ namespace crpcut {
   class tester_base
   {
   protected:
-    tester_base(const char *loc,
+    template <size_t N>
+    tester_base(const char (&loc)[N],
                 const char *ops,
                 comm::reporter &report,
                 const crpcut_test_monitor *mon)
-      : location_(loc), op_(ops), report_(report), mon_(mon)
+      : location_(datatypes::fixed_string::make(loc)),
+        op_(ops),
+        report_(report),
+        mon_(mon)
     {
     }
     template <comm::type action, typename T1, typename T2>
@@ -2249,8 +2285,7 @@ namespace crpcut {
           heap::set_limit(heap::system);
           using std::ostringstream;
           ostringstream os;
-          os << location_
-             << "\n" << crpcut_check_name<action>::string()
+          os << crpcut_check_name<action>::string()
              << "_" << op_ << "(" << n1 << ", " << n2 << ")";
 
           static const char *prefix[] = { "\n  where ", "\n        " };
@@ -2264,14 +2299,14 @@ namespace crpcut {
           std::string().swap(s);
           os.~ostringstream();
           new (&os) ostringstream();
-          this->report_(action, p, len, mon_);
+          this->report_(action, p, len, location_, mon_);
         }
       }
   private:
-    const char                *location_;
-    const char                *op_;
-    comm::reporter            &report_;
-    const crpcut_test_monitor *mon_;
+    const datatypes::fixed_string  location_;
+    const char                    *op_;
+    comm::reporter                &report_;
+    const crpcut_test_monitor     *mon_;
   };
 
   template <comm::type action, typename T1, typename T2>
@@ -2280,7 +2315,8 @@ namespace crpcut {
     typedef typename param_traits<T1>::type type1;
     typedef typename param_traits<T2>::type type2;
   public:
-    tester_t(const char                *loc,
+    template <size_t N>
+    tester_t(const char               (&loc)[N],
              const char                *ops,
              comm::reporter            &report,
              const crpcut_test_monitor *mon)
@@ -2318,7 +2354,8 @@ namespace crpcut {
   {
     typedef typename param_traits<T1>::type type1;
   public:
-    tester_t(const char                *loc,
+    template <size_t N>
+    tester_t(const char               (&loc)[N],
              const char                *ops,
              comm::reporter            &report,
              const crpcut_test_monitor *mon)
@@ -2362,7 +2399,8 @@ namespace crpcut {
   {
     typedef typename param_traits<T2>::type type2;
   public:
-    tester_t(const char                *loc,
+    template <size_t N>
+    tester_t(const char               (&loc)[N],
              const char                *ops,
              comm::reporter            &report,
              const crpcut_test_monitor *mon)
@@ -2401,11 +2439,11 @@ namespace crpcut {
     }
   };
 
-  template <comm::type action, bool null1, typename T1, bool null2, typename T2>
+  template <comm::type action, bool null1, typename T1, bool null2, typename T2, size_t N>
   tester_t<action,
            typename if_else<null1, void, T1>::type,
            typename if_else<null2, void, T2>::type>
-  tester(const char *loc,
+  tester(const char (&loc)[N],
          const char *op,
          comm::reporter & report = comm::report,
          const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
@@ -2420,7 +2458,6 @@ namespace crpcut {
   {
   public:
     static std::ostringstream& prepare(std::ostringstream &os,
-                                       const char *location,
                                        const char *check_type,
                                        const char *check_name,
                                        const char *expr_string);
@@ -2429,12 +2466,12 @@ namespace crpcut {
   template <comm::type action>
   class bool_tester : failed_check_reporter
   {
-    const char *loc_;
   public:
-    bool_tester(const char                *loc,
+    template <size_t N>
+    bool_tester(const char               (&loc)[N],
                 comm::reporter            &reporter = comm::report,
                 const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
-      : loc_(loc),
+      : loc_(datatypes::fixed_string::make(loc)),
         report_(reporter),
         mon_(mon)
     {
@@ -2457,14 +2494,13 @@ namespace crpcut {
       std::ostringstream os;
 
       crpcut::show_value<8>(prepare(os,
-                                    loc_,
                                     crpcut_check_name<action>::string(),
                                     name,
                                     vn),
                              v);
-      this->report_(action, os, mon_);
+      this->report_(action, os, loc_, mon_);
     }
-
+    const datatypes::fixed_string loc_;
     comm::reporter            &report_;
     const crpcut_test_monitor *mon_;
   };
@@ -3286,12 +3322,12 @@ namespace crpcut {
 
   namespace policies {
 
-    template <typename T> template <comm::type action>
+    template <typename T> template <comm::type action, size_t N>
     void
     exception_specifier<void (T)>
-    ::check_match(const char *location,
-                  const char *param_string,
-                  const char *pattern,
+    ::check_match(const char (&location)[N],
+                  const char  *param_string,
+                  const char  *pattern,
                   crpcut_none)
     {
       try {
@@ -3304,8 +3340,7 @@ namespace crpcut {
             {
               std::size_t old_size = heap::set_limit(heap::system);
               {
-                comm::direct_reporter<action>()
-                  << location << "\n"
+                comm::direct_reporter<action>(location)
                   << crpcut_check_name<action>::string()
                   << "_THROW("
                   << param_string
@@ -3320,12 +3355,12 @@ namespace crpcut {
         }
     }
 
-    template <typename T> template <comm::type action, typename M>
+    template <typename T> template <comm::type action, size_t N, typename M>
     void
     exception_specifier<void (T)>
-    ::check_match(const char *location,
-                  const char *param_string,
-                  M           m,
+    ::check_match(const char (&location)[N],
+                  const char  *param_string,
+                  M            m,
                   crpcut_none)
     {
       try {
@@ -3339,8 +3374,7 @@ namespace crpcut {
               {
                 std::ostringstream os;
                 show_value(os, t);
-                comm::direct_reporter<action>()
-                  << location << "\n"
+                comm::direct_reporter<action>(location)
                   << crpcut_check_name<action>::string()
                   << "_THROW("
                   << param_string
@@ -3449,29 +3483,32 @@ namespace crpcut {
     void
     reporter::operator()(type                        t,
                          const stream::toastream<N> &os,
+                         datatypes::fixed_string     location,
                          const crpcut_test_monitor  *mon) const
     {
       const stream::oastream &os_(os);
-      operator()(t, os_, mon);
+      operator()(t, os_, location, mon);
     }
 
     template <size_t N>
     void
     reporter::operator()(type                       t,
                          const char               (&array)[N],
+                         datatypes::fixed_string    location,
                          const crpcut_test_monitor *mon) const
     {
-      operator()(t, array, N - 1, mon);
+      operator()(t, array, N - 1, location, mon);
     }
 
     template <typename T>
     void
     reporter::operator()(comm::type                 t,
                          const T                   &data,
+                         datatypes::fixed_string    location,
                          const crpcut_test_monitor *mon) const
     {
       const void *addr = &data;
-      report(t, static_cast<const char*>(addr), sizeof(data), mon);
+      report(t, static_cast<const char*>(addr), sizeof(data), location, mon);
     }
 
     template <typename T>
@@ -3483,11 +3520,25 @@ namespace crpcut {
       reader_->read_loop(p, sizeof(T));
     }
 
-    template <comm::type type>
+    template <comm::type type> template <size_t N>
     direct_reporter<type>
-    ::direct_reporter(reporter                  &r,
+    ::direct_reporter(const char              (&location)[N],
+                      reporter                  &r,
                       const crpcut_test_monitor *mon)
       : heap_limit(heap::set_limit(heap::system)),
+        location_(datatypes::fixed_string::make(location)),
+        report_(r),
+        mon_(mon)
+    {
+    }
+
+    template <comm::type type>
+    direct_reporter<type>
+    ::direct_reporter(datatypes::fixed_string    location,
+                      reporter                  &r,
+                      const crpcut_test_monitor *mon)
+      : heap_limit(heap::set_limit(heap::system)),
+        location_(location),
         report_(r),
         mon_(mon)
     {
@@ -3519,7 +3570,7 @@ namespace crpcut {
       char *p = static_cast<char*>(alloca(len));
       s.copy(p, len);
       std::string().swap(s);
-      report_(type, p, len, mon_);
+      report_(type, p, len, location_, mon_);
       heap::set_limit(heap_limit);
     }
 
@@ -3908,8 +3959,7 @@ namespace crpcut {
           }
       }
     std::ostringstream msg;
-    msg << crpcut_test_monitor::current_test()->get_location()
-        << "\nParameter " << name << " with ";
+    msg << "\nParameter " << name << " with ";
     if (v)
       {
         msg << "value \"" << v << "\"";
@@ -3919,7 +3969,7 @@ namespace crpcut {
         msg << "no value";
       }
     msg << " cannot be interpreted as desired type";
-    comm::report(comm::exit_fail, msg);
+    comm::report(comm::exit_fail, msg, crpcut_test_monitor::current_test()->get_location());
   }
 
 
@@ -4189,19 +4239,20 @@ namespace crpcut {
       operator bool() const { return false; }
       void silence_warning() const {}
     protected:
-      time_base(unsigned long deadline, const char *filename, size_t line);
+      time_base(unsigned long deadline, datatypes::fixed_string location);
       unsigned long const deadline_;
-      char const *  const filename_;
-      size_t        const line_;
+      const datatypes::fixed_string location_;
     };
     template <comm::type action, typename cond, typename clock>
     class time : public time_base
     {
     public:
-      time(unsigned long us, const char *file, size_t line,
+      template <size_t N>
+      time(unsigned long us, const char (&location)[N],
            comm::reporter &reporter = comm::report,
            const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
-        : time_base(clock::now() + us * crpcut::timeout_multiplier(), file, line),
+        : time_base(clock::now() + us * crpcut::timeout_multiplier(),
+                    datatypes::fixed_string::make(location)),
           limit_us_(us),
           reporter_(reporter),
           mon_(mon)
@@ -4215,8 +4266,7 @@ namespace crpcut {
             if (timeouts_are_enabled() && cond::busted(t, deadline_))
               {
                 unsigned long duration_ms = (t - deadline_ + limit_us_) / 1000;
-                comm::direct_reporter<action>(reporter_, mon_)
-                  << filename_ << ":" << line_ << "\n"
+                comm::direct_reporter<action>(location_, reporter_, mon_)
                   << crpcut_check_name<action>::string()
                   << "_SCOPE_" << cond::name()
                   << "_" << clock::name() << "_MS(" << limit_us_ / 1000 << ")"
@@ -4305,7 +4355,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
     public:                                                             \
        crpcut_registrator()                                             \
          : crpcut_registrator_base(#test_case_name,                     \
-                                   crpcut::datatypes::fixed_string::make(__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__)), \
+                                   crpcut::datatypes::fixed_string::make(CRPCUT_HERE), \
                                    crpcut_current_namespace,            \
                                    crpcut_cputime_timeout_us),          \
            report_reader_(this),                                        \
@@ -4545,13 +4595,13 @@ namespace crpcut {
         <crpcut::comm::action,                                          \
          CRPCUT_IS_ZERO_LIT(lh), CRPCUT_DECLTYPE(lh),                   \
          CRPCUT_IS_ZERO_LIT(rh), CRPCUT_DECLTYPE(rh)>                   \
-        (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__), #name)               \
+        (CRPCUT_HERE, #name)                                            \
         .name(lh, #lh, rh, #rh);                                        \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
       using crpcut::policies::report_unexpected_exception;              \
       report_unexpected_exception(crpcut::comm::action,                 \
-                                  __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__), \
+                                  CRPCUT_HERE,                          \
                                   crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
                                   #name,                                \
                                   #lh ", " #rh);                        \
@@ -4566,14 +4616,14 @@ namespace crpcut {
 #define CRPCUT_CHECK_FALSE(action, a)                   \
   do {                                                  \
     crpcut::bool_tester<crpcut::comm::action>           \
-      (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))        \
+      (CRPCUT_HERE)                                     \
       .check_false((a), #a);                            \
   } while (0)
 
 #define CRPCUT_CHECK_TRUE(action, a)                    \
   do {                                                  \
     crpcut::bool_tester<crpcut::comm::action>           \
-      (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))        \
+      (CRPCUT_HERE)                                     \
       .check_true((a), #a);                             \
   } while (0)
 
@@ -4583,13 +4633,13 @@ namespace crpcut {
   do {                                                                  \
     try {                                                               \
       crpcut::bool_tester<crpcut::comm::action>                         \
-        (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
+        (CRPCUT_HERE)                                                   \
         .check_true((crpcut::expr::hook()->*a), #a);                    \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
         using crpcut::policies::report_unexpected_exception;            \
         report_unexpected_exception(crpcut::comm::action,               \
-                                     __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                     CRPCUT_HERE,                       \
                                      crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
                                      "TRUE",                            \
                                      #a);                               \
@@ -4600,16 +4650,16 @@ namespace crpcut {
   do {                                                                  \
     try {                                                               \
       crpcut::bool_tester<crpcut::comm::action>                         \
-        (__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__))                      \
+        (CRPCUT_HERE)                                                   \
         .check_false((crpcut::expr::hook()->*a), #a);                   \
     }                                                                   \
     CATCH_BLOCK(..., {                                                  \
         using crpcut::policies::report_unexpected_exception;            \
         report_unexpected_exception(crpcut::comm::action,               \
-                                            __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
-                                            crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
-                                            "FALSE",                    \
-                                            #a);                        \
+                                    CRPCUT_HERE,                        \
+                                    crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
+                                    "FALSE",                    \
+                                    #a);                        \
       })                                                                \
   } while(0)
 #endif // __CDT_PARSER__
@@ -4663,7 +4713,7 @@ namespace crpcut
       }                                                                 \
       catch (exc) {                                                     \
         crpcut::policies::exception_specifier<void(exc)>                \
-          ::check_match<crpcut::comm::action>(__FILE__ ":" CRPCUT_STRINGIZE_(__LINE__), \
+          ::check_match<crpcut::comm::action>(CRPCUT_HERE,              \
                                               str,                      \
                                               __VA_ARGS__);             \
         break;                                                          \
@@ -4672,7 +4722,7 @@ namespace crpcut
     CATCH_BLOCK(..., {                                                  \
         using crpcut::policies::report_unexpected_exception;            \
         report_unexpected_exception(crpcut::comm::action,               \
-                                    __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                    CRPCUT_HERE,                        \
                                     crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
                                     "THROW",                            \
                                     str);                               \
@@ -4695,7 +4745,7 @@ namespace crpcut
     CATCH_BLOCK(..., {                                                  \
         using crpcut::policies::report_unexpected_exception;            \
         report_unexpected_exception(crpcut::comm::action,               \
-                                    __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                    CRPCUT_HERE,                        \
                                     crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
                                     "NO_THROW",                         \
                                     #expr);                             \
@@ -4711,8 +4761,7 @@ namespace crpcut
 
 
 #define CRPCUT_CHECK_REPORT_HEAD(action)                                \
-  crpcut::comm::direct_reporter<crpcut::comm::action>()                 \
-    << __FILE__ << ':' << __LINE__ << "\n"                              \
+  crpcut::comm::direct_reporter<crpcut::comm::action>(CRPCUT_HERE)      \
     << crpcut::crpcut_check_name<crpcut::comm::action>::string()        \
 
 #define CRPCUT_CHECK_PRED(action, pred, ...)                            \
@@ -4742,7 +4791,7 @@ namespace crpcut
     CATCH_BLOCK(..., {                                                  \
         using crpcut::policies::report_unexpected_exception;            \
         report_unexpected_exception(crpcut::comm::action,               \
-                                    __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__),\
+                                    CRPCUT_HERE,                        \
                                     crpcut::crpcut_check_name<crpcut::comm::action>::string(), \
                                     "PRED",                             \
                                     CRPCUT_STRINGIZE(pred, __VA_ARGS__)); \
@@ -4760,8 +4809,7 @@ namespace crpcut
       = crpcut::scope::time<crpcut::comm::action,                       \
                             crpcut::scope::time_base::type,             \
                             crpcut::scope::time_base::clock>((ms)*1000UL*crpcut::timeout_multiplier(), \
-                                                             __FILE__,  \
-                                                             __LINE__)) \
+                                                             CRPCUT_HERE)) \
     { CRPCUT_LOCAL_NAME(time_scope).silence_warning(); } else           \
 
 #define ASSERT_SCOPE_MAX_REALTIME_MS(ms)        \
@@ -4784,9 +4832,9 @@ namespace crpcut
 
 #define CRPCUT_CHECK_SCOPE_HEAP_LEAK_FREE(type)                         \
   if (const crpcut::heap::local_root & CRPCUT_LOCAL_NAME(leak_free_scope) \
-      = crpcut::heap::local_root(crpcut::comm::type,__FILE__, __LINE__)) \
+      = crpcut::heap::local_root(crpcut::comm::type, CRPCUT_HERE))      \
     {                                                                   \
-      CRPCUT_LOCAL_NAME(leak_free_scope).nonsense_func();  \
+      CRPCUT_LOCAL_NAME(leak_free_scope).nonsense_func();               \
     }                                                                   \
   else
 
@@ -4829,11 +4877,8 @@ class crpcut_testsuite_dep
 
 #define TESTSUITE(...) TESTSUITE_DEF(__VA_ARGS__, crpcut::crpcut_none)
 
-#define INFO crpcut::comm::direct_reporter<crpcut::comm::info>() \
-  << __FILE__ << ':' << __LINE__  << "\n"
-
-#define FAIL crpcut::comm::direct_reporter<crpcut::comm::exit_fail>()   \
-  << __FILE__ << ':' << __LINE__  << "\n"
+#define INFO crpcut::comm::direct_reporter<crpcut::comm::info>(CRPCUT_HERE)
+#define FAIL crpcut::comm::direct_reporter<crpcut::comm::exit_fail>(CRPCUT_HERE)
 
 
 #define WITH_TEST_TAG(tag_name)                         \

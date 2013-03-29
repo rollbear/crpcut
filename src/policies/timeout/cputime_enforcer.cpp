@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,11 +58,10 @@ namespace crpcut {
         if  (diff > duration_us_)
           {
             std::ostringstream os;
-            os << current_test_->get_location()
-               << "\nCPU-time timeout " << duration_us_ / 1000
+            os << "CPU-time timeout " << duration_us_ / 1000
                << "ms exceeded.\n  Actual time to completion was "
                << diff / 1000 << "ms";
-            comm::report(comm::exit_fail, os);
+            comm::report(comm::exit_fail, os, current_test_->get_location());
           }
       }
     }

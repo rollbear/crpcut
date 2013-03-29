@@ -55,7 +55,7 @@ TESTSUITE(scope)
         using crpcut::comm::fail;
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::max max;
-        time<fail, max, test_clock> t(0, "apa", 3, r, 0);
+        time<fail, max, test_clock> t(0, "apa:3", r, 0);
       }
       ASSERT_TRUE(os.str() == "");
     }
@@ -67,7 +67,7 @@ TESTSUITE(scope)
         using crpcut::comm::fail;
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::min min;
-        time<fail, min, test_clock> t(0, "apa", 3, r, 0);
+        time<fail, min, test_clock> t(0, "apa:3", r, 0);
       }
       ASSERT_TRUE(os.str() == "");
     }
@@ -79,7 +79,7 @@ TESTSUITE(scope)
         using crpcut::comm::fail;
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::max max;
-        time<fail, max, test_clock> t(0, "apa", 3, r, 0);
+        time<fail, max, test_clock> t(0, "apa:3", r, 0);
         test_clock::set_timestamp_us(1000UL);
       }
       static const char report[] =
@@ -96,7 +96,7 @@ TESTSUITE(scope)
         using crpcut::comm::fail;
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::min min;
-        time<fail, min, test_clock> t(0, "apa", 3, r, 0);
+        time<fail, min, test_clock> t(0, "apa:3", r, 0);
         test_clock::set_timestamp_us(1000UL);
       }
       ASSERT_TRUE(os.str() == "");
@@ -109,7 +109,7 @@ TESTSUITE(scope)
         using crpcut::comm::fail;
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::min min;
-        time<fail, min, test_clock> t(1000, "apa", 3, r, 0);
+        time<fail, min, test_clock> t(1000, "apa:3", r, 0);
       }
       static const char report[] =
           "\napa:3\n"
@@ -125,7 +125,7 @@ TESTSUITE(scope)
         using crpcut::comm::fail;
         using crpcut::scope::time;
         typedef crpcut::scope::time_base::max max;
-        time<fail, max, test_clock> t(0, "apa", 3, r, 0);
+        time<fail, max, test_clock> t(0, "apa:3", r, 0);
         test_clock::set_timestamp_us(1000UL);
         crpcut::scope::time<fail, max, test_clock> t2(t);
         crpcut::scope::time<fail, max, test_clock> t3(t2);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,17 @@ TESTSUITE(test_wrapper)
   class mock_reporter : public crpcut::comm::reporter
   {
   public:
-    MOCK_CONST_METHOD4(report, void(crpcut::comm::type,
+    MOCK_CONST_METHOD5(report, void(crpcut::comm::type,
                                     const char*,
                                     size_t,
+                                    std::string loc,
                                     const crpcut::crpcut_test_monitor*));
+    void report(crpcut::comm::type t, const char *msg, size_t len,
+                crpcut::datatypes::fixed_string location,
+                const crpcut::crpcut_test_monitor* mon) const
+    {
+      report(t, msg, len, std::string(location.str, location.len), mon);
+    }
   };
 
   class mock_test : public crpcut::crpcut_test_case_base
@@ -111,9 +118,9 @@ TESTSUITE(test_wrapper)
     		WillOnce(Return(loc));
     EXPECT_CALL(registrator, crpcut_expected_death(_)).
       WillOnce(Invoke(expected_death_report));
-    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail, _, _,&registrator)).
+    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail, _, _, "apa:3", &registrator)).
       With(Args<1,2>(ElementsAreArray(
-                     S(apa:3\nUnexpectedly survived\nExpected signal 9))));
+                     S(Unexpectedly survived\nExpected signal 9))));
     typedef crpcut::test_wrapper<crpcut::policies::deaths::wrapper> wrapper;
     wrapper::run(&test_case, reporter);
   }
@@ -135,8 +142,8 @@ TESTSUITE(test_wrapper)
       WillRepeatedly(ReturnRef(registrator));
     EXPECT_CALL(registrator, get_location()).
       WillOnce(Return(loc));
-    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail, _, _,&registrator)).
-      With(Args<1,2>(ElementsAreArray(S(apa:3\nUnexpectedly did not throw))));
+    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail, _, _, "apa:3", &registrator)).
+      With(Args<1,2>(ElementsAreArray(S(Unexpectedly did not throw))));
     typedef crpcut::test_wrapper<crpcut::policies::any_exception_wrapper> w;
     w::run(&test_case, reporter);
   }
@@ -166,8 +173,8 @@ TESTSUITE(test_wrapper)
       WillRepeatedly(ReturnRef(registrator));
     EXPECT_CALL(registrator, get_location()).
       WillOnce(Return(loc));
-    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,_,_, &registrator)).
-      With(Args<1,2>(ElementsAreArray(S(apa:3\nUnexpectedly did not throw))));
+    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,_,_, "apa:3", &registrator)).
+      With(Args<1,2>(ElementsAreArray(S(Unexpectedly did not throw))));
 
     typedef crpcut::policies::exception_wrapper<std::exception> policy;
     typedef crpcut::test_wrapper<policy > w;
@@ -181,8 +188,8 @@ TESTSUITE(test_wrapper)
       WillRepeatedly(ReturnRef(registrator));
     EXPECT_CALL(registrator, get_location()).
       WillOnce(Return(loc));
-    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,_,_,&registrator)).
-        With(Args<1,2>(ElementsAreArray(S(apa:3\nUnexpectedly did not throw))));
+    EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,_,_,"apa:3", &registrator)).
+        With(Args<1,2>(ElementsAreArray(S(Unexpectedly did not throw))));
     typedef crpcut::policies::exception_wrapper<my_error> policy;
     typedef crpcut::test_wrapper<policy> w;
     w::run(&test_case, reporter);

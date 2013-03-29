@@ -38,34 +38,49 @@ namespace crpcut {
     {
     }
 
-    void reporter::send_message(type t, const char *msg, size_t len) const
+    void reporter::send_message(type t, const char *msg, size_t len, datatypes::fixed_string location) const
     {
       const size_t header_size = sizeof(t) + sizeof(len);
-
-      void *report_addr = alloca(len + header_size);
+      size_t buff_size = header_size + len;
+      if (location)
+        {
+          buff_size += location.len + 1;
+        }
+      void *report_addr = alloca(buff_size);
 
       *static_cast<type*>(report_addr) = t;
       char *p = static_cast<char *>(report_addr);
       p+= sizeof(type);
 
-      *static_cast<size_t*>(static_cast<void*>(p)) = len;
+      *static_cast<size_t*>(static_cast<void*>(p)) = buff_size - header_size;
       p+= sizeof(len);
-
+      if (location)
+        {
+          wrapped::memcpy(p, location.str, location.len);
+          p+= location.len;
+          *p++='\n';
+        }
       wrapped::memcpy(p, msg, len);
       sigignore ignore(SIGPIPE);
-      writer_->write_loop(report_addr, len + header_size);
+      writer_->write_loop(report_addr, buff_size);
     }
 
     void reporter
     ::report(type                       t,
              const char                *msg,
              size_t                     len,
+             datatypes::fixed_string    location,
              const crpcut_test_monitor *current_test) const
     {
       if (!current_test || !writer_)
         {
           if (len)
             {
+              if (location)
+                {
+                  default_out_.put('\n');
+                  default_out_.write(location.str, location.len);
+                }
               default_out_.put('\n');
               default_out_.write(msg, std::streamsize(len));
               default_out_.put('\n');
@@ -84,8 +99,7 @@ namespace crpcut {
           {
             t = static_cast<type>(t | kill_me);
           }
-
-        send_message(t, msg, len);
+        send_message(t, msg, len, location);
 
         if (t == comm::exit_fail || testicide)
           {
@@ -115,35 +129,39 @@ namespace crpcut {
     void
     reporter::operator()(type                       t,
                          const stream::oastream    &os,
+                         datatypes::fixed_string    location,
                          const crpcut_test_monitor *mon) const
     {
-      report(t, os.begin(), os.size(), mon);
+      report(t, os.begin(), os.size(), location, mon);
     }
 
     void
     reporter::operator()(type                       t,
                          const std::ostringstream  &os,
+                         datatypes::fixed_string    location,
                          const crpcut_test_monitor *mon) const
     {
       const std::string &s = os.str();
-      report(t, s.c_str(), s.length(), mon);
+      report(t, s.c_str(), s.length(), location, mon);
     }
 
     void
     reporter::operator()(type                       t,
                          const char                *msg,
+                         datatypes::fixed_string    location,
                          const crpcut_test_monitor *mon) const
     {
-      report(t, msg, wrapped::strlen(msg), mon);
+      report(t, msg, wrapped::strlen(msg), location, mon);
     }
 
     void
     reporter::operator()(type                       t,
                          const char                *msg,
                          size_t                     len,
+                         datatypes::fixed_string    location,
                          const crpcut_test_monitor *mon) const
     {
-      report(t, msg, len, mon);
+      report(t, msg, len, location, mon);
     }
   }
 

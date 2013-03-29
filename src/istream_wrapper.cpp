@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,8 @@ namespace crpcut {
   {
     if (!is)
       {
-        std::ostringstream os;
         crpcut_test_monitor *current_test = crpcut_test_monitor::current_test();
-        os << current_test->get_location() << "\n" << msg;
-        comm::report(comm::exit_fail, os);
+        comm::report(comm::exit_fail, msg, current_test->get_location());
       }
     return *this;
   }

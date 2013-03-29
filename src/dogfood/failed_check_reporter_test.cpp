@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,8 @@ TESTSUITE(failed_check_reporter)
   TEST(report_string_is_correct)
   {
     std::ostringstream os;
-    access::prepare(os, "apa.cpp:32", "ASSERT", "TRUE", "a==b") << "42";
+    access::prepare(os, "ASSERT", "TRUE", "a==b") << "42";
     static const char truth[] =
-        "apa.cpp:32\n"
         "ASSERT_TRUE(a==b)\n"
         "  is evaluated as:\n    "
         "42";

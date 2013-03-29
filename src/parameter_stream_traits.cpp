@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ namespace {
     if (!p)
       {
         std::ostringstream os;
-        os << current_test->get_location()
-           << "\nNo parameter named \"" << n << "\"";
-        comm::report(comm::exit_fail, os);
+        os << "No parameter named \"" << n << "\"";
+        comm::report(comm::exit_fail, os, current_test->get_location());
       }
     return p;
   }

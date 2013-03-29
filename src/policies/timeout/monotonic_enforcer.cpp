@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,9 @@
 #include <crpcut.hpp>
 #include "../../clocks/clocks.hpp"
 
+namespace {
+  static const crpcut::datatypes::fixed_string no_location = { 0, 0 };
+}
 namespace crpcut {
   namespace policies {
     namespace timeout {
@@ -42,7 +45,7 @@ namespace crpcut {
         if (timeouts_are_enabled())
           {
             clocks::monotonic::timestamp deadline = duration_us_;
-            comm::report(comm::set_timeout, deadline);
+            comm::report(comm::set_timeout, deadline, no_location);
           }
       }
 
@@ -56,15 +59,14 @@ namespace crpcut {
         if (diff <= duration_us_)
           {
             const char *nullstr = 0;
-            comm::report(comm::cancel_timeout, nullstr, 0U, current_test_);
+            comm::report(comm::cancel_timeout, nullstr, 0U, no_location, current_test_);
             return;
           }
         std::ostringstream os;
-        os << current_test_->get_location()
-           << "\nRealtime timeout " << duration_us_ / 1000
+        os << "Realtime timeout " << duration_us_ / 1000
            << "ms exceeded.\n  Actual time to completion was " << diff / 1000
            << "ms";
-        comm::report(comm::exit_fail, os);
+        comm::report(comm::exit_fail, os, current_test_->get_location());
       }
     }
   }

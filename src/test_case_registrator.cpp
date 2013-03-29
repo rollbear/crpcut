@@ -55,7 +55,7 @@ namespace {
       }
     return info;
   }
-
+  static const crpcut::datatypes::fixed_string no_location = { 0, 0 };
 }
 
 namespace crpcut {
@@ -241,7 +241,7 @@ namespace crpcut {
     if (env_->tests_as_child_procs())
       {
         unsigned long req = deadline_us*env_->timeout_multiplier();
-        (*reporter_)(comm::set_timeout, req);
+        (*reporter_)(comm::set_timeout, req, no_location);
       }
   }
 
@@ -259,7 +259,7 @@ namespace crpcut {
     if (env_->timeouts_enabled())
       {
         unsigned long req = deadline_us*env_->timeout_multiplier();
-        (*reporter_)(comm::set_timeout, req);
+        (*reporter_)(comm::set_timeout, req, no_location);
       }
   }
 
@@ -310,7 +310,7 @@ namespace crpcut {
         assert(rv == 0);
         struct timeval cputime;
         timeradd(&usage.ru_utime, &usage.ru_stime, &cputime);
-        (*reporter_)(comm::begin_test, cputime);
+        (*reporter_)(comm::begin_test, cputime, no_location);
       }
     try {
       p->crpcut_run();
@@ -321,7 +321,7 @@ namespace crpcut {
         std::ostringstream out;
         out << get_location() << "\nUnexpectedly caught "
             << policies::crpcut_exception_translator::try_all();
-        (*reporter_)(comm::exit_fail, out);
+        (*reporter_)(comm::exit_fail, out, no_location);
       }
     if (!env_->tests_as_child_procs())
       {
@@ -369,9 +369,7 @@ namespace crpcut {
     name << dirnum_ << '\0';
     if (filesystem_->chdir(name.begin()) != 0)
       {
-        std::ostringstream os;
-        os << get_location() << "\nCouldn't chdir working dir";
-        (*reporter_)(comm::exit_fail, os);
+        (*reporter_)(comm::exit_fail, "Couldn't chdir working dir", get_location());
         assert("unreachable code reached" == 0);
       }
   }

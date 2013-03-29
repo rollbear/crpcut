@@ -72,10 +72,17 @@ TESTSUITE(test_runner)
   {
   public:
     mock_reporter(std::ostream &os) : reporter(os) {}
-    MOCK_CONST_METHOD4(report, void(crpcut::comm::type,
-                                    const char *,
-                                    size_t,
+    MOCK_CONST_METHOD5(report, void(crpcut::comm::type,
+                                    const char *p,
+                                    size_t len,
+                                    std::string,
                                     const crpcut::crpcut_test_monitor*));
+    void report(crpcut::comm::type t, const char *msg, size_t len,
+                crpcut::datatypes::fixed_string loc,
+                const crpcut::crpcut_test_monitor* mon) const
+    {
+      report(t, msg, len, std::string(loc.str, loc.len), mon);
+    }
   };
 
   class mock_process_control : public crpcut::process_control
@@ -306,8 +313,9 @@ TESTSUITE(test_runner)
       EXPECT_CALL(reg, get_location()).
         WillOnce(Return(loc));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
-                                   StrEq("apa.cpp:3\nCouldn't chdir working dir"),
-                                   36,
+                                   StrEq("Couldn't chdir working dir"),
+                                   _,
+                                   "apa.cpp:3",
                                    _)).
         WillOnce(Throw(my_exit()));
       reg.set_wd(101);
@@ -325,8 +333,9 @@ TESTSUITE(test_runner)
       EXPECT_CALL(reg, get_location()).
     	WillOnce(Return(loc));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
-                                   StrEq("apa.cpp:3\nCouldn't chdir working dir"),
-                                   36,
+                                   StrEq("Couldn't chdir working dir"),
+                                   _,
+                                   "apa.cpp:3",
                                    _));
       reg.set_wd(101);
       reg.goto_wd();
@@ -356,6 +365,7 @@ TESTSUITE(test_runner)
       EXPECT_CALL(reporter, report(crpcut::comm::set_timeout,
                                    _,
                                    sizeof(result),
+                                   "",
                                    _)).
           With(Args<1,2>(ElementsAreArray(result_str, sizeof(result))));
       reg.prepare_construction(requested_timeout);
@@ -389,6 +399,7 @@ TESTSUITE(test_runner)
       EXPECT_CALL(reporter, report(crpcut::comm::set_timeout,
                                    _,
                                    sizeof(result),
+                                   "",
                                    _)).
           With(Args<1,2>(ElementsAreArray(result_str, sizeof(result))));
       reg.prepare_destruction(requested_timeout);
@@ -426,7 +437,7 @@ TESTSUITE(test_runner)
       const void *addr = &result;
       const char *result_str = static_cast<const char*>(addr);
 
-      EXPECT_CALL(reporter, report(crpcut::comm::begin_test, _, _,_)).
+      EXPECT_CALL(reporter, report(crpcut::comm::begin_test, _, sizeof(result), "",_)).
           With(Args<1,2>(ElementsAreArray(result_str, sizeof(result)))).
           InSequence(s);
 

@@ -27,6 +27,10 @@
 #include <gmock/gmock.h>
 #include <crpcut.hpp>
 
+namespace {
+  typedef crpcut::datatypes::fixed_string fs;
+  static const fs location = fs::make("apa.cpp:32");
+}
 TESTSUITE(comm)
 {
   TESTSUITE(reporter)
@@ -76,9 +80,9 @@ TESTSUITE(comm)
        {
          crpcut::comm::reporter r(os);
          const crpcut::crpcut_test_monitor *no_monitor = 0;
-         r(crpcut::comm::info, "apa", no_monitor);
+         r(crpcut::comm::info, "apa", location, no_monitor);
        }
-       ASSERT_TRUE(os.str() == "\napa\n");
+       ASSERT_TRUE(os.str() == "\napa.cpp:32\napa\n");
     }
 
     TEST(reporter_without_current_process_prints_and_aborts_for_exit_fail,
@@ -88,7 +92,7 @@ TESTSUITE(comm)
       std::ostringstream os;
       crpcut::comm::reporter r(os);
       const crpcut::crpcut_test_monitor *no_monitor = 0;
-      r(crpcut::comm::exit_fail, "apa", no_monitor);
+      r(crpcut::comm::exit_fail, "apa", location, no_monitor);
     }
 
     template <typename T>
@@ -109,16 +113,16 @@ TESTSUITE(comm)
       r.set_writer(&wfd);
 
       using namespace crpcut::comm;
-      char request[sizeof(type) + sizeof(size_t) + 3];
+      char request[sizeof(type) + sizeof(size_t) + 3 + 11];
       void *addr = set_to(request, type(fail | kill_me));
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
-      *p++='a'; *p++='p'; *p++='a';
+      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
+      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
       EXPECT_CALL(mon, is_naughty_child()).
         WillOnce(Return(true));
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
-      r(crpcut::comm::fail, "apa", &mon);
+      r(crpcut::comm::fail, "apa", location, &mon);
     }
 
 
@@ -141,56 +145,56 @@ TESTSUITE(comm)
     TEST(reporter_exits_on_exit_fail,
          EXPECT_EXIT(0), fix)
     {
-      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3];
+      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3 + 11];
       void *addr = set_to(request, crpcut::comm::exit_fail);
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
-      *p++='a'; *p++='p'; *p++='a';
+      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
+      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
-      r(crpcut::comm::exit_fail, "apa", &mon);
+      r(crpcut::comm::exit_fail, "apa", location, &mon);
     }
 
     TEST(reporter_forwards_contents_from_ostringstream, fix)
     {
-      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3];
+      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3 + 11];
       void *addr = set_to(request, crpcut::comm::fail);
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
-      *p++='a'; *p++='p'; *p++='a';
+      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
+      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
       std::ostringstream os;
       os << "apa";
-      r(crpcut::comm::fail, os, &mon);
+      r(crpcut::comm::fail, os, location, &mon);
     }
 
     TEST(reporter_forwards_contents_from_oastream, fix)
     {
-      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3];
+      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3 + 11];
       void *addr = set_to(request, crpcut::comm::info);
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
-      *p++='a'; *p++='p'; *p++='a';
+      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
+      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
 
       crpcut::stream::toastream<3> os;
       os << "apa";
-      r(crpcut::comm::info, os, &mon);
+      r(crpcut::comm::info, os, location, &mon);
     }
 
     TEST(reporter_forwards_contents_from_char_array, fix)
     {
-      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3];
+      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3 + 11];
       void *addr = set_to(request, crpcut::comm::info);
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3)));
-      *p++='a'; *p++='p'; *p++='a';
+      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
+      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
       EXPECT_CALL(wfd, write_loop(_, sizeof(request), _))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
       static const char apa[] = "apa";
-      r(crpcut::comm::info, apa, &mon);
+      r(crpcut::comm::info, apa, location, &mon);
     }
   }
 }

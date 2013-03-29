@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
 
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,9 @@ namespace {
     crpcut::heap::set_limit(crpcut::heap::system);
     crpcut::crpcut_test_case_registrator &current_test = t->crpcut_get_reg();
     std::ostringstream os;
-    os << current_test.get_location()
-       << "\nUnexpectedly survived\nExpected ";
+    os << "Unexpectedly survived\nExpected ";
     current_test.crpcut_expected_death(os);
-    report(crpcut::comm::exit_fail, os, &current_test);
+    report(crpcut::comm::exit_fail, os, current_test.get_location(), &current_test);
   }
 
   void
@@ -47,9 +46,8 @@ namespace {
     crpcut::heap::set_limit(crpcut::heap::system);
     std::ostringstream os;
     crpcut::crpcut_test_monitor &current_test = t->crpcut_get_reg();
-    os << current_test.get_location()
-       << "\nUnexpectedly did not throw";
-    report(crpcut::comm::exit_fail, os, &current_test);
+    os << "Unexpectedly did not throw";
+    report(crpcut::comm::exit_fail, os, current_test.get_location(), &current_test);
 
   }
 }
@@ -96,10 +94,9 @@ namespace crpcut {
       heap::set_limit(heap::system);
       std::ostringstream out;
       const crpcut_test_monitor &mon = t->crpcut_get_reg();
-      out << mon.get_location()
-          << "\nUnexpectedly caught "
+      out << "Unexpectedly caught "
           << policies::crpcut_exception_translator::try_all();
-      report(comm::exit_fail, out, &mon);
+      report(comm::exit_fail, out, mon.get_location(), &mon);
     }
     report_did_not_throw(t, report);
   }

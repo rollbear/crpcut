@@ -258,23 +258,10 @@ namespace crpcut
       }
 
     }
-    local_root::local_root(comm::type t, const char *file, size_t line)
-      : file_(file),
-        line_(line),
-        old_root_(current()),
-        check_type_(t)
-      {
-        current_root = this;
-        next = this;
-        prev = this;
-        stack = 0;
-        type = 0;
-      }
 
     local_root::local_root(const local_root &orig)
       : mem_list_element(orig),
-        file_(orig.file_),
-        line_(orig.line_),
+        location_(orig.location_),
         old_root_(orig.old_root_),
         check_type_(orig.check_type_)
     {
@@ -285,7 +272,7 @@ namespace crpcut
     {
       valgrind_make_mem_defined(this, sizeof(mem_list_element));
       current_root = old_root_;
-      if (file_) assert_empty();
+      assert_empty();
       unlink();
     }
     mem_list_element* local_root::current()
@@ -320,16 +307,14 @@ namespace crpcut
         }
       if (check_type_ == comm::exit_fail)
         {
-          comm::direct_reporter<comm::exit_fail>()
-            << file_ << ":" << line_
-            << "\nASSERT_SCOPE_LEAK_FREE\n"
+          comm::direct_reporter<comm::exit_fail>(location_)
+            << "ASSERT_SCOPE_LEAK_FREE\n"
             << msg.str();
         }
       else
         {
-          comm::direct_reporter<comm::fail>()
-            << file_ << ":" << line_
-            << "\nVERIFY_SCOPE_LEAK_FREE\n"
+          comm::direct_reporter<comm::fail>(location_)
+            << "VERIFY_SCOPE_LEAK_FREE\n"
             << msg.str();
         }
       valgrind_make_mem_undefined(const_cast<local_root*>(this), sizeof(*this));
@@ -384,9 +369,8 @@ namespace crpcut
               std::ostringstream msg;
               show_stack(msg, "\nAlloc stack:", p->stack, p->stack_size);
               show_stack(msg, "\nNow at:", 0, 0);
-              comm::direct_reporter<crpcut::comm::exit_fail>()
-                << crpcut_test_monitor::current_test()->get_location()
-                << "\nDEALLOC FAIL\n"
+              comm::direct_reporter<crpcut::comm::exit_fail>(crpcut_test_monitor::current_test()->get_location())
+                << "DEALLOC FAIL\n"
                 << free_name(type) << " " << addr << " was allocated using "
                 << alloc_name(current_type)
                 << msg.str();
@@ -548,9 +532,8 @@ namespace crpcut
           if (control::is_enabled())
             {
               size_t now_bytes = bytes;
-              comm::direct_reporter<crpcut::comm::exit_fail>()
-                << crpcut_test_monitor::current_test()->get_location()
-                << "\nheap::set_limit(" << n
+              comm::direct_reporter<crpcut::comm::exit_fail>(crpcut_test_monitor::current_test()->get_location())
+                << "heap::set_limit(" << n
                 << ") is below current use of " << now_bytes
                 << " bytes";
             }

@@ -41,43 +41,45 @@ TESTSUITE(comm)
     TEST(trivial_output_is_copied_in_verbatim, fix)
     {
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter,0);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,0);
         d << "apa" << ' ' << 32;
         ASSERT_TRUE(os.size() == 0U);
       }
-      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa 32\n");
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa.cpp:32\napa 32\n");
     }
 
     TEST(output_stream_manipulators_are_forwarded, fix)
     {
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter,0);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,0);
         d << std::hex << std::noshowbase << 32 << std::endl
           << std::setw(5) << std::left << 1;
       }
-      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\n20\n1    \n");
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa.cpp:32\n20\n1    \n");
     }
 
     TEST(output_works_in_limited_heap, fix)
     {
       {
         crpcut::heap::set_limit(crpcut::heap::allocated_bytes());
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter,0);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,0);
         d << "apa\nkatt";
       }
       crpcut::heap::set_limit(crpcut::heap::system);
-      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa\nkatt\n");
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa.cpp:32\napa\nkatt\n");
     }
 
     TEST(variables_are_forwarded, fix)
     {
+      using crpcut::datatypes::fixed_string;
+      static fixed_string loc = fixed_string::make("apa.cpp:32");
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(actual_reporter,0);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d(loc, actual_reporter,0);
         int c = 3;
         const unsigned u = 8;
         d << c << " " << u;
       }
-      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\n3 8\n");
+      ASSERT_TRUE(std::string(os.begin(), os.end()) == "\napa.cpp:32\n3 8\n");
     }
 
   }
