@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,10 @@ namespace crpcut {
     void begin_test(test_case_result*);
     void end_test(test_phase phase, test_case_result *);
     void nonempty_dir(test_case_result *);
-    void output_data(comm::type t, test_case_result *);
+    void output_data(comm::type               t,
+                     test_case_result        *result,
+                     datatypes::fixed_string  msg,
+                     datatypes::fixed_string  location);
     void blocked_test();
     datatypes::list_elem<test_case_result>  messages_;
     poll<io>                               &poller_;

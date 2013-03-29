@@ -307,6 +307,8 @@ namespace std {
 
 #define ANY_CODE -1
 #define CRPCUT_VERBATIM(x) x
+#define CRPCUT_STRINGIZE(...) #__VA_ARGS__
+#define CRPCUT_STRINGIZE_(...) CRPCUT_STRINGIZE(__VA_ARGS__)
 
 namespace crpcut {
 
@@ -1187,6 +1189,18 @@ namespace crpcut {
       kill_me = 0x100
     } type;
 
+    inline std::ostream& operator<<(std::ostream& os, type t)
+    {
+      if (t & kill_me)
+        {
+          os << '!';
+          t = type(t & ~kill_me);
+        }
+      static const char *names[] = {
+          CRPCUT_COMM_MSGS(CRPCUT_STRINGIZE)
+      };
+      return os << names[t];
+    }
   }
 
   class crpcut_test_monitor
@@ -4411,8 +4425,6 @@ extern crpcut::namespace_info crpcut_current_namespace;
 #define CRPCUT_LOCAL_NAME(prefix) \
   CRPCUT_CONCAT(crpcut_local_, prefix, __LINE__)
 
-#define CRPCUT_STRINGIZE(...) #__VA_ARGS__
-#define CRPCUT_STRINGIZE_(...) CRPCUT_STRINGIZE(__VA_ARGS__)
 
 #ifndef CRPCUT_EXPERIMENTAL_CXX0X
 #define CRPCUT_REFTYPE(expr) \

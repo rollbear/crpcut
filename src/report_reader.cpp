@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,7 +133,6 @@ namespace crpcut {
         default:
           break; // silence warning
         }
-
       mon_->send_to_presentation(t, len, buff);
       if (t == comm::exit_ok || t == comm::exit_fail)
         {

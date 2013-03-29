@@ -101,20 +101,20 @@ TESTSUITE(presentation_reader)
     {
       msg<crpcut::comm::dir>(id, phase, name);
     }
-    template <size_t N>
-    void fail(pid_t id, crpcut::test_phase phase, const char (&name)[N])
+    template <size_t N1, size_t N2>
+    void fail(pid_t id, crpcut::test_phase phase, const char (&loc)[N1], const char (&name)[N2])
     {
-      msg<crpcut::comm::fail>(id, phase, name);
+      msg<crpcut::comm::fail>(id, phase, loc, name);
+    }
+    template <size_t N1, size_t N2>
+    void exit_fail(pid_t id, crpcut::test_phase phase, const char (&loc)[N1], const char (&name)[N2])
+    {
+      msg<crpcut::comm::exit_fail>(id, phase, loc, name);
     }
     template <size_t N>
-    void exit_fail(pid_t id, crpcut::test_phase phase, const char (&name)[N])
+    void exit_ok(pid_t id, crpcut::test_phase phase, const char (&loc)[N])
     {
-      msg<crpcut::comm::exit_fail>(id, phase, name);
-    }
-    template <size_t N>
-    void exit_ok(pid_t id, crpcut::test_phase phase, const char (&name)[N])
-    {
-      msg<crpcut::comm::exit_ok>(id, phase, name);
+      msg<crpcut::comm::exit_ok>(id, phase, loc, "");
     }
     template <size_t N>
     void stdout(pid_t id, crpcut::test_phase phase, const char (&name)[N])
@@ -126,10 +126,10 @@ TESTSUITE(presentation_reader)
     {
       msg<crpcut::comm::stderr>(id, phase, name);
     }
-    template <size_t N>
-    void info(pid_t id, crpcut::test_phase phase, const char (&name)[N])
+    template <size_t N1, size_t N2>
+    void info(pid_t id, crpcut::test_phase phase, const char (&loc)[N1], const char (&name)[N2])
     {
-      msg<crpcut::comm::info>(id, phase, name);
+      msg<crpcut::comm::info>(id, phase, loc, name);
     }
   private:
     template <crpcut::comm::type type, size_t N>
@@ -138,6 +138,15 @@ TESTSUITE(presentation_reader)
       add_data(id);
       add_data(type);
       add_data(phase);
+      add_data(name);
+    }
+    template <crpcut::comm::type type, size_t N1, size_t N2>
+    void msg(pid_t id, crpcut::test_phase phase, const char (&loc)[N1], const char (&name)[N2])
+    {
+      add_data(id);
+      add_data(type);
+      add_data(phase);
+      add_data(loc);
       add_data(name);
     }
     mutable std::deque<std::string > data_;
@@ -248,10 +257,10 @@ TESTSUITE(presentation_reader)
   TEST(passed_critical_verbose_prints_all, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
-    fd.info(101, crpcut::running, "apa.cpp\nINFO << info");
+    fd.info(101, crpcut::running, "apa.cpp", "INFO << info");
     fd.stderr(101, crpcut::running, "stderr");
     fd.stdout(101, crpcut::running, "stdout");
-    fd.exit_ok(101, crpcut::post_mortem, "");
+    fd.exit_ok(101, crpcut::post_mortem, "apa.cpp");
     fd.end_test(101, crpcut::post_mortem, true, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())
@@ -268,7 +277,7 @@ TESTSUITE(presentation_reader)
   TEST(failed_critical_behaviour_with_nonempty_dir_prints_all, fix<true>)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
-    fd.exit_fail(101, crpcut::running, "apa.cpp\nFAIL << orm");
+    fd.exit_fail(101, crpcut::running, "apa.cpp", "FAIL << orm");
     fd.nonempty_dir(101, crpcut::running, "");
     fd.end_test(101, crpcut::running, true, 100);
 
@@ -296,10 +305,10 @@ TESTSUITE(presentation_reader)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
     fd.begin_test(20, crpcut::creating, &ko);
-    fd.exit_fail(101, crpcut::running, "apa.cpp\nFAIL << orm");
-    fd.fail(20, crpcut::running, "apa.cpp\nVERIFY_APA");
+    fd.exit_fail(101, crpcut::running, "apa.cpp", "FAIL << orm");
+    fd.fail(20, crpcut::running, "apa.cpp", "VERIFY_APA");
     fd.end_test(101, crpcut::running, true, 100);
-    fd.exit_fail(20, crpcut::running, "apa.cpp\nEarlier verify failed");
+    fd.exit_fail(20, crpcut::running, "apa.cpp", "Earlier verify failed");
 
     EXPECT_CALL(apa_katt, crpcut_tag())
       .WillOnce(ReturnRef(tags));
@@ -322,7 +331,7 @@ TESTSUITE(presentation_reader)
   TEST(stderr_stdout_info_are_not_shown_in_non_verbose_mode_pass, fix<false>)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
-    fd.info(101, crpcut::running, "INFO");
+    fd.info(101, crpcut::running, "apa.cpp", "INFO");
     fd.stdout(101, crpcut::running, "stdout");
     fd.stderr(101, crpcut::running, "stderr");
     fd.end_test(101, crpcut::destroying, true, 100);
@@ -336,10 +345,10 @@ TESTSUITE(presentation_reader)
   TEST(stderr_stdout_info_are_shown_in_non_verbose_fail, fix<false>)
   {
     fd.begin_test(101, crpcut::creating, &apa_katt);
-    fd.info(101, crpcut::running, "apa.cpp\nINFO");
+    fd.info(101, crpcut::running, "apa.cpp", "INFO");
     fd.stdout(101, crpcut::running, "stdout");
     fd.stderr(101, crpcut::running, "stderr");
-    fd.exit_fail(101, crpcut::running, "apa.cpp\nFAIL << orm");
+    fd.exit_fail(101, crpcut::running, "apa.cpp", "FAIL << orm");
     fd.end_test(101, crpcut::running, false, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())

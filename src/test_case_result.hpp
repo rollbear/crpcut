@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ namespace crpcut {
 
     crpcut_test_case_registrator *test;
     datatypes::fixed_string       termination;
+    datatypes::fixed_string       location;
     datatypes::list_elem<event>   history;
   private:
     test_case_result(const test_case_result& r);

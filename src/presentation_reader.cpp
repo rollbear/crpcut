@@ -157,37 +157,19 @@ namespace crpcut {
             i != static_cast<event*>(&s->history);
             i = i->next())
           {
-            datatypes::fixed_string msg(i->body);
-            datatypes::fixed_string location = { 0, 0 };
-            if (i->tag == comm::fail || i->tag == comm::info)
-              {
-                location = msg;
-                const char *loc_end = wrapped::strchr(msg.str, '\n');
-                assert(loc_end);
-                location.len = size_t(loc_end - location.str);
-                msg.len -= location.len + 1;
-                msg.str = loc_end + 1;
-              }
-            fmt_.print(tag_info[i->tag], msg, location);
+            fmt_.print(tag_info[i->tag_], i->msg_, i->location_);
           }
         if (s->termination || s->nonempty_dir || s->explicit_fail)
           {
-            const char *loc_end = wrapped::strchr(s->termination.str, '\n');
-            assert(loc_end);
-            datatypes::fixed_string location(s->termination);
-            location.len = size_t(loc_end - s->termination.str);
-            datatypes::fixed_string msg(s->termination);
-            msg.len -= size_t(loc_end - s->termination.str + 1);
-            msg.str = loc_end + 1;
             if (s->nonempty_dir)
               {
                 std::ostringstream dirname;
                 dirname << working_dir_ << "/" << *s->test;
-                fmt_.terminate(phase, msg, location, dirname.str());
+                fmt_.terminate(phase, s->termination, s->location, dirname.str());
               }
             else
               {
-                fmt_.terminate(phase, msg, location);
+                fmt_.terminate(phase, s->termination, s->location);
               }
           }
       }
@@ -215,21 +197,16 @@ namespace crpcut {
 
   void
   presentation_reader
-  ::output_data(comm::type t, test_case_result *s)
+  ::output_data(comm::type t, test_case_result *s, datatypes::fixed_string msg, datatypes::fixed_string location)
   {
-    size_t len;
-    fd_.read_loop(&len, sizeof(len));
-    if (len == 0) return;
-
-    char *buff = static_cast<char*>(wrapped::malloc(len));
-    fd_.read_loop(buff, len);
-
+    if (s->termination) return;
     if (t == comm::exit_ok || t == comm::exit_fail)
       {
-        s->termination = datatypes::fixed_string::make(buff, len);
+        s->termination = msg;
+        s->location    = location;
         return;
       }
-    event *e = new event(t, buff, len);
+    event *e = new event(t, msg, location);
     e->link_before(s->history);
   }
 
@@ -254,9 +231,9 @@ namespace crpcut {
           s->link_after(messages_);
         }
       assert(test_case_id || t == comm::dir);
-
       int mask = t & comm::kill_me;
       t = static_cast<comm::type>(t & ~mask);
+      datatypes::fixed_string location = { 0, 0 };
       switch (t)
         {
         case comm::begin_test:
@@ -275,10 +252,28 @@ namespace crpcut {
         case comm::exit_ok:
           s->success &= t == comm::exit_ok;
                                            /* no break */
+        case comm::info:
+          fd_.read_loop(&location.len, sizeof(location.len));
+          if (location.len)
+            {
+              char *buff = static_cast<char*>(wrapped::malloc(location.len));
+              fd_.read_loop(buff, location.len);
+              location.str = buff;
+            }
+                                           /* no break */
         case comm::stdout:
         case comm::stderr:
-        case comm::info:
-          output_data(t, s);
+          {
+            datatypes::fixed_string msg = { 0, 0 };
+            fd_.read_loop(&msg.len, sizeof(msg.len));
+            if (msg.len)
+              {
+                char *buff = static_cast<char*>(wrapped::malloc(msg.len));
+                fd_.read_loop(buff, msg.len);
+                msg.str = buff;
+              }
+            output_data(t, s, msg, location);
+          }
           break;
         default:
           assert("unreachable code reached" == 0);

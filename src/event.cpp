@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,17 +28,20 @@
 
 namespace crpcut {
 
+  using datatypes::fixed_string;
+
   event
-  ::event(comm::type t, const char *b, std::size_t b_len)
-    : tag(t)
+  ::event(comm::type t, fixed_string msg, fixed_string location)
+    : tag_(t),
+      msg_(msg),
+      location_(location)
   {
-    body.str = b;
-    body.len = b_len;
   }
 
   event
   ::~event()
   {
-    wrapped::free(body.str);
+    wrapped::free(msg_.str);
+    wrapped::free(location_.str);
   }
 }

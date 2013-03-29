@@ -293,8 +293,21 @@ namespace crpcut {
     presenter_pipe_
       .write_loop(&pid)
       .write_loop(&t)
-      .write_loop(&phase)
-      .write_loop(&len);
+      .write_loop(&phase);
+    if (t == comm::fail || t == comm::exit_fail || t == comm::exit_ok || t == comm::info)
+      {
+        const char *end_of_loc = len ? wrapped::strchr(buff, '\n') : 0;
+        size_t loc_len(end_of_loc ? end_of_loc - buff : 0U);
+        presenter_pipe_.write_loop(&loc_len);
+        if (loc_len)
+          {
+            presenter_pipe_.write_loop(buff, loc_len);
+            buff = end_of_loc + 1;
+            len -= loc_len + 1;
+          }
+      }
+
+    presenter_pipe_.write_loop(&len);
     if (len)
       {
         presenter_pipe_.write_loop(buff, len);

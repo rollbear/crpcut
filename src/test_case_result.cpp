@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,8 @@ namespace crpcut {
      success(false),
      nonempty_dir(false),
      test(0),
-     termination(datatypes::fixed_string::make(""))
+     termination(datatypes::fixed_string::make("")),
+     location(datatypes::fixed_string::make(""))
   {
   }
 
@@ -44,6 +45,7 @@ namespace crpcut {
   ::~test_case_result()
   {
     if (termination) wrapped::free(termination.str);
+    if (location) wrapped::free(location.str);
     while (!history.is_empty())
       {
         event *e = history.next();
