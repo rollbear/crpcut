@@ -61,7 +61,7 @@ namespace {
     assert(location.len);
     const void *len_addr = &location.len;
     os.write(static_cast<const char*>(len_addr), sizeof(location.len));
-    os.write(location.str, location.len);
+    os.write(location.str, std::streamsize(location.len));
   }
 }
 

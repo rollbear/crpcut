@@ -126,22 +126,25 @@
     {                                                                   \
       if (result.failed())                                              \
         {                                                               \
+          using crpcut::datatypes::fixed_string;                        \
           crpcut::heap::set_limit(crpcut::heap::system);                \
-          std::ostringstream location;                                  \
+          std::ostringstream loc_stream;                                \
+          std::string lstr;                                             \
+          fixed_string loc;                                             \
           if (result.file_name() && result.line_number() > 0)           \
             {                                                           \
-              location << result.file_name()                            \
-                       << ":"                                           \
-                       << result.line_number();                         \
+              loc_stream << result.file_name()                          \
+                         << ":"                                         \
+                         << result.line_number();                       \
+              loc_stream.str().swap(lstr);                              \
+              loc = fixed_string::make(lstr.c_str(), lstr.length());    \
             }                                                           \
           else                                                          \
             {                                                           \
-              location << crpcut::crpcut_test_monitor::current_test()->get_location();          \
+              loc = fixed_string::make(CRPCUT_HERE);                    \
             }                                                           \
           std::ostringstream os;                                        \
           os << result.summary() << result.message();                   \
-          std::string loc_str(location.str());                                \
-          crpcut::datatypes::fixed_string loc = { loc_str.c_str(), loc_str.length() }; \
           crpcut::comm::report(crpcut::comm::exit_fail, os, loc);       \
         }                                                               \
     }                                                                   \

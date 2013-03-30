@@ -39,7 +39,7 @@ void make_message(crpcut::datatypes::fixed_string location,
   std::ostringstream os;
   void *len_addr = &location.len;
   os.write(static_cast<const char*>(len_addr), sizeof(location.len));
-  os.write(location.str, location.len);
+  os.write(location.str, std::streamsize(location.len));
   os << msg;
   os.str().swap(result);
 }

@@ -80,7 +80,7 @@ namespace crpcut {
               if (location)
                 {
                   default_out_.put('\n');
-                  default_out_.write(location.str, location.len);
+                  default_out_.write(location.str, std::streamsize(location.len));
                 }
               default_out_.put('\n');
               default_out_.write(msg, std::streamsize(len));
