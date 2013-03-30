@@ -44,7 +44,7 @@ namespace crpcut {
       size_t buff_size = header_size + len;
       if (location)
         {
-          buff_size += location.len + 1;
+          buff_size += location.len + sizeof(location.len);
         }
       void *report_addr = alloca(buff_size);
 
@@ -56,9 +56,10 @@ namespace crpcut {
       p+= sizeof(len);
       if (location)
         {
+          wrapped::memcpy(p, &location.len, sizeof(location.len));
+          p+= sizeof(location.len);
           wrapped::memcpy(p, location.str, location.len);
           p+= location.len;
-          *p++='\n';
         }
       wrapped::memcpy(p, msg, len);
       sigignore ignore(SIGPIPE);

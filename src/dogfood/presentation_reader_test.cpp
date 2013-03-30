@@ -48,11 +48,11 @@ TESTSUITE(presentation_reader)
       data_.push_back(std::string(cs, sizeof(t)));
     }
     template <size_t N>
-    void add_data(const char (&cs)[N])
+    void add_data(const char (&cs)[N], bool with_len = true)
     {
       const size_t n = N - 1;
       const char *p = static_cast<const char*>(static_cast<const void*>(&n));
-      data_.push_back(std::string(p, sizeof(n)));
+      if (with_len) data_.push_back(std::string(p, sizeof(n)));
       if (n) data_.push_back(std::string(cs, n));
     }
     virtual ssize_t read(void *p, size_t n) const
@@ -111,10 +111,9 @@ TESTSUITE(presentation_reader)
     {
       msg<crpcut::comm::exit_fail>(id, phase, loc, name);
     }
-    template <size_t N>
-    void exit_ok(pid_t id, crpcut::test_phase phase, const char (&loc)[N])
+    void exit_ok(pid_t id, crpcut::test_phase phase)
     {
-      msg<crpcut::comm::exit_ok>(id, phase, loc, "");
+      msg<crpcut::comm::exit_ok>(id, phase, "");
     }
     template <size_t N>
     void stdout(pid_t id, crpcut::test_phase phase, const char (&name)[N])
@@ -146,8 +145,9 @@ TESTSUITE(presentation_reader)
       add_data(id);
       add_data(type);
       add_data(phase);
+      add_data(N1 - 1 + N2 - 1 + sizeof(size_t));
       add_data(loc);
-      add_data(name);
+      add_data(name, false);
     }
     mutable std::deque<std::string > data_;
     mutable size_t pos_;
@@ -260,7 +260,7 @@ TESTSUITE(presentation_reader)
     fd.info(101, crpcut::running, "apa.cpp", "INFO << info");
     fd.stderr(101, crpcut::running, "stderr");
     fd.stdout(101, crpcut::running, "stdout");
-    fd.exit_ok(101, crpcut::post_mortem, "apa.cpp");
+    fd.exit_ok(101, crpcut::post_mortem);
     fd.end_test(101, crpcut::post_mortem, true, 100);
 
     EXPECT_CALL(apa_katt, crpcut_tag())

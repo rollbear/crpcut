@@ -160,13 +160,16 @@ TESTSUITE(test_runner)
     MOCK_CONST_METHOD0(crpcut_get_reg, crpcut::crpcut_test_case_registrator&());
   };
 
+  static const char loc_str[] = "apa.cpp:3";
+  static const size_t loc_len = sizeof(loc_str) - 1U;
+
   template <unsigned long cpulimit,
             class dump_policy = crpcut::policies::core_dumps::crpcut_default_handler>
   struct fix
   {
+    typedef crpcut::datatypes::fixed_string fixed_string;
     fix()
-    : loc(crpcut::datatypes::fixed_string::make("apa.cpp:3")),
-      default_out(),
+    : default_out(),
       runner(),
       reporter(default_out),
       process_control(),
@@ -177,6 +180,14 @@ TESTSUITE(test_runner)
           &reporter, &process_control, &fsops, &runner)
     {
       reg.set_test_environment(&env);
+    }
+    template <size_t N1, size_t N2>
+    void make_message(char (&buffer)[N1], const char (&msg)[N2])
+    {
+      const size_t len = loc_len;
+      memcpy(buffer, &len, sizeof(len));
+      memcpy(buffer + sizeof(len), loc_str, len);
+      memcpy(buffer + sizeof(len) + len, msg, N2);
     }
     void setup(pid_t pid)
     {
@@ -200,16 +211,15 @@ TESTSUITE(test_runner)
           WillOnce(SetErrnoAndReturn(ECHILD, -1));
     }
 
-    crpcut::datatypes::fixed_string      loc;
-    std::ostringstream                   default_out;
-    StrictMock<mock_environment>         env;
-    StrictMock<mock_runner>              runner;
-    mock_reporter                        reporter;
-    StrictMock<mock_process_control>     process_control;
-    StrictMock<mock_fsops>               fsops;
-    crpcut::namespace_info               top_namespace;
-    crpcut::namespace_info               current_namespace;
-    test_registrator<dump_policy>        reg;
+    std::ostringstream                    default_out;
+    StrictMock<mock_environment>          env;
+    StrictMock<mock_runner>               runner;
+    mock_reporter                         reporter;
+    StrictMock<mock_process_control>      process_control;
+    StrictMock<mock_fsops>                fsops;
+    crpcut::namespace_info                top_namespace;
+    crpcut::namespace_info                current_namespace;
+    test_registrator<dump_policy>         reg;
   };
 
   TESTSUITE(just_constructed)
@@ -311,7 +321,7 @@ TESTSUITE(test_runner)
       EXPECT_CALL(fsops, chdir(StrEq("101"))).
         WillOnce(SetErrnoAndReturn(EACCES, -1));
       EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(loc));
+        WillOnce(Return(fixed_string::make(loc_str)));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
                                    StrEq("Couldn't chdir working dir"),
                                    _,
@@ -331,7 +341,7 @@ TESTSUITE(test_runner)
       EXPECT_CALL(fsops, chdir(StrEq("101"))).
         WillOnce(SetErrnoAndReturn(EACCES, -1));
       EXPECT_CALL(reg, get_location()).
-    	WillOnce(Return(loc));
+    	WillOnce(Return(fixed_string::make(loc_str)));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
                                    StrEq("Couldn't chdir working dir"),
                                    _,
@@ -552,13 +562,17 @@ TESTSUITE(test_runner)
                                     0, 0)).
            InSequence(s);
         EXPECT_CALL(reg, get_location()).
-          WillRepeatedly(Return(loc));
+          WillRepeatedly(Return(fixed_string::make(loc_str)));
         EXPECT_CALL(fsops, rename(StrEq("99"), StrEq("apa::test")));
+        const char msg[] = "Died with core dump";
+        char buffer[sizeof(msg) - 1 + loc_len + sizeof(size_t)];
+        make_message(buffer, msg);
         EXPECT_CALL(runner, present(test_pid,
                                     crpcut::comm::exit_fail,
                                     crpcut::running,
-                                    29, StartsWith("apa.cpp:3\nDied with core dump"))).
-           InSequence(s);
+                                    _, NotNull())).
+          With(Args<4,3>(ElementsAreArray(buffer))).
+          InSequence(s);
         EXPECT_CALL(runner, return_dir(99));
 
         EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test,
@@ -583,7 +597,6 @@ TESTSUITE(test_runner)
     }
 
 
-#define S(...) #__VA_ARGS__, (sizeof(#__VA_ARGS__)-1)
     TEST(exit_with_wrong_code_gives_fail_report, fix<100U>)
     {
       Sequence s;
@@ -606,9 +619,13 @@ TESTSUITE(test_runner)
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
       EXPECT_CALL(reg, get_location()).
-    	WillOnce(Return(loc));
+    	WillOnce(Return(fixed_string::make(loc_str)));
+
+      const char msg[] = "Exited with code 3\nExpected exit 0";
+      char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
+      make_message(buffer, msg);
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nExited with code 3\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(buffer))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(3));
@@ -642,13 +659,17 @@ TESTSUITE(test_runner)
           WillOnce(Return(false));
 
       EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(loc));
+        WillOnce(Return(fixed_string::make(loc_str)));
       EXPECT_CALL(reg, crpcut_expected_death(_)).
           InSequence(s).
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
+      const char msg[] = "Died on signal 15\nExpected exit 0";
+      char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
+      make_message(buffer, msg);
+
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nDied on signal 15\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(buffer))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(100));
@@ -687,14 +708,18 @@ TESTSUITE(test_runner)
           WillOnce(Return(false));
 
       EXPECT_CALL(reg, get_location()).
-    	WillOnce(Return(loc));
+    	WillOnce(Return(fixed_string::make(loc_str)));
 
       EXPECT_CALL(reg, crpcut_expected_death(_)).
           InSequence(s).
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
+      const char msg[] = "Timed out - killed\nExpected exit 0";
+      char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
+      make_message(buffer, msg);
+
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nTimed out - killed\nExpected exit 0)))).
+          With(Args<4,3>(ElementsAreArray(buffer))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -731,12 +756,16 @@ TESTSUITE(test_runner)
           WillOnce(Return(true));
 
       EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(loc));
+        WillOnce(Return(fixed_string::make(loc_str)));
       EXPECT_CALL(env, timeouts_enabled()).
           WillOnce(Return(true));
 
+      const char msg[] = "Test consumed 1000ms CPU-time\nLimit was 100ms";
+      char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
+      make_message(buffer, msg);
+
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nTest consumed 1000ms CPU-time\nLimit was 100ms)))).
+          With(Args<4,3>(ElementsAreArray(buffer))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -846,9 +875,14 @@ TESTSUITE(test_runner)
           WillOnce(Return(1000000U));
 
       EXPECT_CALL(reg, get_location()).
-    	WillOnce(Return(loc));
+    	WillOnce(Return(fixed_string::make(loc_str)));
+
+      const char msg[] = "Died with core dump";
+      char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
+      make_message(buffer, msg);
+
       EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nDied with core dump)))).
+          With(Args<4,3>(ElementsAreArray(buffer))).
           InSequence(s);
 
       EXPECT_CALL(runner, return_dir(1));
@@ -880,12 +914,16 @@ TESTSUITE(test_runner)
           WillOnce(Return(1000000U));
 
       EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(loc));
+        WillOnce(Return(fixed_string::make(loc_str)));
+
+      const char msg[] = "Died for unknown reason, code=-1";
+      char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
+      make_message(buffer, msg);
 
       EXPECT_CALL(runner, present(test_pid,
                                    crpcut::comm::exit_fail,
                                    phase, _, _)).
-        With(Args<4,3>(ElementsAreArray(S(apa.cpp:3\nDied for unknown reason, code=-1)))).
+        With(Args<4,3>(ElementsAreArray(buffer))).
         InSequence(s);
 
 

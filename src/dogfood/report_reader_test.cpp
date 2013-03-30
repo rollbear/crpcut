@@ -215,10 +215,15 @@ TESTSUITE(report_reader)
       WillOnce(Return(true));
     EXPECT_CALL(monitor, get_location()).
       WillOnce(Return(crpcut::datatypes::fixed_string::make("apa:3")));
+
+    const char payload[] = "apa:3Earlier VERIFY failed";
+    char buffer[sizeof(size_t) + sizeof(payload) - 1];
+    const size_t loc_len = 5;
+    memcpy(buffer, &loc_len, sizeof(loc_len));
+    memcpy(buffer + sizeof(loc_len), payload, sizeof(payload) - 1);
     EXPECT_CALL(monitor,
-                send_to_presentation(crpcut::comm::exit_fail,
-                                     _,
-                                     StartsWith("apa:3\nEarlier VERIFY"))).
+                send_to_presentation(crpcut::comm::exit_fail, _, NotNull())).
+      With(Args<2,1>(ElementsAreArray(buffer))).
       InSequence(s);
     EXPECT_CALL(monitor, set_death_note());
     ASSERT_TRUE(reader.read_data());
@@ -251,6 +256,8 @@ TESTSUITE(report_reader)
       verify_naughty_child();
     }
 
+    const char kill_payload[] = "apa:3A child process spawned from the test has misbehaved. Process group killed";
+
     TEST(begin_test_marks_as_failed_kills_and_presents_as_exit_fail_naughty,
          fix)
     {
@@ -261,10 +268,16 @@ TESTSUITE(report_reader)
       reader.buffer.push_back(cpu);
       EXPECT_CALL(monitor, get_location()).
         WillOnce(Return(loc));
+
+      char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
+      const size_t loc_len = 5;
+      memcpy(buffer, &loc_len, sizeof(loc_len));
+      memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
       EXPECT_CALL(monitor,
                   send_to_presentation(exit_fail,
                                        _,
-                                       StartsWith("apa:3\nA child process spawned")));
+                                       NotNull()))
+        .With(Args<2,1>(ElementsAreArray(buffer)));
       verify_naughty_child();
     }
 
@@ -278,10 +291,16 @@ TESTSUITE(report_reader)
       reader.buffer.push_back(now);
       EXPECT_CALL(monitor, get_location()).
         WillOnce(Return(loc));
+
+      char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
+      const size_t loc_len = 5;
+      memcpy(buffer, &loc_len, sizeof(loc_len));
+      memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
       EXPECT_CALL(monitor,
                   send_to_presentation(exit_fail,
                                        _,
-                                       StartsWith("apa:3\nA child process spawned")));
+                                       NotNull()))
+        .With(Args<2,1>(ElementsAreArray(buffer)));
       verify_naughty_child();
     }
 
@@ -293,10 +312,14 @@ TESTSUITE(report_reader)
       reader.buffer.push_back(size_t(0));
       EXPECT_CALL(monitor, get_location()).
         WillOnce(Return(loc));
+
+      char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
+      const size_t loc_len = 5;
+      memcpy(buffer, &loc_len, sizeof(loc_len));
+      memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
       EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail,
-                                       _,
-                                       StartsWith("apa:3\nA child process spawned")));
+                  send_to_presentation(exit_fail, _, NotNull()))
+        .With(Args<2,1>(ElementsAreArray(buffer)));
       verify_naughty_child();
     }
 
@@ -308,10 +331,14 @@ TESTSUITE(report_reader)
       reader.buffer.push_back(size_t(0));
       EXPECT_CALL(monitor, get_location()).
         WillOnce(Return(loc));
+
+      char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
+      const size_t loc_len = 5;
+      memcpy(buffer, &loc_len, sizeof(loc_len));
+      memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
       EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail,
-                                       _,
-                                       StartsWith("apa:3\nA child process spawned")));
+                  send_to_presentation(exit_fail, _, NotNull()))
+        .With(Args<2,1>(ElementsAreArray(buffer)));
       verify_naughty_child();
     }
 
@@ -349,10 +376,14 @@ TESTSUITE(report_reader)
       reader.buffer.push_back(size_t(0));
       EXPECT_CALL(monitor, get_location()).
     	WillOnce(Return(loc));
+
+      char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
+      const size_t loc_len = 5;
+      memcpy(buffer, &loc_len, sizeof(loc_len));
+      memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
       EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail,
-                                       _,
-                                       StartsWith("apa:3\nA child process spawned")));
+                  send_to_presentation(exit_fail, _, NotNull())).
+        With(Args<2,1>(ElementsAreArray(buffer)));
       verify_naughty_child();
     }
 

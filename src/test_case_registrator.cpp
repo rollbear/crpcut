@@ -55,7 +55,14 @@ namespace {
       }
     return info;
   }
-  static const crpcut::datatypes::fixed_string no_location = { 0, 0 };
+
+  void set_location(std::ostream& os, crpcut::datatypes::fixed_string location)
+  {
+    assert(location.len);
+    const void *len_addr = &location.len;
+    os.write(static_cast<const char*>(len_addr), sizeof(location.len));
+    os.write(location.str, location.len);
+  }
 }
 
 namespace crpcut {
@@ -241,7 +248,7 @@ namespace crpcut {
     if (env_->tests_as_child_procs())
       {
         unsigned long req = deadline_us*env_->timeout_multiplier();
-        (*reporter_)(comm::set_timeout, req, no_location);
+        (*reporter_)(comm::set_timeout, req);
       }
   }
 
@@ -259,7 +266,7 @@ namespace crpcut {
     if (env_->timeouts_enabled())
       {
         unsigned long req = deadline_us*env_->timeout_multiplier();
-        (*reporter_)(comm::set_timeout, req, no_location);
+        (*reporter_)(comm::set_timeout, req);
       }
   }
 
@@ -310,7 +317,7 @@ namespace crpcut {
         assert(rv == 0);
         struct timeval cputime;
         timeradd(&usage.ru_utime, &usage.ru_stime, &cputime);
-        (*reporter_)(comm::begin_test, cputime, no_location);
+        (*reporter_)(comm::begin_test, cputime);
       }
     try {
       p->crpcut_run();
@@ -319,9 +326,9 @@ namespace crpcut {
       {
         heap::set_limit(heap::system);
         std::ostringstream out;
-        out << get_location() << "\nUnexpectedly caught "
+        out << "Unexpectedly caught "
             << policies::crpcut_exception_translator::try_all();
-        (*reporter_)(comm::exit_fail, out, no_location);
+        (*reporter_)(comm::exit_fail, out, get_location());
       }
     if (!env_->tests_as_child_procs())
       {
@@ -391,7 +398,8 @@ namespace crpcut {
     if (crpcut_failed() || crpcut_is_expected_exit(status)) return false;
 
     crpcut_register_success(false);
-    out << get_location() << "\nExited with code " << status << "\nExpected ";
+    set_location(out, get_location());
+    out << "Exited with code " << status << "\nExpected ";
     crpcut_expected_death(out);
     return true;
    }
@@ -404,15 +412,15 @@ namespace crpcut {
 
     if (!crpcut_is_expected_signal(signo))
       {
+        set_location(out, get_location());
         crpcut_register_success(false);
         if (killed_)
           {
-            out << get_location() << "\nTimed out - killed";
+            out << "Timed out - killed";
           }
         else
           {
-            out << get_location() << "\nDied on signal "
-                << signo;
+            out << "Died on signal " << signo;
           }
         out << "\nExpected ";
         crpcut_expected_death(out);
@@ -422,7 +430,8 @@ namespace crpcut {
     if (cputime_timeout(cputime_us))
       {
         crpcut_register_success(false);
-        out << get_location() << "\nTest consumed "
+        set_location(out, get_location());
+        out << "Test consumed "
             << cputime_us / 1000 << "ms CPU-time\nLimit was "
             << cputime_limit_us_ / 1000 << "ms";
         return true;
@@ -480,7 +489,8 @@ namespace crpcut {
           case CLD_DUMPED:
             if (crpcut_core_dumps_allowed())
               {
-                out << get_location() << "\nDied with core dump";
+                set_location(out, get_location());
+                out << "Died with core dump";
                 t = comm::exit_fail;
                 break;
               }
@@ -492,7 +502,8 @@ namespace crpcut {
               }
             break;
           default:
-            out << get_location() << "\nDied for unknown reason, code=" << info.si_code;
+            set_location(out, get_location());
+            out << "Died for unknown reason, code=" << info.si_code;
             t = comm::exit_fail;
             break;
         }
@@ -512,7 +523,7 @@ namespace crpcut {
       {
         if (out.str().empty())
           {
-            out << get_location() << '\n';
+            set_location(out, get_location());
           }
         t = comm::exit_fail;
       }

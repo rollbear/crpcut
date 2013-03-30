@@ -45,7 +45,6 @@ namespace crpcut {
   ::~test_case_result()
   {
     if (termination) wrapped::free(termination.str);
-    if (location) wrapped::free(location.str);
     while (!history.is_empty())
       {
         event *e = history.next();

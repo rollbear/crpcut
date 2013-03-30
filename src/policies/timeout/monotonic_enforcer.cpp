@@ -27,9 +27,6 @@
 #include <crpcut.hpp>
 #include "../../clocks/clocks.hpp"
 
-namespace {
-  static const crpcut::datatypes::fixed_string no_location = { 0, 0 };
-}
 namespace crpcut {
   namespace policies {
     namespace timeout {
@@ -45,7 +42,7 @@ namespace crpcut {
         if (timeouts_are_enabled())
           {
             clocks::monotonic::timestamp deadline = duration_us_;
-            comm::report(comm::set_timeout, deadline, no_location);
+            comm::report(comm::set_timeout, deadline);
           }
       }
 
@@ -58,8 +55,7 @@ namespace crpcut {
         unsigned long diff = now - start_timestamp_us_;
         if (diff <= duration_us_)
           {
-            const char *nullstr = 0;
-            comm::report(comm::cancel_timeout, nullstr, 0U, no_location, current_test_);
+            comm::report(comm::cancel_timeout, "", comm::reporter::no_location(), current_test_);
             return;
           }
         std::ostringstream os;

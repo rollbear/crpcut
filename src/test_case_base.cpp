@@ -25,9 +25,7 @@
  */
 
 #include <crpcut.hpp>
-namespace {
-  static const crpcut::datatypes::fixed_string no_location = { 0, 0 };
-}
+
 namespace crpcut {
 
   crpcut_test_case_base
@@ -42,7 +40,7 @@ namespace crpcut {
   ::crpcut_test_finished()
   {
     crpcut_finished = true;
-    comm::report(comm::end_test, 0, 0, no_location, crpcut_test_monitor::current_test());
+    comm::report(comm::end_test, "", comm::reporter::no_location(), crpcut_test_monitor::current_test());
   }
 
   crpcut_test_case_base
@@ -50,7 +48,7 @@ namespace crpcut {
   {
     if (crpcut_finished)
       {
-        comm::report(comm::exit_ok, 0, 0, no_location, crpcut_test_monitor::current_test());
+        comm::report(comm::exit_ok, "", comm::reporter::no_location(), crpcut_test_monitor::current_test());
       }
   }
 

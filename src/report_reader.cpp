@@ -31,6 +31,19 @@
 #include "posix_error.hpp"
 #include "sigignore.hpp"
 
+namespace {
+void make_message(crpcut::datatypes::fixed_string location,
+                  const char *msg,
+                  std::string &result)
+{
+  std::ostringstream os;
+  void *len_addr = &location.len;
+  os.write(static_cast<const char*>(len_addr), sizeof(location.len));
+  os.write(location.str, location.len);
+  os << msg;
+  os.str().swap(result);
+}
+}
 namespace crpcut {
 
   report_reader
@@ -84,11 +97,9 @@ namespace crpcut {
         {
           if (len == 0 || t == comm::set_timeout || t == comm::begin_test)
             {
-              std::ostringstream os;
-              os << mon_->get_location()
-                 << "\nA child process spawned from the test has misbehaved. "
-                "Process group killed";
-              os.str().swap(msg);
+              make_message(mon_->get_location(),
+                           "A child process spawned from the test has misbehaved. Process group killed",
+                           msg);
               buff = const_cast<char*>(msg.c_str());
               len = msg.length();
             }
@@ -121,10 +132,7 @@ namespace crpcut {
               return true;
             }
           {
-            std::ostringstream os;
-            os << mon_->get_location()
-               <<"\nEarlier VERIFY failed";
-            os.str().swap(msg);
+            make_message(mon_->get_location(), "Earlier VERIFY failed", msg);
             buff = const_cast<char*>(msg.c_str());
             len = msg.length();
             t = comm::exit_fail;

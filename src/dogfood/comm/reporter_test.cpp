@@ -113,10 +113,11 @@ TESTSUITE(comm)
       r.set_writer(&wfd);
 
       using namespace crpcut::comm;
-      char request[sizeof(type) + sizeof(size_t) + 3 + 11];
+      char request[sizeof(type) + 2*sizeof(size_t) + 3 + 10];
       void *addr = set_to(request, type(fail | kill_me));
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
-      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
+      char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
+      p = static_cast<char*>(set_to(p, size_t(10)));
+      memcpy(p, "apa.cpp:32apa", 10 + 3);
       EXPECT_CALL(mon, is_naughty_child()).
         WillOnce(Return(true));
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
@@ -145,10 +146,11 @@ TESTSUITE(comm)
     TEST(reporter_exits_on_exit_fail,
          EXPECT_EXIT(0), fix)
     {
-      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3 + 11];
+      char request[sizeof(crpcut::comm::type) + 2*sizeof(size_t) + 3 + 10];
       void *addr = set_to(request, crpcut::comm::exit_fail);
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
-      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
+      char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
+      p = static_cast<char*>(set_to(p, std::size_t(10)));
+      memcpy(p, "apa.cpp:32apa", 3 + 10);
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
@@ -157,10 +159,11 @@ TESTSUITE(comm)
 
     TEST(reporter_forwards_contents_from_ostringstream, fix)
     {
-      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3 + 11];
+      char request[sizeof(crpcut::comm::type) + 2*sizeof(size_t) + 3 + 10];
       void *addr = set_to(request, crpcut::comm::fail);
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
-      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
+      char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
+      p = static_cast<char*>(set_to(p, size_t(10)));
+      memcpy(p, "apa.cpp:32apa", 10 + 3);
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
@@ -171,10 +174,11 @@ TESTSUITE(comm)
 
     TEST(reporter_forwards_contents_from_oastream, fix)
     {
-      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3 + 11];
+      char request[sizeof(crpcut::comm::type) + 2*sizeof(size_t) + 3 + 10];
       void *addr = set_to(request, crpcut::comm::info);
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
-      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
+      char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
+      p = static_cast<char*>(set_to(p, size_t(10)));
+      memcpy(p, "apa.cpp:32apa", 10 + 3);
       EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));
@@ -186,10 +190,11 @@ TESTSUITE(comm)
 
     TEST(reporter_forwards_contents_from_char_array, fix)
     {
-      char request[sizeof(crpcut::comm::type) + sizeof(size_t) + 3 + 11];
+      char request[sizeof(crpcut::comm::type) + 2*sizeof(size_t) + 3 + 10];
       void *addr = set_to(request, crpcut::comm::info);
-      char *p = static_cast<char*>(set_to(addr, std::size_t(3 + 11)));
-      memcpy(p, "apa.cpp:32\napa", sizeof(request) - (p - request));
+      char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
+      p = static_cast<char*>(set_to(p, size_t(10)));
+      memcpy(p, "apa.cpp:32apa", 10 + 3);
       EXPECT_CALL(wfd, write_loop(_, sizeof(request), _))
         .With(Args<0,1>(ElementsAreArray(request)))
         .WillOnce(ReturnRef(wfd));

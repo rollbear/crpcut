@@ -136,7 +136,7 @@
             }                                                           \
           else                                                          \
             {                                                           \
-              location << CRPCUT_HERE;                                  \
+              location << crpcut::crpcut_test_monitor::current_test()->get_location();          \
             }                                                           \
           std::ostringstream os;                                        \
           os << result.summary() << result.message();                   \
@@ -1294,40 +1294,45 @@ namespace crpcut {
 
       typedef crpcut_test_monitor tm;
     public:
+      static datatypes::fixed_string no_location()
+      {
+        datatypes::fixed_string n = { 0, 0 };
+        return n;
+      }
       virtual ~reporter();
       reporter(std::ostream &default_out = std::cout);
       void set_writer(data_writer *w);
       void operator()(type                       t,
                       const std::ostringstream  &os,
-                      datatypes::fixed_string    location,
+                      datatypes::fixed_string    location = no_location(),
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       template <size_t N>
       void operator()(type                       t,
                       const stream::toastream<N>&os,
-                      datatypes::fixed_string    location,
+                      datatypes::fixed_string    location = no_location(),
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       void operator()(type                       t,
                       const stream::oastream    &os,
-                      datatypes::fixed_string    location,
+                      datatypes::fixed_string    location = no_location(),
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       void operator()(type                       t,
                       const char                *msg,
-                      datatypes::fixed_string    location,
+                      datatypes::fixed_string    location = no_location(),
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       void operator()(type t,
                       const char                *msg,
                       size_t                     len,
-                      datatypes::fixed_string    location,
+                      datatypes::fixed_string    location = no_location(),
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       template <size_t N>
       void operator()(type                       t,
                       const char               (&msg)[N],
-                      datatypes::fixed_string    location,
+                      datatypes::fixed_string    location = no_location(),
                       const crpcut_test_monitor *mon = tm::current_test()) const;
       template <typename T>
       void operator()(type                       t,
                       const T                   &data,
-                      datatypes::fixed_string    location,
+                      datatypes::fixed_string    location = no_location(),
                       const crpcut_test_monitor *mon = tm::current_test()) const;
     private:
       virtual void report(type                       t,

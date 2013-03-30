@@ -234,6 +234,7 @@ namespace crpcut {
       int mask = t & comm::kill_me;
       t = static_cast<comm::type>(t & ~mask);
       datatypes::fixed_string location = { 0, 0 };
+      bool with_location = false;
       switch (t)
         {
         case comm::begin_test:
@@ -253,25 +254,27 @@ namespace crpcut {
           s->success &= t == comm::exit_ok;
                                            /* no break */
         case comm::info:
-          fd_.read_loop(&location.len, sizeof(location.len));
-          if (location.len)
-            {
-              char *buff = static_cast<char*>(wrapped::malloc(location.len));
-              fd_.read_loop(buff, location.len);
-              location.str = buff;
-            }
+          with_location = t != comm::exit_ok;
                                            /* no break */
         case comm::stdout:
         case comm::stderr:
           {
             datatypes::fixed_string msg = { 0, 0 };
             fd_.read_loop(&msg.len, sizeof(msg.len));
-            if (msg.len)
+            assert(!with_location || msg.len);
+            if (with_location)
               {
-                char *buff = static_cast<char*>(wrapped::malloc(msg.len));
-                fd_.read_loop(buff, msg.len);
-                msg.str = buff;
+                fd_.read_loop(&location.len, sizeof(location.len));
+                assert(location.len);
+                char *buff = static_cast<char*>(wrapped::malloc(location.len));
+                assert(buff);
+                fd_.read_loop(buff, location.len);
+                location.str = buff;
+                msg.len -= location.len + sizeof(location.len);
               }
+            char *buff = static_cast<char*>(wrapped::malloc(msg.len));
+            fd_.read_loop(buff, msg.len);
+            msg.str = buff;
             output_data(t, s, msg, location);
           }
           break;
