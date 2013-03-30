@@ -60,7 +60,7 @@ namespace {
       template <typename T>
       data(const T& t) : bytes(sizeof(t))
       {
-    	memcpy(&bytes[0], &t, sizeof(t));
+        memcpy(&bytes[0], &t, sizeof(t));
       }
       std::vector<char> bytes;
     };
@@ -96,7 +96,7 @@ namespace {
   {
     typedef crpcut::clocks::monotonic::timestamp ts;
     fix() : loc(crpcut::datatypes::fixed_string::make("apa:3")),
-    		reader(&monitor) {}
+            reader(&monitor) {}
     crpcut::datatypes::fixed_string loc;
     StrictMock<mock_monitor>        monitor;
     StrictMock<test_reader>         reader;
@@ -375,7 +375,7 @@ TESTSUITE(report_reader)
       reader.buffer.push_back(type(exit_ok | kill_me));
       reader.buffer.push_back(size_t(0));
       EXPECT_CALL(monitor, get_location()).
-    	WillOnce(Return(loc));
+        WillOnce(Return(loc));
 
       char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
       const size_t loc_len = 5;

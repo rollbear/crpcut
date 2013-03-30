@@ -341,7 +341,7 @@ TESTSUITE(test_runner)
       EXPECT_CALL(fsops, chdir(StrEq("101"))).
         WillOnce(SetErrnoAndReturn(EACCES, -1));
       EXPECT_CALL(reg, get_location()).
-    	WillOnce(Return(fixed_string::make(loc_str)));
+        WillOnce(Return(fixed_string::make(loc_str)));
       EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
                                    StrEq("Couldn't chdir working dir"),
                                    _,
@@ -619,7 +619,7 @@ TESTSUITE(test_runner)
           WillOnce(Invoke(set_expected_exit_msg<0>));
 
       EXPECT_CALL(reg, get_location()).
-    	WillOnce(Return(fixed_string::make(loc_str)));
+        WillOnce(Return(fixed_string::make(loc_str)));
 
       const char msg[] = "Exited with code 3\nExpected exit 0";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
@@ -708,7 +708,7 @@ TESTSUITE(test_runner)
           WillOnce(Return(false));
 
       EXPECT_CALL(reg, get_location()).
-    	WillOnce(Return(fixed_string::make(loc_str)));
+        WillOnce(Return(fixed_string::make(loc_str)));
 
       EXPECT_CALL(reg, crpcut_expected_death(_)).
           InSequence(s).
@@ -875,7 +875,7 @@ TESTSUITE(test_runner)
           WillOnce(Return(1000000U));
 
       EXPECT_CALL(reg, get_location()).
-    	WillOnce(Return(fixed_string::make(loc_str)));
+        WillOnce(Return(fixed_string::make(loc_str)));
 
       const char msg[] = "Died with core dump";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];

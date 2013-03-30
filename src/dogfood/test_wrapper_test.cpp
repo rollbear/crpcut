@@ -115,7 +115,7 @@ TESTSUITE(test_wrapper)
     EXPECT_CALL(test_case, crpcut_get_reg()).
       WillRepeatedly(ReturnRef(registrator));
     EXPECT_CALL(registrator, get_location()).
-    		WillOnce(Return(loc));
+      WillOnce(Return(loc));
     EXPECT_CALL(registrator, crpcut_expected_death(_)).
       WillOnce(Invoke(expected_death_report));
     EXPECT_CALL(reporter, report(crpcut::comm::exit_fail, _, _, "apa:3", &registrator)).
