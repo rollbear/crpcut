@@ -235,30 +235,56 @@
 
 #endif
 
-#ifdef __GNUG__
-#  ifdef __GXX_EXPERIMENTAL_CXX0X__
+#ifdef __clang__
+#  if __has_feature(cxx_constexpr)
+#    define CRPCUT_SUPPORTS_CONSTEXPR
+#  endif
+#  if __has_feature(cxx_decltype)
 #    define CRPCUT_DECLTYPE decltype
-#    define CRPCUT_EXPERIMENTAL_CXX0X
-#    if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
-#      define CRPCUT_SUPPORTS_VTEMPLATES
-#    endif
 #  else
 #    define CRPCUT_DECLTYPE typeof
 #  endif
+#  if __has_feature(cxx_variadic_templates)
+#    define CRPCUT_SUPPORTS_VTEMPLATES
+#  endif
+#  ifdef __GXX_EXPERIMENTAL_CXX0X__
+#    define CRPCUT_EXPERIMENTAL_CXX0X
+#  endif
 #  define CRPCUT_NORETURN __attribute__((noreturn))
-#  ifndef __EXCEPTIONS
+#  if !__has_feature(cxx_exceptions)
 #    define CRPCUT_NO_EXCEPTION_SUPPORT
 #  endif
 #else
-#  if defined(__CDT_PARSER__)
-#    define CRPCUT_DECLTYPE decltype
-#    define CRPCUT_EXPERIMENTAL_CXX0X
-#    define CRPCUT_SUPPORTS_VTEMPLATES
-#    define __GXX_EXPERIMENTAL_CXX0X__
+#  ifdef __GNUG__
+#    ifdef __GXX_EXPERIMENTAL_CXX0X__
+#      define CRPCUT_DECLTYPE decltype
+#      define CRPCUT_EXPERIMENTAL_CXX0X
+#      if (__GNUC__ == 4)
+#        if (__GNUC_MINOR__ >= 3)
+#          define CRPCUT_SUPPORTS_VTEMPLATES
+#        endif
+#        if (__GNUC_MINOR__ >= 6)
+#          define CRPCUT_SUPPORTS_CONSTEXPR
+#        endif
+#      endif
+#    else
+#      define CRPCUT_DECLTYPE typeof
+#    endif
+#    define CRPCUT_NORETURN __attribute__((noreturn))
+#    ifndef __EXCEPTIONS
+#      define CRPCUT_NO_EXCEPTION_SUPPORT
+#    endif
+#  else
+#    if defined(__CDT_PARSER__)
+#      define CRPCUT_DECLTYPE decltype
+#      define CRPCUT_EXPERIMENTAL_CXX0X
+#      define CRPCUT_SUPPORTS_VTEMPLATES
+#      define __GXX_EXPERIMENTAL_CXX0X__
+#      define CRPCUT_SUPPORTS_CONSTEXPR
+#    endif
+#    define CRPCUT_NORETURN
 #  endif
-#  define CRPCUT_NORETURN
 #endif
-
 #include <stdexcept>
 #include <sstream>
 #include <string>
@@ -292,7 +318,7 @@ extern "C"
 }
 
 namespace std {
-#if (not defined(CRPCUT_EXPERIMENTAL_CXX0X) || defined (BOOST_TR1))
+#if (!defined(CRPCUT_EXPERIMENTAL_CXX0X) || defined (BOOST_TR1))
   using std::tr1::array;
   using std::tr1::remove_cv;
   using std::tr1::remove_reference;
@@ -317,6 +343,14 @@ namespace std {
 #define CRPCUT_HERE __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__)
 
 namespace crpcut {
+
+#ifdef CRPCUT_SUPPORTS_CONSTEXPR
+template <size_t N>
+constexpr char array_index(size_t n, const char (&array)[N])
+{
+  return n < N ? array[n] : '\0';
+}
+#endif
 
   template <bool b, typename T>
   struct enable_if; // I know, it exists in <type_traits>, but not in g++-4.2.4
@@ -695,6 +729,40 @@ namespace crpcut {
 
 #ifdef CRPCUT_SUPPORTS_VTEMPLATES
 
+#  ifdef CRPCUT_SUPPORTS_CONSTEXPR
+    template <char ...t>
+    struct string_type;
+
+    template <char c, typename T>
+    struct append_t;
+
+    template <char ...t>
+    struct string_type
+    {
+      template <char c>
+      struct append
+      {
+        typedef typename append_t<c, string_type>::type type;
+      };
+      static const size_t size = sizeof...(t);
+      static const char c_str[size + 1];
+    };
+
+    template <char ...t>
+    const char string_type<t...>::c_str[string_type<t...>::size + 1] = { t..., 0 };
+
+    template <char c, char ...t>
+    struct append_t<c, string_type<t...> >
+    {
+      typedef string_type<t..., c> type;
+    };
+
+    template <char ...t>
+    struct append_t<'\0', string_type<t...> >
+    {
+      typedef string_type<t...> type;
+    };
+#  endif
 
     template <typename... Ts>
     struct tlist_maker;
@@ -987,6 +1055,7 @@ namespace crpcut {
     mutable std::auto_ptr<type> p_; // Yeach! Ugly
   };
 
+
 #ifdef CRPCUT_SUPPORTS_VTEMPLATES
   template <typename D, typename ...T>
   struct match_traits
@@ -1110,6 +1179,34 @@ namespace crpcut {
     size_t get_name_len() const;
     virtual datatypes::fixed_string get_name() const;
   };
+
+#if defined(CRPCUT_SUPPORTS_VTEMPLATES) && defined(CRPCUT_SUPPORTS_CONSTEXPR)
+  template <char ...t>
+  class crpcut_tag_info<datatypes::string_type<t...> > : public tag
+  {
+    typedef datatypes::string_type<t...> rep;
+  public:
+    static crpcut_tag_info &obj()
+    {
+      static crpcut_tag_info instance;
+      return instance;
+    }
+  private:
+    crpcut_tag_info()
+      : tag(get_name_len(),
+            &crpcut_tag_info<crpcut_none>::obj())
+    {
+    }
+    size_t get_name_len() const { return rep::size; }
+    virtual datatypes::fixed_string get_name() const
+    {
+      return datatypes::fixed_string::make(rep::c_str);
+    }
+  };
+
+#define CRPCUT_APPEND_INDEX(i, str) ::append<crpcut::array_index(i, str)>::type
+
+#endif
 
   namespace stream {
     template <typename charT, typename traits = std::char_traits<charT> >
@@ -4491,7 +4588,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
 namespace crpcut {
   namespace datatypes {
     template <typename T>
-    const volatile typename undecorated<T>::typee &gettype();
+    const volatile typename undecorated<T>::type &gettype();
 
   }
 }
@@ -4889,35 +4986,128 @@ class crpcut_testsuite_dep
 #define FAIL crpcut::comm::direct_reporter<crpcut::comm::exit_fail>(CRPCUT_HERE)
 
 
-#define WITH_TEST_TAG(tag_name)                         \
-  crpcut::policies::tag_policy<crpcut::crpcut_tags::tag_name>
+#define CRPCUT_REPEAT_1(M, ...)                                   M( 0, __VA_ARGS__)
+#define CRPCUT_REPEAT_2(M, ...)  CRPCUT_REPEAT_1(M, __VA_ARGS__)  M( 1, __VA_ARGS__)
+#define CRPCUT_REPEAT_3(M, ...)  CRPCUT_REPEAT_2(M, __VA_ARGS__)  M( 2, __VA_ARGS__)
+#define CRPCUT_REPEAT_4(M, ...)  CRPCUT_REPEAT_3(M, __VA_ARGS__)  M( 3, __VA_ARGS__)
+#define CRPCUT_REPEAT_5(M, ...)  CRPCUT_REPEAT_4(M, __VA_ARGS__)  M( 4, __VA_ARGS__)
+#define CRPCUT_REPEAT_6(M, ...)  CRPCUT_REPEAT_5(M, __VA_ARGS__)  M( 5, __VA_ARGS__)
+#define CRPCUT_REPEAT_7(M, ...)  CRPCUT_REPEAT_6(M, __VA_ARGS__)  M( 6, __VA_ARGS__)
+#define CRPCUT_REPEAT_8(M, ...)  CRPCUT_REPEAT_7(M, __VA_ARGS__)  M( 7, __VA_ARGS__)
+#define CRPCUT_REPEAT_9(M, ...)  CRPCUT_REPEAT_8(M, __VA_ARGS__)  M( 8, __VA_ARGS__)
+#define CRPCUT_REPEAT_10(M, ...) CRPCUT_REPEAT_9(M, __VA_ARGS__)  M( 9, __VA_ARGS__)
+#define CRPCUT_REPEAT_11(M, ...) CRPCUT_REPEAT_10(M, __VA_ARGS__) M(10, __VA_ARGS__)
+#define CRPCUT_REPEAT_12(M, ...) CRPCUT_REPEAT_11(M, __VA_ARGS__) M(11, __VA_ARGS__)
+#define CRPCUT_REPEAT_13(M, ...) CRPCUT_REPEAT_12(M, __VA_ARGS__) M(12, __VA_ARGS__)
+#define CRPCUT_REPEAT_14(M, ...) CRPCUT_REPEAT_13(M, __VA_ARGS__) M(13, __VA_ARGS__)
+#define CRPCUT_REPEAT_15(M, ...) CRPCUT_REPEAT_14(M, __VA_ARGS__) M(14, __VA_ARGS__)
+#define CRPCUT_REPEAT_16(M, ...) CRPCUT_REPEAT_15(M, __VA_ARGS__) M(15, __VA_ARGS__)
+#define CRPCUT_REPEAT_17(M, ...) CRPCUT_REPEAT_16(M, __VA_ARGS__) M(16, __VA_ARGS__)
+#define CRPCUT_REPEAT_18(M, ...) CRPCUT_REPEAT_17(M, __VA_ARGS__) M(17, __VA_ARGS__)
+#define CRPCUT_REPEAT_19(M, ...) CRPCUT_REPEAT_18(M, __VA_ARGS__) M(18, __VA_ARGS__)
+#define CRPCUT_REPEAT_20(M, ...) CRPCUT_REPEAT_19(M, __VA_ARGS__) M(19, __VA_ARGS__)
+#define CRPCUT_REPEAT_21(M, ...) CRPCUT_REPEAT_20(M, __VA_ARGS__) M(20, __VA_ARGS__)
+#define CRPCUT_REPEAT_22(M, ...) CRPCUT_REPEAT_21(M, __VA_ARGS__) M(21, __VA_ARGS__)
+#define CRPCUT_REPEAT_23(M, ...) CRPCUT_REPEAT_22(M, __VA_ARGS__) M(22, __VA_ARGS__)
+#define CRPCUT_REPEAT_24(M, ...) CRPCUT_REPEAT_23(M, __VA_ARGS__) M(23, __VA_ARGS__)
+#define CRPCUT_REPEAT_25(M, ...) CRPCUT_REPEAT_24(M, __VA_ARGS__) M(24, __VA_ARGS__)
+#define CRPCUT_REPEAT_26(M, ...) CRPCUT_REPEAT_25(M, __VA_ARGS__) M(25, __VA_ARGS__)
+#define CRPCUT_REPEAT_27(M, ...) CRPCUT_REPEAT_26(M, __VA_ARGS__) M(26, __VA_ARGS__)
+#define CRPCUT_REPEAT_28(M, ...) CRPCUT_REPEAT_27(M, __VA_ARGS__) M(27, __VA_ARGS__)
+#define CRPCUT_REPEAT_29(M, ...) CRPCUT_REPEAT_28(M, __VA_ARGS__) M(28, __VA_ARGS__)
+#define CRPCUT_REPEAT_30(M, ...) CRPCUT_REPEAT_29(M, __VA_ARGS__) M(29, __VA_ARGS__)
+#define CRPCUT_REPEAT_31(M, ...) CRPCUT_REPEAT_30(M, __VA_ARGS__) M(30, __VA_ARGS__)
+#define CRPCUT_REPEAT_32(M, ...) CRPCUT_REPEAT_31(M, __VA_ARGS__) M(31, __VA_ARGS__)
+#define CRPCUT_REPEAT_33(M, ...) CRPCUT_REPEAT_32(M, __VA_ARGS__) M(32, __VA_ARGS__)
+#define CRPCUT_REPEAT_34(M, ...) CRPCUT_REPEAT_33(M, __VA_ARGS__) M(33, __VA_ARGS__)
+#define CRPCUT_REPEAT_35(M, ...) CRPCUT_REPEAT_34(M, __VA_ARGS__) M(34, __VA_ARGS__)
+#define CRPCUT_REPEAT_36(M, ...) CRPCUT_REPEAT_35(M, __VA_ARGS__) M(35, __VA_ARGS__)
+#define CRPCUT_REPEAT_37(M, ...) CRPCUT_REPEAT_36(M, __VA_ARGS__) M(36, __VA_ARGS__)
+#define CRPCUT_REPEAT_38(M, ...) CRPCUT_REPEAT_37(M, __VA_ARGS__) M(37, __VA_ARGS__)
+#define CRPCUT_REPEAT_39(M, ...) CRPCUT_REPEAT_38(M, __VA_ARGS__) M(38, __VA_ARGS__)
+#define CRPCUT_REPEAT_40(M, ...) CRPCUT_REPEAT_39(M, __VA_ARGS__) M(39, __VA_ARGS__)
+#define CRPCUT_REPEAT_41(M, ...) CRPCUT_REPEAT_40(M, __VA_ARGS__) M(40, __VA_ARGS__)
+#define CRPCUT_REPEAT_42(M, ...) CRPCUT_REPEAT_41(M, __VA_ARGS__) M(41, __VA_ARGS__)
+#define CRPCUT_REPEAT_43(M, ...) CRPCUT_REPEAT_42(M, __VA_ARGS__) M(42, __VA_ARGS__)
+#define CRPCUT_REPEAT_44(M, ...) CRPCUT_REPEAT_43(M, __VA_ARGS__) M(43, __VA_ARGS__)
+#define CRPCUT_REPEAT_45(M, ...) CRPCUT_REPEAT_44(M, __VA_ARGS__) M(44, __VA_ARGS__)
+#define CRPCUT_REPEAT_46(M, ...) CRPCUT_REPEAT_45(M, __VA_ARGS__) M(45, __VA_ARGS__)
+#define CRPCUT_REPEAT_47(M, ...) CRPCUT_REPEAT_46(M, __VA_ARGS__) M(46, __VA_ARGS__)
+#define CRPCUT_REPEAT_48(M, ...) CRPCUT_REPEAT_47(M, __VA_ARGS__) M(47, __VA_ARGS__)
+#define CRPCUT_REPEAT_49(M, ...) CRPCUT_REPEAT_48(M, __VA_ARGS__) M(48, __VA_ARGS__)
+#define CRPCUT_REPEAT_50(M, ...) CRPCUT_REPEAT_49(M, __VA_ARGS__) M(49, __VA_ARGS__)
+#define CRPCUT_REPEAT_51(M, ...) CRPCUT_REPEAT_50(M, __VA_ARGS__) M(50, __VA_ARGS__)
+#define CRPCUT_REPEAT_52(M, ...) CRPCUT_REPEAT_51(M, __VA_ARGS__) M(51, __VA_ARGS__)
+#define CRPCUT_REPEAT_53(M, ...) CRPCUT_REPEAT_52(M, __VA_ARGS__) M(52, __VA_ARGS__)
+#define CRPCUT_REPEAT_54(M, ...) CRPCUT_REPEAT_53(M, __VA_ARGS__) M(53, __VA_ARGS__)
+#define CRPCUT_REPEAT_55(M, ...) CRPCUT_REPEAT_54(M, __VA_ARGS__) M(54, __VA_ARGS__)
+#define CRPCUT_REPEAT_56(M, ...) CRPCUT_REPEAT_55(M, __VA_ARGS__) M(55, __VA_ARGS__)
+#define CRPCUT_REPEAT_57(M, ...) CRPCUT_REPEAT_56(M, __VA_ARGS__) M(56, __VA_ARGS__)
+#define CRPCUT_REPEAT_58(M, ...) CRPCUT_REPEAT_57(M, __VA_ARGS__) M(57, __VA_ARGS__)
+#define CRPCUT_REPEAT_59(M, ...) CRPCUT_REPEAT_58(M, __VA_ARGS__) M(58, __VA_ARGS__)
+#define CRPCUT_REPEAT_60(M, ...) CRPCUT_REPEAT_59(M, __VA_ARGS__) M(59, __VA_ARGS__)
+#define CRPCUT_REPEAT_61(M, ...) CRPCUT_REPEAT_60(M, __VA_ARGS__) M(60, __VA_ARGS__)
+#define CRPCUT_REPEAT_62(M, ...) CRPCUT_REPEAT_61(M, __VA_ARGS__) M(61, __VA_ARGS__)
+#define CRPCUT_REPEAT_63(M, ...) CRPCUT_REPEAT_62(M, __VA_ARGS__) M(62, __VA_ARGS__)
+#define CRPCUT_REPEAT_64(M, ...) CRPCUT_REPEAT_63(M, __VA_ARGS__) M(63, __VA_ARGS__)
+#define CRPCUT_REPEAT_65(M, ...) CRPCUT_REPEAT_64(M, __VA_ARGS__) M(64, __VA_ARGS__)
+#define CRPCUT_REPEAT_66(M, ...) CRPCUT_REPEAT_65(M, __VA_ARGS__) M(65, __VA_ARGS__)
+#define CRPCUT_REPEAT_67(M, ...) CRPCUT_REPEAT_66(M, __VA_ARGS__) M(66, __VA_ARGS__)
+#define CRPCUT_REPEAT_68(M, ...) CRPCUT_REPEAT_67(M, __VA_ARGS__) M(67, __VA_ARGS__)
+#define CRPCUT_REPEAT_69(M, ...) CRPCUT_REPEAT_68(M, __VA_ARGS__) M(68, __VA_ARGS__)
+#define CRPCUT_REPEAT_70(M, ...) CRPCUT_REPEAT_69(M, __VA_ARGS__) M(69, __VA_ARGS__)
+#define CRPCUT_REPEAT_71(M, ...) CRPCUT_REPEAT_70(M, __VA_ARGS__) M(70, __VA_ARGS__)
+#define CRPCUT_REPEAT_72(M, ...) CRPCUT_REPEAT_71(M, __VA_ARGS__) M(71, __VA_ARGS__)
+#define CRPCUT_REPEAT_73(M, ...) CRPCUT_REPEAT_72(M, __VA_ARGS__) M(72, __VA_ARGS__)
+#define CRPCUT_REPEAT_74(M, ...) CRPCUT_REPEAT_73(M, __VA_ARGS__) M(73, __VA_ARGS__)
+#define CRPCUT_REPEAT_75(M, ...) CRPCUT_REPEAT_74(M, __VA_ARGS__) M(74, __VA_ARGS__)
+#define CRPCUT_REPEAT_76(M, ...) CRPCUT_REPEAT_75(M, __VA_ARGS__) M(75, __VA_ARGS__)
+#define CRPCUT_REPEAT_77(M, ...) CRPCUT_REPEAT_76(M, __VA_ARGS__) M(76, __VA_ARGS__)
+#define CRPCUT_REPEAT_78(M, ...) CRPCUT_REPEAT_77(M, __VA_ARGS__) M(77, __VA_ARGS__)
+#define CRPCUT_REPEAT_79(M, ...) CRPCUT_REPEAT_78(M, __VA_ARGS__) M(78, __VA_ARGS__)
+#define CRPCUT_REPEAT_80(M, ...) CRPCUT_REPEAT_79(M, __VA_ARGS__) M(79, __VA_ARGS__)
 
-#define DEFINE_TEST_TAG(tag_name)                               \
-  namespace crpcut {                                            \
-    namespace crpcut_tags {                                     \
-      struct tag_name;                                          \
-    }                                                           \
-    template <>                                                 \
-    inline                                                      \
-    size_t                                                      \
-    crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
-    ::get_name_len() const                                      \
-    {                                                           \
-      return sizeof(#tag_name) - 1U;                            \
-    }                                                           \
-    template <>                                                 \
-    inline                                                      \
-    crpcut::datatypes::fixed_string                             \
-    crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
-    ::get_name() const                                          \
-    {                                                           \
-      using crpcut::datatypes::fixed_string;                    \
-      fixed_string s = { #tag_name, get_name_len() };           \
-      return s;                                                 \
-    }                                                           \
-  }                                                             \
-  using crpcut::crpcut_tags::tag_name
+#if defined(CRPCUT_SUPPORTS_VTEMPLATES) && defined(CRPCUT_SUPPORTS_CONSTEXPR)
 
+#  define WITH_TEST_TAG(...)                                         \
+  crpcut::policies::tag_policy<crpcut::datatypes::string_type<>      \
+                               CRPCUT_REPEAT_40(CRPCUT_APPEND_INDEX, \
+                                                CRPCUT_STRINGIZE(__VA_ARGS__)) >
+
+#  define DEFINE_TEST_TAG(...) class crpcut_DEFINE_TEST_TAG_is_deprecated
+
+#else
+
+#  define WITH_TEST_TAG(tag_name)                         \
+    crpcut::policies::tag_policy<crpcut::crpcut_tags::tag_name>
+
+#  define DEFINE_TEST_TAG(tag_name)                               \
+    namespace crpcut {                                            \
+      namespace crpcut_tags {                                     \
+        struct tag_name;                                          \
+      }                                                           \
+      template <>                                                 \
+      inline                                                      \
+      size_t                                                      \
+      crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
+      ::get_name_len() const                                      \
+      {                                                           \
+        return sizeof(#tag_name) - 1U;                            \
+      }                                                           \
+      template <>                                                 \
+      inline                                                      \
+      crpcut::datatypes::fixed_string                             \
+      crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
+      ::get_name() const                                          \
+      {                                                           \
+        using crpcut::datatypes::fixed_string;                    \
+        fixed_string s = { #tag_name, get_name_len() };           \
+        return s;                                                 \
+      }                                                           \
+    }                                                             \
+    using crpcut::crpcut_tags::tag_name
+
+#endif
 #ifdef GMOCK_INCLUDE_GMOCK_GMOCK_H_
 
 

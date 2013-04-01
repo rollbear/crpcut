@@ -1,3 +1,11 @@
+         * When compiling with c++11 support (-std=c++11 or -std=c++0x) in
+           gcc 4.6 or later, or clang 3.1 or later, tags are no longer
+           restricted to being valid identifiers.
+           
+           The macro DEFINE_TEST_TAG() expands to nothing, and the macro
+           WITH_TEST_TAG(...) accepts anything that the preprocessor can
+           interpret, as long as the length is 80 characters or less.
+
          * Added an attribute location="file:line" to the XML report
            entries fail, info and violation. The previous use of file:line
            as the first line in an entry is discontinued.

@@ -81,7 +81,7 @@
   </xs:complexType>
 
   <xs:complexType name="tag_result">
-    <xs:attribute name="name" type="identifier" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
     <xs:attribute name="passed" type="xs:unsignedInt" use="required"/>
     <xs:attribute name="failed" type="xs:unsignedInt" use="required"/>
     <xs:attribute name="critical" type="xs:boolean" use="required"/>
