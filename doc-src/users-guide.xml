@@ -34,10 +34,8 @@
       </para>
       <para>To build the program, make sure you have the correct
         include path to reach <symbol>&lt;crpcut.hpp&gt;</symbol>.
-        Link your test program with <code>-lcrpcut_heap -lcrpcut</code>,
-        and make sure <code>libcrpcut_heap.so</code> and
-        <code>libcrpcut.so</code> can be found when starting the
-        program.</para>
+        Link your test program with <code>-lcrpcut</code>
+        or <code>-lcrpcut_basic</code>.</para>
       <para>Running the test program with the
         <xref linkend="list-tests" xrefstyle="select:title"/> (list)
         command line flag, will list all tests:
@@ -812,8 +810,9 @@ macro.
     mind is to always <symbol>#include &lt;gmock/gmock.h&gt;</symbol>
     before <symbol>#include &lt;crpcut.hpp&gt;</symbol>, and to link
     your test program with <code>-lgmock</code>, <code>-lgtest</code>
-    and, of course also <code>-lcrpcut_heap -lcrpcut</code>. Depending on your version
-    of <ulink url="http://code.google.com/p/googlemock">google-mock</ulink>
+    and, of course also <code>-lcrpcut</code> or <code>-lcrpcut_basic</code>.
+    Depending on your version of
+    <ulink url="http://code.google.com/p/googlemock">google-mock</ulink>
     you may also need <code>-lpthread</code>.
     </para>
     <tip>
@@ -849,8 +848,7 @@ macro.
       are easy, since &crpcut; provides simple access to query and limit
       the heap.
       <note>For these to work, you must link your test program with
-      <code>-lcrpcut_heap -lcrpcut</code>. The order of the two libraries
-      is important.</note>
+      <code>-lcrpcut</code> instead of <code>-lcrpcut_basic</code>.</note>
     </para>
     <para>
       The simplest way to assert that your code does not leak heap objects is
@@ -996,7 +994,7 @@ macro.
         See the chapter on <xref linkend="heap-management"
         xrefstyle="select:quotedtitle"/>.</para>
         <para>You may use or test your own heap implementation, but then you
-        must not link with <code>-lcrpcut_heap</code> and lose &crpcut;'s
+        must link with <code>-lcrpcut_basic</code> and lose &crpcut;'s
         instrumentation support.</para></footnote>
     </para>
     <para>

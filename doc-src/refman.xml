@@ -427,7 +427,8 @@
     <para>A code block follows immediately after.</para>
     </formalpara>
     <formalpara><title>Requirement:</title>
-    <para>The test program must be linked with <code>-lcrpcut_heap -lcrpcut</code>
+    <para>The test program must be linked with <code>-lcrpcut</code> instead
+    of <code>-lcrpcut_basic</code>.
     </para></formalpara>
     <para>The assertion succeeds if, and only if, all heap objects allocated
     in the code block following are also deallocated in the block, so that
@@ -2226,7 +2227,8 @@
     <para>A code block follows immediately after.</para>
     </formalpara>
     <formalpara><title>Requirement:</title>
-    <para>The test program must be linked with <code>-lcrpcut_heap -lcrpcut</code>
+    <para>The test program must be linked with <code>-lcrpcut</code> instead
+    of <code>-lcrpcut_basic</code>
     </para></formalpara>
     <para>The check succeeds if, and only if, all heap objects allocated
     in the code block following are also deallocated in the block, so that
@@ -2792,7 +2794,7 @@
     <para>These functions are used for querying the current state of the heap,
     or to impose limits on the available heap space.
     <note>The heap management functionality requires linking with
-    <code>-lcrpcut_heap -lcrpcut</code></note>
+    <code>-lcrpcut</code> instead of <code>-lcrpcut_basic</code></note>
     </para>
     <section id="allocated_bytes">
       <title><type>crpcut::heap::</type><function>allocated_bytes()</function></title>
@@ -3248,7 +3250,7 @@ int main(int argc, char *argv[])
             considerably for heap intensive tests.
             <note>This option is only available if &crpcut; is compiled with
             support for backtrace and the program is linked with
-            <code>-lcrpcut_heap -lcrpcut</code>. See
+            <code>-lcrpcut</code> instead of <code>-lcrpcut_basic</code>. See
             <xref linkend="backtrace-support" xrefstyle="select:title"/></note>
             </para>
           </listitem>

@@ -608,9 +608,8 @@
         <para>Your test uses
         <xref linkend="ASSERT_SCOPE_HEAP_LEAK_FREE" xrefstyle="select:title"/>
         or <xref linkend="VERIFY_SCOPE_HEAP_LEAK_FREE" xrefstyle="select:title"/>,
-        and for those to work you need to link with <code>-lcrpcut_heap</code>.
-        Note that the link order is important. <code>-lcrpcut_heap</code>
-        must precede <code>-lcrpcut</code> on the link command line.</para>
+        and for those to work you need to link with <code>-lcrpcut</code>
+        instead of <code>-lcrpcut_basic</code>.</para>
       </answer>
     </qandaentry>
 
@@ -620,9 +619,12 @@
         </para>
       </question>
       <answer>
-        <para>Most probably you have reversed the link order of
-        <code>-lcrpcut_heap</code> and <code>-lcrpcut</code>. It is important
-        that <code>-lcrpcut_heap</code> precedes <code>-lcrpcut</code>
+        <para>Most probably you have used the experimental library
+        <code>-lcrpcut_heap</code>, and added it after
+        <code>-lcrpcut_basic</code> on the link command line. The preferred
+        solution is to link with <code>-lcrpcut</code> instead, but should you
+        want to use <code>-lcrpcut_heap</code> it is important that
+        <code>-lcrpcut_heap</code> precedes <code>-lcrpcut</code>
         on the link command line.</para>
       </answer>
     </qandaentry>
@@ -633,11 +635,9 @@
         the way of my code that needs to implement its own heap?</para>
       </question>
       <answer>
-        <para>&crpcut;'s heap lives in <code>libcrpcut_heap.so</code>.
-        &crpcut; runs fine without it, so link your test program with
-        <code>-lcrpcut</code> only and you won't have any conflict.</para>
-        <para>You will, of course, lose the &crpcut; heap instrumentation
-        functionality if you do.</para>
+        <para>Link your test program with <code>-lcrpcut_basic</code>
+        instead of <code>-lcrpcut</code>. You will, however, lose
+        the &crpcut; heap instrumentation functionality if you do.</para>
       </answer>
     </qandaentry>
     
