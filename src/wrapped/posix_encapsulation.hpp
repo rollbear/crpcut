@@ -32,6 +32,7 @@
 extern "C" {
 #  include <dirent.h>
 #  include <signal.h>
+#  include <sys/resource.h>
 }
 
 #include "../posix_write.hpp"
