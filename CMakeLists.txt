@@ -54,7 +54,10 @@ if ("${BUILD_SHARED_LIBS}" STREQUAL "")
 endif ()
 file(GLOB LIBHEAP_SRCS
      src/heap.cpp
-)     
+)
+file(GLOB HEAP_FAKE_SRCS
+     src/heap_fake.cpp
+)
 file(GLOB LIB_SRCS
      src/check_name.cpp
      src/cli/activation_param.cpp
@@ -76,7 +79,6 @@ file(GLOB LIB_SRCS
      src/fdreader.cpp
      src/filesystem_operations.cpp
      src/fsfuncs.cpp
-     src/heap_fake.cpp
      src/istream_wrapper.cpp
      src/namespace_info.cpp
      src/output/formatter.cpp
@@ -397,11 +399,14 @@ else (WITHOUT_HEAP)
   install(TARGETS crpcut_heap DESTINATION ${LIBRARY_OUTPUT_PATH})
   set(SELFTEST_PARAM ${SELFTEST_PARAM} heap)
 endif (WITHOUT_HEAP)
-add_library(crpcut ${LIB_SRCS})
-set_target_properties(crpcut PROPERTIES
+add_library(crpcut_basic ${LIB_SRCS} ${HEAP_FAKE_SRCS})
+set_target_properties(crpcut_basic PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
   SOVERSION ${CRPCUT_LIB_SOVERSION})
-
+add_library(crpcut ${LIB_SRCS} ${LIBHEAP_SRCS})
+set_target_properties(crpcut_heap PROPERTIES
+  VERSION ${CRPCUT_LIB_VERSION}
+  SOVERSION ${CRPCUT_LIB_SOVERSION})
 if(GMOCK_LIBS)
   file(GLOB GMOCK_TEST_SRCS   test-src/gmock.cpp)
 endif(GMOCK_LIBS)
