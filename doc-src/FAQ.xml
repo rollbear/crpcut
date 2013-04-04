@@ -187,7 +187,7 @@
         url="http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=50372">ISO/IEC 14882:2011</ulink>.</para>
         <para>While few, if any, compilers supports the standard in full, most
         compilers today supports the functionality required for &crpcut;, and
-        has done so for years, so it isn't too outrageous. The advantage gained
+        has done so for years. The advantage gained
         in ease of writing test cases far outweighs the disadvantage of not
         working with a select few old compilers.</para>
         <note>It is only the test code itself that must be

@@ -1054,7 +1054,7 @@
      compilers</para>
     </formalpara>
     <para>
-      In <productname>C++98</productname>A tag has the same naming rules and
+      In <productname>C++98</productname> a tag has the same naming rules and
       visibility as a <productname>C++</productname> type<footnote><para>In
       fact, the macro defines a type, and when referring to
       the tag, the type must be visible.</para></footnote>.
