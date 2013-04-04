@@ -22,9 +22,9 @@
       </question>
       <answer>
         <para>
-          Because, even though there are many C++ unit test systems out
-          there, none covered all the desired properties, although many
-          covered some:
+          Because, even though there are many <productname>C++</productname>
+          unit test systems out there, none covered all the desired properties,
+          although many covered some:
           <itemizedlist>
             <listitem>
               <para>
@@ -85,12 +85,13 @@
     <qandaentry>
       <question>
         <para>Why not <symbol>throw</symbol> <type>exception</type> to
-          report errors? After all, that is the natural C++ error reporting
-          mechanism.</para>
+          report errors? After all, that is the natural
+          <productname>C++</productname> error reporting mechanism.</para>
       </question>
       <answer>
         <para>
-          It is a bad idea just because it is the natural C++ error reporting
+          It is a bad idea just because it is the natural
+          <productname>C++</productname> error reporting
           mechanism. A unit under test could accidentally prevent an error
           report from being captured. Consider the following class, that
           needs testing:
@@ -167,7 +168,7 @@
     <qandaentry>
       <question>
         <para>Why the macros and template trickery,
-          instead of a more normal C++ use?</para>
+          instead of a more normal <productname>C++</productname> use?</para>
       </question>
       <answer>
         <para>It was not an easy decision, but the reason is simple. As ugly
@@ -486,7 +487,8 @@
           is called. There are a number of reasons why this may fail:
           <itemizedlist>
             <listitem>
-              <function>main</function>() is not compiled by a C++ compiler.
+              <function>main</function>() is not compiled by a
+              <productname>C++</productname> compiler.
             </listitem>
             <listitem>
               The object file containing <function>main</function>() and the

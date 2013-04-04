@@ -1050,17 +1050,22 @@
     <title><function>DEFINE_TEST_TAG(tagname)</function></title>
     <para>Introduce a tag for use by tests.</para>
     <formalpara><title>Used in:</title>
-    <para>Global scope</para>
+    <para>Global scope with older <productname>C++</productname>
+     compilers</para>
     </formalpara>
     <para>
-      A tag has the same naming rules and visibility as a
-      <productname>C++</productname> type<footnote><para>In
+      In <productname>C++98</productname>A tag has the same naming rules and
+      visibility as a <productname>C++</productname> type<footnote><para>In
       fact, the macro defines a type, and when referring to
       the tag, the type must be visible.</para></footnote>.
     </para>
     <para>See the command line option
     <xref linkend="tags-cli" xrefstyle="select:title"/> for how to use
     tags when running a test program.</para>
+    <tip>
+      If you compile your test program as <productname>C++11</productname>,
+      <function>DEFINE_TEST_TAG()</function> is not needed.
+    </tip>
     <para>Example. The following test program:
         <programlisting language="c++">
 <xi:include href="../stripped-src/test_tag.cpp" parse="text"/>
@@ -2549,9 +2554,10 @@
     <xref linkend="TEST" xrefstyle="select:title"/></para>
     </formalpara>
     <para>
-      Set a named tag to a test. The tag must be visible. See
-      <xref linkend="DEFINE_TEST_TAG" xrefstyle="select:title"/> for
-      defining tags.
+      Set a named tag to a test. If not compiling with a
+      <productname>C++11</productname> compiler, the tag must be defined with
+      <xref linkend="DEFINE_TEST_TAG" xrefstyle="select:title"/> before
+      use.
       A test can either be untagged (the default,) or have one tag. It is
       not possible to attach several tags to a test.
     </para>
@@ -2973,7 +2979,9 @@
           <listitem>
             <para>The pattern string that is a regular expression. The pattern
               can be either a C-string or a <type>std::string</type>.
-              <caution>Beware of C/C++ escape rules when regular expressions
+              <caution>Beware of
+                <productname>C</productname>/<productname>C++</productname>
+                escape rules when regular expressions
                 contain <quote>\</quote>.
               </caution>
 
@@ -3364,8 +3372,8 @@ int main(int argc, char *argv[])
               <parameter>-L</parameter> / <parameter>--list-tags</parameter>
               cannot be combined with any other option.
             </note>
-            <para>See <xref linkend="DEFINE_TEST_TAG" xrefstyle="select:title"/>
-            for defining tags.</para>
+            <para>See <xref linkend="WITH_TEST_TAG" xrefstyle="select:title"/>
+            for how to use tags with tests.</para>
           </listitem>
         </varlistentry>
 

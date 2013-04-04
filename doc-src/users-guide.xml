@@ -98,7 +98,8 @@
       <title>Checking correctness</title>
       <para>A test isn't worth much if it isn't possible to check the
         correctness of the unit under test. Although you can use the
-        standard C/C++ <function>assert()</function> macro, &crpcut;
+        standard <productname>C</productname>/<productname>C++</productname>
+        <function>assert()</function> macro, &crpcut;
         offers a wealth of its own assert macros with several benefits.
       </para>
       <para>There are two families of macros used for checking results,
@@ -391,7 +392,7 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
       </para>
       <para>Testsuites are declared using the
       <xref linkend="TESTSUITE" xrefstyle="select:title"/>
-      macro. A testsuite is a <symbol>C++</symbol> namespace with some
+      macro. A testsuite is a <productname>C++</productname> namespace with some
       decorations attached. For example it is possible to express
       dependencies on testsuites (i.e. the requirement that all tests
       in a testsuite pass,) and it is possible for testsuites to depend
@@ -435,10 +436,15 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
       <para>A tag in a &crpcut; test program is a group identity that can be
       attached to a test. A test can either be untagged (the default) or have
       one tag, never more.</para>
-      <para>Tags must be defined with the <xref linkend="DEFINE_TEST_TAG"
-      xrefstyle="select:title"/> macro before they can be used. A tag is a
-      <symbol>C++</symbol> type with some decorations, and from there it
-      follows that a tag must be visible at the site of use.</para>
+      <para>In older <productname>C++</productname> tags must be defined with
+      the <xref linkend="DEFINE_TEST_TAG"
+      xrefstyle="select:title"/> macro before they can be used. It makes a tag
+      as a <productname>C++</productname> type with some decorations, and from
+      there it follows that a tag must be visible at the site of use.</para>
+      <tip>Compile your test program as <productname>C++11</productname>,
+      then <xref linkend="DEFINE_TEST_TAG" xrefstyle=select:title"/> becomes
+      unnecessary, and tags have a freer form and can be anything the
+      preprocessor can parse.</tip>
       <para>To attach a tag to a test, include the
       <xref linkend="WITH_TEST_TAG" xrefstyle="select:title"/> macro in
       the <link linkend="modifiers">modifiers</link> list.</para>
@@ -700,7 +706,8 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
         ignoring case, and <type>crpcut::regex::</type><constant>m</constant>
         for multi line patterns.
       <caution>Be careful with patterns containing <quote>\</quote>, since
-        C/C++ interprets them as character escapes.</caution>
+        <productname>C</productname>/<productname>C++</productname> interprets
+        them as character escapes.</caution>
  The output from the short test program is:
         <screen>
 
@@ -711,7 +718,7 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
         assert that strings match a regular expression. If you need more
         advanced functionality, for example picking sub strings for decisions,
         you have to use either <function>regcomp()</function> and
-        <function>regexec()</function>, or <symbol>C++</symbol>
+        <function>regexec()</function>, or <productname>C++</productname>
         <type>std::regex</type> if your compiler supports it.</note>
       <tip>The site
         <ulink url="http://www.regular-expressions.info">http://www.regular-expressions.info</ulink>
@@ -744,7 +751,8 @@ macro.
 <xi:include href="../stripped-src/sorted-names.hpp" parse="text"/>
 </programlisting>
       </para>
-      <para>Working with locales in C++ is a headache, but writing
+      <para>Working with locales in <productname>C++</productname> is a
+        headache, but writing
         the test program with &crpcut; isn't too bad:
         <programlisting language="c++">
 <xi:include href="../stripped-src/collate_example.cpp" parse="text"/>
