@@ -5071,7 +5071,7 @@ class crpcut_testsuite_dep
 
 #  define WITH_TEST_TAG(...)                                         \
   crpcut::policies::tag_policy<crpcut::datatypes::string_type<>      \
-                               CRPCUT_REPEAT_40(CRPCUT_APPEND_INDEX, \
+                               CRPCUT_REPEAT_80(CRPCUT_APPEND_INDEX, \
                                                 CRPCUT_STRINGIZE(__VA_ARGS__)) >
 
 #  define DEFINE_TEST_TAG(...) class crpcut_DEFINE_TEST_TAG_is_deprecated
