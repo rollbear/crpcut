@@ -442,7 +442,7 @@ url="http://en.wikipedia.org/wiki/C++0x#Lambda_functions_and_expressions">lambda
       as a <productname>C++</productname> type with some decorations, and from
       there it follows that a tag must be visible at the site of use.</para>
       <tip>Compile your test program as <productname>C++11</productname>,
-      then <xref linkend="DEFINE_TEST_TAG" xrefstyle=select:title"/> becomes
+      then <xref linkend="DEFINE_TEST_TAG" xrefstyle="select:title"/> becomes
       unnecessary, and tags have a freer form and can be anything the
       preprocessor can parse.</tip>
       <para>To attach a tag to a test, include the
