@@ -1,9 +1,11 @@
+2013-04-05 1.9.0
+
          * When compiling with c++11 support (-std=c++11 or -std=c++0x) in
            gcc 4.6 or later, or clang 3.1 or later, tags are no longer
            restricted to being valid identifiers nor do they need to be
            defined before use with the DEFINE_TEST_TAG() macro (which
            becomes a no-op.)
-           
+
            The macro WITH_TEST_TAG(...) accepts anything that the preprocessor
            can interpret, as long as the length is 80 characters or less.
 
@@ -30,16 +32,16 @@
 
          * Fixed a bug in the heap valgrind instrumentation which made
            valgrind miss a lot of errors.
- 
+
          * Fixed a test-dependency bug, where tests that were not selected
            could prevent selected tests from running.
-           
+
          * Fixed a bug where INFO in tests failed when run with
            --single-shot
-           
+
          * Fixed a bug where the duration_us field in XML reports were
            wrong when run with --disable-timeouts
-           
+
          * Improved robustness in heap-error reporting
 
 2012-07-21 1.8.3
