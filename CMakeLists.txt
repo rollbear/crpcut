@@ -970,7 +970,7 @@ install(
   DESTINATION include
 )
 
-install(TARGETS crpcut DESTINATION ${LIBRARY_OUTPUT_PATH})
+install(TARGETS crpcut crpcut_basic crpcut_heap DESTINATION ${LIBRARY_OUTPUT_PATH})
 install(
   FILES ${TEST_SRCS}
   DESTINATION "${SHAREDIR}/example_source"
