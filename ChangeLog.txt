@@ -1,3 +1,7 @@
+3013-04-06 1.9.1
+
+         * libcrpcut_basic.so was built but not installed
+
 2013-04-05 1.9.0
 
          * When compiling with c++11 support (-std=c++11 or -std=c++0x) in
