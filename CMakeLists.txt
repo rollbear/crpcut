@@ -401,11 +401,13 @@ else (WITHOUT_HEAP)
   set(SELFTEST_PARAM ${SELFTEST_PARAM} heap)
   set(CRPCUT_LIB "crpcut")
 endif (WITHOUT_HEAP)
-add_library(crpcut_basic ${LIB_SRCS} ${HEAP_FAKE_SRCS})
+add_library(common_lib OBJECT ${LIB_SRCS})
+set_target_properties(common_lib PROPERTIES COMPILE_FLAGS "-fPIC")
+add_library(crpcut_basic $<TARGET_OBJECTS:common_lib> ${HEAP_FAKE_SRCS})
 set_target_properties(crpcut_basic PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
   SOVERSION ${CRPCUT_LIB_SOVERSION})
-add_library(crpcut ${LIB_SRCS} ${LIBHEAP_SRCS})
+add_library(crpcut $<TARGET_OBJECTS:common_lib> ${LIBHEAP_SRCS})
 set_target_properties(crpcut PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
   SOVERSION ${CRPCUT_LIB_SOVERSION})
