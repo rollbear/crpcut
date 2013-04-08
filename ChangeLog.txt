@@ -1,6 +1,8 @@
+2013-04-08 1.9.2
+
          * Adapted CMakeLists.txt for CMake 2.6 or later
 
-3013-04-06 1.9.1
+2013-04-06 1.9.1
 
          * libcrpcut_basic.so was built but not installed
 
