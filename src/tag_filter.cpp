@@ -31,6 +31,7 @@ namespace {
   void
   assert_name_list(const char *begin, const char*end, crpcut::tag_list_root &l)
   {
+    if (begin == end) return;
     const char *p = begin;
     while (p)
       {
@@ -38,19 +39,18 @@ namespace {
           {
             using crpcut::tag_list_root;
             bool found = false;
-            tag_list_root::iterator e = l.end();
-            tag_list_root::iterator i = l.begin();
-            do
+            const tag_list_root::iterator e = l.end();
+            for (tag_list_root::iterator i = l.begin();
+                 !found && i != e;
+                 ++i)
               {
                 crpcut::datatypes::fixed_string name = i->get_name();
                 const char *n = name.str;
                 const char *name_end = n + name.len;
                 const char *t = begin;
                 while (t != p && *t == *n) { ++t; ++n; }
-                if (t == p && n == name_end) { found = true; break; }
-                ++i;
+                found = t == p && n == name_end;
               }
-            while (i != e);
             if (!found)
               {
                 std::string msg(begin,p);

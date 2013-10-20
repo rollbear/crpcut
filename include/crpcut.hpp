@@ -1122,15 +1122,16 @@ constexpr char array_index(size_t n, const char (&array)[N])
   std::ostream &operator<<(std::ostream &os, crpcut::tag::importance i);
   class tag_list_root : public tag
   {
+    typedef datatypes::list_elem<tag> tag_list_type;
   public:
-    tag_list_root() : tag(), longest_tag_name_(0) {}
+    tag_list_root() : longest_tag_name_(0), list_() { link_after(list_);}
     virtual size_t longest_tag_name() const { return longest_tag_name_; }
     void store_name_length(size_t n) { longest_tag_name_ = n; }
     template <typename T>
     class iterator_t
     {
     public:
-      iterator_t(T *p, const tag_list_root& list) : p_(p), list_(list) {};
+      iterator_t(T *p, const tag_list_type& list) : p_(p), list_(list) {};
       iterator_t& operator++() { p_ = list_.next_after(p_); return *this; }
       iterator_t operator++(int) { iterator_t rv(*this); ++(*this); return rv;}
       T *operator->() { return p_; }
@@ -1139,18 +1140,19 @@ constexpr char array_index(size_t n, const char (&array)[N])
       bool operator!=(const iterator_t &i) const { return !(operator==(i)); }
     private:
       T                   *p_;
-      const tag_list_root &list_;
+      const tag_list_type &list_;
     };
     typedef iterator_t<tag> iterator;
     typedef iterator_t<const tag> const_iterator;
-    const_iterator begin() const { return const_iterator(first(), *this); }
-    const_iterator end() const { return const_iterator(0, *this); }
-    iterator begin() { return iterator(first(), *this); }
-    iterator end() { return iterator(0, *this); }
+    const_iterator begin() const { return const_iterator(list_.first(), list_); }
+    const_iterator end() const { return const_iterator(0, list_); }
+    iterator begin() { return iterator(list_.first(), list_); }
+    iterator end() { return iterator(0, list_); }
     void print_to(std::ostream &) const;
     void configure_importance(const char *specification);
   private:
-    size_t longest_tag_name_;
+    size_t        longest_tag_name_;
+    tag_list_type list_;
   };
 
   template <typename T>

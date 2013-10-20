@@ -192,7 +192,7 @@ namespace {
   template <typename T>
   void match_all(T& t, list &r)
   {
-    for (reg *i = r.next(); !r.is_this(i); i = i->next())
+    for (reg *i = r.first(); i; i = r.next_after(i))
       {
         match_and_remove(t, i);
       }

@@ -33,7 +33,10 @@ namespace crpcut {
   {
     for (crpcut::tag_list::const_iterator i = begin(); i != end(); ++i)
       {
-        os << i->get_name().str << "\n";
+        if (i->get_name().len > 0U)
+          {
+            os << i->get_name().str << "\n";
+          }
       }
   }
 
@@ -44,15 +47,12 @@ namespace crpcut {
     if (specification == 0) return;
     tag_filter filter(specification);
     filter.assert_names(*this);
-    // tag.end() refers to the defaulted nameless tag which
-    // we want to include in this loop, hence the odd appearence
-    tag_list::iterator ti = begin();
-    do
+    for (tag_list::iterator ti = begin();
+         ti != end();
+         ++ti)
       {
         tag::importance i = filter.lookup(ti->get_name());
         ti->set_importance(i);
       }
-    while (ti++ != end());
-
   }
 }

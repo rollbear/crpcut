@@ -187,7 +187,7 @@ TESTSUITE(test_runner)
       const size_t len = loc_len;
       memcpy(buffer, &len, sizeof(len));
       memcpy(buffer + sizeof(len), loc_str, len);
-      memcpy(buffer + sizeof(len) + len, msg, N2);
+      memcpy(buffer + sizeof(len) + len, msg, N2 - 1);
     }
     void setup(pid_t pid)
     {

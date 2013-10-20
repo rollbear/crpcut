@@ -256,13 +256,13 @@ namespace crpcut {
     ::statistics(unsigned num_run,
                  unsigned num_failed)
     {
-      tag_list_root::const_iterator i = tags_.begin();
       tag_list_root::const_iterator const end = tags_.end();
-      do
+      for (tag_list_root::const_iterator i = tags_.begin();
+           i != end;
+           ++i)
         {
           tag_summary(*i);
         }
-      while (i++ != end);
       if (tag_summary_)
         {
           write("  </tag_summary>\n");
