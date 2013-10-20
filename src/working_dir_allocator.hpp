@@ -26,7 +26,7 @@
 
 
 
-#ifndef WORKING_DIR__ALLOCATOR_HPP_
+#ifndef WORKING_DIR_ALLOCATOR_HPP_
 #define WORKING_DIR_ALLOCATOR_HPP_
 
 #include "buffer_vector.hpp"
