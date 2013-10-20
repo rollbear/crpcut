@@ -144,8 +144,8 @@ namespace crpcut {
       assert(cli_arg);
       while (*cli_arg)
         {
-          param *p = next();
-          while (!is_this(p))
+          param *p = first();
+          while (p)
             {
               const char *const *arg = p->match(cli_arg);
               if (arg)
@@ -153,9 +153,9 @@ namespace crpcut {
                   cli_arg = arg;
                   break;
                 }
-              p = p->next();
+              p = next_after(p);
             }
-          if (is_this(p)) break;
+          if (!p) break;
         }
       return cli_arg;
     }

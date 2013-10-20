@@ -38,8 +38,8 @@ namespace {
           {
             using crpcut::tag_list_root;
             bool found = false;
-            tag_list_root::iterator e = tag_list_root::iterator(&l);
-            tag_list_root::iterator i = e;
+            tag_list_root::iterator e = l.end();
+            tag_list_root::iterator i = l.begin();
             do
               {
                 crpcut::datatypes::fixed_string name = i->get_name();

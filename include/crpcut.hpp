@@ -923,25 +923,29 @@ constexpr char array_index(size_t n, const char (&array)[N])
       virtual ~list_elem();
       void link_after(list_elem& r);
       void link_before(list_elem &r);
-      T *next() { return next_; }
-      T *prev() { return prev_; }
-      const T *next() const { return next_; }
-      const T *prev() const { return prev_; }
+      T *first() { return is_empty() ? 0 : static_cast<T*>(next_); }
+      T *last() { return is_empty() ? 0 : static_cast<T*>(prev_); }
+      const T *first() const { return is_empty() ? 0 : static_cast<const T*>(next_); }
+      const T *last() const { return is_empty() ? 0 : static_cast<const T*>(prev_); }
+      T* next_after(T* p) const { return p == last() ? 0 : static_cast<T*>(p->next_); }
+      T* prev_before(T* p) const { return p == first() ? 0 : static_cast<T*>(p->prev_); }
+      const T* next_after(const T* p) const { return p == last() ? 0 : static_cast<T*>(p->next_); }
+      const T* prev_before(const T* p) const { return p == first() ? 0 : static_cast<T*>(p->prev_); }
       bool is_empty() const;
-      bool is_this(const T *p) const;
+      //      bool is_this(const T *p) const;
     protected:
       void unlink();
     private:
       list_elem(const list_elem&);
       list_elem& operator=(const list_elem&);
-      T *next_;
-      T *prev_;
+      list_elem *next_;
+      list_elem *prev_;
     };
 
     template <typename T>
     inline list_elem<T>::list_elem()
-      : next_(static_cast<T*>(this)),
-        prev_(static_cast<T*>(this))
+      : next_(this),
+        prev_(this)
     {
     }
 
@@ -954,46 +958,46 @@ constexpr char array_index(size_t n, const char (&array)[N])
     template <typename T>
     inline void list_elem<T>::link_after(list_elem& r)
     {
-      T *p = prev_;
-      T *r_n = r.next_;
+      list_elem *p = prev_;
+      list_elem *r_n = r.next_;
       p->next_ = r_n;
       r_n->prev_ = p;
-      r.next_ = static_cast<T*>(this);
-      prev_ = static_cast<T*>(&r);
+      r.next_ = this;
+      prev_ = &r;
     }
 
     template <typename T>
     inline void list_elem<T>::link_before(list_elem &r)
     {
-      T *n = next_;
-      T *r_p = r.prev_;
+      list_elem *n = next_;
+      list_elem *r_p = r.prev_;
       n->prev_ = r_p;
       r_p->next_ = n;
-      r.prev_ = static_cast<T*>(this);
-      next_ = static_cast<T*>(&r);
+      r.prev_ = this;
+      next_ = &r;
     }
 
     template <typename T>
     inline bool list_elem<T>::is_empty() const
     {
-      return next_ == static_cast<const T*>(this);
+      return next_ == this;
     }
-
+#if 0
     template <typename T>
     inline bool list_elem<T>::is_this(const T* p) const
     {
       return static_cast<const T*>(this) == p;
     }
-
+#endif
     template <typename T>
     inline void list_elem<T>::unlink()
     {
-      T *n = next_;
-      T *p = prev_;
+      list_elem *n = next_;
+      list_elem *p = prev_;
       n->prev_ = p;
       p->next_ = n;
-      prev_ = static_cast<T*>(this);
-      next_ = static_cast<T*>(this);
+      prev_ = this;
+      next_ = this;
     }
 
   } // namespace datatypes
@@ -1126,22 +1130,23 @@ constexpr char array_index(size_t n, const char (&array)[N])
     class iterator_t
     {
     public:
-      iterator_t(T *p) : p_(p) {};
-      iterator_t& operator++() { p_ = p_->next(); return *this; }
+      iterator_t(T *p, const tag_list_root& list) : p_(p), list_(list) {};
+      iterator_t& operator++() { p_ = list_.next_after(p_); return *this; }
       iterator_t operator++(int) { iterator_t rv(*this); ++(*this); return rv;}
       T *operator->() { return p_; }
       T& operator*() { return *p_; }
       bool operator==(const iterator_t &i) const { return p_ == i.p_; }
       bool operator!=(const iterator_t &i) const { return !(operator==(i)); }
     private:
-      T *p_;
+      T                   *p_;
+      const tag_list_root &list_;
     };
     typedef iterator_t<tag> iterator;
     typedef iterator_t<const tag> const_iterator;
-    const_iterator begin() const { return const_iterator(next()); }
-    const_iterator end() const { return const_iterator(this); }
-    iterator begin() { return iterator(next()); }
-    iterator end() { return iterator(this); }
+    const_iterator begin() const { return const_iterator(first(), *this); }
+    const_iterator end() const { return const_iterator(0, *this); }
+    iterator begin() { return iterator(first(), *this); }
+    iterator end() { return iterator(0, *this); }
     void print_to(std::ostream &) const;
     void configure_importance(const char *specification);
   private:
@@ -1774,7 +1779,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
 
 
       template <typename T>
-      class enforcer : private basic_enforcer
+      class enforcer : public basic_enforcer
       {
       public:
         enforcer();

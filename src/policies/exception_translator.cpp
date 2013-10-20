@@ -67,9 +67,9 @@ namespace crpcut {
     crpcut_exception_translator
     ::do_try_all()
     {
-      for (crpcut_exception_translator *p = next();
-           p != this;
-           p = p->next())
+      for (crpcut_exception_translator *p = first();
+           p;
+           p = next_after(p))
         {
           try {
             return p->crpcut_translate();

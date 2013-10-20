@@ -38,21 +38,21 @@ namespace crpcut {
     typedef crpcut_test_case_registrator reg;
 
     {
-      reg *n;
-      for (reg *i = next(); !is_this(i); i = n)
+      for (reg *i = first(); i; )
         {
-          n = i->next();
+          reg *obj = i;
+          i = next_after(i);
           ++num_registered_tests;
-          tag &t = i->crpcut_tag();
+          tag &t = obj->crpcut_tag();
           if (t.get_importance() == tag::ignored)
             {
-              i->unlink();
-              i->crpcut_uninhibit_dependants();
+              obj->unlink();
+              obj->crpcut_uninhibit_dependants();
               continue;
             }
-          if (i->get_importance() == tag::disabled)
+          if (obj->get_importance() == tag::disabled)
             {
-              i->crpcut_uninhibit_dependants();
+              obj->crpcut_uninhibit_dependants();
             }
         }
       }
@@ -66,16 +66,16 @@ namespace crpcut {
     for (const char *const*name = names; *name; ++name)
       {
         unsigned matches = 0;
-        reg *n;
-        for (reg *i = next(); !is_this(i); i = n)
+        for (reg *i = first(); i;)
           {
-            n = i->next();
-            if (i->match_name(*name))
+            reg *obj = i;
+            i = next_after(i);
+            if (obj->match_name(*name))
               {
                 ++matches;
                 ++num_selected_tests;
-                i->unlink();
-                i->link_before(result);
+                obj->unlink();
+                obj->link_before(result);
              }
           }
         if (matches == 0)
@@ -96,7 +96,7 @@ namespace crpcut {
 
     // Ensure that tests not selected for running, do not prevent
     // selected tests from running
-    for (reg *i = next(); !is_this(i); i = i->next())
+    for (reg *i = first(); i; i = next_after(i))
       {
          if (i->get_importance() != tag::disabled)
            {
@@ -126,8 +126,8 @@ namespace crpcut {
            << "============\n"
            << std::setfill(' ');
       }
-    for (const crpcut_test_case_registrator *i = next();
-         !is_this(i); i = i->next())
+    for (const crpcut_test_case_registrator *i = first();
+         i; i = next_after(i))
       {
         tag::importance importance = i->get_importance();
 

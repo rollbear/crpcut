@@ -367,20 +367,20 @@ namespace crpcut {
       {
         bool progress = false;
         typedef crpcut_test_case_registrator reg;
-        reg *next;
-        for (reg *i = reg_.next(); !reg_.is_this(i); i = next)
+        for (reg *i = reg_.first(); i;)
           {
-            next = i->next();
-            if (   (cli_->honour_dependencies() && !i->crpcut_can_run())
-                || i->get_importance() == crpcut::tag::disabled)
+            reg *obj = i;
+            i = reg_.next_after(i);
+            if (   (cli_->honour_dependencies() && !obj->crpcut_can_run())
+                || obj->get_importance() == crpcut::tag::disabled)
               {
                 continue;
               }
             progress = true;
-            i->set_test_environment(env_);
-            start_test(i, poller);
+            obj->set_test_environment(env_);
+            start_test(obj, poller);
             manage_children(num_parallel, poller);
-            i->unlink();
+            obj->unlink();
           }
         if (!progress)
           {
@@ -475,7 +475,7 @@ namespace crpcut {
                 err_os << "Single shot requires exactly one test selected\n";
                 throw cli_exception(-1);
               }
-            crpcut_test_case_registrator *i = reg_.next();
+            crpcut_test_case_registrator *i = reg_.first();
             i->set_test_environment(env_);
             std::cout << *i << " ";
             i->run_test_case();

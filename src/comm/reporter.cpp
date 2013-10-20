@@ -52,7 +52,9 @@ namespace crpcut {
       char *p = static_cast<char *>(report_addr);
       p+= sizeof(type);
 
-      *static_cast<size_t*>(static_cast<void*>(p)) = buff_size - header_size;
+      size_t msg_size(buff_size - header_size);
+      memcpy(p, &msg_size, sizeof(msg_size));
+      //      *static_cast<size_t*>(static_cast<void*>(p)) = buff_size - header_size;
       p+= sizeof(len);
       if (location)
         {

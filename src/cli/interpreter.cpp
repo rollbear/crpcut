@@ -125,9 +125,9 @@ namespace crpcut {
       std::ostringstream os;
       os << "Usage: " << program_name() << " [flags] {testcases}\n"
           "  where flags can be:\n";
-      for (const cli::param *p = list_.next();
-          !list_.is_this(p);
-          p = p->next())
+      for (const cli::param *p = list_.first();
+           p;
+           p = list_.next_after(p))
       {
           os << *p << "\n\n";
       }
