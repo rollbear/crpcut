@@ -24,42 +24,42 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 #include "../printer.hpp"
 #include "../output/formatter.hpp"
-
-using namespace testing;
 
 TESTSUITE(printer)
 {
   class test_formatter : public crpcut::output::formatter
   {
   public:
-    MOCK_METHOD4(begin_case, void(std::string, bool, bool, unsigned long));
-    MOCK_METHOD0(end_case, void());
-    MOCK_METHOD4(terminate,
-                 void(crpcut::test_phase,
-                      crpcut::datatypes::fixed_string,
-                      crpcut::datatypes::fixed_string,
-                      std::string));
-    MOCK_METHOD3(print, void(crpcut::datatypes::fixed_string,
-                             crpcut::datatypes::fixed_string,
-                             crpcut::datatypes::fixed_string));
-    MOCK_METHOD2(statistics, void(unsigned, unsigned));
-    MOCK_METHOD1(nonempty_dir, void(const char*));
-    MOCK_METHOD2(blocked_test,
-                 void(crpcut::tag::importance, std::string));
+    MAKE_MOCK4(begin_case, void(std::string, bool, bool, unsigned long));
+    MAKE_MOCK0(end_case, void());
+    MAKE_MOCK4(terminate,
+               void(crpcut::test_phase,
+                    crpcut::datatypes::fixed_string,
+                    crpcut::datatypes::fixed_string,
+                    std::string));
+    MAKE_MOCK3(print, void(crpcut::datatypes::fixed_string,
+                           crpcut::datatypes::fixed_string,
+                           crpcut::datatypes::fixed_string));
+    MAKE_MOCK2(statistics, void(unsigned, unsigned));
+    MAKE_MOCK1(nonempty_dir, void(const char*));
+    MAKE_MOCK2(blocked_test,
+               void(crpcut::tag::importance, std::string));
   };
 
   TEST(create_and_destroy_calls_formatter_begin_and_end)
   {
-    using namespace testing;
-    StrictMock<test_formatter> fmt;
+    test_formatter fmt;
 
-    EXPECT_CALL(fmt, begin_case("apa", false, true, 100)).Times(1);
-    crpcut::printer p(fmt, "apa", false, true, 100);
-    Mock::VerifyAndClearExpectations(&fmt);
-    EXPECT_CALL(fmt, end_case()).Times(1);
+    crpcut::printer *p = nullptr;
+    {
+      REQUIRE_CALL(fmt, begin_case("apa", false, true, 100U));
+      p = new crpcut::printer(fmt, "apa", false, true, 100);
+    }
+    REQUIRE_CALL(fmt, end_case());
+    delete p;
   }
 }

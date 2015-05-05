@@ -29,24 +29,22 @@
 #ifndef TAG_MOCKS_HPP
 #define TAG_MOCKS_HPP
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 
 namespace mock
 {
-  using namespace testing;
-
   class tag_list : public crpcut::tag_list_root
   {
   public:
-    MOCK_METHOD0(fail, void());
-    MOCK_METHOD0(pass, void());
-    MOCK_CONST_METHOD0(num_failed, size_t());
-    MOCK_CONST_METHOD0(num_passed, size_t());
-    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
-    MOCK_CONST_METHOD0(longest_tag_name, size_t());
-    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
-    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
+    MAKE_MOCK0(fail, void());
+    MAKE_MOCK0(pass, void());
+    MAKE_CONST_MOCK0(num_failed, size_t());
+    MAKE_CONST_MOCK0(num_passed, size_t());
+    MAKE_CONST_MOCK0(get_name, crpcut::datatypes::fixed_string());
+    MAKE_CONST_MOCK0(longest_tag_name, size_t());
+    MAKE_MOCK1(set_importance, void(crpcut::tag::importance));
+    MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
   };
 
   class test_tag : public crpcut::tag
@@ -55,18 +53,21 @@ namespace mock
     template <size_t N>
     test_tag(const char (&f)[N], tag_list *root)
       : crpcut::tag(N, root),
-        name_(crpcut::datatypes::fixed_string::make(f))
+        name_(crpcut::datatypes::fixed_string::make(f)),
+        x(NAMED_REQUIRE_CALL(*this, get_name())
+          .RETURN(std::ref(name_)))
     {
-      EXPECT_CALL(*this, get_name()).WillOnce(Return(name_));
     }
-    MOCK_METHOD0(fail, void());
-    MOCK_METHOD0(pass, void());
-    MOCK_CONST_METHOD0(num_failed, size_t());
-    MOCK_CONST_METHOD0(num_passed, size_t());
-    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
-    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
-    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
+    MAKE_MOCK0(fail, void());
+    MAKE_MOCK0(pass, void());
+    MAKE_CONST_MOCK0(num_failed, size_t());
+    MAKE_CONST_MOCK0(num_passed, size_t());
+    MAKE_CONST_MOCK0(get_name, crpcut::datatypes::fixed_string());
+    MAKE_MOCK1(set_importance, void(crpcut::tag::importance));
+    MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
     crpcut::datatypes::fixed_string name_;
+  private:
+    std::unique_ptr<trompeloeil::expectation> x;
   };
 
 }

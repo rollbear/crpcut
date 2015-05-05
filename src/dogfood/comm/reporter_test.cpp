@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 
 namespace {
@@ -35,45 +35,47 @@ TESTSUITE(comm)
 {
   TESTSUITE(reporter)
   {
-    using namespace testing;
     class writer_mock : public crpcut::comm::data_writer
     {
     public:
-      MOCK_CONST_METHOD3(write_loop,
-                         const crpcut::comm::data_writer&(const char*,
-                                                          std::size_t,
-                                                          const char*));
+      MAKE_CONST_MOCK3(write_loop,
+                       const crpcut::comm::data_writer&(const char*,
+                                                        std::size_t,
+                                                        const char*));
       const data_writer& write_loop(const void *addr, std::size_t len,
                                     const char *context) const
       {
          write_loop(static_cast<const char*>(addr), len, context);
          return *this;
       }
-      MOCK_CONST_METHOD2(write, ssize_t(const void*, std::size_t));
+      MAKE_CONST_MOCK2(write, ssize_t(const void*, std::size_t));
     };
 
     class monitor_mock : public crpcut::crpcut_test_monitor
     {
     public:
-      MOCK_METHOD1(set_timeout, void(unsigned long));
-      MOCK_CONST_METHOD0(duration_us, unsigned long());
-      MOCK_CONST_METHOD0(deadline_is_set, bool());
-      MOCK_METHOD0(clear_deadline, void());
-      MOCK_METHOD1(crpcut_register_success, void(bool));
-      MOCK_METHOD1(set_phase, void(crpcut::test_phase));
-      MOCK_METHOD0(kill, void());
-      MOCK_CONST_METHOD0(crpcut_failed, bool());
-      MOCK_METHOD1(set_cputime_at_start, void(const struct timeval&));
-      MOCK_CONST_METHOD3(send_to_presentation, void(crpcut::comm::type, size_t, const char*));
-      MOCK_METHOD0(set_death_note, void());
-      MOCK_METHOD0(activate_reader, void());
-      MOCK_METHOD0(deactivate_reader, void());
-      MOCK_CONST_METHOD0(has_active_readers, bool());
-      MOCK_METHOD0(manage_death, void());
-      MOCK_CONST_METHOD0(is_naughty_child, bool());
-      MOCK_CONST_METHOD0(freeze, void());
-      MOCK_CONST_METHOD0(get_location, crpcut::datatypes::fixed_string());
+      MAKE_MOCK1(set_timeout, void(unsigned long));
+      MAKE_CONST_MOCK0(duration_us, unsigned long());
+      MAKE_CONST_MOCK0(deadline_is_set, bool());
+      MAKE_MOCK0(clear_deadline, void());
+      MAKE_MOCK1(crpcut_register_success, void(bool));
+      MAKE_MOCK1(set_phase, void(crpcut::test_phase));
+      MAKE_MOCK0(kill, void());
+      MAKE_CONST_MOCK0(crpcut_failed, bool());
+      MAKE_MOCK1(set_cputime_at_start, void(const struct timeval&));
+      MAKE_CONST_MOCK3(send_to_presentation, void(crpcut::comm::type, size_t, const char*));
+      MAKE_MOCK0(set_death_note, void());
+      MAKE_MOCK0(activate_reader, void());
+      MAKE_MOCK0(deactivate_reader, void());
+      MAKE_CONST_MOCK0(has_active_readers, bool());
+      MAKE_MOCK0(manage_death, void());
+      MAKE_CONST_MOCK0(is_naughty_child, bool());
+      MAKE_CONST_MOCK0(freeze, void());
+      MAKE_CONST_MOCK0(get_location, crpcut::datatypes::fixed_string());
     };
+
+    using trompeloeil::_;
+
     TEST(reporter_without_current_process_prints_on_stream)
     {
        std::ostringstream os;
@@ -105,10 +107,10 @@ TESTSUITE(comm)
     TEST(naughty_children_requests_testicide_end_exits,
          EXPECT_EXIT(1))
     {
-      StrictMock<writer_mock>  wfd;
-      StrictMock<monitor_mock> mon;
-      std::ostringstream       os;
-      crpcut::comm::reporter   r(os);
+      writer_mock            wfd;
+      monitor_mock           mon;
+      std::ostringstream     os;
+      crpcut::comm::reporter r(os);
 
       r.set_writer(&wfd);
 
@@ -118,11 +120,13 @@ TESTSUITE(comm)
       char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
       p = static_cast<char*>(set_to(p, size_t(10)));
       memcpy(p, "apa.cpp:32apa", 10 + 3);
-      EXPECT_CALL(mon, is_naughty_child()).
-        WillOnce(Return(true));
-      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
-        .With(Args<0,1>(ElementsAreArray(request)))
-        .WillOnce(ReturnRef(wfd));
+
+      REQUIRE_CALL(mon, is_naughty_child())
+        .RETURN(true);
+
+      REQUIRE_CALL(wfd, write_loop(_, sizeof(request),_))
+        .WITH(memcmp(_1, request, _2) == 0)
+        .LR_RETURN(std::ref(wfd));
       r(crpcut::comm::fail, "apa", location, &mon);
     }
 
@@ -131,16 +135,17 @@ TESTSUITE(comm)
     {
       fix()
         : wfd(),
+          child_x(NAMED_ALLOW_CALL(mon, is_naughty_child())
+                  .RETURN(false)),
           r(fake_cout)
       {
         r.set_writer(&wfd);
-        EXPECT_CALL(mon, is_naughty_child()).
-          WillRepeatedly(Return(false));
       }
-      StrictMock<monitor_mock> mon;
-      StrictMock<writer_mock>  wfd;
-      std::ostringstream       fake_cout;
-      crpcut::comm::reporter   r;
+      monitor_mock                              mon;
+      writer_mock                               wfd;
+      std::ostringstream                        fake_cout;
+      std::unique_ptr<trompeloeil::expectation> child_x;
+      crpcut::comm::reporter                    r;
     };
 
     TEST(reporter_exits_on_exit_fail,
@@ -151,9 +156,10 @@ TESTSUITE(comm)
       char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
       p = static_cast<char*>(set_to(p, std::size_t(10)));
       memcpy(p, "apa.cpp:32apa", 3 + 10);
-      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
-        .With(Args<0,1>(ElementsAreArray(request)))
-        .WillOnce(ReturnRef(wfd));
+
+      REQUIRE_CALL(wfd, write_loop(_, sizeof(request),_))
+        .WITH(memcmp(_1, request, _2) == 0)
+        .RETURN(std::ref(wfd));
       r(crpcut::comm::exit_fail, "apa", location, &mon);
     }
 
@@ -164,9 +170,11 @@ TESTSUITE(comm)
       char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
       p = static_cast<char*>(set_to(p, size_t(10)));
       memcpy(p, "apa.cpp:32apa", 10 + 3);
-      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
-        .With(Args<0,1>(ElementsAreArray(request)))
-        .WillOnce(ReturnRef(wfd));
+
+      REQUIRE_CALL(wfd, write_loop(_, sizeof(request),_))
+        .WITH(memcmp(_1, request, _2) == 0)
+        .RETURN(std::ref(wfd));
+
       std::ostringstream os;
       os << "apa";
       r(crpcut::comm::fail, os, location, &mon);
@@ -179,9 +187,10 @@ TESTSUITE(comm)
       char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
       p = static_cast<char*>(set_to(p, size_t(10)));
       memcpy(p, "apa.cpp:32apa", 10 + 3);
-      EXPECT_CALL(wfd, write_loop(_, sizeof(request),_))
-        .With(Args<0,1>(ElementsAreArray(request)))
-        .WillOnce(ReturnRef(wfd));
+
+      REQUIRE_CALL(wfd, write_loop(_, sizeof(request),_))
+        .WITH(memcmp(_1, request, _2) == 0)
+        .RETURN(std::ref(wfd));
 
       crpcut::stream::toastream<3> os;
       os << "apa";
@@ -195,9 +204,11 @@ TESTSUITE(comm)
       char *p = static_cast<char*>(set_to(addr, sizeof(size_t) + 3 + 10));
       p = static_cast<char*>(set_to(p, size_t(10)));
       memcpy(p, "apa.cpp:32apa", 10 + 3);
-      EXPECT_CALL(wfd, write_loop(_, sizeof(request), _))
-        .With(Args<0,1>(ElementsAreArray(request)))
-        .WillOnce(ReturnRef(wfd));
+
+      REQUIRE_CALL(wfd, write_loop(_, sizeof(request), _))
+        .WITH(memcmp(_1, request, _2) == 0)
+        .RETURN(std::ref(wfd));
+
       static const char apa[] = "apa";
       r(crpcut::comm::info, apa, location, &mon);
     }

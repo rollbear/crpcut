@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 #include "../../output/writer.hpp"
 #include "../../output/buffer.hpp"
@@ -33,16 +33,18 @@
 
 TESTSUITE(output)
 {
+  using trompeloeil::_;
+
   TESTSUITE(text_modifier)
   {
     class test_buffer : public crpcut::output::buffer
     {
     public:
       typedef std::pair<const char*, std::size_t> buff;
-      MOCK_CONST_METHOD0(get_buffer, buff());
-      MOCK_METHOD0(advance, void());
-      MOCK_METHOD2(write, ssize_t(const char*, std::size_t));
-      MOCK_CONST_METHOD0(is_empty, bool());
+      MAKE_CONST_MOCK0(get_buffer, buff());
+      MAKE_MOCK0(advance, void());
+      MAKE_MOCK2(write, ssize_t(const char*, std::size_t));
+      MAKE_CONST_MOCK0(is_empty, bool());
     };
 
     using crpcut::output::text_modifier;
@@ -75,9 +77,9 @@ TESTSUITE(output)
       ASSERT_TRUE(os.str() == "");
 
       test_buffer buff;
-      using testing::_;
-      EXPECT_CALL(buff, write(_,_))
-        .Times(0);
+
+      FORBID_CALL(buff, write(_,_));
+
       crpcut::output::writer w(buff, "UTF-8", "--illegal--");
       obj.write_to(w, text_modifier::NORMAL);
       obj.write_to(w, text_modifier::PASSED);
@@ -92,15 +94,13 @@ TESTSUITE(output)
       obj.write_to(w, text_modifier::BLOCKED_SUM);
     }
 
-    using namespace testing;
-
     class fix
     {
     protected:
       fix() : writer(buff, "UTF-8", "--illegal--") {}
-      StrictMock<test_buffer> buff;
+      test_buffer buff;
       crpcut::output::writer writer;
-      Sequence seq;
+      trompeloeil::sequence seq;
     };
 
     TEST(set_values_are_honoured, fix)
@@ -119,20 +119,20 @@ TESTSUITE(output)
         " BLOCKED_SUM=10"
         " ";
       text_modifier modifier(config);
-      ON_CALL(buff, write(_,1)).WillByDefault(Return(1));
-      ON_CALL(buff, write(_,2)).WillByDefault(Return(2));
-      EXPECT_CALL(buff, write(StartsWith("0"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("1"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("2"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("3"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("4"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("5"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("6"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("7"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("8"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("9"), 1)).InSequence(seq);
-      EXPECT_CALL(buff, write(StartsWith("10"), 2)).InSequence(seq);
-
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='0').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='1').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='2').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='3').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='4').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='5').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='6').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='7').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='8').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,1U)).WITH(*_1=='9').IN_SEQUENCE(seq).RETURN(ssize_t(_2));
+      REQUIRE_CALL(buff, write(_,2U))
+        .WITH(std::string(_1,_2) == "10")
+        .IN_SEQUENCE(seq)
+        .RETURN(ssize_t(_2));
       modifier.write_to(writer, text_modifier::NORMAL);
       modifier.write_to(writer, text_modifier::PASSED);
       modifier.write_to(writer, text_modifier::FAILED);
@@ -154,24 +154,29 @@ TESTSUITE(output)
         " ";
 
       text_modifier modifier(config);
-      ON_CALL(buff, write(_, 1)).WillByDefault(Return(1));
-      EXPECT_CALL(buff, write(StartsWith("F"), 1)).Times(4);
-      modifier.write_to(writer, text_modifier::FAILED);
-      modifier.write_to(writer, text_modifier::NCFAILED);
-      modifier.write_to(writer, text_modifier::FAILED_SUM);
-      modifier.write_to(writer, text_modifier::NCFAILED_SUM);
-      Mock::VerifyAndClearExpectations(&buff);
+      {
+        REQUIRE_CALL(buff, write(_,_))
+          .WITH(std::string(_1,_2) == "F")
+          .TIMES(4)
+          .RETURN(ssize_t(_2));
+        modifier.write_to(writer, text_modifier::FAILED);
+        modifier.write_to(writer, text_modifier::NCFAILED);
+        modifier.write_to(writer, text_modifier::FAILED_SUM);
+        modifier.write_to(writer, text_modifier::NCFAILED_SUM);
+      }
+      {
+        REQUIRE_CALL(buff, write(_,_))
+          .WITH(std::string(_1,_2) == "0")
+          .RETURN(ssize_t(_2));
+        modifier.write_to(writer, text_modifier::NORMAL);
 
-      EXPECT_CALL(buff, write(StartsWith("0"), 1)).Times(1);
-      modifier.write_to(writer, text_modifier::NORMAL);
-      Mock::VerifyAndClearExpectations(&buff);
-
-      modifier.write_to(writer, text_modifier::PASSED);
-      modifier.write_to(writer, text_modifier::NCPASSED);
-      modifier.write_to(writer, text_modifier::BLOCKED);
-      modifier.write_to(writer, text_modifier::PASSED_SUM);
-      modifier.write_to(writer, text_modifier::NCPASSED_SUM);
-      modifier.write_to(writer, text_modifier::BLOCKED_SUM);
+        modifier.write_to(writer, text_modifier::PASSED);
+        modifier.write_to(writer, text_modifier::NCPASSED);
+        modifier.write_to(writer, text_modifier::BLOCKED);
+        modifier.write_to(writer, text_modifier::PASSED_SUM);
+        modifier.write_to(writer, text_modifier::NCPASSED_SUM);
+        modifier.write_to(writer, text_modifier::BLOCKED_SUM);
+      }
     }
 
     TEST(ncfailed_propagates, fix)
@@ -182,15 +187,20 @@ TESTSUITE(output)
         " ";
 
       text_modifier modifier(config);
-      ON_CALL(buff, write(_, 1)).WillByDefault(Return(1));
-      EXPECT_CALL(buff, write(StartsWith("F"), 1)).Times(2);
-      modifier.write_to(writer, text_modifier::NCFAILED);
-      modifier.write_to(writer, text_modifier::NCFAILED_SUM);
-      Mock::VerifyAndClearExpectations(&buff);
-
-      EXPECT_CALL(buff, write(StartsWith("0"), 1)).Times(1);
-      modifier.write_to(writer, text_modifier::NORMAL);
-      Mock::VerifyAndClearExpectations(&buff);
+      {
+        REQUIRE_CALL(buff, write(_,_))
+          .WITH(std::string(_1,_2) == "F")
+          .TIMES(2)
+          .RETURN(ssize_t(_2));
+        modifier.write_to(writer, text_modifier::NCFAILED);
+        modifier.write_to(writer, text_modifier::NCFAILED_SUM);
+      }
+      {
+        REQUIRE_CALL(buff, write(_,_))
+          .WITH(std::string(_1,_2) == "0")
+          .RETURN(ssize_t(_2));
+        modifier.write_to(writer, text_modifier::NORMAL);
+      }
 
       modifier.write_to(writer, text_modifier::FAILED_SUM);
       modifier.write_to(writer, text_modifier::FAILED);
@@ -210,14 +220,21 @@ TESTSUITE(output)
         " ";
 
       text_modifier modifier(config);
-      ON_CALL(buff, write(_, 1)).WillByDefault(Return(1));
-      EXPECT_CALL(buff, write(StartsWith("P"), 1)).Times(2);
-      modifier.write_to(writer, text_modifier::NCPASSED);
-      modifier.write_to(writer, text_modifier::NCPASSED_SUM);
-
-      EXPECT_CALL(buff, write(StartsWith("0"), 1)).Times(1);
-      modifier.write_to(writer, text_modifier::NORMAL);
-      EXPECT_CALL(buff, write(_,_)).Times(0);
+      {
+        REQUIRE_CALL(buff, write(_,_))
+          .WITH(std::string(_1,_2) == "P")
+          .TIMES(2)
+          .RETURN(ssize_t(_2));
+        modifier.write_to(writer, text_modifier::NCPASSED);
+        modifier.write_to(writer, text_modifier::NCPASSED_SUM);
+      }
+      {
+        REQUIRE_CALL(buff, write(_,_))
+          .WITH(std::string(_1,_2) == "0")
+          .RETURN(ssize_t(_2));
+        modifier.write_to(writer, text_modifier::NORMAL);
+      }
+      FORBID_CALL(buff, write(_,_));
       modifier.write_to(writer, text_modifier::NCFAILED);
       modifier.write_to(writer, text_modifier::NCFAILED_SUM);
       modifier.write_to(writer, text_modifier::FAILED_SUM);
@@ -236,14 +253,21 @@ TESTSUITE(output)
         " ";
 
       text_modifier modifier(config);
-      ON_CALL(buff, write(_, 1)).WillByDefault(Return(1));
-      EXPECT_CALL(buff, write(StartsWith("B"), 1)).Times(2);
-      modifier.write_to(writer, text_modifier::BLOCKED);
-      modifier.write_to(writer, text_modifier::BLOCKED_SUM);
-
-      EXPECT_CALL(buff, write(StartsWith("0"), 1)).Times(1);
-      modifier.write_to(writer, text_modifier::NORMAL);
-      EXPECT_CALL(buff, write(_,_)).Times(0);
+      {
+        REQUIRE_CALL(buff, write(_,_))
+          .WITH(std::string(_1,_2) == "B")
+          .TIMES(2)
+          .RETURN(ssize_t(_2));
+        modifier.write_to(writer, text_modifier::BLOCKED);
+        modifier.write_to(writer, text_modifier::BLOCKED_SUM);
+      }
+      {
+        REQUIRE_CALL(buff, write(_,_))
+          .WITH(std::string(_1,_2) == "0")
+          .RETURN(ssize_t(_2));
+        modifier.write_to(writer, text_modifier::NORMAL);
+      }
+      FORBID_CALL(buff, write(_,_));
       modifier.write_to(writer, text_modifier::NCPASSED);
       modifier.write_to(writer, text_modifier::NCPASSED_SUM);
       modifier.write_to(writer, text_modifier::NCFAILED);
@@ -266,28 +290,43 @@ TESTSUITE(output)
       " ";
 
         text_modifier modifier(config);
-        ON_CALL(buff, write(_, 1)).WillByDefault(Return(1));
-        ON_CALL(buff, write(_, 2)).WillByDefault(Return(2));
-        ON_CALL(buff, write(_, 3)).WillByDefault(Return(3));
-        EXPECT_CALL(buff, write(StartsWith("PS"), 2)).Times(1);
-        modifier.write_to(writer, text_modifier::PASSED_SUM);
-
-        EXPECT_CALL(buff, write(StartsWith("FS"), 2)).Times(1);
-        modifier.write_to(writer, text_modifier::FAILED_SUM);
-
-        EXPECT_CALL(buff, write(StartsWith("BS"), 2)).Times(1);
-        modifier.write_to(writer, text_modifier::BLOCKED_SUM);
-
-        EXPECT_CALL(buff, write(StartsWith("NFS"), 3)).Times(1);
-        modifier.write_to(writer, text_modifier::NCFAILED_SUM);
-
-        EXPECT_CALL(buff, write(StartsWith("NPS"), 3)).Times(1);
-        modifier.write_to(writer, text_modifier::NCPASSED_SUM);
-
-        EXPECT_CALL(buff, write(StartsWith("0"), 1)).Times(1);
-        modifier.write_to(writer, text_modifier::NORMAL);
-
-        EXPECT_CALL(buff, write(_,_)).Times(0);
+        {
+          REQUIRE_CALL(buff, write(_, _))
+            .WITH(std::string(_1,_2) == "PS")
+            .RETURN(ssize_t(_2));
+          modifier.write_to(writer, text_modifier::PASSED_SUM);
+        }
+        {
+          REQUIRE_CALL(buff, write(_, _))
+            .WITH(std::string(_1,_2) == "FS")
+            .RETURN(2);
+          modifier.write_to(writer, text_modifier::FAILED_SUM);
+        }
+        {
+          REQUIRE_CALL(buff, write(_, _))
+            .WITH(std::string(_1, _2) == "BS")
+            .RETURN(2);
+          modifier.write_to(writer, text_modifier::BLOCKED_SUM);
+        }
+        {
+          REQUIRE_CALL(buff, write(_, _))
+            .WITH(std::string(_1,_2) == "NFS")
+            .RETURN(ssize_t(_2));
+          modifier.write_to(writer, text_modifier::NCFAILED_SUM);
+        }
+        {
+          REQUIRE_CALL(buff, write(_, _))
+            .WITH(std::string(_1, _2) == "NPS")
+            .RETURN(ssize_t(_2));
+          modifier.write_to(writer, text_modifier::NCPASSED_SUM);
+        }
+        {
+          REQUIRE_CALL(buff, write(_, _))
+            .WITH(std::string(_1, _2) == "0")
+            .RETURN(ssize_t(_2));
+          modifier.write_to(writer, text_modifier::NORMAL);
+        }
+        FORBID_CALL(buff, write(_,_));
         modifier.write_to(writer, text_modifier::PASSED);
         modifier.write_to(writer, text_modifier::FAILED);
         modifier.write_to(writer, text_modifier::NCFAILED);

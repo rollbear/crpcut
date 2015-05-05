@@ -24,14 +24,14 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 #include "../poll.hpp"
 #include <deque>
 #include <vector>
 #include "../clocks/clocks.hpp"
 
-using namespace testing;
+using trompeloeil::_;
 
 namespace {
   class test_reader : public crpcut::report_reader
@@ -41,8 +41,8 @@ namespace {
     : crpcut::report_reader(mon)
     {
     }
-    MOCK_METHOD0(close, void());
-    MOCK_CONST_METHOD2(read, ssize_t(void *buff, size_t));
+    MAKE_MOCK0(close, void());
+    MAKE_CONST_MOCK2(read, ssize_t(void *buff, size_t));
     void read_loop(void *addr, size_t bytes, const char*) const
     {
       if (bytes == 0U) return;
@@ -70,25 +70,25 @@ namespace {
   class mock_monitor : public crpcut::crpcut_test_monitor
   {
   public:
-    MOCK_METHOD1(set_timeout, void(unsigned long));
-    MOCK_CONST_METHOD0(duration_us, unsigned long());
-    MOCK_CONST_METHOD0(deadline_is_set, bool());
-    MOCK_CONST_METHOD0(get_location, crpcut::datatypes::fixed_string());
-    MOCK_METHOD0(clear_deadline, void());
-    MOCK_METHOD1(crpcut_register_success, void(bool));
-    MOCK_METHOD1(set_phase, void(crpcut::test_phase));
-    MOCK_METHOD0(kill, void());
-    MOCK_CONST_METHOD0(crpcut_failed, bool());
-    MOCK_METHOD1(set_cputime_at_start, void(const struct timeval&));
-    MOCK_CONST_METHOD3(send_to_presentation,
-                       void(crpcut::comm::type, size_t, const char*));
-    MOCK_METHOD0(set_death_note, void());
-    MOCK_METHOD0(activate_reader, void());
-    MOCK_METHOD0(deactivate_reader, void());
-    MOCK_CONST_METHOD0(has_active_readers, bool());
-    MOCK_METHOD0(manage_death, void());
-    MOCK_CONST_METHOD0(is_naughty_child, bool());
-    MOCK_CONST_METHOD0(freeze, void());
+    MAKE_MOCK1(set_timeout, void(unsigned long));
+    MAKE_CONST_MOCK0(duration_us, unsigned long());
+    MAKE_CONST_MOCK0(deadline_is_set, bool());
+    MAKE_CONST_MOCK0(get_location, crpcut::datatypes::fixed_string());
+    MAKE_MOCK0(clear_deadline, void());
+    MAKE_MOCK1(crpcut_register_success, void(bool));
+    MAKE_MOCK1(set_phase, void(crpcut::test_phase));
+    MAKE_MOCK0(kill, void());
+    MAKE_CONST_MOCK0(crpcut_failed, bool());
+    MAKE_MOCK1(set_cputime_at_start, void(const struct timeval&));
+    MAKE_CONST_MOCK3(send_to_presentation,
+                     void(crpcut::comm::type, size_t, const char*));
+    MAKE_MOCK0(set_death_note, void());
+    MAKE_MOCK0(activate_reader, void());
+    MAKE_MOCK0(deactivate_reader, void());
+    MAKE_CONST_MOCK0(has_active_readers, bool());
+    MAKE_MOCK0(manage_death, void());
+    MAKE_CONST_MOCK0(is_naughty_child, bool());
+    MAKE_CONST_MOCK0(freeze, void());
   };
 
 
@@ -98,15 +98,15 @@ namespace {
     fix() : loc(crpcut::datatypes::fixed_string::make("apa:3")),
             reader(&monitor) {}
     crpcut::datatypes::fixed_string loc;
-    StrictMock<mock_monitor>        monitor;
-    StrictMock<test_reader>         reader;
+    mock_monitor                    monitor;
+    test_reader                     reader;
 
     void verify_naughty_child()
     {
-      EXPECT_CALL(monitor, crpcut_register_success(false));
-      EXPECT_CALL(monitor, set_phase(crpcut::child));
-      EXPECT_CALL(monitor, kill());
-      EXPECT_CALL(monitor, set_death_note());
+      REQUIRE_CALL(monitor, crpcut_register_success(false));
+      REQUIRE_CALL(monitor, set_phase(crpcut::child));
+      REQUIRE_CALL(monitor, kill());
+      REQUIRE_CALL(monitor, set_death_note());
       ASSERT_FALSE(reader.read_data());
       ASSERT_TRUE(reader.buffer.size() == 0U);
     }
@@ -117,7 +117,7 @@ TESTSUITE(report_reader)
 {
   TEST(construction_and_immediate_destruction_does_nothing)
   {
-     fix f;
+    fix f;
   }
 
 
@@ -129,8 +129,8 @@ TESTSUITE(report_reader)
     struct timeval tv = { 10, 1 };
     reader.buffer.push_back(sizeof(tv));
     reader.buffer.push_back(tv);
-    EXPECT_CALL(monitor, set_phase(crpcut::running));
-    EXPECT_CALL(monitor, set_cputime_at_start(_));
+    REQUIRE_CALL(monitor, set_phase(crpcut::running));
+    REQUIRE_CALL(monitor, set_cputime_at_start(_));
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
   }
@@ -138,14 +138,14 @@ TESTSUITE(report_reader)
   TEST(set_timeout_forwards_timeout_to_monitor_without_any_other_effects,
        fix)
   {
-    Sequence s1;
+    trompeloeil::sequence s1;
     reader.buffer.push_back(crpcut::comm::set_timeout);
     reader.buffer.push_back(sizeof(ts));
     reader.buffer.push_back(ts(100));
-    EXPECT_CALL(monitor, deadline_is_set()).
-        WillRepeatedly(Return(true));
-    EXPECT_CALL(monitor, clear_deadline()).InSequence(s1);
-    EXPECT_CALL(monitor, set_timeout(_)).InSequence(s1);
+    ALLOW_CALL(monitor, deadline_is_set())
+      .RETURN(true);
+    REQUIRE_CALL(monitor, clear_deadline()).IN_SEQUENCE(s1);
+    REQUIRE_CALL(monitor, set_timeout(_)).IN_SEQUENCE(s1);
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
   }
@@ -155,7 +155,7 @@ TESTSUITE(report_reader)
   {
     reader.buffer.push_back(crpcut::comm::cancel_timeout);
     reader.buffer.push_back(size_t(0U));
-    EXPECT_CALL(monitor, clear_deadline());
+    REQUIRE_CALL(monitor, clear_deadline());
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
   }
@@ -163,14 +163,16 @@ TESTSUITE(report_reader)
   TEST(exit_fail_marks_the_test_as_failed_notes_death_and_presents,
        fix)
   {
-    static const char apa[] = { 'a', 'p', 'a' };
+    const char apa[] = { 'a', 'p', 'a' };
     reader.buffer.push_back(crpcut::comm::exit_fail);
     reader.buffer.push_back(sizeof(apa));
     reader.buffer.push_back(apa);
-    EXPECT_CALL(monitor, set_death_note());
-    EXPECT_CALL(monitor, crpcut_register_success(false));
-    EXPECT_CALL(monitor, send_to_presentation(crpcut::comm::exit_fail, _, _)).
-      With(Args<2,1>(ElementsAreArray(apa)));
+    REQUIRE_CALL(monitor, set_death_note());
+    REQUIRE_CALL(monitor, crpcut_register_success(false));
+    REQUIRE_CALL(monitor, send_to_presentation(crpcut::comm::exit_fail,
+                                               sizeof(apa),
+                                               _))
+      .WITH(memcmp(_3, apa, _2) == 0);
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
   }
@@ -178,13 +180,15 @@ TESTSUITE(report_reader)
   TEST(fail_marks_the_test_as_failed_and_presents,
        fix)
   {
-    static const char apa[] = { 'a', 'p', 'a' };
+    const char apa[] = { 'a', 'p', 'a' };
     reader.buffer.push_back(crpcut::comm::fail);
     reader.buffer.push_back(sizeof(apa));
     reader.buffer.push_back(apa);
-    EXPECT_CALL(monitor, crpcut_register_success(false));
-    EXPECT_CALL(monitor, send_to_presentation(crpcut::comm::fail, _, _)).
-      With(Args<2, 1>(ElementsAreArray(apa)));
+    REQUIRE_CALL(monitor, crpcut_register_success(false));
+    REQUIRE_CALL(monitor, send_to_presentation(crpcut::comm::fail,
+                                               sizeof(apa),
+                                               _))
+      .WITH(memcmp(_3, apa, _2) == 0);
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
   }
@@ -192,14 +196,14 @@ TESTSUITE(report_reader)
   TEST(end_test_and_not_failed_sets_phase_destroying,
        fix)
   {
-    Sequence s;
+    trompeloeil::sequence s;
     reader.buffer.push_back(crpcut::comm::end_test);
     reader.buffer.push_back(size_t(0));
-    EXPECT_CALL(monitor, crpcut_failed()).
-      InSequence(s).
-      WillOnce(Return(false));
-    EXPECT_CALL(monitor, set_phase(crpcut::destroying)).
-      InSequence(s);
+    REQUIRE_CALL(monitor, crpcut_failed())
+      .IN_SEQUENCE(s)
+      .RETURN(false);
+    REQUIRE_CALL(monitor, set_phase(crpcut::destroying))
+      .IN_SEQUENCE(s);
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
   }
@@ -207,25 +211,27 @@ TESTSUITE(report_reader)
   TEST(end_test_and_failed_presents_exit_fail_w_Earlier_VERIFY_msg,
        fix)
   {
-    Sequence s;
+    trompeloeil::sequence s;
     reader.buffer.push_back(crpcut::comm::end_test);
     reader.buffer.push_back(size_t(0));
-    EXPECT_CALL(monitor, crpcut_failed()).
-      InSequence(s).
-      WillOnce(Return(true));
-    EXPECT_CALL(monitor, get_location()).
-      WillOnce(Return(crpcut::datatypes::fixed_string::make("apa:3")));
+    REQUIRE_CALL(monitor, crpcut_failed())
+      .IN_SEQUENCE(s)
+      .RETURN(true);
+    REQUIRE_CALL(monitor, get_location())
+      .RETURN(crpcut::datatypes::fixed_string::make("apa:3"));
 
     const char payload[] = "apa:3Earlier VERIFY failed";
     char buffer[sizeof(size_t) + sizeof(payload) - 1];
     const size_t loc_len = 5;
     memcpy(buffer, &loc_len, sizeof(loc_len));
     memcpy(buffer + sizeof(loc_len), payload, sizeof(payload) - 1);
-    EXPECT_CALL(monitor,
-                send_to_presentation(crpcut::comm::exit_fail, _, NotNull())).
-      With(Args<2,1>(ElementsAreArray(buffer))).
-      InSequence(s);
-    EXPECT_CALL(monitor, set_death_note());
+    REQUIRE_CALL(monitor, send_to_presentation(crpcut::comm::exit_fail,
+                                               sizeof(buffer),
+                                               _))
+      .WITH(_3 != nullptr)
+      .WITH(memcmp(_3, buffer, _2) == 0)
+      .IN_SEQUENCE(s);
+    REQUIRE_CALL(monitor, set_death_note());
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
   }
@@ -235,8 +241,8 @@ TESTSUITE(report_reader)
   {
     reader.buffer.push_back(crpcut::comm::exit_ok);
     reader.buffer.push_back(size_t(0));
-    EXPECT_CALL(monitor, send_to_presentation(crpcut::comm::exit_ok, 0U, _));
-    EXPECT_CALL(monitor, set_death_note());
+    REQUIRE_CALL(monitor, send_to_presentation(crpcut::comm::exit_ok, 0U, _));
+    REQUIRE_CALL(monitor, set_death_note());
     ASSERT_TRUE(reader.read_data());
     ASSERT_TRUE(reader.buffer.size() == 0U);
   }
@@ -247,12 +253,12 @@ TESTSUITE(report_reader)
        fix)
     {
       using namespace crpcut::comm;
-      static const char apa[] = { 'a', 'p', 'a' };
+      const char apa[] = { 'a', 'p', 'a' };
       reader.buffer.push_back(type(info | kill_me));
       reader.buffer.push_back(sizeof(apa));
       reader.buffer.push_back(apa);
-      EXPECT_CALL(monitor, send_to_presentation(exit_fail, _, _)).
-        With(Args<2, 1>(ElementsAreArray(apa)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(apa), _))
+        .WITH(memcmp(_3, apa, _2) == 0);
       verify_naughty_child();
     }
 
@@ -266,18 +272,16 @@ TESTSUITE(report_reader)
       struct timeval cpu = { 10, 1 };
       reader.buffer.push_back(sizeof(cpu));
       reader.buffer.push_back(cpu);
-      EXPECT_CALL(monitor, get_location()).
-        WillOnce(Return(loc));
+      REQUIRE_CALL(monitor, get_location())
+        .RETURN(loc);
 
       char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
       const size_t loc_len = 5;
       memcpy(buffer, &loc_len, sizeof(loc_len));
       memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
-      EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail,
-                                       _,
-                                       NotNull()))
-        .With(Args<2,1>(ElementsAreArray(buffer)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(buffer), _))
+        .WITH(_3 != nullptr)
+        .WITH(memcmp(_3, buffer, _2) == 0);
       verify_naughty_child();
     }
 
@@ -289,18 +293,16 @@ TESTSUITE(report_reader)
       crpcut::clocks::monotonic::timestamp now = 100;
       reader.buffer.push_back(sizeof(now));
       reader.buffer.push_back(now);
-      EXPECT_CALL(monitor, get_location()).
-        WillOnce(Return(loc));
+      REQUIRE_CALL(monitor, get_location())
+        .RETURN(loc);
 
       char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
       const size_t loc_len = 5;
       memcpy(buffer, &loc_len, sizeof(loc_len));
       memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
-      EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail,
-                                       _,
-                                       NotNull()))
-        .With(Args<2,1>(ElementsAreArray(buffer)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(buffer), _))
+        .WITH(_3 != nullptr)
+        .WITH(memcmp(_3, buffer, _2) == 0);
       verify_naughty_child();
     }
 
@@ -310,16 +312,16 @@ TESTSUITE(report_reader)
       using namespace crpcut::comm;
       reader.buffer.push_back(type(cancel_timeout | kill_me));
       reader.buffer.push_back(size_t(0));
-      EXPECT_CALL(monitor, get_location()).
-        WillOnce(Return(loc));
+      REQUIRE_CALL(monitor, get_location())
+        .RETURN(loc);
 
       char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
       const size_t loc_len = 5;
       memcpy(buffer, &loc_len, sizeof(loc_len));
       memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
-      EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail, _, NotNull()))
-        .With(Args<2,1>(ElementsAreArray(buffer)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(buffer), _))
+        .WITH(_3 != nullptr)
+        .WITH(memcmp(_3, buffer, _2) == 0);
       verify_naughty_child();
     }
 
@@ -329,16 +331,16 @@ TESTSUITE(report_reader)
       using namespace crpcut::comm;
       reader.buffer.push_back(type(end_test | kill_me));
       reader.buffer.push_back(size_t(0));
-      EXPECT_CALL(monitor, get_location()).
-        WillOnce(Return(loc));
+      REQUIRE_CALL(monitor, get_location())
+        .RETURN(loc);
 
       char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
       const size_t loc_len = 5;
       memcpy(buffer, &loc_len, sizeof(loc_len));
       memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
-      EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail, _, NotNull()))
-        .With(Args<2,1>(ElementsAreArray(buffer)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(buffer), _))
+        .WITH(_3 != nullptr)
+        .WITH(memcmp(_3, buffer, _2) == 0);
       verify_naughty_child();
     }
 
@@ -346,12 +348,13 @@ TESTSUITE(report_reader)
          fix)
     {
       using namespace crpcut::comm;
-      static const char apa[] = { 'a', 'p', 'a' };
+      const char apa[] = { 'a', 'p', 'a' };
       reader.buffer.push_back(type(info | kill_me));
       reader.buffer.push_back(sizeof(apa));
       reader.buffer.push_back(apa);
-      EXPECT_CALL(monitor, send_to_presentation(exit_fail, _, _)).
-        With(Args<2,1>(ElementsAreArray(apa)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(apa), _))
+        .WITH(_3 != nullptr)
+        .WITH(memcmp(_3, apa, _2) == 0);
       verify_naughty_child();
     }
 
@@ -359,12 +362,13 @@ TESTSUITE(report_reader)
          fix)
     {
       using namespace crpcut::comm;
-      static const char apa[] = { 'a', 'p', 'a' };
+      const char apa[] = { 'a', 'p', 'a' };
       reader.buffer.push_back(type(fail | kill_me));
       reader.buffer.push_back(sizeof(apa));
       reader.buffer.push_back(apa);
-      EXPECT_CALL(monitor, send_to_presentation(exit_fail, _, _)).
-        With(Args<2,1>(ElementsAreArray(apa)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(apa), _))
+        .WITH(_3 != nullptr)
+        .WITH(memcmp(_3, apa, _2) == 0);
       verify_naughty_child();
     }
 
@@ -374,16 +378,16 @@ TESTSUITE(report_reader)
       using namespace crpcut::comm;
       reader.buffer.push_back(type(exit_ok | kill_me));
       reader.buffer.push_back(size_t(0));
-      EXPECT_CALL(monitor, get_location()).
-        WillOnce(Return(loc));
+      REQUIRE_CALL(monitor, get_location())
+        .RETURN(loc);
 
       char buffer[sizeof(size_t) + sizeof(kill_payload) - 1];
       const size_t loc_len = 5;
       memcpy(buffer, &loc_len, sizeof(loc_len));
       memcpy(buffer + sizeof(loc_len), kill_payload, sizeof(kill_payload) - 1);
-      EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail, _, NotNull())).
-        With(Args<2,1>(ElementsAreArray(buffer)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(buffer), _))
+        .WITH(_3 != nullptr)
+        .WITH(memcmp(_3, buffer, _2) == 0);
       verify_naughty_child();
     }
 
@@ -391,13 +395,13 @@ TESTSUITE(report_reader)
          fix)
     {
       using namespace crpcut::comm;
-      static const char apa[] = { 'a', 'p', 'a' };
+      const char apa[] = { 'a', 'p', 'a' };
       reader.buffer.push_back(type(exit_fail | kill_me));
       reader.buffer.push_back(sizeof(apa));
       reader.buffer.push_back(apa);
-      EXPECT_CALL(monitor,
-                  send_to_presentation(exit_fail, _, _)).
-        With(Args<2,1>(ElementsAreArray(apa)));
+      REQUIRE_CALL(monitor, send_to_presentation(exit_fail, sizeof(apa), _))
+        .WITH(_3 != nullptr)
+        .WITH(memcmp(_3, apa, _2) == 0);
       verify_naughty_child();
     }
   }

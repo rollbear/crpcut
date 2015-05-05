@@ -24,13 +24,13 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
 #include <crpcut.hpp>
 #include "../../output/xml_formatter.hpp"
 #include "stream_buffer_mock.hpp"
 #include "tag_mocks.hpp"
+
+using trompeloeil::_;
 namespace {
-  using namespace testing;
 
   crpcut::datatypes::fixed_string empty_string = { "", 0 };
 
@@ -38,15 +38,19 @@ namespace {
   {
   protected:
     fix()
+      : importance_x(NAMED_ALLOW_CALL(tags, get_importance())
+                     .RETURN(crpcut::tag::critical)),
+        name_x(NAMED_ALLOW_CALL(tags, get_name())
+               .RETURN(empty_string)),
+        longest_x(NAMED_ALLOW_CALL(tags, longest_tag_name())
+                  .RETURN(0U))
     {
-      EXPECT_CALL(tags, get_importance()).
-        WillRepeatedly(Return(crpcut::tag::critical));
-      EXPECT_CALL(tags, get_name()).
-        WillRepeatedly(Return(empty_string));
-      EXPECT_CALL(tags, longest_tag_name()).
-        WillRepeatedly(Return(0));
     }
-    StrictMock<mock::tag_list> tags;
+    mock::tag_list tags;
+    std::unique_ptr<trompeloeil::expectation> importance_x;
+    std::unique_ptr<trompeloeil::expectation> name_x;
+    std::unique_ptr<trompeloeil::expectation> longest_x;
+
   };
 }
 
@@ -191,12 +195,11 @@ TESTSUITE(output)
   TESTSUITE(xml_formatter)
   {
     static const char *vec[] = { "apa", "katt", "orm", 0 };
-    using namespace testing;
 
     TEST(construction_and_immediate_destruction_yields_header_only,
         fix)
     {
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
@@ -218,7 +221,7 @@ TESTSUITE(output)
     TEST(construction_and_statistics_yields_minimal_complete_report,
          fix)
     {
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
@@ -242,7 +245,7 @@ TESTSUITE(output)
     TEST(minimal_complete_report,
          fix)
     {
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       crpcut::output::xml_formatter obj(test_buffer,
                                         "one",
                                         vec,
@@ -262,7 +265,7 @@ TESTSUITE(output)
 
     TEST(report_with_blocked_tests_list, fix)
     {
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
@@ -297,26 +300,26 @@ TESTSUITE(output)
 
     TEST(report_with_tags_list, fix)
     {
-      EXPECT_CALL(tags, get_importance()).
-        WillRepeatedly(Return(crpcut::tag::critical));
+      ALLOW_CALL(tags, get_importance())
+        .RETURN(crpcut::tag::critical);
 
       MAKE_TAG(apa, tags);
-      EXPECT_CALL(apa, num_passed()).
-        WillRepeatedly(Return(1));
-      EXPECT_CALL(apa, num_failed()).
-        WillRepeatedly(Return(3));
-      EXPECT_CALL(apa, get_importance()).
-        WillRepeatedly(Return(crpcut::tag::critical));
+      ALLOW_CALL(apa, num_passed())
+        .RETURN(1U);
+      ALLOW_CALL(apa, num_failed())
+        .RETURN(3U);
+      ALLOW_CALL(apa, get_importance())
+        .RETURN(crpcut::tag::critical);
 
       MAKE_TAG(katt, tags);
-      EXPECT_CALL(katt, num_passed()).
-        WillRepeatedly(Return(2));
-      EXPECT_CALL(katt, num_failed()).
-        WillRepeatedly(Return(3));
-      EXPECT_CALL(katt, get_importance()).
-        WillRepeatedly(Return(crpcut::tag::non_critical));
+      ALLOW_CALL(katt, num_passed())
+        .RETURN(2U);
+      ALLOW_CALL(katt, num_failed())
+        .RETURN(3U);
+      ALLOW_CALL(katt, get_importance())
+        .RETURN(crpcut::tag::non_critical);
 
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
@@ -356,26 +359,26 @@ TESTSUITE(output)
 
     TEST(report_with_blocked_tests_and_tag_summary, fix)
     {
-      EXPECT_CALL(tags, get_importance()).
-        WillRepeatedly(Return(crpcut::tag::critical));
+      ALLOW_CALL(tags, get_importance())
+        .RETURN(crpcut::tag::critical);
 
       MAKE_TAG(apa, tags);
-      EXPECT_CALL(apa, num_passed()).
-        WillRepeatedly(Return(1));
-      EXPECT_CALL(apa, num_failed()).
-        WillRepeatedly(Return(3));
-      EXPECT_CALL(apa, get_importance()).
-        WillRepeatedly(Return(crpcut::tag::critical));
+      ALLOW_CALL(apa, num_passed())
+        .RETURN(1U);
+      ALLOW_CALL(apa, num_failed())
+        .RETURN(3U);
+      ALLOW_CALL(apa, get_importance())
+        .RETURN(crpcut::tag::critical);
 
       MAKE_TAG(katt, tags);
-      EXPECT_CALL(katt, num_passed()).
-        WillRepeatedly(Return(2));
-      EXPECT_CALL(katt, num_failed()).
-        WillRepeatedly(Return(3));
-      EXPECT_CALL(katt, get_importance()).
-        WillRepeatedly(Return(crpcut::tag::non_critical));
+      ALLOW_CALL(katt, num_passed())
+        .RETURN(2U);
+      ALLOW_CALL(katt, num_failed())
+        .RETURN(3U);
+      ALLOW_CALL(katt, get_importance())
+        .RETURN(crpcut::tag::non_critical);
 
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       {
         using crpcut::datatypes::fixed_string;
         crpcut::output::xml_formatter obj(test_buffer,
@@ -428,7 +431,7 @@ TESTSUITE(output)
 
     TEST(only_lt_gt_amp_apos_quot_are_escaped, fix)
     {
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
@@ -471,7 +474,7 @@ TESTSUITE(output)
 
     TEST(illegal_characters_are_replaced, fix)
     {
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",
@@ -529,7 +532,7 @@ TESTSUITE(output)
 
     TEST(non_empty_directory_is_displayed, fix)
     {
-      StrictMock<mock::stream_buffer> test_buffer;
+      mock::stream_buffer test_buffer;
       {
         crpcut::output::xml_formatter obj(test_buffer,
                                           "one",

@@ -24,22 +24,23 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 #include "../poll.hpp"
 #include "../registrator_list.hpp"
-
-using namespace testing;
+#include <vector>
+#include <algorithm>
+using trompeloeil::_;
 
 namespace {
 
   class mock_poll : public crpcut::poll<crpcut::fdreader>
   {
   public:
-    MOCK_METHOD3(do_add_fd, void(int, crpcut::fdreader*, int));
-    MOCK_METHOD1(do_del_fd, void(int));
-    MOCK_METHOD1(do_wait, descriptor(int));
-    MOCK_CONST_METHOD0(do_num_fds, std::size_t());
+    MAKE_MOCK3(do_add_fd, void(int, crpcut::fdreader*, int));
+    MAKE_MOCK1(do_del_fd, void(int));
+    MAKE_MOCK1(do_wait, descriptor(int));
+    MAKE_CONST_MOCK0(do_num_fds, std::size_t());
   };
 
   typedef crpcut::crpcut_test_case_registrator reg;
@@ -49,13 +50,13 @@ namespace {
     typedef crpcut::tag::importance importance;
     mock_test_reg(const char *name, crpcut::namespace_info *ns)
     : reg(name, ns) {}
-    MOCK_METHOD4(setup, void(crpcut::poll<crpcut::fdreader>&,
-                             int, int, int));
-    MOCK_METHOD0(run_test_case, void());
-    MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag&());
-    MOCK_CONST_METHOD0(get_importance, importance());
-    MOCK_CONST_METHOD0(is_naughty_child, bool());
-    MOCK_CONST_METHOD0(freeze, void());
+    MAKE_MOCK4(setup, void(crpcut::poll<crpcut::fdreader>&,
+                           int, int, int));
+    MAKE_MOCK0(run_test_case, void());
+    MAKE_CONST_MOCK0(crpcut_tag, crpcut::tag&());
+    MAKE_CONST_MOCK0(get_importance, importance());
+    MAKE_CONST_MOCK0(is_naughty_child, bool());
+    MAKE_CONST_MOCK0(freeze, void());
   };
 
   class test_tag_list_root : public crpcut::tag_list_root
@@ -109,7 +110,35 @@ namespace {
       giftiga("giftiga", &unnamed_tag),
       ignored("ignorerad", &unnamed_tag),
       anonymous_disabled("", &unnamed_tag),
-      ignored_disabled("disabled", &unnamed_tag)
+      ignored_disabled("disabled", &unnamed_tag),
+      apa_imp_x(NAMED_ALLOW_CALL(apa, get_importance()).RETURN(unnamed_tag.get_importance())),
+      apa_tag_x(NAMED_ALLOW_CALL(apa, crpcut_tag()).RETURN(std::ref(unnamed_tag))),
+      katt_imp_x(NAMED_ALLOW_CALL(katt, get_importance()).RETURN(tamdjur.get_importance())),
+      katt_tag_x(NAMED_ALLOW_CALL(katt, crpcut_tag()).RETURN(std::ref(tamdjur))),
+      ko_imp_x(NAMED_ALLOW_CALL(ko, get_importance()).RETURN(tamdjur.get_importance())),
+      ko_tag_x(NAMED_ALLOW_CALL(ko, crpcut_tag()).RETURN(std::ref(tamdjur))),
+      lemur_imp_x(NAMED_ALLOW_CALL(lemur, get_importance()).RETURN(crpcut::tag::disabled)),
+      lemur_tag_x(NAMED_ALLOW_CALL(lemur, crpcut_tag()).RETURN(std::ref(anonymous_disabled))),
+      orm_imp_x(NAMED_ALLOW_CALL(reptil_orm, get_importance())
+                .RETURN(giftiga.get_importance())),
+      orm_tag_x(NAMED_ALLOW_CALL(reptil_orm, crpcut_tag())
+                .RETURN(std::ref(giftiga))),
+      krokodil_imp_x(NAMED_ALLOW_CALL(reptil_krokodil, get_importance())
+                     .RETURN(ignored.get_importance())),
+      krokodil_tag_x(NAMED_ALLOW_CALL(reptil_krokodil, crpcut_tag())
+                     .RETURN(std::ref(ignored))),
+      mygga_imp_x(NAMED_ALLOW_CALL(insekt_mygga, get_importance())
+                  .RETURN(giftiga.get_importance())),
+      mygga_tag_x(NAMED_ALLOW_CALL(insekt_mygga, crpcut_tag())
+                  .RETURN(std::ref(giftiga))),
+      bi_imp_x(NAMED_ALLOW_CALL(insekt_bi, get_importance())
+               .RETURN(giftiga.get_importance())),
+      bi_tag_x(NAMED_ALLOW_CALL(insekt_bi, crpcut_tag())
+               .RETURN(std::ref(giftiga))),
+      trilobit_imp_x(NAMED_ALLOW_CALL(trilobit, get_importance())
+                     .RETURN(crpcut::tag::disabled)),
+      trilobit_tag_x(NAMED_ALLOW_CALL(trilobit, crpcut_tag())
+                     .RETURN(std::ref(ignored_disabled)))
     {
       apa.link_before(the_list);
       katt.link_before(the_list);
@@ -120,63 +149,45 @@ namespace {
       insekt_mygga.link_before(the_list);
       insekt_bi.link_before(the_list);
       trilobit.link_before(the_list);
-      EXPECT_CALL(apa, get_importance()).
-        WillRepeatedly(testing::Return(unnamed_tag.get_importance()));
-      EXPECT_CALL(apa, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(unnamed_tag));
-      EXPECT_CALL(katt, get_importance()).
-        WillRepeatedly(testing::Return(tamdjur.get_importance()));
-      EXPECT_CALL(katt, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(tamdjur));
-      EXPECT_CALL(ko, get_importance()).
-        WillRepeatedly(testing::Return(tamdjur.get_importance()));
-      EXPECT_CALL(ko, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(tamdjur));
-      EXPECT_CALL(lemur, get_importance()).
-        WillRepeatedly(testing::Return(crpcut::tag::disabled));
-      EXPECT_CALL(lemur, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(anonymous_disabled));
-      EXPECT_CALL(reptil_orm, get_importance()).
-        WillRepeatedly(testing::Return(giftiga.get_importance()));
-      EXPECT_CALL(reptil_orm, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(giftiga));
-      EXPECT_CALL(reptil_krokodil, get_importance()).
-        WillRepeatedly(testing::Return(ignored.get_importance()));
-      EXPECT_CALL(reptil_krokodil, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(ignored));
-      EXPECT_CALL(insekt_mygga, get_importance()).
-        WillRepeatedly(testing::Return(giftiga.get_importance()));
-      EXPECT_CALL(insekt_mygga, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(giftiga));
-      EXPECT_CALL(insekt_bi, get_importance()).
-        WillRepeatedly(testing::Return(giftiga.get_importance()));
-      EXPECT_CALL(insekt_bi, crpcut_tag()).
-        WillRepeatedly(testing::ReturnRef(giftiga));
 
-      EXPECT_CALL(trilobit, get_importance()).
-          WillRepeatedly(testing::Return(crpcut::tag::disabled));
-      EXPECT_CALL(trilobit, crpcut_tag()).
-          WillRepeatedly(testing::ReturnRef(ignored_disabled));
     }
     list the_list;
     crpcut::namespace_info unnamed_namespace;
     crpcut::namespace_info reptil_namespace;
     crpcut::namespace_info insekt_namespace;
-    StrictMock<mock_test_reg> apa;
-    StrictMock<mock_test_reg> katt;
-    StrictMock<mock_test_reg> ko;
-    StrictMock<mock_test_reg> lemur;
-    StrictMock<mock_test_reg> reptil_orm;
-    StrictMock<mock_test_reg> reptil_krokodil;
-    StrictMock<mock_test_reg> insekt_mygga;
-    StrictMock<mock_test_reg> insekt_bi;
-    StrictMock<mock_test_reg> trilobit;
+    mock_test_reg apa;
+    mock_test_reg katt;
+    mock_test_reg ko;
+    mock_test_reg lemur;
+    mock_test_reg reptil_orm;
+    mock_test_reg reptil_krokodil;
+    mock_test_reg insekt_mygga;
+    mock_test_reg insekt_bi;
+    mock_test_reg trilobit;
     test_tag_list_root        unnamed_tag;
     test_tag<crpcut::tag::non_critical> tamdjur;
     test_tag<crpcut::tag::critical>     giftiga;
     test_tag<crpcut::tag::ignored>      ignored;
     test_tag<crpcut::tag::critical>     anonymous_disabled;
     test_tag<crpcut::tag::ignored>      ignored_disabled;
+    std::unique_ptr<trompeloeil::expectation> apa_imp_x;
+    std::unique_ptr<trompeloeil::expectation> apa_tag_x;
+    std::unique_ptr<trompeloeil::expectation> katt_imp_x;
+    std::unique_ptr<trompeloeil::expectation> katt_tag_x;
+    std::unique_ptr<trompeloeil::expectation> ko_imp_x;
+    std::unique_ptr<trompeloeil::expectation> ko_tag_x;
+    std::unique_ptr<trompeloeil::expectation> lemur_imp_x;
+    std::unique_ptr<trompeloeil::expectation> lemur_tag_x;
+    std::unique_ptr<trompeloeil::expectation> orm_imp_x;
+    std::unique_ptr<trompeloeil::expectation> orm_tag_x;
+    std::unique_ptr<trompeloeil::expectation> krokodil_imp_x;
+    std::unique_ptr<trompeloeil::expectation> krokodil_tag_x;
+    std::unique_ptr<trompeloeil::expectation> mygga_imp_x;
+    std::unique_ptr<trompeloeil::expectation> mygga_tag_x;
+    std::unique_ptr<trompeloeil::expectation> bi_imp_x;
+    std::unique_ptr<trompeloeil::expectation> bi_tag_x;
+    std::unique_ptr<trompeloeil::expectation> trilobit_imp_x;
+    std::unique_ptr<trompeloeil::expectation> trilobit_tag_x;
   };
 
 

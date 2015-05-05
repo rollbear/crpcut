@@ -24,22 +24,22 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 #include "../../posix_error.hpp"
 #include "posix_err_comp.hpp"
 
 namespace {
-    class test_writer : public crpcut::comm::data_writer
+  class test_writer : public crpcut::comm::data_writer
   {
   public:
     test_writer() : data_writer() {}
-    MOCK_METHOD0(close, void());
+    MAKE_MOCK0(close, void());
     ssize_t write(const void *p, size_t n) const
     {
       return write(static_cast<const char*>(p), n);
     }
-    MOCK_CONST_METHOD2(write, ssize_t(const char *, size_t));
+    MAKE_CONST_MOCK2(write, ssize_t(const char *, size_t));
   };
 
   static const char alphabet[] = "abcdefghijklmnopqrstuvwxyz";
@@ -50,46 +50,58 @@ TESTSUITE(comm)
 {
   TESTSUITE(data_writer)
   {
-    using namespace testing;
+    using trompeloeil::_;
 
     TEST(write_loop_constructs_in_chucks)
     {
-      StrictMock<test_writer> d;
-      EXPECT_CALL(d, write(StartsWith(alphabet), 26)).
-          WillOnce(Return(10));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 10), 16)).
-          WillOnce(Return(10));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 20), 6)).
-          WillOnce(Return(6));
-      d.write_loop(alphabet, 26);
+      test_writer d;
+      REQUIRE_CALL(d, write(_, 26U))
+        .WITH(std::string(_1,_2) == alphabet)
+        .RETURN(10);
+      REQUIRE_CALL(d, write(_, 16U))
+        .WITH(std::string(_1,_2) == alphabet + 10)
+        .RETURN(10);
+      REQUIRE_CALL(d, write(_, 6U))
+        .WITH(std::string(_1,_2) == alphabet + 20)
+        .RETURN(6);
+      d.write_loop(alphabet, 26U);
     }
 
     TEST(write_loop_throws_when_fd_closes)
     {
       const char *nullstr = 0;
-      StrictMock<test_writer> d;
-      EXPECT_CALL(d, write(StartsWith(alphabet), 26)).
-          WillOnce(Return(10));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 10), 16)).
-          WillOnce(Return(0));
-      ASSERT_THROW(d.write_loop(alphabet, 26),
+      test_writer d;
+      REQUIRE_CALL(d, write(_, 26U))
+        .WITH(std::string(_1,_2) == alphabet)
+        .RETURN(10);
+      REQUIRE_CALL(d, write(_, 16U))
+        .WITH(std::string(_1, _2) == alphabet + 10)
+        .RETURN(0);
+      ASSERT_THROW(d.write_loop(alphabet, 26U),
                    crpcut::posix_error,
                    posix_err_comp(0, nullstr));
     }
 
     TEST(write_loop_continues_after_EINTR)
     {
-      InSequence s;
-      StrictMock<test_writer> d;
-      EXPECT_CALL(d, write(StartsWith(alphabet), 26)).
-          Times(1).
-          WillOnce(Return(10));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 10), 16)).
-          Times(1).
-          WillOnce(SetErrnoAndReturn(EINTR, -1));
-      EXPECT_CALL(d, write(StartsWith(alphabet + 10), 16)).
-          Times(1).
-          WillOnce(Return(16));
+      trompeloeil::sequence s;
+      test_writer d;
+      ALLOW_CALL(d, write(_,_))
+        .RETURN(ssize_t(_2));
+      REQUIRE_CALL(d, write(_, 26U))
+        .IN_SEQUENCE(s)
+        .WITH(std::string(_1,_2) == alphabet)
+        .RETURN(10);
+
+      REQUIRE_CALL(d, write(_, 16U)) // actually matched last...
+        .WITH(std::string(_1,_2) == alphabet + 10)
+        .RETURN(16);
+
+      REQUIRE_CALL(d, write(_, 16U))
+        .IN_SEQUENCE(s)
+        .WITH(std::string(_1,_2) == alphabet + 10)
+        .SIDE_EFFECT(errno = EINTR)
+        .RETURN(-1);
       d.write_loop(alphabet, 26);
     }
 

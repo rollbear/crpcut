@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 #include "../../posix_error.hpp"
 #include "posix_err_comp.hpp"
@@ -39,8 +39,8 @@ namespace {
     {
       return read(static_cast<char*>(p), t);
     }
-    MOCK_METHOD0(close, void());
-    MOCK_CONST_METHOD2(read, ssize_t(char *, size_t));
+    MAKE_MOCK0(close, void());
+    MAKE_CONST_MOCK2(read, ssize_t(char *, size_t));
   };
 
   static const char alphabet[] = "abcdefghijklmnopqrstuvwxyz";
@@ -50,23 +50,27 @@ TESTSUITE(comm)
 {
   TESTSUITE(data_reader)
   {
-    using namespace testing;
+    using trompeloeil::_;
 
     TEST(read_loop_constructs_in_chunks)
     {
-      StrictMock<test_reader> d;
-      EXPECT_CALL(d, read(_, 26)).
-          WillOnce(DoAll(SetArrayArgument<0>(alphabet, alphabet + 10),
-                         Return(10)));
-      EXPECT_CALL(d, read(_, 16)).
-          WillOnce(DoAll(SetArrayArgument<0>(alphabet + 10, alphabet + 20),
-                         Return(10)));
-      EXPECT_CALL(d, read(_, 6)).
-          WillOnce(DoAll(SetArrayArgument<0>(alphabet + 20, alphabet + 26),
-                         Return(6)));
+      test_reader d;
+
+      REQUIRE_CALL(d, read(_, 26U))
+        .SIDE_EFFECT(memcpy(_1, alphabet, 10))
+        .RETURN(10);
+
+      REQUIRE_CALL(d, read(_, 16U))
+        .SIDE_EFFECT(memcpy(_1, alphabet + 10, 10))
+        .RETURN(10);
+
+      REQUIRE_CALL(d, read(_, 6U))
+        .SIDE_EFFECT(memcpy(_1, alphabet + 20, 6))
+        .RETURN(6);
+
       char buff[30];
       buff[26] = 1;
-      d.read_loop(buff, 26);
+      d.read_loop(buff, 26U);
       ASSERT_TRUE(buff[26] == 1);
       buff[26] = 0;
       ASSERT_TRUE(buff == std::string(alphabet));
@@ -75,12 +79,14 @@ TESTSUITE(comm)
     TEST(read_loop_throws_when_fd_closes)
     {
       const char *nullstr = 0;
-      StrictMock<test_reader> d;
-      EXPECT_CALL(d, read(_, 26)).
-          WillOnce(DoAll(SetArrayArgument<0>(alphabet, alphabet + 10),
-                         Return(10)));
-      EXPECT_CALL(d, read(_, 16)).
-          WillOnce(Return(0));
+      test_reader d;
+
+      REQUIRE_CALL(d, read(_, 26U))
+        .SIDE_EFFECT(memcpy(_1, alphabet, 10))
+        .RETURN(10);
+
+      REQUIRE_CALL(d, read(_, 16U))
+        .RETURN(0);
 
       char buff[30];
 
@@ -92,22 +98,32 @@ TESTSUITE(comm)
 
     TEST(read_loop_continues_after_EINTR)
     {
-      InSequence s;
-      StrictMock<test_reader> d;
-      EXPECT_CALL(d, read(_, 26)).
-          WillOnce(DoAll(SetArrayArgument<0>(alphabet, alphabet + 10),
-                         Return(10)));
-      EXPECT_CALL(d, read(_, 16)).
-          WillOnce(SetErrnoAndReturn(EINTR, -1));
-      EXPECT_CALL(d, read(_, 16)).
-          WillOnce(DoAll(SetArrayArgument<0>(alphabet + 10, alphabet + 20),
-                         Return(10)));
-      EXPECT_CALL(d, read(_, 6)).
-          WillOnce(DoAll(SetArrayArgument<0>(alphabet + 20, alphabet + 26),
-                         Return(6)));
+      trompeloeil::sequence s;
+
+      test_reader d;
+
+      REQUIRE_CALL(d, read(_, 26U))
+        .IN_SEQUENCE(s)
+        .SIDE_EFFECT(memcpy(_1, alphabet, 10))
+        .RETURN(10);
+
+      REQUIRE_CALL(d, read(_, 16U))
+        .IN_SEQUENCE(s)
+        .SIDE_EFFECT(memcpy(_1, alphabet + 10, 10))
+        .RETURN(10);
+
+      REQUIRE_CALL(d, read(_, 6U))
+        .IN_SEQUENCE(s)
+        .SIDE_EFFECT(memcpy(_1, alphabet + 20, 6))
+        .RETURN(6);
+
+      REQUIRE_CALL(d, read(_, 16U))
+        .SIDE_EFFECT(errno = EINTR)
+        .RETURN(-1);
+
       char buff[30];
       buff[26] = 0;
-      d.read_loop(buff, 26);
+      d.read_loop(buff, 26U);
       ASSERT_TRUE(buff == std::string(alphabet));
 
     }

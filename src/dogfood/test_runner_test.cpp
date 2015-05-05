@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 #include "../test_runner.hpp"
 #include "../process_control.hpp"
@@ -37,46 +37,49 @@ extern "C"
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  include <fcntl.h>
+#  include <unistd.h>
+#  include <sys/wait.h>
 }
 TESTSUITE(test_runner)
 {
-  using namespace testing;
+  using trompeloeil::_;
+
   class mock_runner : public crpcut::test_runner
   {
   public:
-    MOCK_METHOD2(introduce_test, void(pid_t,
-                                      const crpcut::crpcut_test_case_registrator *));
-    MOCK_METHOD5(present, void(pid_t, crpcut::comm::type, crpcut::test_phase,
-                               std::size_t, const char *));
-    MOCK_METHOD1(set_deadline, void(crpcut::crpcut_test_case_registrator*));
-    MOCK_METHOD1(clear_deadline, void(crpcut::crpcut_test_case_registrator*));
-    MOCK_METHOD1(return_dir, void(unsigned));
-    MOCK_METHOD1(calc_cputime, unsigned long(const struct timeval&));
+    MAKE_MOCK2(introduce_test, void(pid_t,
+                                    const crpcut::crpcut_test_case_registrator *));
+    MAKE_MOCK5(present, void(pid_t, crpcut::comm::type, crpcut::test_phase,
+                             std::size_t, const char *));
+    MAKE_MOCK1(set_deadline, void(crpcut::crpcut_test_case_registrator*));
+    MAKE_MOCK1(clear_deadline, void(crpcut::crpcut_test_case_registrator*));
+    MAKE_MOCK1(return_dir, void(unsigned));
+    MAKE_MOCK1(calc_cputime, unsigned long(const struct timeval&));
   };
 
   class mock_environment : public crpcut::test_environment
   {
   public:
-    MOCK_CONST_METHOD0(tests_as_child_procs, bool());
-    MOCK_CONST_METHOD0(timeouts_enabled, bool());
-    MOCK_METHOD1(set_charset, void(const char *));
-    MOCK_CONST_METHOD0(get_charset, const char *());
-    MOCK_CONST_METHOD0(get_output_charset, const char*());
-    MOCK_CONST_METHOD0(get_illegal_rep, const char*());
-    MOCK_CONST_METHOD0(timeout_multiplier, unsigned());
-    MOCK_CONST_METHOD0(get_start_dir, const char *());
-    MOCK_CONST_METHOD1(get_parameter, const char *(const char *name));
+    MAKE_CONST_MOCK0(tests_as_child_procs, bool());
+    MAKE_CONST_MOCK0(timeouts_enabled, bool());
+    MAKE_MOCK1(set_charset, void(const char *));
+    MAKE_CONST_MOCK0(get_charset, const char *());
+    MAKE_CONST_MOCK0(get_output_charset, const char*());
+    MAKE_CONST_MOCK0(get_illegal_rep, const char*());
+    MAKE_CONST_MOCK0(timeout_multiplier, unsigned());
+    MAKE_CONST_MOCK0(get_start_dir, const char *());
+    MAKE_CONST_MOCK1(get_parameter, const char *(const char *name));
 
   };
   class mock_reporter : public crpcut::comm::reporter
   {
   public:
     mock_reporter(std::ostream &os) : reporter(os) {}
-    MOCK_CONST_METHOD5(report, void(crpcut::comm::type,
-                                    const char *p,
-                                    size_t len,
-                                    std::string,
-                                    const crpcut::crpcut_test_monitor*));
+    MAKE_CONST_MOCK5(report, void(crpcut::comm::type,
+                                  const char *p,
+                                  size_t len,
+                                  std::string,
+                                  const crpcut::crpcut_test_monitor*));
     void report(crpcut::comm::type t, const char *msg, size_t len,
                 crpcut::datatypes::fixed_string loc,
                 const crpcut::crpcut_test_monitor* mon) const
@@ -88,27 +91,27 @@ TESTSUITE(test_runner)
   class mock_process_control : public crpcut::process_control
   {
   public:
-    MOCK_METHOD2(getrusage, int(int, struct rusage*));
-    MOCK_METHOD2(killpg, int(int, int));
-    MOCK_METHOD4(waitid, int(idtype_t, id_t, siginfo_t*, int));
+    MAKE_MOCK2(getrusage, int(int, struct rusage*));
+    MAKE_MOCK2(killpg, int(int, int));
+    MAKE_MOCK4(waitid, int(idtype_t, id_t, siginfo_t*, int));
   };
 
   class mock_fsops : public crpcut::filesystem_operations
   {
   public:
-    MOCK_METHOD1(chdir, int(const char*));
-    MOCK_METHOD2(mkdir, int(const char *n, mode_t m));
-    MOCK_METHOD2(rename, int(const char *, const char*));
+    MAKE_MOCK1(chdir, int(const char*));
+    MAKE_MOCK2(mkdir, int(const char *n, mode_t m));
+    MAKE_MOCK2(rename, int(const char *, const char*));
   };
 
 
   class mock_poll : public crpcut::poll<crpcut::fdreader>
   {
   public:
-    MOCK_METHOD3(do_add_fd, void(int, crpcut::fdreader *, int));
-    MOCK_METHOD1(do_del_fd, void(int));
-    MOCK_METHOD1(do_wait, descriptor(int));
-    MOCK_CONST_METHOD0(do_num_fds, std::size_t());
+    MAKE_MOCK3(do_add_fd, void(int, crpcut::fdreader *, int));
+    MAKE_MOCK1(do_del_fd, void(int));
+    MAKE_MOCK1(do_wait, descriptor(int));
+    MAKE_CONST_MOCK0(do_num_fds, std::size_t());
   };
 
   template <typename dump_handler>
@@ -117,7 +120,6 @@ TESTSUITE(test_runner)
   {
   public:
     test_registrator(const char                    *name,
-                     
                      const crpcut::namespace_info  &ns,
                      unsigned long                  cpulimit,
                      crpcut::comm::reporter        *reporter,
@@ -139,25 +141,25 @@ TESTSUITE(test_runner)
     using crpcut::crpcut_test_case_registrator::prepare_construction;
     using crpcut::crpcut_test_case_registrator::manage_test_case_execution;
     using crpcut::crpcut_test_case_registrator::prepare_destruction;
-    MOCK_METHOD4(setup, void(crpcut::poll<crpcut::fdreader>&, int, int, int));
-    MOCK_CONST_METHOD0(get_location, crpcut::datatypes::fixed_string());
-    MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag&());
-    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
-    MOCK_METHOD0(run_test_case, void());
-    MOCK_CONST_METHOD1(crpcut_is_expected_exit, bool(int));
-    MOCK_CONST_METHOD1(crpcut_is_expected_signal, bool(int));
-    MOCK_CONST_METHOD1(crpcut_on_ok_action, void(const char*));
-    MOCK_CONST_METHOD1(crpcut_calc_deadline, unsigned long(unsigned long));
-    MOCK_CONST_METHOD1(crpcut_expected_death, void(std::ostream&));
+    MAKE_MOCK4(setup, void(crpcut::poll<crpcut::fdreader>&, int, int, int));
+    MAKE_CONST_MOCK0(get_location, crpcut::datatypes::fixed_string());
+    MAKE_CONST_MOCK0(crpcut_tag, crpcut::tag&());
+    MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
+    MAKE_MOCK0(run_test_case, void());
+    MAKE_CONST_MOCK1(crpcut_is_expected_exit, bool(int));
+    MAKE_CONST_MOCK1(crpcut_is_expected_signal, bool(int));
+    MAKE_CONST_MOCK1(crpcut_on_ok_action, void(const char*));
+    MAKE_CONST_MOCK1(crpcut_calc_deadline, unsigned long(unsigned long));
+    MAKE_CONST_MOCK1(crpcut_expected_death, void(std::ostream&));
   };
 
   class mock_testcase : public crpcut::crpcut_test_case_base
   {
   public:
-    MOCK_METHOD0(crpcut_run_test, void());
-    MOCK_METHOD0(test, void());
-    MOCK_CONST_METHOD0(crpcut_tag, crpcut::tag&());
-    MOCK_CONST_METHOD0(crpcut_get_reg, crpcut::crpcut_test_case_registrator&());
+    MAKE_MOCK0(crpcut_run_test, void());
+    MAKE_MOCK0(test, void());
+    MAKE_CONST_MOCK0(crpcut_tag, crpcut::tag&());
+    MAKE_CONST_MOCK0(crpcut_get_reg, crpcut::crpcut_test_case_registrator&());
   };
 
   static const char loc_str[] = "apa.cpp:3";
@@ -191,35 +193,39 @@ TESTSUITE(test_runner)
     }
     void setup(pid_t pid)
     {
-      StrictMock<mock_poll> poller;
+      mock_poll poller;
       reg.set_pid(pid);
-      reg.setup(poller, -1, -1, -1);
+      //reg.setup(poller, -1, -1, -1);
     }
-    void prepare_siginfo(pid_t pid, int status, int code, Sequence s)
+    void prepare_siginfo(pid_t pid, int status, int code, trompeloeil::sequence&)
     {
       siginfo_t info;
       info.si_pid    = pid;
       info.si_signo  = SIGCHLD;
       info.si_status = status;
       info.si_code   = code;
-      EXPECT_CALL(process_control, waitid(P_PGID, id_t(pid), _, WEXITED)).
-          InSequence(s).
-          WillOnce(DoAll(SetArgumentPointee<2>(info),
-                         Return(0)));
-      EXPECT_CALL(process_control, waitid(P_PGID, id_t(pid), _, WEXITED)).
-          InSequence(s).
-          WillOnce(SetErrnoAndReturn(ECHILD, -1));
+
+      auto idpid = id_t(pid);
+      waitid_x2 = NAMED_REQUIRE_CALL(process_control, waitid(P_PGID, idpid, _, WEXITED))
+        .SIDE_EFFECT(errno = ECHILD)
+        .RETURN(-1);
+
+      waitid_x1 = NAMED_REQUIRE_CALL(process_control, waitid(P_PGID, idpid, _, WEXITED))
+        .SIDE_EFFECT(*_3 = info)
+        .RETURN(0);
     }
 
     std::ostringstream                    default_out;
-    StrictMock<mock_environment>          env;
-    StrictMock<mock_runner>               runner;
+    mock_environment          env;
+    mock_runner               runner;
     mock_reporter                         reporter;
-    StrictMock<mock_process_control>      process_control;
-    StrictMock<mock_fsops>                fsops;
+    mock_process_control      process_control;
+    mock_fsops                fsops;
     crpcut::namespace_info                top_namespace;
     crpcut::namespace_info                current_namespace;
     test_registrator<dump_policy>         reg;
+    std::unique_ptr<trompeloeil::expectation> waitid_x1;
+    std::unique_ptr<trompeloeil::expectation> waitid_x2;
   };
 
   TESTSUITE(just_constructed)
@@ -269,23 +275,27 @@ TESTSUITE(test_runner)
   }
 
 #define SET_WD(num)                              \
-  EXPECT_CALL(fsops, mkdir(StrEq(#num), 0700)).  \
-    WillOnce(Return(0));                         \
+  REQUIRE_CALL(fsops, mkdir(_, 0700U))           \
+    .WITH(_1 == std::string(#num))               \
+    .RETURN(0);                                  \
     reg.set_wd(num)
 
   TESTSUITE(set_wd)
   {
     TEST(creates_working_dir, fix<100U>)
     {
-      EXPECT_CALL(fsops, mkdir(StrEq("100"), 0700)).
-          WillOnce(Return(0));
+      REQUIRE_CALL(fsops, mkdir(_, 0700U))
+        .WITH(_1 == std::string("100"))
+        .RETURN(0);
       reg.set_wd(100);
     }
 
     TEST(accepts_already_existing_dir, fix<100U>)
     {
-      EXPECT_CALL(fsops, mkdir(StrEq("100"), 0700)).
-          WillOnce(SetErrnoAndReturn(EEXIST, -1));
+      REQUIRE_CALL(fsops, mkdir(_, 0700U))
+        .WITH(_1 == std::string("100"))
+        .SIDE_EFFECT(errno = EEXIST)
+        .RETURN(-1);
       reg.set_wd(100);
     }
 
@@ -295,8 +305,10 @@ TESTSUITE(test_runner)
          DEPENDS_ON(accepts_already_existing_dir,
                     creates_working_dir))
     {
-      EXPECT_CALL(fsops, mkdir(StrEq("100"), 0700)).
-          WillOnce(SetErrnoAndReturn(EACCES, -1));
+      REQUIRE_CALL(fsops, mkdir(_, 0700U))
+        .WITH(std::string(_1) == "100")
+        .SIDE_EFFECT(errno = EACCES)
+        .RETURN(-1);
       reg.set_wd(100);
     }
   }
@@ -305,10 +317,11 @@ TESTSUITE(test_runner)
   {
     TEST(changes_to_working_dir, fix<100U>)
     {
-      EXPECT_CALL(fsops, mkdir(_,_)).WillOnce(Return(0));
+      REQUIRE_CALL(fsops, mkdir(_,_)).RETURN(0);
       reg.set_wd(101);
-      EXPECT_CALL(fsops, chdir(StrEq("101"))).
-        WillOnce(Return(0));
+      REQUIRE_CALL(fsops, chdir(_))
+        .WITH(_1 == std::string("101"))
+        .RETURN(0);
       reg.goto_wd();
     }
 
@@ -317,17 +330,21 @@ TESTSUITE(test_runner)
     TEST(reports_failure_to_enter, fix<100U>,
          DEPENDS_ON(changes_to_working_dir))
     {
-      EXPECT_CALL(fsops, mkdir(_,_)).WillOnce(Return(0));
-      EXPECT_CALL(fsops, chdir(StrEq("101"))).
-        WillOnce(SetErrnoAndReturn(EACCES, -1));
-      EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(fixed_string::make(loc_str)));
-      EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
-                                   StrEq("Couldn't chdir working dir"),
-                                   _,
-                                   "apa.cpp:3",
-                                   _)).
-        WillOnce(Throw(my_exit()));
+      REQUIRE_CALL(fsops, mkdir(_,_)).RETURN(0);
+      REQUIRE_CALL(fsops, chdir(_))
+        .WITH(_1 == std::string("101"))
+        .SIDE_EFFECT(errno = EACCES)
+        .RETURN(-1);
+
+      REQUIRE_CALL(reg, get_location())
+        .RETURN(fixed_string::make(loc_str));
+      REQUIRE_CALL(reporter, report(crpcut::comm::exit_fail,
+                                    _,
+                                    _,
+                                    "apa.cpp:3",
+                                    _))
+        .WITH(std::string(_2,_3) == "Couldn't chdir working dir")
+        .THROW(my_exit{});
       reg.set_wd(101);
       ASSERT_THROW(reg.goto_wd(), my_exit);
     }
@@ -337,16 +354,19 @@ TESTSUITE(test_runner)
          EXPECT_SIGNAL_DEATH(SIGABRT),
          NO_CORE_FILE)
     {
-      EXPECT_CALL(fsops, mkdir(_,_)).WillOnce(Return(0));
-      EXPECT_CALL(fsops, chdir(StrEq("101"))).
-        WillOnce(SetErrnoAndReturn(EACCES, -1));
-      EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(fixed_string::make(loc_str)));
-      EXPECT_CALL(reporter, report(crpcut::comm::exit_fail,
-                                   StrEq("Couldn't chdir working dir"),
-                                   _,
-                                   "apa.cpp:3",
-                                   _));
+      REQUIRE_CALL(fsops, mkdir(_,_)).RETURN(0);
+      REQUIRE_CALL(fsops, chdir(_))
+        .WITH(_1 == std::string("101"))
+        .SIDE_EFFECT(errno = EACCES)
+        .RETURN(-1);
+      REQUIRE_CALL(reg, get_location())
+        .RETURN(fixed_string::make(loc_str));
+      REQUIRE_CALL(reporter, report(crpcut::comm::exit_fail,
+                                    _,
+                                    _,
+                                    "apa.cpp:3",
+                                    _))
+        .WITH(std::string(_2,_3) == "Couldn't chdir working dir");
       reg.set_wd(101);
       reg.goto_wd();
     }
@@ -365,26 +385,26 @@ TESTSUITE(test_runner)
       unsigned factor = 20;
       unsigned requested_timeout = 100;
 
-      EXPECT_CALL(env, tests_as_child_procs()).
-        WillOnce(Return(true));
-      EXPECT_CALL(env, timeout_multiplier()).
-        WillOnce(Return(factor));
+      REQUIRE_CALL(env, tests_as_child_procs())
+        .RETURN(true);
+      REQUIRE_CALL(env, timeout_multiplier())
+        .RETURN(factor);
       unsigned long result = requested_timeout*factor;
       const void *addr = &result;
       const char *result_str = static_cast<const char*>(addr);
-      EXPECT_CALL(reporter, report(crpcut::comm::set_timeout,
+      REQUIRE_CALL(reporter, report(crpcut::comm::set_timeout,
                                    _,
                                    sizeof(result),
                                    "",
-                                   _)).
-          With(Args<1,2>(ElementsAreArray(result_str, sizeof(result))));
+                                   _))
+        .WITH(memcmp(_2, result_str, _3) == 0);
       reg.prepare_construction(requested_timeout);
     }
 
     TEST(does_nothing_when_run_in_single_process, fix<10U>)
     {
-      EXPECT_CALL(env, tests_as_child_procs()).
-        WillOnce(Return(false));
+      REQUIRE_CALL(env, tests_as_child_procs())
+        .RETURN(false);
       unsigned requested_timeout(100);
       reg.prepare_construction(requested_timeout);
     }
@@ -397,28 +417,28 @@ TESTSUITE(test_runner)
       unsigned factor = 20;
       unsigned requested_timeout = 100;
 
-      EXPECT_CALL(env, timeouts_enabled()).
-        WillOnce(Return(true));
+      REQUIRE_CALL(env, timeouts_enabled())
+        .RETURN(true);
 
-      EXPECT_CALL(env, timeout_multiplier()).
-        WillOnce(Return(factor));
+      REQUIRE_CALL(env, timeout_multiplier())
+        .RETURN(factor);
 
       unsigned long result = requested_timeout*factor;
       const void *addr = &result;
       const char *result_str = static_cast<const char*>(addr);
-      EXPECT_CALL(reporter, report(crpcut::comm::set_timeout,
-                                   _,
-                                   sizeof(result),
-                                   "",
-                                   _)).
-          With(Args<1,2>(ElementsAreArray(result_str, sizeof(result))));
+      REQUIRE_CALL(reporter, report(crpcut::comm::set_timeout,
+                                    _,
+                                    sizeof(result),
+                                    "",
+                                    _))
+        .WITH(memcmp(_2, result_str, _3) == 0);
       reg.prepare_destruction(requested_timeout);
     }
 
     TEST(does_nothing_if_timeouts_are_disabled, fix<10U>)
     {
-      EXPECT_CALL(env, timeouts_enabled()).
-          WillOnce(Return(false));
+      REQUIRE_CALL(env, timeouts_enabled())
+        .RETURN(false);
       reg.prepare_destruction(100U);
     }
   }
@@ -428,45 +448,44 @@ TESTSUITE(test_runner)
   {
     TEST(reports_cputime_if_run_as_child_procs, fix<10U>)
     {
-
-      EXPECT_CALL(env, tests_as_child_procs()).
-          WillRepeatedly(Return(true));
+      ALLOW_CALL(env, tests_as_child_procs())
+        .RETURN(true);
 
       static const struct timeval utime = { 1, 5 };
       static const struct timeval stime = { 3, 6 };
-      Sequence s;
+      trompeloeil::sequence s;
       struct rusage usage;
       usage.ru_utime = utime;
       usage.ru_stime = stime;
-      EXPECT_CALL(process_control, getrusage(RUSAGE_SELF, _)).
-          InSequence(s).
-          WillOnce(DoAll(SetArgumentPointee<1>(usage),
-                          Return(0)));
+      ALLOW_CALL(process_control, getrusage(RUSAGE_SELF, _))
+        .SIDE_EFFECT(*_2 = usage)
+        .RETURN(0);
 
       struct timeval result = { 4, 11 };
       const void *addr = &result;
       const char *result_str = static_cast<const char*>(addr);
 
-      EXPECT_CALL(reporter, report(crpcut::comm::begin_test, _, sizeof(result), "",_)).
-          With(Args<1,2>(ElementsAreArray(result_str, sizeof(result)))).
-          InSequence(s);
+      REQUIRE_CALL(reporter, report(crpcut::comm::begin_test, _, sizeof(result), "",_))
+        .WITH(memcmp(_2, result_str, _3) == 0)
+        .IN_SEQUENCE(s);
 
-      StrictMock<mock_testcase> test_obj;
-      EXPECT_CALL(test_obj, crpcut_run_test()).
-          InSequence(s);
+      mock_testcase test_obj;
+      REQUIRE_CALL(test_obj, crpcut_run_test())
+        .IN_SEQUENCE(s);
       reg.manage_test_case_execution(&test_obj);
     }
 
     TEST(reports_success_if_not_run_as_child_procs, fix<10U>)
     {
-      EXPECT_CALL(env, tests_as_child_procs()).
-          WillRepeatedly(Return(false));
+      ALLOW_CALL(env, tests_as_child_procs())
+          .RETURN(false);
 
-      StrictMock<mock_testcase> test_obj;
+      mock_testcase test_obj;
+
       ASSERT_FALSE(reg.crpcut_failed());
       ASSERT_FALSE(reg.crpcut_succeeded());
       ASSERT_TRUE(reg.crpcut_can_run());
-      EXPECT_CALL(test_obj, crpcut_run_test());
+      REQUIRE_CALL(test_obj, crpcut_run_test());
       reg.manage_test_case_execution(&test_obj);
       ASSERT_FALSE(reg.crpcut_failed());
       ASSERT_TRUE(reg.crpcut_succeeded());
@@ -506,7 +525,7 @@ TESTSUITE(test_runner)
     TEST(expected_exit_without_prior_fail_reports_success, fix<10U>)
     {
 
-      Sequence s;
+      trompeloeil::sequence s;
 
       const pid_t test_pid = 101;
       setup(test_pid);
@@ -514,28 +533,29 @@ TESTSUITE(test_runner)
       reg.set_phase(crpcut::destroying);
       prepare_siginfo(test_pid, 0, CLD_EXITED, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(10U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(10U);
 
-      EXPECT_CALL(reg, crpcut_is_expected_exit(0)).
-          InSequence(s).
-          WillOnce(Return(true));
+      REQUIRE_CALL(reg, crpcut_is_expected_exit(0))
+        .IN_SEQUENCE(s)
+        .RETURN(true);
 
-      EXPECT_CALL(reg, crpcut_on_ok_action(_));
+      REQUIRE_CALL(reg, crpcut_on_ok_action(_));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_ok,
-                                  crpcut::destroying,
-                                  0, _)).
-          InSequence(s);
-
-      EXPECT_CALL(runner, return_dir(9));
-
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test,
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::exit_ok,
                                    crpcut::destroying,
-                                   sizeof(end_data), _)).
-          InSequence(s);
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+                                   0U, _))
+        .IN_SEQUENCE(s);
+
+      REQUIRE_CALL(runner, return_dir(9U));
+
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test,
+                                   crpcut::destroying,
+                                   sizeof(end_data), _))
+        .IN_SEQUENCE(s);
+
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
       reg.manage_death();
     }
@@ -545,7 +565,7 @@ TESTSUITE(test_runner)
       ::mkdir("99", 0750);
       ::creat("99/junk_file", 0640);
       {
-        Sequence s;
+        trompeloeil::sequence s;
         const pid_t test_pid = 155;
         setup(test_pid);
         reg.set_phase(crpcut::running);
@@ -553,34 +573,40 @@ TESTSUITE(test_runner)
         prepare_siginfo(test_pid, 0, CLD_DUMPED, s);
 
 
-        EXPECT_CALL(runner, calc_cputime(_)).
-            WillOnce(Return(10U));
+        REQUIRE_CALL(runner, calc_cputime(_))
+          .RETURN(10U);
 
-        EXPECT_CALL(runner, present(test_pid,
-                                    crpcut::comm::dir,
-                                    crpcut::running,
-                                    0, 0)).
-           InSequence(s);
-        EXPECT_CALL(reg, get_location()).
-          WillRepeatedly(Return(fixed_string::make(loc_str)));
-        EXPECT_CALL(fsops, rename(StrEq("99"), StrEq("apa::test")));
+        REQUIRE_CALL(runner, present(test_pid,
+                                     crpcut::comm::dir,
+                                     crpcut::running,
+                                     0U, nullptr))
+          .IN_SEQUENCE(s);
+
+        ALLOW_CALL(reg, get_location())
+          .RETURN(fixed_string::make(loc_str));
+        REQUIRE_CALL(fsops, rename(_,_))
+          .WITH(_1 == std::string("99"))
+          .WITH(_2 == std::string("apa::test"))
+          .RETURN(0);
         const char msg[] = "Died with core dump";
         char buffer[sizeof(msg) - 1 + loc_len + sizeof(size_t)];
         make_message(buffer, msg);
-        EXPECT_CALL(runner, present(test_pid,
-                                    crpcut::comm::exit_fail,
-                                    crpcut::running,
-                                    _, NotNull())).
-          With(Args<4,3>(ElementsAreArray(buffer))).
-          InSequence(s);
-        EXPECT_CALL(runner, return_dir(99));
-
-        EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test,
+        REQUIRE_CALL(runner, present(test_pid,
+                                     crpcut::comm::exit_fail,
                                      crpcut::running,
-                                     sizeof(end_data), _)).
-           InSequence(s);
-        EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+                                     _, _))
+          .WITH(_5 != nullptr)
+          .WITH(memcmp(_5, buffer, _4) == 0)
+          .IN_SEQUENCE(s);
+
+        REQUIRE_CALL(runner, return_dir(99U));
+
+        REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test,
+                                     crpcut::running,
+                                     sizeof(end_data), _))
+          .IN_SEQUENCE(s);
+        ALLOW_CALL(reg, crpcut_tag())
+          .RETURN(std::ref(apa));
 
         reg.manage_death();
         ASSERT_TRUE(apa.num_failed() == 0U);
@@ -599,7 +625,7 @@ TESTSUITE(test_runner)
 
     TEST(exit_with_wrong_code_gives_fail_report, fix<100U>)
     {
-      Sequence s;
+      trompeloeil::sequence s;
       const pid_t test_pid = 20123;
       setup(test_pid);
       const crpcut::test_phase phase = crpcut::destroying;
@@ -607,34 +633,34 @@ TESTSUITE(test_runner)
       SET_WD(3);
       prepare_siginfo(test_pid, 3, CLD_EXITED, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(10U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(10U);
 
-      EXPECT_CALL(reg, crpcut_is_expected_exit(3)).
-          InSequence(s).
-          WillOnce(Return(false));
+      REQUIRE_CALL(reg, crpcut_is_expected_exit(3))
+        .IN_SEQUENCE(s)
+        .RETURN(false);
 
-      EXPECT_CALL(reg, crpcut_expected_death(_)).
-          InSequence(s).
-          WillOnce(Invoke(set_expected_exit_msg<0>));
+      REQUIRE_CALL(reg, crpcut_expected_death(_))
+        .IN_SEQUENCE(s)
+        .SIDE_EFFECT(set_expected_exit_msg<0>(_1));
 
-      EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(fixed_string::make(loc_str)));
+      REQUIRE_CALL(reg, get_location())
+        .RETURN(fixed_string::make(loc_str));
 
       const char msg[] = "Exited with code 3\nExpected exit 0";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
       make_message(buffer, msg);
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(buffer))).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_))
+        .WITH(memcmp(_5, buffer, _4) == 0)
+        .IN_SEQUENCE(s);
 
-      EXPECT_CALL(runner, return_dir(3));
+      REQUIRE_CALL(runner, return_dir(3U));
 
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_))
+        .IN_SEQUENCE(s);
 
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
@@ -643,7 +669,7 @@ TESTSUITE(test_runner)
 
     TEST(exit_with_wrong_signal_gives_fail_report, fix<100U>)
     {
-      Sequence s;
+      trompeloeil::sequence s;
       const pid_t test_pid = 3216;
       setup(test_pid);
       const crpcut::test_phase phase = crpcut::running;
@@ -651,34 +677,34 @@ TESTSUITE(test_runner)
       SET_WD(100);
       prepare_siginfo(test_pid, 15, CLD_KILLED, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(10U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(10U);
 
-      EXPECT_CALL(reg, crpcut_is_expected_signal(15)).
-          InSequence(s).
-          WillOnce(Return(false));
+      REQUIRE_CALL(reg, crpcut_is_expected_signal(15))
+        .IN_SEQUENCE(s)
+        .RETURN(false);
 
-      EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(fixed_string::make(loc_str)));
-      EXPECT_CALL(reg, crpcut_expected_death(_)).
-          InSequence(s).
-          WillOnce(Invoke(set_expected_exit_msg<0>));
+      REQUIRE_CALL(reg, get_location())
+        .RETURN(fixed_string::make(loc_str));
+      REQUIRE_CALL(reg, crpcut_expected_death(_))
+        .IN_SEQUENCE(s)
+        .SIDE_EFFECT(set_expected_exit_msg<0>(_1));
 
       const char msg[] = "Died on signal 15\nExpected exit 0";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
       make_message(buffer, msg);
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(buffer))).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_))
+        .WITH(memcmp(_5, buffer, _4) == 0)
+        .IN_SEQUENCE(s);
 
-      EXPECT_CALL(runner, return_dir(100));
+      REQUIRE_CALL(runner, return_dir(100U));
 
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_))
+        .IN_SEQUENCE(s);
 
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
@@ -687,48 +713,48 @@ TESTSUITE(test_runner)
     TEST(exit_with_wrong_signal_gives_timeout_report_if_killed,
          fix<100U>)
     {
-      Sequence s;
+      trompeloeil::sequence s;
       const pid_t test_pid = 5158;
       setup(test_pid);
       const crpcut::test_phase phase = crpcut::running;
       reg.set_phase(phase);
       SET_WD(1);
 
-      EXPECT_CALL(process_control, killpg(test_pid, 9)).
-          InSequence(s).
-          WillOnce(Return(0));
+      REQUIRE_CALL(process_control, killpg(test_pid, 9))
+        .IN_SEQUENCE(s)
+        .RETURN(0);
 
       prepare_siginfo(test_pid, 9, CLD_KILLED, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000000U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(1000000U);
 
-      EXPECT_CALL(reg, crpcut_is_expected_signal(9)).
-          InSequence(s).
-          WillOnce(Return(false));
+      REQUIRE_CALL(reg, crpcut_is_expected_signal(9))
+        .IN_SEQUENCE(s)
+        .RETURN(false);
 
-      EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(fixed_string::make(loc_str)));
+      REQUIRE_CALL(reg, get_location())
+        .RETURN(fixed_string::make(loc_str));
 
-      EXPECT_CALL(reg, crpcut_expected_death(_)).
-          InSequence(s).
-          WillOnce(Invoke(set_expected_exit_msg<0>));
+      REQUIRE_CALL(reg, crpcut_expected_death(_))
+        .IN_SEQUENCE(s)
+        .SIDE_EFFECT(set_expected_exit_msg<0>(_1));
 
       const char msg[] = "Timed out - killed\nExpected exit 0";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
       make_message(buffer, msg);
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(buffer))).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_))
+        .WITH(memcmp(_5, buffer, _4) == 0)
+        .IN_SEQUENCE(s);
 
-      EXPECT_CALL(runner, return_dir(1));
+      REQUIRE_CALL(runner, return_dir(1U));
 
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_))
+        .IN_SEQUENCE(s);
 
       reg.kill();
       reg.manage_death();
@@ -739,7 +765,7 @@ TESTSUITE(test_runner)
     TEST(expected_signal_gives_timeout_report_after_excessive_cputime,
          fix<100U>)
     {
-      Sequence s;
+      trompeloeil::sequence s;
       const pid_t test_pid = 5158;
       setup(test_pid);
       const crpcut::test_phase phase = crpcut::running;
@@ -748,33 +774,33 @@ TESTSUITE(test_runner)
 
       prepare_siginfo(test_pid, 6, CLD_KILLED, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000000U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(1000000U);
 
-      EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
-          InSequence(s).
-          WillOnce(Return(true));
+      REQUIRE_CALL(reg, crpcut_is_expected_signal(6))
+        .IN_SEQUENCE(s)
+        .RETURN(true);
 
-      EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(fixed_string::make(loc_str)));
-      EXPECT_CALL(env, timeouts_enabled()).
-          WillOnce(Return(true));
+      REQUIRE_CALL(reg, get_location())
+        .RETURN(fixed_string::make(loc_str));
+      REQUIRE_CALL(env, timeouts_enabled())
+        .RETURN(true);
 
       const char msg[] = "Test consumed 1000ms CPU-time\nLimit was 100ms";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
       make_message(buffer, msg);
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(buffer))).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_))
+        .WITH(memcmp(_5, buffer, _4) == 0)
+        .IN_SEQUENCE(s);
 
-      EXPECT_CALL(runner, return_dir(1));
+      REQUIRE_CALL(runner, return_dir(1U));
 
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_))
+        .IN_SEQUENCE(s);
 
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
@@ -784,7 +810,7 @@ TESTSUITE(test_runner)
     TEST(expected_signal_gives_no_timeout_report_when_timeouts_are_disabled,
          fix<100U>)
     {
-      Sequence s;
+      trompeloeil::sequence s;
       const pid_t test_pid = 5158;
       setup(test_pid);
       const crpcut::test_phase phase = crpcut::running;
@@ -793,27 +819,27 @@ TESTSUITE(test_runner)
 
       prepare_siginfo(test_pid, 6, CLD_KILLED, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000000U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(1000000U);
 
-      EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
-          InSequence(s).
-          WillOnce(Return(true));
+      REQUIRE_CALL(reg, crpcut_is_expected_signal(6))
+        .IN_SEQUENCE(s)
+        .RETURN(true);
 
-      EXPECT_CALL(reg, crpcut_on_ok_action(_));
-      EXPECT_CALL(env, timeouts_enabled()).
-          WillOnce(Return(false));
+      REQUIRE_CALL(reg, crpcut_on_ok_action(_));
+      REQUIRE_CALL(env, timeouts_enabled())
+        .RETURN(false);
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::exit_ok, phase, 0U,_))
+        .IN_SEQUENCE(s);
 
-      EXPECT_CALL(runner, return_dir(1));
+      REQUIRE_CALL(runner, return_dir(1U));
 
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_))
+        .IN_SEQUENCE(s);
 
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
@@ -823,7 +849,7 @@ TESTSUITE(test_runner)
     TEST(expected_signal_is_successful_if_si_code_is_CLD_DUMPED_if_dumps_are_ignored,
          fix<100U, crpcut::policies::core_dumps::crpcut_ignore>)
     {
-      Sequence s;
+      trompeloeil::sequence s;
       const pid_t test_pid = 5158;
       setup(test_pid);
       const crpcut::test_phase phase = crpcut::running;
@@ -832,27 +858,27 @@ TESTSUITE(test_runner)
 
       prepare_siginfo(test_pid, 6, CLD_DUMPED, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000000U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(1000000U);
 
-      EXPECT_CALL(reg, crpcut_is_expected_signal(6)).
-          InSequence(s).
-          WillOnce(Return(true));
+      REQUIRE_CALL(reg, crpcut_is_expected_signal(6))
+        .IN_SEQUENCE(s)
+        .RETURN(true);
 
-      EXPECT_CALL(reg, crpcut_on_ok_action(_));
-      EXPECT_CALL(env, timeouts_enabled()).
-          WillOnce(Return(false));
+      REQUIRE_CALL(reg, crpcut_on_ok_action(_));
+      REQUIRE_CALL(env, timeouts_enabled())
+        .RETURN(false);
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_ok, phase, 0,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::exit_ok, phase, 0U,_))
+        .IN_SEQUENCE(s);
 
-      EXPECT_CALL(runner, return_dir(1));
+      REQUIRE_CALL(runner, return_dir(1U));
 
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_))
+        .IN_SEQUENCE(s);
 
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
@@ -862,7 +888,7 @@ TESTSUITE(test_runner)
     TEST(expected_signal_reports_core_dump_by_default_if_si_code_is_CLD_DUMPED,
          fix<100U>)
     {
-      Sequence s;
+      trompeloeil::sequence s;
       const pid_t test_pid = 5158;
       setup(test_pid);
       const crpcut::test_phase phase = crpcut::running;
@@ -871,27 +897,27 @@ TESTSUITE(test_runner)
 
       prepare_siginfo(test_pid, 6, CLD_DUMPED, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000000U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(1000000U);
 
-      EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(fixed_string::make(loc_str)));
+      REQUIRE_CALL(reg, get_location())
+        .RETURN(fixed_string::make(loc_str));
 
       const char msg[] = "Died with core dump";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
       make_message(buffer, msg);
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_)).
-          With(Args<4,3>(ElementsAreArray(buffer))).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::exit_fail, phase, _,_))
+        .WITH(memcmp(_5, buffer, _4) == 0)
+        .IN_SEQUENCE(s);
 
-      EXPECT_CALL(runner, return_dir(1));
+      REQUIRE_CALL(runner, return_dir(1U));
 
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_))
+        .IN_SEQUENCE(s);
 
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);
@@ -901,7 +927,7 @@ TESTSUITE(test_runner)
     TEST(unknown_death_cause_gives_failed_test_with_code_number_in_msg,
          fix<100U>)
     {
-      Sequence s;
+      trompeloeil::sequence s;
       const pid_t test_pid = 5158;
       setup(test_pid);
       const crpcut::test_phase phase = crpcut::running;
@@ -910,30 +936,30 @@ TESTSUITE(test_runner)
 
       prepare_siginfo(test_pid, 0, -1, s);
 
-      EXPECT_CALL(runner, calc_cputime(_)).
-          WillOnce(Return(1000000U));
+      REQUIRE_CALL(runner, calc_cputime(_))
+        .RETURN(1000000U);
 
-      EXPECT_CALL(reg, get_location()).
-        WillOnce(Return(fixed_string::make(loc_str)));
+      REQUIRE_CALL(reg, get_location())
+        .RETURN(fixed_string::make(loc_str));
 
       const char msg[] = "Died for unknown reason, code=-1";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
       make_message(buffer, msg);
 
-      EXPECT_CALL(runner, present(test_pid,
+      REQUIRE_CALL(runner, present(test_pid,
                                    crpcut::comm::exit_fail,
-                                   phase, _, _)).
-        With(Args<4,3>(ElementsAreArray(buffer))).
-        InSequence(s);
+                                   phase, _, _))
+        .WITH(memcmp(_5, buffer, _4) == 0)
+        .IN_SEQUENCE(s);
 
 
-      EXPECT_CALL(runner, return_dir(1));
+      REQUIRE_CALL(runner, return_dir(1U));
 
-      EXPECT_CALL(reg, crpcut_tag()).
-          WillRepeatedly(ReturnRef(apa));
+      ALLOW_CALL(reg, crpcut_tag())
+        .RETURN(std::ref(apa));
 
-      EXPECT_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_)).
-          InSequence(s);
+      REQUIRE_CALL(runner, present(test_pid, crpcut::comm::end_test, phase, _,_))
+        .IN_SEQUENCE(s);
 
       reg.manage_death();
       ASSERT_TRUE(apa.num_failed() == 0U);

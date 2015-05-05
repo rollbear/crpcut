@@ -24,7 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include <crpcut.hpp>
 #include "../presentation_output.hpp"
 #include "../poll.hpp"
@@ -32,22 +32,22 @@
 #include "../output/buffer.hpp"
 #include "../io.hpp"
 
-using namespace testing;
+using trompeloeil::_;
 
 namespace {
   class test_poller : public crpcut::poll<crpcut::io>
   {
   public:
-    MOCK_METHOD3(do_add_fd, void(int, crpcut::io*, int));
-    MOCK_METHOD1(do_del_fd, void(int));
-    MOCK_METHOD1(do_wait, descriptor(int));
-    MOCK_CONST_METHOD0(do_num_fds, std::size_t());
+    MAKE_MOCK3(do_add_fd, void(int, crpcut::io*, int));
+    MAKE_MOCK1(do_del_fd, void(int));
+    MAKE_MOCK1(do_wait, descriptor(int));
+    MAKE_CONST_MOCK0(do_num_fds, std::size_t());
   };
 
   class test_write : public crpcut::posix_write
   {
   public:
-    MOCK_METHOD3(do_write, ssize_t(int, const char*, std::size_t));
+    MAKE_MOCK3(do_write, ssize_t(int, const char*, std::size_t));
     ssize_t do_write(int i, const void* p, std::size_t s)
     {
       return do_write(i, (const char*)p, s);
@@ -58,18 +58,18 @@ namespace {
   {
   public:
     typedef std::pair<const char*, std::size_t> buff;
-    MOCK_CONST_METHOD0(get_buffer, buff());
-    MOCK_METHOD0(advance, void());
-    MOCK_METHOD2(write, ssize_t(const char *, std::size_t));
-    MOCK_CONST_METHOD0(is_empty, bool());
+    MAKE_CONST_MOCK0(get_buffer, buff());
+    MAKE_MOCK0(advance, void());
+    MAKE_MOCK2(write, ssize_t(const char *, std::size_t));
+    MAKE_CONST_MOCK0(is_empty, bool());
   };
 
   class fix
   {
   protected:
-    StrictMock<test_buffer> buffer;
-    StrictMock<test_poller> poller;
-    StrictMock<test_write> writer;
+    test_buffer buffer;
+    test_poller poller;
+    test_write  writer;
   };
 }
 TESTSUITE(presentation_output)
@@ -89,14 +89,15 @@ TESTSUITE(presentation_output)
   {
     crpcut::presentation_output obj(buffer, poller, 10, writer);
     ASSERT_FALSE(obj.enabled());
-    EXPECT_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
-      .Times(1);
-    obj.enable(true);
-    Mock::VerifyAndClearExpectations(&poller);
+    {
+      REQUIRE_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w));
+      obj.enable(true);
+    }
     ASSERT_TRUE(obj.enabled());
-    EXPECT_CALL(poller, do_del_fd(10))
-      .Times(1);
-    obj.enable(false);
+    {
+      REQUIRE_CALL(poller, do_del_fd(10));
+      obj.enable(false);
+    }
     ASSERT_FALSE(obj.enabled());
   }
 
@@ -106,23 +107,24 @@ TESTSUITE(presentation_output)
   {
     TEST(returns_after_partial_fd_write, fix)
     {
-      Sequence seq;
+      trompeloeil::sequence seq;
       crpcut::presentation_output obj(buffer, poller, 10, writer);
-      EXPECT_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
-        .InSequence(seq);
+      REQUIRE_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
+        .IN_SEQUENCE(seq);
       obj.enable(1);
       test_buffer::buff buff_data[] = {
         S(hej hopp alla),
         S(barnen i bullerbyn)
       };
-      EXPECT_CALL(buffer, is_empty())
-        .WillOnce(Return(false));
-      EXPECT_CALL(buffer, get_buffer())
-        .InSequence(seq)
-        .WillOnce(Return(buff_data[0]));
-      EXPECT_CALL(writer, do_write(10, StartsWith("hej hopp alla"), 13))
-        .InSequence(seq)
-        .WillOnce(Return(10));
+      REQUIRE_CALL(buffer, is_empty())
+        .RETURN(false);
+      REQUIRE_CALL(buffer, get_buffer())
+        .IN_SEQUENCE(seq)
+        .RETURN(buff_data[0]);
+      REQUIRE_CALL(writer, do_write(10, _, 13U))
+        .WITH(std::string(_2, _3) == "hej hopp alla")
+        .IN_SEQUENCE(seq)
+        .RETURN(10);
       bool rv = obj.write();
       ASSERT_FALSE(rv);
     }
@@ -130,25 +132,26 @@ TESTSUITE(presentation_output)
     TEST(advance_buffer_and_return_when_current_buffer_has_been_consumed,
          fix)
     {
-      Sequence seq;
+      trompeloeil::sequence seq;
       crpcut::presentation_output obj(buffer, poller, 10, writer);
-      EXPECT_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
-        .InSequence(seq);
+      REQUIRE_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
+        .IN_SEQUENCE(seq);
       obj.enable(1);
       test_buffer::buff buff_data[] = {
         S(hej hopp alla),
         S(barnen i bullerbyn)
       };
-      EXPECT_CALL(buffer, is_empty())
-        .WillRepeatedly(Return(false));
-      EXPECT_CALL(buffer, get_buffer())
-        .InSequence(seq)
-        .WillOnce(Return(buff_data[0]));
-      EXPECT_CALL(writer, do_write(10, StartsWith("hej hopp alla"), 13))
-        .InSequence(seq)
-        .WillOnce(Return(13));
-      EXPECT_CALL(buffer, advance())
-        .InSequence(seq);
+      ALLOW_CALL(buffer, is_empty())
+        .RETURN(false);
+      REQUIRE_CALL(buffer, get_buffer())
+        .IN_SEQUENCE(seq)
+        .RETURN(buff_data[0]);
+      REQUIRE_CALL(writer, do_write(10, _, 13U))
+        .WITH(std::string(_2,_3) == "hej hopp alla")
+        .IN_SEQUENCE(seq)
+        .RETURN(13);
+      REQUIRE_CALL(buffer, advance())
+        .IN_SEQUENCE(seq);
       bool rv = obj.write();
       ASSERT_FALSE(rv);
     }
@@ -157,34 +160,36 @@ TESTSUITE(presentation_output)
          DEPENDS_ON(returns_after_partial_fd_write,
                     advance_buffer_and_return_when_current_buffer_has_been_consumed))
     {
-      Sequence seq;
+      trompeloeil::sequence seq;
       crpcut::presentation_output obj(buffer, poller, 10, writer);
-      EXPECT_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
-        .InSequence(seq);
+      REQUIRE_CALL(poller, do_add_fd(10, &obj, test_poller::polltype::w))
+        .IN_SEQUENCE(seq);
       obj.enable(1);
       test_buffer::buff buff_data[] = {
         S(hej hopp alla),
         S(barnen i bullerbyn)
       };
-      EXPECT_CALL(buffer, is_empty())
-        .WillRepeatedly(Return(false));
-      EXPECT_CALL(buffer, get_buffer())
-        .InSequence(seq)
-        .WillOnce(Return(buff_data[0]));
-      EXPECT_CALL(writer, do_write(10, StartsWith("hej hopp alla"), 13))
-        .InSequence(seq)
-        .WillOnce(Return(10));
+      ALLOW_CALL(buffer, is_empty())
+        .RETURN(false);
+      REQUIRE_CALL(buffer, get_buffer())
+        .IN_SEQUENCE(seq)
+        .RETURN(buff_data[0]);
+      REQUIRE_CALL(writer, do_write(10, _, 13U))
+        .WITH(std::string(_2, _3) == "hej hopp alla")
+        .IN_SEQUENCE(seq)
+        .RETURN(10);
       bool rv = obj.write();
       ASSERT_FALSE(rv);
 
-      EXPECT_CALL(buffer, get_buffer())
-        .InSequence(seq)
-        .WillOnce(Return(buff_data[0]));
-      EXPECT_CALL(writer, do_write(10, StartsWith("lla"), 3))
-        .InSequence(seq)
-        .WillOnce(Return(3));
-      EXPECT_CALL(buffer, advance())
-        .InSequence(seq);
+      REQUIRE_CALL(buffer, get_buffer())
+        .IN_SEQUENCE(seq)
+        .RETURN(buff_data[0]);
+      REQUIRE_CALL(writer, do_write(10, _, 3U))
+        .WITH(std::string(_2, _3) == "lla")
+        .IN_SEQUENCE(seq)
+        .RETURN(3);
+      REQUIRE_CALL(buffer, advance())
+        .IN_SEQUENCE(seq);
       rv = obj.write();
       ASSERT_FALSE(rv);
     }

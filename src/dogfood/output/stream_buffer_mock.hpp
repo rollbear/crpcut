@@ -29,25 +29,24 @@
 #ifndef STREAM_BUFFER_MOCK_HPP
 #define STREAM_BUFFER_MOCK_HPP
 
-#include <gmock/gmock.h>
+#include <trompeloeil.hpp>
 #include "../../output/buffer.hpp"
 #include <sstream>
 
 namespace mock {
-  using namespace testing;
 
   struct stream_buffer : public crpcut::output::buffer
   {
   public:
     typedef std::pair<const char*, std::size_t> buff;
-    MOCK_CONST_METHOD0(get_buffer, buff());
-    MOCK_METHOD0(advance, void());
+    MAKE_CONST_MOCK0(get_buffer, buff());
+    MAKE_MOCK0(advance, void());
     virtual ssize_t write(const char *data, std::size_t len)
     {
       os.write(data, std::streamsize(len));
       return ssize_t(len);
     }
-    MOCK_CONST_METHOD0(is_empty, bool());
+    MAKE_CONST_MOCK0(is_empty, bool());
     std::ostringstream os;
   };
 }

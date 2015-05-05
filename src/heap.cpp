@@ -604,7 +604,7 @@ extern "C"
 
 }
 
-#if __cplusplus == 201103L
+#if __cplusplus >= 201103L
 #define THROW(...)
 #define NOTHROW noexcept
 #else

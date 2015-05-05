@@ -24,63 +24,10 @@
  * SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
 #include <crpcut.hpp>
 #include "../../output/nil_formatter.hpp"
 #include "stream_buffer_mock.hpp"
 #include "tag_mocks.hpp"
-namespace {
-
-  using namespace testing;
-
-  struct stream_buffer : public crpcut::output::buffer
-  {
-  public:
-    typedef std::pair<const char*, std::size_t> buff;
-    MOCK_CONST_METHOD0(get_buffer, buff());
-    MOCK_METHOD0(advance, void());
-    virtual ssize_t write(const char *data, std::size_t len)
-    {
-      os.write(data, std::streamsize(len));
-      return ssize_t(len);
-    }
-    MOCK_CONST_METHOD0(is_empty, bool());
-    std::ostringstream os;
-  };
-
-  class tag_list : public crpcut::tag_list_root
-  {
-  public:
-    MOCK_METHOD0(fail, void());
-    MOCK_METHOD0(pass, void());
-    MOCK_CONST_METHOD0(num_failed, size_t());
-    MOCK_CONST_METHOD0(num_passed, size_t());
-    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
-    MOCK_CONST_METHOD0(longest_tag_name, size_t());
-    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
-    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
-  };
-
-  class test_tag : public crpcut::tag
-  {
-  public:
-    template <size_t N>
-    test_tag(const char (&f)[N], tag_list *root)
-      : crpcut::tag(N, root),
-        name_(crpcut::datatypes::fixed_string::make(f))
-    {
-      EXPECT_CALL(*this, get_name()).WillOnce(Return(name_));
-    }
-    MOCK_METHOD0(fail, void());
-    MOCK_METHOD0(pass, void());
-    MOCK_CONST_METHOD0(num_failed, size_t());
-    MOCK_CONST_METHOD0(num_passed, size_t());
-    MOCK_CONST_METHOD0(get_name, crpcut::datatypes::fixed_string());
-    MOCK_METHOD1(set_importance, void(crpcut::tag::importance));
-    MOCK_CONST_METHOD0(get_importance, crpcut::tag::importance());
-    crpcut::datatypes::fixed_string name_;
-  };
-}
 
 #define _ "[[:space:]]*"
 #define s crpcut::datatypes::fixed_string::make
@@ -96,8 +43,8 @@ TESTSUITE(output)
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
         static const char* vec[] = { "apa", "katt", "orm", 0 };
-        StrictMock<mock::tag_list> tags;
-        StrictMock<mock::stream_buffer> buffer;
+        mock::tag_list tags;
+        mock::stream_buffer buffer;
         {
           crpcut::output::nil_formatter f(buffer,
                                           "test id",
