@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2009-2015 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1048,7 +1048,9 @@ constexpr char array_index(size_t n, const char (&array)[N])
       : p_(new type(t, f1 | f2 | f3))
     {
     }
+#if __cplusplus < 201103L
     regex(const regex& r);
+#endif
     template <typename T>
     bool operator()(const T &t)
     {
@@ -1056,7 +1058,11 @@ constexpr char array_index(size_t n, const char (&array)[N])
     }
     friend std::ostream& operator<<(std::ostream &os, const regex &r);
   private:
+#if __cplusplus >= 201103L
+    std::unique_ptr<type> p_;
+#else
     mutable std::auto_ptr<type> p_; // Yeach! Ugly
+#endif
   };
 
 
@@ -3306,6 +3312,16 @@ constexpr char array_index(size_t n, const char (&array)[N])
     return match(datatypes::string_traits::get_c_str(t));
   }
 
+#if __cplusplus < 201103L
+  inline regex::regex(const regex& r)
+    : p_(r.p_)
+  {
+  }
+#endif
+  inline std::ostream& operator<<(std::ostream &os, const regex &r)
+  {
+    return os << *r.p_;
+  }
 
 
   namespace datatypes {

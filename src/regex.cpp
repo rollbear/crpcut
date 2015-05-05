@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012,2015 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,15 +28,6 @@
 
 namespace crpcut {
 
-  regex::regex(const regex& r)
-    : p_(r.p_)
-  {
-  }
-
-  std::ostream& operator<<(std::ostream &os, const regex &r)
-  {
-    return os << *r.p_;
-  }
 
   void regex::type::init(const char *s, int flags)
   {
