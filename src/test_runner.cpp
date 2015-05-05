@@ -369,18 +369,18 @@ namespace crpcut {
         typedef crpcut_test_case_registrator reg;
         for (reg *i = reg_.first(); i;)
           {
-            reg *obj = i;
+            reg *reg_obj = i;
             i = reg_.next_after(i);
-            if (   (cli_->honour_dependencies() && !obj->crpcut_can_run())
-                || obj->get_importance() == crpcut::tag::disabled)
+            if (   (cli_->honour_dependencies() && !reg_obj->crpcut_can_run())
+                || reg_obj->get_importance() == crpcut::tag::disabled)
               {
                 continue;
               }
             progress = true;
-            obj->set_test_environment(env_);
-            start_test(obj, poller);
+            reg_obj->set_test_environment(env_);
+            start_test(reg_obj, poller);
             manage_children(num_parallel, poller);
-            obj->unlink();
+            reg_obj->unlink();
           }
         if (!progress)
           {
