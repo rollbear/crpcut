@@ -30,12 +30,13 @@
 int main(int argc, char *argv[])
 {
   trompeloeil::set_reporter([](::trompeloeil::severity,
-                               const std::string& loc,
+                               char const *file,
+                               unsigned long line,
                                const std::string& msg)
     {
-      auto location = loc.empty()
-        ? ::crpcut::crpcut_test_monitor::current_test()->get_location()
-        : ::crpcut::datatypes::fixed_string{loc.c_str(), loc.length()};
+      auto location = line
+        ? ::crpcut::datatypes::fixed_string{file, line}
+        : ::crpcut::crpcut_test_monitor::current_test()->get_location();
       ::crpcut::comm::report(::crpcut::comm::exit_fail,
                              std::ostringstream(msg),
                              location);
