@@ -1,3 +1,14 @@
+2015-09-21 1.9.3
+
+         * Adaptations for C++14
+
+         * Adaptations for std::unique_ptr<> instead of deprecated
+           std::auto_ptr<> when so available.
+
+         * Minor bug fixes
+
+         * Verified support for g++4.9, g++5.1, g++5.2, clang++3.7 and clang 3.6
+
 2013-04-08 1.9.2
 
          * Adapted CMakeLists.txt for CMake 2.6 or later
