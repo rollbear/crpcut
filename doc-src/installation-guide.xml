@@ -73,10 +73,10 @@
     </para>
     <para><ulink url="http://gcc.gnu.org">GCC</ulink> supports these
       since long, and &crpcut; has been verified to work with versions
-      4.2.4, 4.3.6, 4.4.7, 4.5.5, 4.6.3, 4.7.2 and 4.8.0
+      4.2.4, 4.3.6, 4.4.7, 4.5.5, 4.6.4, 4.7.4 and 4.8.5, 4.9.3, 5.1.0 and 5.2.0
     </para>
-    <para><ulink url="http:clang.llvm.org">Clang</ulink> works
-    since version 3.0</para>
+    <para><ulink url="http:clang.llvm.org">Clang</ulink> is verified to work
+    with versions 3.6 and 3.7</para>
   </simplesect>
   <simplesect>
     <title>Operating system requirements</title>
