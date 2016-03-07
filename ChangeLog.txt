@@ -1,3 +1,9 @@
+2016-03-07 1.9.4
+
+         * Fixed bug where current_test was not set in --single-shot mode,
+           causing the reporter adapter for Trompeloeil mocking framework
+           (https://github.com/rollbear/trompeloeil) to fail.
+
 2015-09-21 1.9.3
 
          * Adaptations for C++14
