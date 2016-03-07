@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012,2016 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
 #include "../io.hpp"
 
 using trompeloeil::_;
+using trompeloeil::ne;
 
 namespace {
   class test_poller : public crpcut::poll<crpcut::io>
@@ -121,7 +122,7 @@ TESTSUITE(presentation_output)
       REQUIRE_CALL(buffer, get_buffer())
         .IN_SEQUENCE(seq)
         .RETURN(buff_data[0]);
-      REQUIRE_CALL(writer, do_write(10, _, 13U))
+      REQUIRE_CALL(writer, do_write(10, ne<const char*>(nullptr), 13U))
         .WITH(std::string(_2, _3) == "hej hopp alla")
         .IN_SEQUENCE(seq)
         .RETURN(10);
@@ -146,7 +147,7 @@ TESTSUITE(presentation_output)
       REQUIRE_CALL(buffer, get_buffer())
         .IN_SEQUENCE(seq)
         .RETURN(buff_data[0]);
-      REQUIRE_CALL(writer, do_write(10, _, 13U))
+      REQUIRE_CALL(writer, do_write(10, ne<const char*>(nullptr), 13U))
         .WITH(std::string(_2,_3) == "hej hopp alla")
         .IN_SEQUENCE(seq)
         .RETURN(13);
@@ -174,7 +175,7 @@ TESTSUITE(presentation_output)
       REQUIRE_CALL(buffer, get_buffer())
         .IN_SEQUENCE(seq)
         .RETURN(buff_data[0]);
-      REQUIRE_CALL(writer, do_write(10, _, 13U))
+      REQUIRE_CALL(writer, do_write(10, ne<const char*>(nullptr), 13U))
         .WITH(std::string(_2, _3) == "hej hopp alla")
         .IN_SEQUENCE(seq)
         .RETURN(10);
@@ -184,7 +185,7 @@ TESTSUITE(presentation_output)
       REQUIRE_CALL(buffer, get_buffer())
         .IN_SEQUENCE(seq)
         .RETURN(buff_data[0]);
-      REQUIRE_CALL(writer, do_write(10, _, 3U))
+      REQUIRE_CALL(writer, do_write(10, ne<const char*>(nullptr), 3U))
         .WITH(std::string(_2, _3) == "lla")
         .IN_SEQUENCE(seq)
         .RETURN(3);

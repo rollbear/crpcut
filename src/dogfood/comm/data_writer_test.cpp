@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012,2016 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,17 +51,18 @@ TESTSUITE(comm)
   TESTSUITE(data_writer)
   {
     using trompeloeil::_;
+    using trompeloeil::ne;
 
     TEST(write_loop_constructs_in_chucks)
     {
       test_writer d;
-      REQUIRE_CALL(d, write(_, 26U))
+      REQUIRE_CALL(d, write(ne<const char*>(nullptr), 26U))
         .WITH(std::string(_1,_2) == alphabet)
         .RETURN(10);
-      REQUIRE_CALL(d, write(_, 16U))
+      REQUIRE_CALL(d, write(ne<const char*>(nullptr), 16U))
         .WITH(std::string(_1,_2) == alphabet + 10)
         .RETURN(10);
-      REQUIRE_CALL(d, write(_, 6U))
+      REQUIRE_CALL(d, write(ne<const char*>(nullptr), 6U))
         .WITH(std::string(_1,_2) == alphabet + 20)
         .RETURN(6);
       d.write_loop(alphabet, 26U);
@@ -71,10 +72,10 @@ TESTSUITE(comm)
     {
       const char *nullstr = 0;
       test_writer d;
-      REQUIRE_CALL(d, write(_, 26U))
+      REQUIRE_CALL(d, write(ne<const char*>(nullptr), 26U))
         .WITH(std::string(_1,_2) == alphabet)
         .RETURN(10);
-      REQUIRE_CALL(d, write(_, 16U))
+      REQUIRE_CALL(d, write(ne<const char*>(nullptr), 16U))
         .WITH(std::string(_1, _2) == alphabet + 10)
         .RETURN(0);
       ASSERT_THROW(d.write_loop(alphabet, 26U),
@@ -86,18 +87,18 @@ TESTSUITE(comm)
     {
       trompeloeil::sequence s;
       test_writer d;
-      ALLOW_CALL(d, write(_,_))
+      ALLOW_CALL(d, write(ne<const char*>(nullptr),_))
         .RETURN(ssize_t(_2));
-      REQUIRE_CALL(d, write(_, 26U))
+      REQUIRE_CALL(d, write(ne<const char*>(nullptr), 26U))
         .IN_SEQUENCE(s)
         .WITH(std::string(_1,_2) == alphabet)
         .RETURN(10);
 
-      REQUIRE_CALL(d, write(_, 16U)) // actually matched last...
+      REQUIRE_CALL(d, write(ne<const char*>(nullptr), 16U)) // actually matched last...
         .WITH(std::string(_1,_2) == alphabet + 10)
         .RETURN(16);
 
-      REQUIRE_CALL(d, write(_, 16U))
+      REQUIRE_CALL(d, write(ne<const char*>(nullptr), 16U))
         .IN_SEQUENCE(s)
         .WITH(std::string(_1,_2) == alphabet + 10)
         .SIDE_EFFECT(errno = EINTR)

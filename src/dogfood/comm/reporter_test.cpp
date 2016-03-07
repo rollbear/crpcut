@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012-2013,2016 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,8 @@ TESTSUITE(comm)
     };
 
     using trompeloeil::_;
-
+    using trompeloeil::ne;
+    
     TEST(reporter_without_current_process_prints_on_stream)
     {
        std::ostringstream os;
@@ -124,7 +125,7 @@ TESTSUITE(comm)
       REQUIRE_CALL(mon, is_naughty_child())
         .RETURN(true);
 
-      REQUIRE_CALL(wfd, write_loop(_, sizeof(request),_))
+      REQUIRE_CALL(wfd, write_loop(ne<const char*>(nullptr), sizeof(request),_))
         .WITH(memcmp(_1, request, _2) == 0)
         .LR_RETURN(std::ref(wfd));
       r(crpcut::comm::fail, "apa", location, &mon);
@@ -157,7 +158,7 @@ TESTSUITE(comm)
       p = static_cast<char*>(set_to(p, std::size_t(10)));
       memcpy(p, "apa.cpp:32apa", 3 + 10);
 
-      REQUIRE_CALL(wfd, write_loop(_, sizeof(request),_))
+      REQUIRE_CALL(wfd, write_loop(ne<const char*>(nullptr), sizeof(request),_))
         .WITH(memcmp(_1, request, _2) == 0)
         .RETURN(std::ref(wfd));
       r(crpcut::comm::exit_fail, "apa", location, &mon);
@@ -171,7 +172,7 @@ TESTSUITE(comm)
       p = static_cast<char*>(set_to(p, size_t(10)));
       memcpy(p, "apa.cpp:32apa", 10 + 3);
 
-      REQUIRE_CALL(wfd, write_loop(_, sizeof(request),_))
+      REQUIRE_CALL(wfd, write_loop(ne<const char*>(nullptr), sizeof(request),_))
         .WITH(memcmp(_1, request, _2) == 0)
         .RETURN(std::ref(wfd));
 
@@ -188,7 +189,7 @@ TESTSUITE(comm)
       p = static_cast<char*>(set_to(p, size_t(10)));
       memcpy(p, "apa.cpp:32apa", 10 + 3);
 
-      REQUIRE_CALL(wfd, write_loop(_, sizeof(request),_))
+      REQUIRE_CALL(wfd, write_loop(ne<const char*>(nullptr), sizeof(request),_))
         .WITH(memcmp(_1, request, _2) == 0)
         .RETURN(std::ref(wfd));
 
@@ -205,7 +206,7 @@ TESTSUITE(comm)
       p = static_cast<char*>(set_to(p, size_t(10)));
       memcpy(p, "apa.cpp:32apa", 10 + 3);
 
-      REQUIRE_CALL(wfd, write_loop(_, sizeof(request), _))
+      REQUIRE_CALL(wfd, write_loop(ne<const char*>(nullptr), sizeof(request), _))
         .WITH(memcmp(_1, request, _2) == 0)
         .RETURN(std::ref(wfd));
 

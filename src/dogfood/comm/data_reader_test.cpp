@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2012,2016 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,20 +51,21 @@ TESTSUITE(comm)
   TESTSUITE(data_reader)
   {
     using trompeloeil::_;
-
+    using trompeloeil::ne;
+    
     TEST(read_loop_constructs_in_chunks)
     {
       test_reader d;
 
-      REQUIRE_CALL(d, read(_, 26U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 26U))
         .SIDE_EFFECT(memcpy(_1, alphabet, 10))
         .RETURN(10);
 
-      REQUIRE_CALL(d, read(_, 16U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 16U))
         .SIDE_EFFECT(memcpy(_1, alphabet + 10, 10))
         .RETURN(10);
 
-      REQUIRE_CALL(d, read(_, 6U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 6U))
         .SIDE_EFFECT(memcpy(_1, alphabet + 20, 6))
         .RETURN(6);
 
@@ -81,11 +82,11 @@ TESTSUITE(comm)
       const char *nullstr = 0;
       test_reader d;
 
-      REQUIRE_CALL(d, read(_, 26U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 26U))
         .SIDE_EFFECT(memcpy(_1, alphabet, 10))
         .RETURN(10);
 
-      REQUIRE_CALL(d, read(_, 16U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 16U))
         .RETURN(0);
 
       char buff[30];
@@ -102,22 +103,22 @@ TESTSUITE(comm)
 
       test_reader d;
 
-      REQUIRE_CALL(d, read(_, 26U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 26U))
         .IN_SEQUENCE(s)
         .SIDE_EFFECT(memcpy(_1, alphabet, 10))
         .RETURN(10);
 
-      REQUIRE_CALL(d, read(_, 16U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 16U))
         .IN_SEQUENCE(s)
         .SIDE_EFFECT(memcpy(_1, alphabet + 10, 10))
         .RETURN(10);
 
-      REQUIRE_CALL(d, read(_, 6U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 6U))
         .IN_SEQUENCE(s)
         .SIDE_EFFECT(memcpy(_1, alphabet + 20, 6))
         .RETURN(6);
 
-      REQUIRE_CALL(d, read(_, 16U))
+      REQUIRE_CALL(d, read(ne<char*>(nullptr), 16U))
         .SIDE_EFFECT(errno = EINTR)
         .RETURN(-1);
 
