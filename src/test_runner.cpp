@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2013 Bjorn Fahller <bjorn@fahller.se>
+ * Copyright 2011-2013,2016 Bjorn Fahller <bjorn@fahller.se>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -477,6 +477,7 @@ namespace crpcut {
               }
             crpcut_test_case_registrator *i = reg_.first();
             i->set_test_environment(env_);
+            crpcut_test_monitor::make_current(i);
             std::cout << *i << " ";
             i->run_test_case();
             std::cout << "OK\n";
