@@ -415,6 +415,8 @@ else (HAS_OBJECT_LIBS)
   set(COMMON ${LIB_SRCS})
 endif (HAS_OBJECT_LIBS)
 
+find_package(Threads REQUIRED)
+
 add_library(crpcut_basic ${COMMON} ${HEAP_FAKE_SRCS})
 set_target_properties(crpcut_basic PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
@@ -423,6 +425,8 @@ add_library(crpcut ${COMMON} ${LIBHEAP_SRCS})
 set_target_properties(crpcut PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
   SOVERSION ${CRPCUT_LIB_SOVERSION})
+target_link_libraries(crpcut ${CMAKE_DL_LIBS})
+target_link_libraries(crpcut ${CMAKE_THREAD_LIBS_INIT})
 if(GMOCK_LIBS)
   file(GLOB GMOCK_TEST_SRCS   test-src/gmock.cpp)
 endif(GMOCK_LIBS)
@@ -987,7 +991,6 @@ install(
   DESTINATION include
 )
 
-install(TARGETS crpcut crpcut_basic crpcut_heap DESTINATION ${LIBRARY_OUTPUT_PATH})
 install(
   FILES ${TEST_SRCS}
   DESTINATION "${SHAREDIR}/example_source"
@@ -996,4 +999,46 @@ install(
   FILES crpcut.xsd TODO
   DESTINATION "${SHAREDIR}"
   )
+
+install(TARGETS crpcut crpcut_basic crpcut_heap EXPORT crpcutTargets
+    LIBRARY DESTINATION ${LIBRARY_OUTPUT_PATH}
+    ARCHIVE DESTINATION ${LIBRARY_OUTPUT_PATH}
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/crpcut-${CRPCUT_LIB_VERSION}/crpcutConfigVersion.cmake"
+  VERSION ${CRPCUT_LIB_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+export(EXPORT crpcutTargets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/crpcut-${CRPCUT_LIB_VERSION}/crpcutTargets.cmake"
+  NAMESPACE crpcut::
+)
+configure_file(crpcutConfig.cmake
+  "${CMAKE_CURRENT_BINARY_DIR}/crpcut-${CRPCUT_LIB_VERSION}/crpcutConfig.cmake"
+  COPYONLY
+)
+
+set(ConfigPackageLocation lib/cmake/crpcut)
+install(EXPORT crpcutTargets
+  FILE
+    crpcutTargets.cmake
+  NAMESPACE
+    crpcut::
+  DESTINATION
+    ${ConfigPackageLocation}
+)
+install(
+  FILES
+    crpcutConfig.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/crpcut-${CRPCUT_LIB_VERSION}/crpcutConfigVersion.cmake"
+  DESTINATION
+    ${ConfigPackageLocation}
+  COMPONENT
+    Devel
+)
 
