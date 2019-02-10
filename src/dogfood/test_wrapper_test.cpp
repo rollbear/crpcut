@@ -27,7 +27,6 @@
 #include <trompeloeil.hpp>
 #include <crpcut.hpp>
 
-#define S(...) #__VA_ARGS__, (sizeof(#__VA_ARGS__) - 1)
 TESTSUITE(test_wrapper)
 {
   class mock_reporter : public crpcut::comm::reporter

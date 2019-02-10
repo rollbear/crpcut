@@ -127,11 +127,6 @@ TESTSUITE(output)
                    "Can't convert from \"UTF-8\" to \"tjolahopp!\"");
     }
 
-    std::string str(crpcut::datatypes::fixed_string s)
-    {
-      return std::string(s.str, s.len);
-    }
-
 
     static const char msg[] =
       "abcdefghijklmnopqrstuvwxyz\n"
