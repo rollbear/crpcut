@@ -257,16 +257,6 @@ namespace crpcut
       }
 
     }
-
-    local_root::local_root(const local_root &orig)
-      : mem_list_element(orig),
-        location_(orig.location_),
-        old_root_(orig.old_root_),
-        check_type_(orig.check_type_)
-    {
-      orig.old_root_ = 0;
-    }
-
     local_root::~local_root()
     {
       valgrind_make_mem_defined(this, sizeof(mem_list_element));

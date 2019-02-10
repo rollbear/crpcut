@@ -118,7 +118,7 @@ TESTSUITE(scope)
       ASSERT_TRUE(os.str() == report);
     }
 
-    TEST(copying_of_a_busted_limit_gives_only_one_report,
+    TEST(moving_a_busted_limit_gives_only_one_report,
          fix)
     {
       {
@@ -127,8 +127,8 @@ TESTSUITE(scope)
         using max = crpcut::scope::time_base::max;
         time<fail, max, test_clock> t(0, "apa:3", r, 0);
         test_clock::set_timestamp_us(1000UL);
-        crpcut::scope::time<fail, max, test_clock> t2(t);
-        crpcut::scope::time<fail, max, test_clock> t3(t2);
+        crpcut::scope::time<fail, max, test_clock> t2(std::move(t));
+        crpcut::scope::time<fail, max, test_clock> t3(std::move(t2));
       }
       static const char report[] =
           "\napa:3\n"

@@ -327,23 +327,19 @@ namespace crpcut {
     {
       const char  *str;
       std::size_t  len;
-    private:
-      struct secret_bool;
     public:
-      static fixed_string make(const char * p, size_t len)
+      static constexpr fixed_string make(const char * p, size_t len)
       {
-        fixed_string s = { p, len };
-        return s;
+        return fixed_string{ p, len };
       }
       template <size_t N>
-      static fixed_string make(const char (&f)[N])
+      static constexpr fixed_string make(const char (&f)[N])
       {
-        fixed_string s = { f, N - 1 };
-        return s;
+        return fixed_string{ f, N - 1 };
       }
-      operator const secret_bool* () const
+      constexpr explicit operator bool () const
       {
-        return len ? reinterpret_cast<const secret_bool*>(this) : 0;
+        return len > 0U;
       }
       bool operator==(const fixed_string &s) const
       {
@@ -394,6 +390,8 @@ namespace crpcut {
     {
     public:
       list_elem();
+      list_elem(const list_elem&) = delete;
+      list_elem& operator=(const list_elem&) = delete;
       virtual ~list_elem();
       void link_after(list_elem& r);
       void link_before(list_elem &r);
@@ -410,8 +408,6 @@ namespace crpcut {
     protected:
       void unlink();
     private:
-      list_elem(const list_elem&);
-      list_elem& operator=(const list_elem&);
       list_elem *next_;
       list_elem *prev_;
     };
@@ -508,7 +504,7 @@ namespace crpcut {
     {
     }
     template <typename T>
-    bool operator()(const T &t)
+    bool operator()(const T &t) const
     {
       return (*p_)(t);
     }
@@ -677,7 +673,7 @@ namespace crpcut {
       basic_oastream(charT *begin_, charT *end_);
       basic_oastream(charT *begin_, size_t size_);
       template <size_t N>
-      basic_oastream(charT (&buff)[N]);
+      explicit basic_oastream(charT (&buff)[N]);
       using oabuf<charT, traits>::begin;
       using oabuf<charT, traits>::end;
       std::size_t size() const { return size_t(end() - begin()); }
@@ -699,7 +695,7 @@ namespace crpcut {
     {
     public:
       basic_iastream(const charT *begin, const charT *end);
-      basic_iastream(const charT *begin);
+      explicit basic_iastream(const charT *begin);
       basic_iastream(const basic_iastream& i);
     };
 
@@ -787,7 +783,7 @@ namespace crpcut {
     protected:
       int get_fd() const { return fd_; }
       file_descriptor();
-      file_descriptor(int fd);
+      explicit file_descriptor(int fd);
       virtual ~file_descriptor();
       int fd_;
     };
@@ -806,7 +802,7 @@ namespace crpcut {
     {
     public:
       rfile_descriptor();
-      rfile_descriptor(int fd);
+      explicit rfile_descriptor(int fd);
       virtual ssize_t read(void *buff, size_t len) const;
     };
 
@@ -829,7 +825,7 @@ namespace crpcut {
     {
     public:
       wfile_descriptor();
-      wfile_descriptor(int fd);
+      explicit wfile_descriptor(int fd);
       virtual ssize_t write(const void *buff, size_t len) const;
     };
 
@@ -844,13 +840,12 @@ namespace crpcut {
 
       using tm =  crpcut_test_monitor;
     public:
-      static datatypes::fixed_string no_location()
+      static constexpr datatypes::fixed_string no_location()
       {
-        datatypes::fixed_string n = { 0, 0 };
-        return n;
+        return datatypes::fixed_string{ 0, 0 };
       }
       virtual ~reporter();
-      reporter(std::ostream &default_out = std::cout);
+      explicit reporter(std::ostream &default_out = std::cout);
       void set_writer(data_writer *w);
       void operator()(type                       t,
                       const std::ostringstream  &os,
@@ -906,12 +901,16 @@ namespace crpcut {
     {
     public:
       template <size_t N>
-      direct_reporter(const char               (&location)[N],
-                      reporter                  &r = report,
-                      const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
-      direct_reporter(datatypes::fixed_string  location,
-                      reporter                &r = report,
-                      const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
+      explicit direct_reporter(const char               (&location)[N],
+                               reporter                  &r = report,
+                               const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
+      explicit direct_reporter(datatypes::fixed_string  location,
+                               reporter                &r = report,
+                               const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
+
+      direct_reporter(const direct_reporter &) = delete;
+      direct_reporter& operator=(const direct_reporter&) = delete;
+
       template <typename V>
       direct_reporter& operator<<(const V& v);
       template <typename V>
@@ -932,8 +931,6 @@ namespace crpcut {
       }
       ~direct_reporter();
     private:
-      direct_reporter(const direct_reporter &);
-      direct_reporter& operator=(const direct_reporter&);
 
       size_t                         heap_limit;
       const datatypes::fixed_string  location_;
@@ -952,15 +949,15 @@ namespace crpcut {
     public:
       static std::string try_all();
     protected:
-      crpcut_exception_translator(crpcut_exception_translator &
+      explicit crpcut_exception_translator(crpcut_exception_translator &
                                   r  = root_object());
+      crpcut_exception_translator(const crpcut_exception_translator&) = delete;
+      crpcut_exception_translator& operator=(const crpcut_exception_translator&) = delete;
       ~crpcut_exception_translator();
-      crpcut_exception_translator(int);
+      explicit crpcut_exception_translator(int);
       std::string do_try_all();
       static crpcut_exception_translator& root_object();
     private:
-      crpcut_exception_translator(const crpcut_exception_translator&);
-      crpcut_exception_translator& operator=(const crpcut_exception_translator&);
       virtual std::string crpcut_translate() const;
     };
 
@@ -1377,21 +1374,19 @@ namespace crpcut {
     class local_root : public mem_list_element
     {
     public:
-      using bool_test = const local_root *;
       template <size_t N>
       local_root(comm::type type, const char (&location)[N]);
-      local_root(const local_root&);
+      local_root(const local_root&) = delete;
       ~local_root();
-      operator bool_test() const { return 0; }
+      local_root& operator=(const local_root&) = delete;
+      explicit operator bool() const { return false; }
       void nonsense_func() const {}
       static mem_list_element* current();
     private:
-      local_root();
       void assert_empty() const;
-      local_root& operator=(const local_root&);
 
       const datatypes::fixed_string  location_;
-      mutable mem_list_element      *old_root_;
+      mem_list_element      *old_root_;
       comm::type        const        check_type_;
 
       static mem_list_element *current_root;
@@ -1444,7 +1439,7 @@ namespace crpcut {
     void unregister();
     virtual ~fdreader() { }
   protected:
-    fdreader(crpcut_test_monitor *r, int fd = -1);
+    explicit fdreader(crpcut_test_monitor *r, int fd = -1);
     void set_fd(int fd, poll<fdreader> *poller);
     crpcut_test_monitor *const mon_;
   private:
@@ -1456,7 +1451,7 @@ namespace crpcut {
   class reader : public fdreader
   {
   public:
-    reader(crpcut_test_monitor *r, int fd = -1);
+    explicit reader(crpcut_test_monitor *r, int fd = -1);
     using fdreader::set_fd;
   private:
     virtual bool do_read_data();
@@ -1465,7 +1460,7 @@ namespace crpcut {
   class report_reader : public fdreader
   {
   public:
-    report_reader(crpcut_test_monitor *r);
+    explicit report_reader(crpcut_test_monitor *r);
     using fdreader::set_fd;
   private:
     void set_timeout(void *buff, size_t len);
@@ -1701,6 +1696,10 @@ namespace crpcut {
 
 
 
+  constexpr std::true_type is_nullptr(std::nullptr_t) { return {};}
+  inline std::false_type is_nullptr(...) { return {};}
+
+#if 0
   class null_cmp
   {
     class secret;
@@ -1710,16 +1709,10 @@ namespace crpcut {
     template <typename T>
     static char (&func(T*))[2];
   };
-
+#endif
   template <typename T>
-  class is_struct // or class or union
-  {
-    template <typename U>
-    static char check_member(double U::*);
-    template <typename U>
-    static char (&check_member(...))[2];
-  public:
-    static const bool value = (sizeof(check_member<T>(0)) == 1);
+  struct is_struct {
+    static constexpr bool value = std::is_class<T>::value || std::is_union<T>::value;
   };
   template <typename T>
   struct param_traits
@@ -3274,7 +3267,7 @@ namespace crpcut {
         static unsigned long now();
       };
       ~time_base() {};
-      operator bool() const { return false; }
+      explicit operator bool() const { return false; }
       void silence_warning() const {}
     protected:
       time_base(unsigned long deadline, datatypes::fixed_string location);
@@ -3312,7 +3305,7 @@ namespace crpcut {
               }
           }
       }
-      time(const time& r)
+      time(time&& r)
         : time_base(r),
           limit_us_(r.limit_us_),
           reporter_(r.reporter_),
@@ -3322,9 +3315,8 @@ namespace crpcut {
         r.limit_us_ = ~zero;
       }
     private:
-      time& operator=(const time&);
 
-      unsigned long mutable      limit_us_;
+      unsigned long              limit_us_;
       comm::reporter            &reporter_;
       const crpcut_test_monitor *mon_;
     };
@@ -3618,7 +3610,7 @@ namespace crpcut {
   }
 
 
-#define CRPCUT_IS_ZERO_LIT(x) (sizeof(crpcut::null_cmp::func(x)) == 1)
+#define CRPCUT_IS_ZERO_LIT(x) decltype(crpcut::is_nullptr(x))::value
 
 #define CRPCUT_BINARY_CHECK(action, name, lh, rh)                       \
   do {                                                                  \
