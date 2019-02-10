@@ -33,6 +33,9 @@ extern "C" {
 
 namespace crpcut {
   namespace wrapped {
+    iconv_t iconv_open(const char* to, const char* from);
+    int iconv_close(iconv_t handle);
+    size_t iconv(iconv_t h, char **i, size_t* iz, char **o, size_t *oz);
     CRPCUT_WRAP_FUNC(libc, iconv_open, iconv_t,
                      (const char *to, const char *from),
                      (to, from))

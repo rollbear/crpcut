@@ -28,7 +28,7 @@
 
 namespace cd = crpcut::policies::core_dumps;
 
-void check_value(const cd::crpcut_default_handler &d, bool v)
+static void check_value(const cd::crpcut_default_handler &d, bool v)
 {
   ASSERT_TRUE(d.crpcut_core_dumps_allowed() == v);
 }

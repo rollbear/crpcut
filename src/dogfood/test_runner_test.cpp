@@ -502,7 +502,7 @@ TESTSUITE(test_runner)
         return crpcut::datatypes::fixed_string::make("");
       }
     };
-    test_tag_root tag_root;
+    static test_tag_root tag_root;
 #define TAG(name)                                              \
     class name ## _tag : public crpcut::tag                    \
     {                                                          \
@@ -514,7 +514,7 @@ TESTSUITE(test_runner)
         return crpcut::datatypes::fixed_string::make(#name);   \
       }                                                        \
     };                                                         \
-    name ## _tag name(&tag_root)
+    static name ## _tag name(&tag_root)
     TAG(apa);
 
     struct end_data

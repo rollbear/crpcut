@@ -42,6 +42,7 @@ namespace crpcut {
 #ifdef isprint
 #define ISPRINT(x) isprint(x)
 #else
+    int isprint(int);
     CRPCUT_WRAP_FUNC(libc, isprint, int, (int c), (c))
 #define ISPRINT(x) wrapped::isprint(x)
 #endif

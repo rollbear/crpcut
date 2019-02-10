@@ -149,6 +149,7 @@ extern "C" {
 }
 namespace crpcut {
   namespace wrapped {
+    int clock_gettime(clockid_t, struct timespec*);
     CRPCUT_WRAP_FUNC(HAVE_CLOCK_GETTIME,
                      clock_gettime,
                      int,
@@ -180,6 +181,59 @@ namespace crpcut {
 
 namespace crpcut {
   namespace wrapped {
+    void* malloc(size_t);
+    void free(void*);
+    void* calloc(size_t, size_t);
+    void *realloc(void*, size_t);
+
+    int chdir(const char*);
+    int close(int);
+    int closedir(DIR*);
+    int dup2(int,int);
+    int fork(void);
+    char* getcwd(char*, size_t);
+    char* getenv(const char*);
+    int gethostname(char*, size_t);
+    int getitimer(int, itimerval*);
+    pid_t getpgid(pid_t);
+    int getpid(void);
+    int getrusage(int, rusage*);
+    int gettimeofday(timeval*,struct timezone*);
+    tm* gmtime(const time_t*);
+    int killpg(int, int);
+    void* memcpy(void*, const void*, size_t);
+    int mkdir(const char*, mode_t);
+    char* mkdtemp(char*);
+    int open(const char*, int m, mode_t);
+    DIR* opendir(const char*);
+    int pipe(int p[2]);
+    ssize_t read(int, void*, size_t);
+    int readdir_r(DIR*, dirent*, dirent**);
+    int regcomp(regex_t, const char*, int);
+    int regexec(const regex_t*, const char*, size_t, regmatch_t, int);
+    size_t regerror(int, const regex_t*, char*, size_t);
+    void regfree(regex_t*);
+    int remove(const char*);
+    int rename(const char*, const char*);
+    int rmdir(const char*);
+    int select(int, fd_set*, fd_set*, fd_set*, timeval*);
+    int setitimer(int, const itimerval*, itimerval*);
+    int setpgid(pid_t, pid_t);
+    int setrlimit(int, const rlimit*);
+    sighandler_t signal(int, sighandler_t);
+    int strcmp(const char*, const char*);
+    char* strerror(int);
+    size_t strlun(const char*);
+    int strncmp(const char*, const char*, size_t);
+    char* strchr(const char*, int);
+    char* strstr(const char*, const char*);
+    time_t time(time_t*);
+    int waitid(idtype_t, id_t, siginfo_t*, int);
+    ssize_t write(int, const void*, size_t);
+    [[noreturn]] void _Exit(int);
+    [[noreturn]] void abort(void);
+    [[noreturn]] void exit(int);
+
     CRPCUT_WRAP_FUNC(rtld_next, malloc, void*, (size_t s), (s))
     CRPCUT_WRAP_V_FUNC(rtld_next, free, void, (const void *p), (p))
     CRPCUT_WRAP_FUNC(rtld_next, calloc, void *, (size_t n, size_t s), (n, s))
@@ -193,13 +247,13 @@ namespace crpcut {
     CRPCUT_WRAP_FUNC(libc, getcwd, char*, (char *buf, size_t size), (buf, size))
     CRPCUT_WRAP_FUNC(libc, getenv, char*, (const char*n), (n))
     CRPCUT_WRAP_FUNC(libc, gethostname, int, (char *n, size_t s), (n, s))
-    CRPCUT_WRAP_FUNC(libc, getitimer, int, (int i, struct itimerval *v), (i, v))
+    CRPCUT_WRAP_FUNC(libc, getitimer, int, (int i, itimerval *v), (i, v))
     CRPCUT_WRAP_FUNC(libc, getpgid, pid_t, (pid_t p), (p))
     CRPCUT_WRAP_FUNC(libc, getpid, int, (void), ())
-    CRPCUT_WRAP_FUNC(libc, getrusage, int, (int w, struct rusage *u), (w, u))
+    CRPCUT_WRAP_FUNC(libc, getrusage, int, (int w, rusage *u), (w, u))
     CRPCUT_WRAP_FUNC(libc, gettimeofday,
                      int,
-                     (struct timeval *tv, struct timezone *tz),
+                     (timeval *tv, struct timezone *tz),
                      (tv, tz))
     CRPCUT_WRAP_FUNC(libc, gmtime, struct tm*, (const time_t *t), (t))
     CRPCUT_WRAP_FUNC(libc, killpg, int, (int p, int s), (p, s))
@@ -217,7 +271,7 @@ namespace crpcut {
                      (fd, p, s))
     CRPCUT_WRAP_FUNC(libc, readdir_r,
                      int,
-                     (DIR *d, struct dirent *e, struct dirent **r),
+                     (DIR *d, dirent *e, dirent **r),
                      (d, e, r))
     CRPCUT_WRAP_FUNC(libc, regcomp, int, (regex_t* r, const char *e, int f), (r, e, f))
     CRPCUT_WRAP_FUNC(libc, regexec,
@@ -237,16 +291,17 @@ namespace crpcut {
     CRPCUT_WRAP_FUNC(libc, rmdir, int, (const char *n), (n))
     CRPCUT_WRAP_FUNC(libc, select,
                      int,
-                     (int n, fd_set *r, fd_set *w, fd_set *e, struct timeval *t),
+                     (int n, fd_set *r, fd_set *w, fd_set *e, timeval *t),
                      (n, r, w, e, t))
+
     CRPCUT_WRAP_FUNC(libc, setitimer,
                      int,
-                     (int n, const struct itimerval *i, struct itimerval *o),
+                     (int n, const itimerval *i, itimerval *o),
                      (n, i, o))
     CRPCUT_WRAP_FUNC(libc, setpgid, int, (pid_t pid, pid_t pgid), (pid, pgid))
     CRPCUT_WRAP_FUNC(libc, setrlimit,
                      int,
-                     (int n, const struct rlimit *r),
+                     (int n, const rlimit *r),
                      (n, r))
     CRPCUT_WRAP_FUNC(libc, signal, sighandler_t, (int s, sighandler_t h), (s, h))
     CRPCUT_WRAP_FUNC(libc, strcmp, int, (const char *l, const char *r), (l, r))
