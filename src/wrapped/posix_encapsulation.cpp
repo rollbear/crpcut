@@ -178,7 +178,6 @@ namespace crpcut {
 }
 #endif
 
-
 namespace crpcut {
   namespace wrapped {
     CRPCUT_WRAP_FUNC(rtld_next, malloc, void*, (size_t s), (s))
@@ -269,9 +268,9 @@ namespace crpcut {
                      ssize_t,
                      (int f, const void *p, size_t s),
                      (f, p, s))
-    CRPCUT_WRAP_V_FUNC(libc, _Exit, CRPCUT_NORETURN void, (int n), (n))
-    CRPCUT_WRAP_V_FUNC(libc, abort, CRPCUT_NORETURN void, (void),  ())
-    CRPCUT_WRAP_V_FUNC(libc, exit,  CRPCUT_NORETURN void, (int n), (n))
+    CRPCUT_WRAP_V_FUNC(libc, _Exit, void, (int n), (n))
+    CRPCUT_WRAP_V_FUNC(libc, abort, void, (void),  ())
+    CRPCUT_WRAP_V_FUNC(libc, exit,  void, (int n), (n))
   }
 
   ssize_t

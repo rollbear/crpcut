@@ -28,8 +28,8 @@
 
 #define CHECK(name, lh, rh, r)                                  \
   crpcut::tester<crpcut::comm::fail,                            \
-                 CRPCUT_IS_ZERO_LIT(lh), CRPCUT_DECLTYPE(lh),   \
-                 CRPCUT_IS_ZERO_LIT(rh), CRPCUT_DECLTYPE(rh)>   \
+                 CRPCUT_IS_ZERO_LIT(lh), decltype(lh),   \
+                 CRPCUT_IS_ZERO_LIT(rh), decltype(rh)>   \
   ("location", #name, r, 0).name(lh, #lh, rh, #rh);
 namespace {
   struct fix

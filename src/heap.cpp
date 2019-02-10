@@ -511,7 +511,7 @@ namespace crpcut
 
     std::bad_alloc bad_alloc_exc;
 
-    void *alloc_new_mem(size_t s, alloc_type type) throw (std::bad_alloc)
+    void *alloc_new_mem(size_t s, alloc_type type)
     {
       void *p = 0;
       for (;;)

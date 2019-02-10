@@ -246,17 +246,18 @@ TESTSUITE(asserts)
   }
 
   template <typename T>
-    class unstreamable
+  class unstreamable
   {
   public:
     unstreamable(T t) : data(t) {}
-    unstreamable& operator=(const T& t) { data = t; return *this; }
     operator T&() { return data; }
     operator const T&() const { return data; }
-    unstreamable(const unstreamable& t) : data(t.data) {};
   private:
     T data;
   };
+
+  template <typename T>
+  std::ostream& operator<<(std::ostream&, const unstreamable<T>&) = delete;
 
   TEST(should_fail_on_assert_gt_with_unstreamable_param_i, fixture<3>)
   {

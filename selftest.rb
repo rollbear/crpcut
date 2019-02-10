@@ -1345,7 +1345,7 @@ TESTS = {
   'should_succeed_reading_file_in_start_dir' =>
   PassedTest.new().
   tag('filesystem').
-  log('info', /in.rdstate\(\)=\d-byte object <[ 0-9A-Fa-f]+>/),
+  log('info', /in.rdstate\(\)=0/),
 
  'should_not_run_due_to_failed_left_behind_files_success_otherwise' =>
   PassedTest.new().

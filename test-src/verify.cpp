@@ -281,6 +281,9 @@ TESTSUITE(verify)
     T data;
   };
 
+  template <typename T>
+  std::ostream& operator<<(std::ostream&, const unstreamable<T>&) = delete;
+
   TEST(should_fail_on_verify_gt_with_unstreamable_param_i, fixture<3>)
   {
     unstreamable<int> i(3);

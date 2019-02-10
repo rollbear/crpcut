@@ -41,13 +41,13 @@ namespace crpcut {
   extern unsigned use_local_heap;
 
   namespace wrapped {
-    CRPCUT_NORETURN void _Exit(int c);
-    CRPCUT_NORETURN void abort();
+    [[noreturn]] void    _Exit(int c);
+    [[noreturn]] void    abort();
     int                  chdir(const char *n);
     int                  close(int);
     int                  closedir(DIR* p);
     int                  dup2(int o, int n);
-    CRPCUT_NORETURN void exit(int c);
+    [[noreturn]] void    exit(int c);
     int                  fork(void);
     void                 free(const void*);
     char *               getcwd(char *buf, size_t size);

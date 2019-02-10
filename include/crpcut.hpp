@@ -27,264 +27,7 @@
 #ifndef CRPCUT_HPP
 #define CRPCUT_HPP
 
-#if defined(GMOCK_INCLUDE_GMOCK_GMOCK_H_)  || defined(__CDT_PARSER__)
-#undef ADD_FAILURE
-#undef ASSERT_ANY_THROW
-#undef ASSERT_DEATH
-#undef ASSERT_DEBUG_DEATH
-#undef ASSERT_DOUBLE_EQ
-#undef ASSERT_EQ
-#undef ASSERT_EXIT
-#undef ASSERT_FALSE
-#undef ASSERT_FLOAT_EQ
-#undef ASSERT_GE
-#undef ASSERT_GT
-#undef ASSERT_HRESULT_FAILED
-#undef ASSERT_HRESULT_SUCCEEDED
-#undef ASSERT_LE
-#undef ASSERT_LT
-#undef ASSERT_NE
-#undef ASSERT_NEAR
-#undef ASSERT_NO_FATAL_FAILURE
-#undef ASSERT_NO_THROW
-#undef ASSERT_PRED
-#undef ASSERT_PRED_FORMAT
-#undef ASSERT_STRCASEEQ
-#undef ASSERT_STRCASENE
-#undef ASSERT_STREQ
-#undef ASSERT_STRNE
-#undef ASSERT_THROW
-#undef ASSERT_TRUE
-#undef EXPECT_ANY_THROW
-#undef EXPECT_DEATH
-#undef EXPECT_DEBUG_DEATH
-#undef EXPECT_DOUBLE_EQ
-#undef EXPECT_EQ
-#undef EXPECT_EXIT
-#undef EXPECT_FALSE
-#undef EXPECT_FATAL_FAILURE
-#undef EXPECT_FATAL_FAILURE_ON_ALL_THREADS
-#undef EXPECT_FLOAT_EQ
-#undef EXPECT_GE
-#undef EXPECT_GT
-#undef EXPECT_HRESULT_FAILED
-#undef EXPECT_HRESULT_SUCCEEDED
-#undef EXPECT_LE
-#undef EXPECT_LT
-#undef EXPECT_NE
-#undef EXPECT_NEAR
-#undef EXPECT_NONFATAL_FAILURE
-#undef EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS
-#undef EXPECT_NO_FATAL_FAILURE
-#undef EXPECT_NO_THROW
-#undef EXPECT_PRED
-#undef EXPECT_PRED_FORMAT
-#undef EXPECT_STRCASEEQ
-#undef EXPECT_STRCASENE
-#undef EXPECT_STREQ
-#undef EXPECT_STRNE
-#undef EXPECT_THROW
-#undef EXPECT_TRUE
-#undef FAIL
-#undef FRIEND_TEST
-#undef GTEST_ASSERT_
-#undef GTEST_CASE_NAMESPACE_
-#undef GTEST_IMPL_CMP_HELPER_
-#undef GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
-#undef GTEST_INCLUDE_GTEST_GTEST_H_
-#undef GTEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
-#undef GTEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
-#undef GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
-#undef GTEST_INCLUDE_GTEST_GTEST_PROD_H_
-#undef GTEST_INCLUDE_GTEST_GTEST_SPI_H_
-#undef GTEST_INCLUDE_GTEST_GTEST_TEST_PART_H_
-#undef GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
-#undef GTEST_PRED
-#undef GTEST_PRED_FORMAT
-#undef GTEST_REGISTERED_TEST_NAMES_
-#undef GTEST_TYPED_TEST_CASE_P_STATE_
-#undef GTEST_TYPE_PARAMS_
-#undef INSTANTIATE_TEST_CASE_P
-#undef INSTANTIATE_TYPED_TEST_CASE_P
-#undef REGISTER_TYPED_TEST_CASE_P
-#undef RUN_ALL_TESTS
-#undef SCOPED_TRACE
-#undef SUCCEED
-#undef TEST
-#undef TEST_F
-#undef TEST_P
-#undef TYPED_TEST
-#undef TYPED_TEST_CASE
-#undef TYPED_TEST_CASE_P
-#undef TYPED_TEST_P
 
-#define CRPCUT_DEFINE_REPORTER                                          \
-  class crpcut_reporter : public ::testing::EmptyTestEventListener      \
-  {                                                                     \
-  public:                                                               \
-    virtual void OnTestPartResult(const testing::TestPartResult& result) \
-    {                                                                   \
-      if (result.failed())                                              \
-        {                                                               \
-          using crpcut::datatypes::fixed_string;                        \
-          crpcut::heap::set_limit(crpcut::heap::system);                \
-          std::ostringstream loc_stream;                                \
-          std::string lstr;                                             \
-          fixed_string loc;                                             \
-          if (result.file_name() && result.line_number() > 0)           \
-            {                                                           \
-              loc_stream << result.file_name()                          \
-                         << ":"                                         \
-                         << result.line_number();                       \
-              loc_stream.str().swap(lstr);                              \
-              loc = fixed_string::make(lstr.c_str(), lstr.length());    \
-            }                                                           \
-          else                                                          \
-            {                                                           \
-              loc = fixed_string::make(CRPCUT_HERE);                    \
-            }                                                           \
-          std::ostringstream os;                                        \
-          os << result.summary() << result.message();                   \
-          crpcut::comm::report(crpcut::comm::exit_fail, os, loc);       \
-        }                                                               \
-    }                                                                   \
-  };                                                                    \
-  ::testing::TestEventListeners& listeners =                            \
-                ::testing::UnitTest::GetInstance()->listeners();        \
-  delete listeners.Release(listeners.default_result_printer());         \
-  listeners.Append(new crpcut_reporter())
-
-#else
-
-#define CRPCUT_DEFINE_REPORTER do {} while (0)
-
-// In a way this isn't nice, but the resulting compiler error gives
-// the user a very obvious hint about what's wrong and what to do instead
-
-#define ERRMSG "You must include <gmock/gmock.h> before <crpcut_hpp>"
-#define EXPECT_CALL ERRMSG
-#define ON_CALL ERRMSG
-#define MOCK_METHOD0 ERRMSG
-#define MOCK_METHOD0_T ERRMSG
-#define MOCK_METHOD1 ERRMSG
-#define MOCK_METHOD1_T ERRMSG
-#define MOCK_METHOD2 ERRMSG
-#define MOCK_METHOD2_T ERRMSG
-#define MOCK_METHOD3 ERRMSG
-#define MOCK_METHOD3_T ERRMSG
-#define MOCK_METHOD4 ERRMSG
-#define MOCK_METHOD4_T ERRMSG
-#define MOCK_METHOD5 ERRMSG
-#define MOCK_METHOD5_T ERRMSG
-#define MOCK_METHOD6 ERRMSG
-#define MOCK_METHOD6_T ERRMSG
-#define MOCK_METHOD7 ERRMSG
-#define MOCK_METHOD7_T ERRMSG
-#define MOCK_METHOD8 ERRMSG
-#define MOCK_METHOD8_T ERRMSG
-#define MOCK_METHOD9 ERRMSG
-#define MOCK_METHOD9_T ERRMSG
-#define MOCK_METHOD10 ERRMSG
-#define MOCK_METHOD10_T ERRMSG
-
-#define MOCK_CONST_METHOD0 ERRMSG
-#define MOCK_CONST_METHOD0_T ERRMSG
-#define MOCK_CONST_METHOD1 ERRMSG
-#define MOCK_CONST_METHOD1_T ERRMSG
-#define MOCK_CONST_METHOD2 ERRMSG
-#define MOCK_CONST_METHOD2_T ERRMSG
-#define MOCK_CONST_METHOD3 ERRMSG
-#define MOCK_CONST_METHOD3_T ERRMSG
-#define MOCK_CONST_METHOD4 ERRMSG
-#define MOCK_CONST_METHOD4_T ERRMSG
-#define MOCK_CONST_METHOD5 ERRMSG
-#define MOCK_CONST_METHOD5_T ERRMSG
-#define MOCK_CONST_METHOD6 ERRMSG
-#define MOCK_CONST_METHOD6_T ERRMSG
-#define MOCK_CONST_METHOD7 ERRMSG
-#define MOCK_CONST_METHOD7_T ERRMSG
-#define MOCK_CONST_METHOD8 ERRMSG
-#define MOCK_CONST_METHOD8_T ERRMSG
-#define MOCK_CONST_METHOD9 ERRMSG
-#define MOCK_CONST_METHOD9_T ERRMSG
-#define MOCK_CONST_METHOD10 ERRMSG
-#define MOCK_CONST_METHOD10_T ERRMSG
-
-#define MOCK_METHOD0_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD0_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD1_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD1_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD2_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD2_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD3_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD3_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD4_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD4_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD5_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD5_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD6_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD6_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD7_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD7_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD8_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD8_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD9_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD9_T_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD10_WITH_CALLTYPE ERRMSG
-#define MOCK_METHOD10_T_WITH_CALLTYPE ERRMSG
-
-#endif
-
-#ifdef __clang__
-#  if __has_feature(cxx_constexpr)
-#    define CRPCUT_SUPPORTS_CONSTEXPR
-#  endif
-#  if __has_feature(cxx_decltype)
-#    define CRPCUT_DECLTYPE decltype
-#  else
-#    define CRPCUT_DECLTYPE typeof
-#  endif
-#  if __has_feature(cxx_variadic_templates)
-#    define CRPCUT_SUPPORTS_VTEMPLATES
-#  endif
-#  ifdef __GXX_EXPERIMENTAL_CXX0X__
-#    define CRPCUT_EXPERIMENTAL_CXX0X
-#  endif
-#  define CRPCUT_NORETURN __attribute__((noreturn))
-#  if !__has_feature(cxx_exceptions)
-#    define CRPCUT_NO_EXCEPTION_SUPPORT
-#  endif
-#else
-#  ifdef __GNUG__
-#    ifdef __GXX_EXPERIMENTAL_CXX0X__
-#      define CRPCUT_DECLTYPE decltype
-#      define CRPCUT_EXPERIMENTAL_CXX0X
-#      if (__GNUC__ == 4)
-#        if (__GNUC_MINOR__ >= 3)
-#          define CRPCUT_SUPPORTS_VTEMPLATES
-#        endif
-#        if (__GNUC_MINOR__ >= 6)
-#          define CRPCUT_SUPPORTS_CONSTEXPR
-#        endif
-#      endif
-#    else
-#      define CRPCUT_DECLTYPE typeof
-#    endif
-#    define CRPCUT_NORETURN __attribute__((noreturn))
-#    ifndef __EXCEPTIONS
-#      define CRPCUT_NO_EXCEPTION_SUPPORT
-#    endif
-#  else
-#    if defined(__CDT_PARSER__)
-#      define CRPCUT_DECLTYPE decltype
-#      define CRPCUT_EXPERIMENTAL_CXX0X
-#      define CRPCUT_SUPPORTS_VTEMPLATES
-#      define __GXX_EXPERIMENTAL_CXX0X__
-#      define CRPCUT_SUPPORTS_CONSTEXPR
-#    endif
-#    define CRPCUT_NORETURN
-#  endif
-#endif
 #include <stdexcept>
 #include <sstream>
 #include <string>
@@ -293,18 +36,8 @@
 #include <iomanip>
 #include <cerrno>
 #include <cassert>
-#ifdef CRPCUT_EXPERIMENTAL_CXX0X
-#  include <type_traits>
-#  include <array>
-#else
-#  ifdef BOOST_TR1
-#    include <boost/tr1/type_traits.hpp>
-#    include <boost/tr1/array.hpp>
-#  else
-#    include <tr1/type_traits>
-#    include <tr1/array>
-#  endif
-#endif
+#include <type_traits>
+#include <array>
 #include <cstring>
 #include <cstdlib>
 #include <limits>
@@ -316,15 +49,6 @@ extern "C"
 #  include <regex.h>
 #  include <stdint.h>
 }
-
-namespace std {
-#if (!defined(CRPCUT_EXPERIMENTAL_CXX0X) || defined (BOOST_TR1))
-  using std::tr1::array;
-  using std::tr1::remove_cv;
-  using std::tr1::remove_reference;
-#endif
-}
-
 
 
 #ifdef CRPCUT_NO_EXCEPTION_SUPPORT
@@ -344,22 +68,19 @@ namespace std {
 
 namespace crpcut {
 
-#ifdef CRPCUT_SUPPORTS_CONSTEXPR
-template <size_t N>
-constexpr char array_index(size_t n, const char (&array)[N])
-{
-  return n < N ? array[n] : '\0';
-}
-#endif
-
-  template <bool b, typename T>
-  struct enable_if; // I know, it exists in <type_traits>, but not in g++-4.2.4
-
-  template <typename T>
-  struct enable_if<true, T>
-  {
-    typedef T type;
+  template <typename...>
+  struct void_t_ {
+    using type = void;
   };
+  template <typename ... Ts>
+  using void_t = typename void_t_<Ts...>::type;
+
+  template <size_t N>
+  constexpr char array_index(size_t n, const char (&array)[N])
+  {
+    return n < N ? array[n] : '\0';
+  }
+
 
   namespace datatypes {
     template <typename T>
@@ -369,6 +90,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
       typedef typename std::remove_cv<noref_type>::type type;
     };
   }
+
   template <typename T>
   struct eval_t
   {
@@ -391,7 +113,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
   class collate_t;
 
   namespace wrapped { // stdc and posix functions
-    CRPCUT_NORETURN void abort();
+    [[noreturn]]         void abort();
     void                 free(const void* p);
     void                *malloc(size_t n);
     ssize_t              read(int fd, void* p, size_t s);
@@ -460,15 +182,16 @@ constexpr char array_index(size_t n, const char (&array)[N])
     public:
       static bool is_loaded() { return libptr(); }
       template <typename T>
-      T sym(const char *name)
+      T sym(const char *name) const
       {
         assert_lib_is_loaded(libptr());
-        union {       // I don't like silencing the warning this way,
-          T func;     // but it should be safe. *IF* the function pointer
-          void *addr; // can't be represented by void*, dlsym() can't
-        } dlr;        // exist either.
-        dlr.addr = symbol(libptr(), name);
-        return dlr.func;
+        void *addr = symbol(libptr(), name);
+        T func;
+        static_assert(sizeof(func) == sizeof(addr),
+          "Can't use dlsym if sizeof funcptr is not same as sizeof void*");
+
+        std::memcpy(&func, &addr, sizeof(func));
+        return func;
       }
       static bool has_symbol(const char *name)
       {
@@ -488,12 +211,12 @@ constexpr char array_index(size_t n, const char (&array)[N])
       template <typename T>
       T sym(const char *name)
       {
-        union {
-          T func;
-          void *addr;
-        } dlr;
-        dlr.addr = symbol(RTLD_NEXT, name);
-        return dlr.func;
+        void *addr = symbol(RTLD_NEXT, name);
+        T func;
+        static_assert(sizeof(func) == sizeof(addr),
+                      "Can't use dlsym if sizeof funcptr is not same as sizeof void*");
+        std::memcpy(&func, &addr, sizeof(func));
+        return func;
       }
       static bool has_symbol(const char *name)
       {
@@ -511,196 +234,20 @@ constexpr char array_index(size_t n, const char (&array)[N])
 
   namespace stream_checker
   {
-    template <typename V, typename U>
-    char operator<<(V&, const U&);
 
-    template <typename T>
+    template <typename T, typename = void>
     struct is_output_streamable
     {
-    private:
-      static std::ostream &os;
-      static T& t;
-
-      static char check(char);
-      static std::pair<char, char> check(std::ostream&);
-    public:
-      static const bool value = sizeof(check(os << t)) != sizeof(char);
-    };
-
-
-    template <typename T>
-    struct is_output_streamable<const T>
-    {
-      static const bool value = is_output_streamable<T>::value;
+      static constexpr bool value = false;
     };
 
     template <typename T>
-    struct is_output_streamable<volatile T>
+    struct is_output_streamable<T, void_t<decltype(std::declval<std::ostream&>() << std::declval<const T&>())>>
     {
-      static const bool value = is_output_streamable<T>::value;
+      static constexpr bool value = true;
     };
 
-    template <typename T>
-    struct is_output_streamable<T&>
-    {
-      static const bool value = is_output_streamable<T>::value;
-    };
 
-    template <size_t N>
-    struct is_output_streamable<char[N]>
-    {
-      static const bool value = true;
-    };
-
-    template <size_t N>
-    struct is_output_streamable<const char[N]>
-    {
-      static const bool value = true;
-    };
-
-    template <typename T>
-    struct is_output_streamable<T*>
-    {
-      static const bool value = true;
-    };
-
-    template <typename T>
-    struct is_output_streamable<T (*)()>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1>
-    struct is_output_streamable<T (*)(P1)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1, typename P2>
-    struct is_output_streamable<T (*)(P1, P2)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1, typename P2, typename P3>
-    struct is_output_streamable<T (*)(P1, P2, P3)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1, typename P2, typename P3, typename P4>
-    struct is_output_streamable<T (*)(P1, P2, P3, P4)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1, typename P2, typename P3, typename P4,
-              typename P5>
-    struct is_output_streamable<T (*)(P1, P2, P3, P4, P5)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1, typename P2, typename P3, typename P4,
-              typename P5, typename P6>
-    struct is_output_streamable<T (*)(P1, P2, P3, P4, P5, P6)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1, typename P2, typename P3, typename P4,
-              typename P5, typename P6, typename P7>
-    struct is_output_streamable<T (*)(P1, P2, P3, P4, P5, P6, P7)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1, typename P2, typename P3, typename P4,
-              typename P5, typename P6, typename P7, typename P8>
-    struct is_output_streamable<T (*)(P1, P2, P3, P4, P5, P6, P7, P8)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename P1, typename P2, typename P3, typename P4,
-              typename P5, typename P6, typename P7, typename P8, typename P9>
-    struct is_output_streamable<T (*)(P1, P2, P3, P4, P5, P6, P7, P8, P9)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C>
-    struct is_output_streamable<T (C::*)()>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C, typename P1>
-    struct is_output_streamable<T (C::*)(P1)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C,
-              typename P1, typename P2>
-    struct is_output_streamable<T (C::*)(P1, P2)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C,
-              typename P1, typename P2, typename P3>
-    struct is_output_streamable<T (C::*)(P1, P2, P3)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C,
-              typename P1, typename P2, typename P3, typename P4>
-    struct is_output_streamable<T (C::*)(P1, P2, P3, P4)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C,
-              typename P1, typename P2, typename P3, typename P4,
-              typename P5>
-    struct is_output_streamable<T (C::*)(P1, P2, P3, P4, P5)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C,
-              typename P1, typename P2, typename P3, typename P4,
-              typename P5, typename P6>
-    struct is_output_streamable<T (C::*)(P1, P2, P3, P4, P5, P6)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C,
-              typename P1, typename P2, typename P3, typename P4,
-              typename P5, typename P6, typename P7>
-    struct is_output_streamable<T (C::*)(P1, P2, P3, P4, P5, P6, P7)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C,
-              typename P1, typename P2, typename P3, typename P4,
-              typename P5, typename P6, typename P7, typename P8>
-    struct is_output_streamable<T (C::*)(P1, P2, P3, P4, P5, P6, P7, P8)>
-    {
-      static const bool value = false;
-    };
-
-    template <typename T, typename C,
-              typename P1, typename P2, typename P3, typename P4,
-              typename P5, typename P6, typename P7, typename P8, typename P9>
-    struct is_output_streamable<T (C::*)(P1, P2, P3, P4, P5, P6, P7, P8, P9)>
-    {
-      static const bool value = false;
-    };
   } // namespace stream_checker
 
 
@@ -727,9 +274,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
       typedef crpcut_none tail;
     };
 
-#ifdef CRPCUT_SUPPORTS_VTEMPLATES
-
-#  ifdef CRPCUT_SUPPORTS_CONSTEXPR
     template <char ...t>
     struct string_type;
 
@@ -762,7 +306,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
     {
       typedef string_type<t...> type;
     };
-#  endif
 
     template <typename... Ts>
     struct tlist_maker;
@@ -779,74 +322,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
     {
       typedef tlist<T, typename tlist_maker<Tail...>::type> type;
     };
-#else
-
-    template <typename T1 = crpcut_none, typename T2 = crpcut_none,
-              typename T3 = crpcut_none, typename T4 = crpcut_none,
-              typename T5 = crpcut_none, typename T6 = crpcut_none,
-              typename T7 = crpcut_none, typename T8 = crpcut_none,
-              typename T9 = crpcut_none, typename T10 = crpcut_none,
-              typename T11 = crpcut_none, typename T12 = crpcut_none,
-              typename T13 = crpcut_none, typename T14 = crpcut_none,
-              typename T15 = crpcut_none, typename T16 = crpcut_none,
-              typename T17 = crpcut_none, typename T18 = crpcut_none>
-    struct tlist_maker
-    {
-      typedef tlist<
-        T1,
-        tlist<
-          T2,
-          tlist<
-            T3,
-            tlist<
-              T4,
-              tlist<
-                T5,
-                tlist<
-                  T6,
-                  tlist<
-                    T7,
-                    tlist<
-                      T8,
-                      tlist<
-                        T9,
-                        tlist<
-                          T10,
-                          tlist<
-                            T11,
-                            tlist<
-                              T12,
-                              tlist<
-                                T13,
-                                tlist<
-                                  T14,
-                                  tlist<
-                                    T15,
-                                    tlist<
-                                      T16,
-                                      tlist<
-                                        T17,
-                                        tlist<T18>
-                                        >
-                                      >
-                                    >
-                                  >
-                                >
-                              >
-                            >
-                          >
-                        >
-                      >
-                    >
-                  >
-                >
-              >
-            >
-          >
-        >
-      type;
-    };
-#endif
 
     struct fixed_string
     {
@@ -982,13 +457,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
     {
       return next_ == this;
     }
-#if 0
-    template <typename T>
-    inline bool list_elem<T>::is_this(const T* p) const
-    {
-      return static_cast<const T*>(this) == p;
-    }
-#endif
     template <typename T>
     inline void list_elem<T>::unlink()
     {
@@ -1005,15 +473,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
   class predicate {};
 
   template <typename T>
-  struct is_predicate
-  {
-    typedef char no;
-    struct yes { char v[2]; };
-    static no func(...);
-    static yes func(predicate*);
-    static const bool value = sizeof(func((T*)0)) == sizeof(yes);
-  };
-
+  using is_predicate = std::is_base_of<predicate, T>;
 
   class regex : public predicate
   {
@@ -1041,16 +501,13 @@ constexpr char array_index(size_t n, const char (&array)[N])
       m = REG_NEWLINE
     } regflag;
     template <typename T>
-    regex(T t,
+    explicit regex(T t,
           regflag f1 = regflag(),
           regflag f2 = regflag(),
           regflag f3 = regflag())
       : p_(new type(t, f1 | f2 | f3))
     {
     }
-#if __cplusplus < 201103L
-    regex(const regex& r);
-#endif
     template <typename T>
     bool operator()(const T &t)
     {
@@ -1058,32 +515,15 @@ constexpr char array_index(size_t n, const char (&array)[N])
     }
     friend std::ostream& operator<<(std::ostream &os, const regex &r);
   private:
-#if __cplusplus >= 201103L
     std::unique_ptr<type> p_;
-#else
-    mutable std::auto_ptr<type> p_; // Yeach! Ugly
-#endif
   };
 
 
-#ifdef CRPCUT_SUPPORTS_VTEMPLATES
   template <typename D, typename ...T>
   struct match_traits
   {
     typedef D type;
   };
-#else
-  template <typename D,
-            typename T1,                typename T2 = crpcut_none,
-            typename T3 = crpcut_none,  typename T4 = crpcut_none,
-            typename T5 = crpcut_none,  typename T6 = crpcut_none,
-            typename T7 = crpcut_none,  typename T8 = crpcut_none,
-            typename T9 = crpcut_none>
-  struct match_traits
-  {
-    typedef D type;
-  };
-#endif
 
 #define CRPCUT_TEST_PHASES(translator)     \
               translator(creating),        \
@@ -1193,7 +633,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
     virtual datatypes::fixed_string get_name() const;
   };
 
-#if defined(CRPCUT_SUPPORTS_VTEMPLATES) && defined(CRPCUT_SUPPORTS_CONSTEXPR)
   template <char ...t>
   class crpcut_tag_info<datatypes::string_type<t...> > : public tag
   {
@@ -1219,7 +658,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
 
 #define CRPCUT_APPEND_INDEX(i, str) ::append<crpcut::array_index(i, str)>::type
 
-#endif
 
   namespace stream {
     template <typename charT, typename traits = std::char_traits<charT> >
@@ -1475,8 +913,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
       direct_reporter(datatypes::fixed_string  location,
                       reporter                &r = report,
                       const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
-      template <typename V>
-      direct_reporter& operator<<(V& v);
       template <typename V>
       direct_reporter& operator<<(const V& v);
       template <typename V>
@@ -2203,6 +1639,8 @@ constexpr char array_index(size_t n, const char (&array)[N])
             bool b = stream_checker::is_output_streamable<T>::value>
   struct conditional_streamer
   {
+    static_assert(b,"");
+    static_assert(stream_checker::is_output_streamable<T>::value,"");
     static void stream(std::ostream &os, const T& t)
     {
       os << t;
@@ -2232,15 +1670,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
 
   namespace stream {
     template <typename T>
-    class is_std_exception
-    {
-      typedef char no;
-      struct yes { char v[2]; };
-      static no func(...);
-      static yes func(std::exception *);
-    public:
-      static const bool value = sizeof(func(static_cast<T*>(0))) == sizeof(yes);
-    };
+    using is_std_exception = std::is_base_of<std::exception, T>;
 
     template <typename T, bool b = is_std_exception<T>::value>
     struct value_streamer
@@ -2299,22 +1729,10 @@ constexpr char array_index(size_t n, const char (&array)[N])
     static const bool value = (sizeof(check_member<T>(0)) == 1);
   };
 
-  template <bool b, typename T1, typename T2>
-  struct if_else
-  {
-    typedef T1 type;
-  };
-
-  template <typename T1, typename T2>
-  struct if_else<false, T1, T2>
-  {
-    typedef T2 type;
-  };
-
   template <typename T>
   struct param_traits
   {
-    typedef typename if_else<is_struct<T>::value, const  T&, T>::type type;
+    typedef typename std::conditional<is_struct<T>::value, const  T&, T>::type type;
   };
 
   template <typename T>
@@ -2559,16 +1977,16 @@ constexpr char array_index(size_t n, const char (&array)[N])
 
   template <comm::type action, bool null1, typename T1, bool null2, typename T2, size_t N>
   tester_t<action,
-           typename if_else<null1, void, T1>::type,
-           typename if_else<null2, void, T2>::type>
+           typename std::conditional<null1, void, T1>::type,
+           typename std::conditional<null2, void, T2>::type>
   tester(const char (&loc)[N],
          const char *op,
          comm::reporter & report = comm::report,
          const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
   {
     tester_t<action,
-             typename if_else<null1, void, T1>::type,
-             typename if_else<null2, void, T2>::type> v(loc, op, report, mon);
+             typename std::conditional<null1, void, T1>::type,
+             typename std::conditional<null2, void, T2>::type> v(loc, op, report, mon);
     return v;
   }
 
@@ -2663,7 +2081,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
     friend class crpcut::collate_t;
   };
 
-#ifdef CRPCUT_SUPPORTS_VTEMPLATES
   template <int US, typename ...T>
   class param_holder;
 
@@ -2706,339 +2123,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
     return param_holder<1, T...>(v...);
   }
 
-#else
 
-  template <int N, typename T>
-  class holder
-  {
-  protected:
-    holder(const T& v) : val(v) {}
-    const T& getval() const { return val; }
-    void print_to(std::ostream &os) const
-    {
-      os << "  param" << N << " = " << val << "\n";
-    }
-  private:
-    const T &val;
-  };
-
-  template <int N>
-  class holder<N, crpcut_none> : private crpcut_none
-  {
-  protected:
-    holder(const crpcut_none&) {}
-    void print_to(std::ostream&) const {};
-    const crpcut_none& getval() const { return *this; }
-  };
-
-  template <typename T1,               typename T2 = crpcut_none,
-            typename T3 = crpcut_none, typename T4 = crpcut_none,
-            typename T5 = crpcut_none, typename T6 = crpcut_none,
-            typename T7 = crpcut_none, typename T8 = crpcut_none,
-            typename T9 = crpcut_none>
-  class param_holder
-    : holder<1, T1>, holder<2, T2>, holder<3, T3>,
-      holder<4, T4>, holder<5, T5>, holder<6, T6>,
-      holder<7, T7>, holder<8, T8>, holder<9, T9>
-  {
-  public:
-    param_holder(const T1 &v1, const T2 &v2 = T2(), const T3 &v3 = T3(),
-                 const T4 &v4 = T4(), const T5 &v5 = T5(),
-                 const T6 &v6 = T6(), const T7 &v7 = T7(),
-                 const T8 &v8 = T8(), const T9 &v9 = T9())
-      : holder<1, T1>(v1),
-        holder<2, T2>(v2),
-        holder<3, T3>(v3),
-        holder<4, T4>(v4),
-        holder<5, T5>(v5),
-        holder<6, T6>(v6),
-        holder<7, T7>(v7),
-        holder<8, T8>(v8),
-        holder<9, T9>(v9)
-    {}
-    template <typename P>
-    bool apply(P &pred) const;
-    void print_to(std::ostream &os) const
-    {
-      holder<1, T1>::print_to(os);
-      holder<2, T2>::print_to(os);
-      holder<3, T3>::print_to(os);
-      holder<4, T4>::print_to(os);
-      holder<5, T5>::print_to(os);
-      holder<6, T6>::print_to(os);
-      holder<7, T7>::print_to(os);
-      holder<8, T8>::print_to(os);
-      holder<9, T9>::print_to(os);
-    }
-  };
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7, typename T8, typename T9>
-  struct call_traits
-  {
-    template <typename P>
-    static bool call(P &p,
-                     const T1 &t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const T5 &t5, const T6 &t6,
-                     const T7 &t7, const T8 &t8, const T9 &t9)
-    {
-      return p(t1, t2, t3, t4, t5, t6, t7, t8, t9);
-    }
-  };
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7, typename T8>
-  struct call_traits<T1, T2, T3, T4, T5, T6, T7, T8, crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p,
-                     const T1 &t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const T5 &t5, const T6 &t6,
-                     const T7 &t7, const T8 &t8, const crpcut_none&)
-    {
-      return p(t1, t2, t3, t4, t5, t6, t7, t8);
-    }
-  };
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7>
-  struct call_traits<T1, T2, T3, T4, T5, T6, T7, crpcut_none, crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p,
-                     const T1 &t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const T5 &t5, const T6 &t6,
-                     const T7 &t7, const crpcut_none&, const crpcut_none&)
-    {
-      return p(t1, t2, t3, t4, t5, t6, t7);
-    }
-  };
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6>
-  struct call_traits<T1, T2, T3, T4, T5, T6,
-                     crpcut_none, crpcut_none, crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p,
-                     const T1 &t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const T5 &t5, const T6 &t6,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&)
-    {
-      return p(t1, t2, t3, t4, t5, t6);
-    }
-  };
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5>
-  struct call_traits<T1, T2, T3, T4, T5,
-                     crpcut_none, crpcut_none, crpcut_none, crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const T5 &t5, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&)
-    {
-      return p(t1, t2, t3, t4, t5);
-    }
-  };
-
-  template <typename T1, typename T2, typename T3,
-            typename T4>
-  struct call_traits<T1, T2, T3, T4,
-                     crpcut_none, crpcut_none, crpcut_none,
-                     crpcut_none, crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
-                     const T4 &t4, const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&)
-    {
-      return p(t1, t2, t3, t4);
-    }
-  };
-
-  template <typename T1, typename T2, typename T3>
-  struct call_traits<T1, T2, T3, crpcut_none,
-                     crpcut_none, crpcut_none, crpcut_none, crpcut_none,
-                     crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p, const T1& t1, const T2 &t2, const T3 &t3,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&)
-    {
-      return p(t1, t2, t3);
-    }
-  };
-
-  template <typename T1, typename T2>
-  struct call_traits<T1, T2, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none, crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p, const T1& t1, const T2 &t2, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&)
-    {
-      return p(t1, t2);
-    }
-  };
-
-  template <typename T1>
-  struct call_traits<T1, crpcut_none, crpcut_none,
-                     crpcut_none, crpcut_none, crpcut_none, crpcut_none,
-                     crpcut_none, crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p, const T1& t1, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&)
-    {
-      return p(t1);
-    }
-  };
-
-  template <>
-  struct call_traits<crpcut_none, crpcut_none, crpcut_none, crpcut_none,
-                     crpcut_none, crpcut_none, crpcut_none, crpcut_none,
-                     crpcut_none>
-  {
-    template <typename P>
-    static bool call(P &p,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&, const crpcut_none&,
-                     const crpcut_none&)
-    {
-      return p();
-    }
-  };
-
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7, typename T8, typename T9>
-  template <typename P>
-  bool
-  param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9>::apply(P &pred) const
-  {
-    typedef call_traits<T1, T2, T3, T4, T5, T6, T7, T8, T9> traits;
-    return traits::call(pred,
-                        holder<1, T1>::getval(),
-                        holder<2, T2>::getval(),
-                        holder<3, T3>::getval(),
-                        holder<4, T4>::getval(),
-                        holder<5, T5>::getval(),
-                        holder<6, T6>::getval(),
-                        holder<7, T7>::getval(),
-                        holder<8, T8>::getval(),
-                        holder<9, T9>::getval());
-  }
-
-  template <typename T1>
-  param_holder<T1>
-  params(const T1& t1)
-  {
-    typedef param_holder<T1> R;
-    return R(t1);
-  }
-
-  template <typename T1, typename T2>
-  param_holder<T1, T2>
-  params(const T1& t1, const T2 &t2)
-  {
-    typedef param_holder<T1, T2> R;
-    return R(t1, t2);
-  }
-
-  template <typename T1, typename T2, typename T3>
-  param_holder<T1, T2, T3>
-  params(const T1& t1, const T2 &t2, const T3 &t3)
-  {
-    typedef param_holder<T1, T2, T3> R;
-    return R(t1, t2, t3);
-  }
-
-  template <typename T1, typename T2, typename T3, typename T4>
-  param_holder<T1, T2, T3, T4>
-  params(const T1& t1, const T2 &t2, const T3 &t3, const T4 &t4)
-  {
-    typedef param_holder<T1, T2, T3, T4> R;
-    return R(t1, t2, t3, t4);
-  }
-
-  template <typename T1, typename T2, typename T3, typename T4, typename T5>
-  param_holder<T1, T2, T3, T4, T5>
-  params(const T1& t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5)
-  {
-    typedef param_holder<T1, T2, T3, T4, T5> R;
-    return R(t1, t2, t3, t4, t5);
-  }
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6>
-  param_holder<T1, T2, T3, T4, T5, T6>
-  params(const T1& t1, const T2 &t2, const T3 &t3,
-         const T4 &t4, const T5 &t5, const T6 &t6)
-  {
-    typedef param_holder<T1, T2, T3, T4, T5, T6> R;
-    return R(t1, t2, t3, t4, t5, t6);
-  }
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7>
-  param_holder<T1, T2, T3, T4, T5, T6, T7>
-  params(const T1& t1, const T2 &t2, const T3 &t3,
-         const T4 &t4, const T5 &t5, const T6 &t6,
-         const T7 &t7)
-  {
-    typedef param_holder<T1, T2, T3, T4, T5, T6, T7> R;
-    return R(t1, t2, t3, t4, t5, t6, t7);
-  }
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7, typename T8>
-  param_holder<T1, T2, T3, T4, T5, T6, T7, T8>
-  params(const T1& t1, const T2 &t2, const T3 &t3,
-         const T4 &t4, const T5 &t5, const T6 &t6,
-         const T7 &t7, const T8 &t8)
-  {
-    typedef param_holder<T1, T2, T3, T4, T5, T6, T7, T8> R;
-    return R(t1, t2, t3, t4, t5, t6, t7, t8);
-  }
-
-  template <typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7, typename T8, typename T9>
-  param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9>
-  params(const T1& t1, const T2 &t2, const T3 &t3,
-         const T4 &t4, const T5 &t5, const T6 &t6,
-         const T7 &t7, const T8 &t8, const T9 &t9)
-  {
-    typedef param_holder<T1, T2, T3, T4, T5, T6, T7, T8, T9> R;
-    return R(t1, t2, t3, t4, t5, t6, t7, t8, t9);
-  }
-
-  inline
-  param_holder<crpcut_none>
-  params()
-  {
-    return param_holder<crpcut_none>(crpcut_none());
-  }
-#endif
   template <typename P,
             bool streamable = stream_checker::is_output_streamable<P>::value>
   struct predicate_streamer
@@ -3312,12 +2397,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
     return match(datatypes::string_traits::get_c_str(t));
   }
 
-#if __cplusplus < 201103L
-  inline regex::regex(const regex& r)
-    : p_(r.p_)
-  {
-  }
-#endif
   inline std::ostream& operator<<(std::ostream &os, const regex &r)
   {
     return os << *r.p_;
@@ -3328,13 +2407,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
     template <std::size_t N>
     struct fp_rep;
 
-#ifdef __CDT_PARSER__
-    template <std::size_t N>
-    struct fp_rep
-    {
-      typedef void type;
-    };
-#endif // __CDT_PARSER__
 
 #define CRPCUT_MAKE_FP_REP(x)                   \
     template <>                                 \
@@ -3679,13 +2751,6 @@ constexpr char array_index(size_t n, const char (&array)[N])
       return *this;
     }
 
-    template <comm::type t> template <typename V>
-    direct_reporter<t>& direct_reporter<t>::operator<<(V& v)
-    {
-      crpcut::show_value(os, v);
-      return *this;
-    }
-
     template <comm::type type>
     direct_reporter<type>::~direct_reporter()
     {
@@ -3776,111 +2841,13 @@ constexpr char array_index(size_t n, const char (&array)[N])
   }
 
 
-#ifdef CRPCUT_SUPPORTS_VTEMPLATES
   template <typename D, typename ...T>
   typename match_traits<D, T...>::type
   match(T... t)
   {
     return typename match_traits<D, T...>::type(t...);
   }
-#else
-  template <typename D, typename T>
-  typename match_traits<D, T>::type
-  match(T t)
-  {
-    typedef match_traits<D, T> traits;
-    typename traits::type rv(t);
-    return rv;
-  }
 
-  template <typename D, typename T1, typename T2>
-  typename match_traits<D, T1, T2>::type
-  match(T1 t1, T2 t2)
-  {
-    typedef match_traits<D, T1, T2> traits;
-    typename traits::type rv(t1, t2);
-    return rv;
-  }
-
-  template <typename D,
-            typename T1, typename T2, typename T3>
-  typename match_traits<D, T1, T2, T3>::type
-  match(T1 t1, T2 t2, T3 t3)
-  {
-    typedef match_traits<D, T1, T2, T3> traits;
-    typename traits::type rv(t1, t2, t3);
-    return rv;
-  }
-
-  template <typename D,
-            typename T1, typename T2, typename T3,
-            typename T4>
-  typename match_traits<D, T1, T2, T3, T4>::type
-  match(T1 t1, T2 t2, T3 t3, T4 t4)
-  {
-    typedef match_traits<D, T1, T2, T3, T4> traits;
-    typename traits::type rv(t1, t2, t3, t4);
-    return rv;
-  }
-
-  template <typename D,
-            typename T1, typename T2, typename T3,
-            typename T4, typename T5>
-  typename match_traits<D, T1, T2, T3, T4, T5>::type
-  match(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5)
-  {
-    typedef match_traits<D, T1, T2, T3, T4, T5> traits;
-    typename traits::type rv(t1, t2, t3, t4, t5);
-    return rv;
-  }
-
-  template <typename D,
-            typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6>
-  typename match_traits<D, T1, T2, T3, T4, T5, T6>::type
-  match(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6)
-  {
-    typedef match_traits<D, T1, T2, T3, T4, T5, T6> traits;
-    typename traits::type rv(t1, t2, t3, t4, t5, t6);
-    return rv;
-  }
-
-  template <typename D,
-            typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7>
-  typename match_traits<D, T1, T2, T3, T4, T5, T6, T7>::type
-  match(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7)
-  {
-    typedef match_traits<D, T1, T2, T3, T4, T5, T6, T7> traits;
-    typename traits::type rv(t1, t2, t3, t4, t5, t6, t7);
-    return rv;
-  }
-
-  template <typename D,
-            typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7, typename T8>
-  typename match_traits<D, T1, T2, T3, T4, T5, T6, T7, T8>::type
-  match(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8)
-  {
-    typedef match_traits<D, T1, T2, T3, T4, T5, T6, T7, T8> traits;
-    typename traits::type rv(t1, t2, t3, t4, t5, t6, t7, t8);
-    return rv;
-  }
-
-  template <typename D,
-            typename T1, typename T2, typename T3,
-            typename T4, typename T5, typename T6,
-            typename T7, typename T8, typename T9>
-  typename match_traits<D, T1, T2, T3, T4, T5, T6, T7, T8, T9>::type
-  match(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8, T9 t9)
-  {
-    typedef match_traits<D, T1, T2, T3, T4, T5, T6, T7, T8, T9> traits;
-    typename traits::type rv(t1, t2, t3, t4, t5, t6, t7, t8, t9);
-    return rv;
-  }
-#endif
   class abs_diff
   {
   public:
@@ -4182,8 +3149,8 @@ constexpr char array_index(size_t n, const char (&array)[N])
       }                                                                 \
       friend struct eval_t<name>;                                       \
       template <typename V>                                             \
-      typename enable_if<is_predicate_proxy<V>::value,                  \
-                         predicate_match<name, typename V::type> >::type \
+      typename std::enable_if_t<is_predicate_proxy<V>::value,           \
+                                predicate_match<name, typename V::type>>\
       operator=(const V& v)                                             \
       {                                                                 \
         typedef typename V::type predicate;                             \
@@ -4198,13 +3165,13 @@ constexpr char array_index(size_t n, const char (&array)[N])
 #define CRPCUT_OPFUNC(name, opexpr)                                     \
   namespace expr {                                                      \
     template <typename T, typename U>                                   \
-    typename enable_if<is_struct<U>::value, name<const T&, const U&> >::type   \
+    std::enable_if_t<is_struct<U>::value, name<const T&, const U&> >    \
     operator opexpr(const T &t, const U &u)                             \
     {                                                                   \
       return name<const T&, const U&>(t, u);                            \
     }                                                                   \
     template <typename T, typename U>                                   \
-    typename enable_if<!is_struct<U>::value, name<const T&, U> >::type  \
+    std::enable_if_t<!is_struct<U>::value, name<const T&, U> >          \
     operator opexpr(const T &t, U u)                                    \
     {                                                                   \
       return name<const T&, U>(t, u);                                   \
@@ -4217,7 +3184,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
     typedef typename eval_t<U>::type utype;                             \
     typedef typename datatypes::undecorated<ttype>::type trtype;       \
     typedef typename datatypes::undecorated<utype>::type urtype;       \
-    typedef CRPCUT_DECLTYPE(::crpcut::expr::gen<trtype>() opexpr ::crpcut::expr::gen<urtype>()) type; \
+    typedef decltype(::crpcut::expr::gen<trtype>() opexpr ::crpcut::expr::gen<urtype>()) type; \
     static type func(const expr::name<T, U>& n)                         \
     {                                                                   \
       return ::crpcut::eval(n.t_) opexpr ::crpcut::eval(n.u_);          \
@@ -4252,7 +3219,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
 
 
     template <typename T>
-    typename enable_if<is_predicate<T>::value, expr::predicate_proxy<T> >::type
+    typename std::enable_if_t<is_predicate<T>::value, expr::predicate_proxy<T>>
     operator~(const T& t)
     {
       return expr::predicate_proxy<T>(const_cast<T&>(t));
@@ -4278,8 +3245,8 @@ constexpr char array_index(size_t n, const char (&array)[N])
         return os;
       }
       template <typename U>
-      typename enable_if<is_predicate_proxy<U>::value,
-                         predicate_match<T, typename U::type> >::type
+      std::enable_if_t<is_predicate_proxy<U>::value,
+                       predicate_match<T, typename U::type>>
       operator=(const U& u)
       {
         return predicate_match<T, typename U::type>(t_, u.get_predicate());
@@ -4293,7 +3260,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
   struct eval_t<expr::atom<T> >
   {
     typedef typename datatypes::undecorated<T>::type naked_type;
-    typedef typename if_else<is_struct<naked_type>::value, const naked_type&, naked_type>::type type;
+    typedef typename std::conditional<is_struct<naked_type>::value, const naked_type&, naked_type>::type type;
     static type func(const expr::atom<T> &n) { return n.t_; }
   };
 
@@ -4305,7 +3272,7 @@ constexpr char array_index(size_t n, const char (&array)[N])
   {
     static typename datatypes::undecorated<U>::type & u_;
     static typename datatypes::undecorated<T>::type & t_;
-    typedef CRPCUT_DECLTYPE(u_(crpcut::eval(t_))) type;
+    typedef decltype(u_(crpcut::eval(t_))) type;
     static type func(const expr::predicate_match<T, U> &n)
     {
       return n.r_(crpcut::eval(n.l_));
@@ -4322,13 +3289,13 @@ constexpr char array_index(size_t n, const char (&array)[N])
         return r;
       }
       template <typename T>
-      typename enable_if<is_struct<T>::value, atom<const T&> >::type
+      std::enable_if_t<is_struct<T>::value, atom<const T&>>
       operator->*(const T& t) const
       {
         return atom<const T&>(t);
       }
       template <typename T>
-      typename enable_if<!is_struct<T>::value, atom<T> >::type
+      std::enable_if_t<!is_struct<T>::value, atom<T>>
       operator->*(T t) const
       {
         return atom<T>(t);
@@ -4495,7 +3462,6 @@ extern crpcut::namespace_info crpcut_current_namespace;
          }                                                              \
        virtual void run_test_case()                                     \
        {                                                                \
-         CRPCUT_DEFINE_REPORTER;                                        \
          prepare_construction(crpcut_constructor_timeout_us);           \
          crpcut_test_class obj;                                         \
          manage_test_case_execution(&obj);                              \
@@ -4604,10 +3570,6 @@ extern crpcut::namespace_info crpcut_current_namespace;
   CRPCUT_CONCAT(crpcut_local_, prefix, __LINE__)
 
 
-#ifndef CRPCUT_EXPERIMENTAL_CXX0X
-#define CRPCUT_REFTYPE(expr) \
-  const CRPCUT_DECLTYPE(expr) &
-#else
 namespace crpcut {
   namespace datatypes {
     template <typename T>
@@ -4616,8 +3578,7 @@ namespace crpcut {
   }
 }
 #define CRPCUT_REFTYPE(expr) \
-  CRPCUT_DECLTYPE(crpcut::datatypes::gettype<CRPCUT_DECLTYPE(expr)>())
-#endif
+  decltype(crpcut::datatypes::gettype<decltype(expr)>())
 
 #define NO_CORE_FILE \
   protected virtual crpcut::policies::no_core_file
@@ -4721,8 +3682,8 @@ namespace crpcut {
     try {                                                               \
       crpcut::tester                                                    \
         <crpcut::comm::action,                                          \
-         CRPCUT_IS_ZERO_LIT(lh), CRPCUT_DECLTYPE(lh),                   \
-         CRPCUT_IS_ZERO_LIT(rh), CRPCUT_DECLTYPE(rh)>                   \
+         CRPCUT_IS_ZERO_LIT(lh), decltype(lh),                          \
+         CRPCUT_IS_ZERO_LIT(rh), decltype(rh)>                          \
         (CRPCUT_HERE, #name)                                            \
         .name(lh, #lh, rh, #rh);                                        \
     }                                                                   \
@@ -4740,23 +3701,6 @@ namespace crpcut {
 
 
 
-#ifdef __CDT_PARSER__
-#define CRPCUT_CHECK_FALSE(action, a)                   \
-  do {                                                  \
-    crpcut::bool_tester<crpcut::comm::action>           \
-      (CRPCUT_HERE)                                     \
-      .check_false((a), #a);                            \
-  } while (0)
-
-#define CRPCUT_CHECK_TRUE(action, a)                    \
-  do {                                                  \
-    crpcut::bool_tester<crpcut::comm::action>           \
-      (CRPCUT_HERE)                                     \
-      .check_true((a), #a);                             \
-  } while (0)
-
-
-#else
 #define CRPCUT_CHECK_TRUE(action, a)                                    \
   do {                                                                  \
     try {                                                               \
@@ -4790,7 +3734,7 @@ namespace crpcut {
                                     #a);                        \
       })                                                                \
   } while(0)
-#endif // __CDT_PARSER__
+
 #define ASSERT_TRUE(a) CRPCUT_CHECK_TRUE(exit_fail, a)
 #define VERIFY_TRUE(a) CRPCUT_CHECK_TRUE(fail, a)
 
@@ -5090,7 +4034,6 @@ class crpcut_testsuite_dep
 #define CRPCUT_REPEAT_79(M, ...) CRPCUT_REPEAT_78(M, __VA_ARGS__) M(78, __VA_ARGS__)
 #define CRPCUT_REPEAT_80(M, ...) CRPCUT_REPEAT_79(M, __VA_ARGS__) M(79, __VA_ARGS__)
 
-#if defined(CRPCUT_SUPPORTS_VTEMPLATES) && defined(CRPCUT_SUPPORTS_CONSTEXPR)
 
 #  define WITH_TEST_TAG(...)                                         \
   crpcut::policies::tag_policy<crpcut::datatypes::string_type<>      \
@@ -5099,41 +4042,4 @@ class crpcut_testsuite_dep
 
 #  define DEFINE_TEST_TAG(...) class crpcut_DEFINE_TEST_TAG_is_deprecated
 
-#else
-
-#  define WITH_TEST_TAG(tag_name)                         \
-    crpcut::policies::tag_policy<crpcut::crpcut_tags::tag_name>
-
-#  define DEFINE_TEST_TAG(tag_name)                               \
-    namespace crpcut {                                            \
-      namespace crpcut_tags {                                     \
-        struct tag_name;                                          \
-      }                                                           \
-      template <>                                                 \
-      inline                                                      \
-      size_t                                                      \
-      crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
-      ::get_name_len() const                                      \
-      {                                                           \
-        return sizeof(#tag_name) - 1U;                            \
-      }                                                           \
-      template <>                                                 \
-      inline                                                      \
-      crpcut::datatypes::fixed_string                             \
-      crpcut_tag_info<crpcut::crpcut_tags::tag_name>              \
-      ::get_name() const                                          \
-      {                                                           \
-        using crpcut::datatypes::fixed_string;                    \
-        fixed_string s = { #tag_name, get_name_len() };           \
-        return s;                                                 \
-      }                                                           \
-    }                                                             \
-    using crpcut::crpcut_tags::tag_name
-
-#endif
-#ifdef GMOCK_INCLUDE_GMOCK_GMOCK_H_
-
-
-
-#endif
 #endif // CRPCUT_HPP

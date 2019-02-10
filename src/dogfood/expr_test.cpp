@@ -180,6 +180,9 @@ TESTSUITE(expr)
       T t_;
     };
 
+    template <typename T>
+    std::ostream& operator<<(std::ostream&, const unstreamable<T>&) = delete;
+
     TEST(noncopyable_equals_int_is_computed_and_displayed_correctly)
     {
       ASSERT_VALUE(noncopyable<int>(3) == 4, false, "nc(3) == 4");
