@@ -298,7 +298,7 @@ TESTSUITE(heap)
   {
     crpcut::heap::set_limit(crpcut::heap::allocated_bytes() + 99);
     std::set_new_handler(stupid_new_handler);
-    ASSERT_THROW((void)new char[100], std::bad_alloc); // leak if alloc succeeds
+    ASSERT_THROW((void)new char[100], std::bad_alloc&); // leak if alloc succeeds
   }
 
   TEST(should_succeed_nothrow_new_handler)

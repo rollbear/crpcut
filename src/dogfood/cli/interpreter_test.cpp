@@ -121,7 +121,7 @@ TESTSUITE(cli)
     {
       ARGV("-_");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    usage);
     }
 
@@ -129,7 +129,7 @@ TESTSUITE(cli)
     {
       ARGV("--_");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    usage);
     }
 
@@ -172,7 +172,7 @@ TESTSUITE(cli)
     {
       ARGV("-x", "-c", "0", "-I", "apa");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    "-c number / --children=number - number must be at least 1");
     }
 
@@ -199,7 +199,7 @@ TESTSUITE(cli)
         "-C charset / --output-charset=charset cannot be used with XML reports";
       ARGV("-C", "apa", "-o", "/dev/null");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    str);
     }
 
@@ -378,7 +378,7 @@ TESTSUITE(cli)
     {
       ARGV("-x", "--timeout-multiplier=0", "-n");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    "--timeout-multiplier=factor - factor must be at least 1");
     }
 
@@ -393,7 +393,7 @@ TESTSUITE(cli)
     {
       ARGV("--timeout-multiplier=5", "--param=apa=katt", "-s");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    "--timeout-multiplier=factor cannot be combined with -s / --single-shot");
     }
 
@@ -402,7 +402,7 @@ TESTSUITE(cli)
       ARGV("-s", "-x", "apa");
       static const char msg[]= "-s / --single-shot cannot be combined with -x {boolean value} / --xml{=boolean value}";
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    msg);
     }
 
@@ -426,7 +426,7 @@ TESTSUITE(cli)
     {
       ARGV("-s", "-t", "apa", "katt");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    "-s / --single-shot cannot be combined with -t / --disable-timeouts");
     }
 
@@ -434,7 +434,7 @@ TESTSUITE(cli)
     {
       ARGV("-t", "--timeout-multiplier=5");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    "--timeout-multiplier=factor cannot be combined with -t / --disable-timeouts");
     }
 
@@ -507,7 +507,7 @@ TESTSUITE(cli)
     {
       ARGV("-i", "7", "--version", "-o", "apa");
       ASSERT_THROW(crpcut::cli::interpreter cli(argv),
-                   crpcut::cli::param::exception,
+                   crpcut::cli::param::exception&,
                    "crpcut-" CRPCUT_VERSION_STRING);
     }
 

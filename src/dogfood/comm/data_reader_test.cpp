@@ -92,7 +92,7 @@ TESTSUITE(comm)
       char buff[30];
 
       ASSERT_THROW(d.read_loop(buff, 26),
-                   crpcut::posix_error,
+                   crpcut::posix_error&,
                    posix_err_comp(0, nullstr));
       ASSERT_TRUE(std::string(buff, 10) == std::string(alphabet, 10));
     }

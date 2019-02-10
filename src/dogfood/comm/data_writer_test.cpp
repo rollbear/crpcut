@@ -79,7 +79,7 @@ TESTSUITE(comm)
         .WITH(std::string(_1, _2) == alphabet + 10)
         .RETURN(0);
       ASSERT_THROW(d.write_loop(alphabet, 26U),
-                   crpcut::posix_error,
+                   crpcut::posix_error&,
                    posix_err_comp(0, nullstr));
     }
 

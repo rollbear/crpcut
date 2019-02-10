@@ -67,19 +67,19 @@ TESTSUITE(asserts)
 #ifndef CRPCUT_NO_EXCEPTION_SUPPORT
   TEST(should_succeed_assert_throw_with_correct_exception)
   {
-    ASSERT_THROW(throw std::bad_alloc(), std::bad_alloc);
+    ASSERT_THROW(throw std::bad_alloc(), std::bad_alloc&);
   }
 
   TEST(should_fail_assert_exception_with_wrong_exception)
   {
-    ASSERT_THROW(throw std::bad_alloc(), std::domain_error);
+    ASSERT_THROW(throw std::bad_alloc(), std::domain_error&);
   }
 
 
   TEST(should_fail_assert_throw_with_no_exception)
   {
     int i;
-    ASSERT_THROW(i=1, std::exception);
+    ASSERT_THROW(i=1, std::exception&);
     std::cout << "i=" << i; // won't run
   }
 
@@ -114,20 +114,20 @@ TESTSUITE(asserts)
   TEST(should_succeed_assert_throw_with_exact_string_match,
        WITH_TEST_TAG(exception_content_match))
   {
-    ASSERT_THROW(throw std::range_error("apa"), std::exception, "apa");
+    ASSERT_THROW(throw std::range_error("apa"), std::exception&, "apa");
   }
 
   TEST(should_fail_assert_throw_with_mismatching_string,
        WITH_TEST_TAG(exception_content_match))
   {
-    ASSERT_THROW(throw std::range_error("apa"), std::exception, "katt");
+    ASSERT_THROW(throw std::range_error("apa"), std::exception&, "katt");
   }
 
   TEST(should_succeed_assert_throw_with_regexp_match,
        WITH_TEST_TAG(exception_content_match))
   {
     ASSERT_THROW(throw std::range_error("en liten apa"),
-                 std::exception,
+                 std::exception&,
                  crpcut::match<crpcut::regex>("liten"));
   }
 
@@ -135,7 +135,7 @@ TESTSUITE(asserts)
        WITH_TEST_TAG(exception_content_match))
   {
     ASSERT_THROW(throw std::range_error("en liten apa"),
-                 std::exception,
+                 std::exception&,
                  crpcut::match<crpcut::regex>(".*x.*"));
   }
 

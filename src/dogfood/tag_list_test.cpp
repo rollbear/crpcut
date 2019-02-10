@@ -191,7 +191,7 @@ TESTSUITE(tag_list)
     TEST(illegal_specification_throws, fix)
     {
       ASSERT_THROW(list.configure_importance("//"),
-                   crpcut::tag_filter::spec_error);
+                   crpcut::tag_filter::spec_error&);
     }
   }
 }

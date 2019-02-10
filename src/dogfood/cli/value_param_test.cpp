@@ -53,28 +53,28 @@ TESTSUITE(cli)
     TEST(long_form_without_value_throws, fix<int>)
     {
       static const char * cli[] = { "--identity", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                     ID " expects a value");
     }
 
     TEST(long_form_with_naked_assign_throws, fix<int>)
     {
       static const char *cli[] = { "--identity=", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " expects a value");
     }
 
     TEST(long_form_with_wrong_value_type_throws, fix<int>)
     {
       static const char *cli[] = { "--identity=apa", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"apa\"");
     }
 
     TEST(long_form_with_tail_after_value_throws, fix<int>)
     {
       static const char *cli[] = { "--identity=3z", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"3z\"");
     }
 
@@ -118,35 +118,35 @@ TESTSUITE(cli)
       static const char *cli[] = { "--identity=\"apa\"",
                                    "--identity=\"katt\"", 0 };
       const char *const *p = param.match(cli);
-      ASSERT_THROW(param.match(p), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                    ID " can only be used once");
     }
 
     TEST(short_form_without_value_throws, fix<int>)
     {
       static const char * cli[] = { "-i", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                     ID " expects a value");
     }
 
     TEST(short_form_with_following_param_assign_throws, fix<int>)
     {
       static const char *cli[] = { "-i", "-p", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"-p\"");
     }
 
     TEST(short_form_with_wrong_value_type_throws, fix<int>)
     {
       static const char *cli[] = { "-i", "apa", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"apa\"");
     }
 
     TEST(short_form_with_tail_after_value_throws, fix<int>)
     {
       static const char *cli[] = { "-i", "3z", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"3z\"");
     }
 
@@ -175,7 +175,7 @@ TESTSUITE(cli)
       static const char *cli[] = { "-i", "\"apa\"",
                                    "-i", "\"katt\"", 0 };
       const char *const *p = param.match(cli);
-      ASSERT_THROW(param.match(p), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                    ID " can only be used once");
     }
 

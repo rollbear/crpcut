@@ -103,7 +103,7 @@ TESTSUITE(cli)
      TEST(long_form_with_illegal_value_throws, fix)
      {
        static const char *cli[] = { "--xml=active", 0 };
-       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                     ID " - can't interpret \"active\" as boolean value");
      }
 
@@ -111,7 +111,7 @@ TESTSUITE(cli)
      {
        static const char *cli[] = { "--xml=On", "--xml", 0 };
        const char *const *p = param.match(cli);
-       ASSERT_THROW(param.match(p), crpcut::cli::param::exception,
+       ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                     ID " is already set");
      }
 
@@ -119,7 +119,7 @@ TESTSUITE(cli)
      {
        static const char *cli[] = { "--xml=False", "--xml", 0 };
        const char *const *p = param.match(cli);
-       ASSERT_THROW(param.match(p), crpcut::cli::param::exception,
+       ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                     ID " is already set");
      }
 

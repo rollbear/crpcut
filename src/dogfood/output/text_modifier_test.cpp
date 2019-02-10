@@ -337,28 +337,28 @@ TESTSUITE(output)
     TEST(variable_subset_length_throws)
     {
       ASSERT_THROW(text_modifier(" 0 BLOCKED_SU=apa "),
-                   text_modifier::illegal_decoration_format,
+                   text_modifier::illegal_decoration_format&,
                    "BLOCKED_SU is not a decorator");
     }
 
     TEST(variable_superset_length_throws)
     {
       ASSERT_THROW(text_modifier(" 0 BLOCKED_SUMM=apa "),
-                   text_modifier::illegal_decoration_format,
+                   text_modifier::illegal_decoration_format&,
                    "BLOCKED_SUMM is not a decorator");
     }
 
     TEST(lacking_assign_throws)
     {
       ASSERT_THROW(text_modifier(" 0 BLOCKED_SUM "),
-                   text_modifier::illegal_decoration_format,
+                   text_modifier::illegal_decoration_format&,
                    "Missing = after name");
     }
 
     TEST(lacking_terminator_throws)
     {
       ASSERT_THROW(text_modifier(" 0 BLOCKED_SUM=apa"),
-                   text_modifier::illegal_decoration_format,
+                   text_modifier::illegal_decoration_format&,
                    "Missing separator after value for BLOCKED_SUM");
     }
   }

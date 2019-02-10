@@ -183,14 +183,14 @@ TESTSUITE(tag_filter)
        test_tag_list)
   {
     ASSERT_THROW(crpcut::tag_filter("apa,katt,ko,tupp").assert_names(root),
-                 crpcut::tag_filter::spec_error);
+                 crpcut::tag_filter::spec_error&);
     ASSERT_THROW(crpcut::tag_filter("tupp,katt,ko").assert_names(root),
-                 crpcut::tag_filter::spec_error);
+                 crpcut::tag_filter::spec_error&);
     ASSERT_THROW(crpcut::tag_filter("/-tupp").assert_names(root),
-                 crpcut::tag_filter::spec_error);
+                 crpcut::tag_filter::spec_error&);
     ASSERT_THROW(crpcut::tag_filter("/apa,katt,ko,tupp").assert_names(root),
-                 crpcut::tag_filter::spec_error);
+                 crpcut::tag_filter::spec_error&);
     ASSERT_THROW(crpcut::tag_filter("//").assert_names(root),
-                 crpcut::tag_filter::spec_error);
+                 crpcut::tag_filter::spec_error&);
   }
 }

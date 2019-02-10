@@ -133,14 +133,14 @@ TESTSUITE(cli)
     TEST(long_form_with_naked_assign_throws, check)
     {
       static const char *cli[] = { "--check=", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    "-c / --check does not accept any value");
     }
 
     TEST(long_form_with_value_throws, check)
     {
       static const char *cli[] = { "--check=3", 0 };
-      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception,
+      ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    "-c / --check does not accept any value");
     }
 

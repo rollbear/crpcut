@@ -124,7 +124,7 @@ TESTSUITE(output)
     {
       buffer b(0, "");
       ASSERT_THROW(empty_writer(b, "tjolahopp!", "apa"),
-                   std::runtime_error,
+                   std::runtime_error&,
                    "Can't convert from \"UTF-8\" to \"tjolahopp!\"");
     }
 

@@ -195,7 +195,7 @@ TESTS = {
   'asserts::should_fail_assert_throw_with_no_exception' =>
   FailedTest.new('running').
   log('violation',
-      /#{A_H}ASSERT_THROW\(i=1, std::exception\)\s+Did not throw/me),
+      /#{A_H}ASSERT_THROW\(i=1, std::exception&\)\s+Did not throw/me),
 
   'asserts::should_fail_on_assert_eq_with_fixture' =>
   FailedTest.new('running').
@@ -382,7 +382,7 @@ TESTS = {
   FailedTest.new('running').
   tag('exception_content_match').
   log('violation',
-      /#{A_H}ASSERT_THROW\(throw std::range_error\("apa"\), std::exception, "katt"\)\n\s*what\(\) == "apa" does not match string "katt"/me),
+      /#{A_H}ASSERT_THROW\(throw std::range_error\("apa"\), std::exception&, "katt"\)\n\s*what\(\) == "apa" does not match string "katt"/me),
 
   'asserts::should_succeed_assert_throw_with_regexp_match' =>
   PassedTest.new().
@@ -720,7 +720,7 @@ TESTS = {
   FailedTest.new('running').
   tag('exception_content_match').
   log('fail',
-      /.*VERIFY_THROW\(throw std::range_error\("apa"\), std::exception, "katt"\)\n\s*what\(\) == "apa" does not match string "katt"/me).
+      /.*VERIFY_THROW\(throw std::range_error\("apa"\), std::exception&, "katt"\)\n\s*what\(\) == "apa" does not match string "katt"/me).
   log('violation', /Earlier VERIFY failed/),
 
   'verify::should_succeed_verify_throw_with_regexp_match' =>

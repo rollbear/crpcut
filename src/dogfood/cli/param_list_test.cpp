@@ -108,7 +108,7 @@ TESTSUITE(cli)
                                     "--param=apa",
                                     "-d",
                                     "/tmp" };
-      ASSERT_THROW(list.match_all(argv), crpcut::cli::param::exception,
+      ASSERT_THROW(list.match_all(argv), crpcut::cli::param::exception&,
                    "-p name=value / --param=name=value missing a value after \"apa\"");
     }
   }

@@ -45,13 +45,13 @@ TESTSUITE(verify)
 #ifndef CRPCUT_NO_EXCEPTION_SUPPORT
   TEST(should_succeed_verify_throw_with_correct_exception)
   {
-    VERIFY_THROW(throw std::bad_alloc(), std::bad_alloc);
+    VERIFY_THROW(throw std::bad_alloc(), std::bad_alloc&);
     INFO << "after";
   }
 
   TEST(should_fail_verify_exception_with_wrong_exception)
   {
-    VERIFY_THROW(throw std::bad_alloc(), std::domain_error);
+    VERIFY_THROW(throw std::bad_alloc(), std::domain_error&);
     INFO << "after";
   }
 
@@ -59,19 +59,19 @@ TESTSUITE(verify)
   TEST(should_fail_verify_throw_with_no_exception)
   {
     int i;
-    VERIFY_THROW(i=1, std::exception);
+    VERIFY_THROW(i=1, std::exception&);
     INFO << "after i=" << i;
   }
 
   TEST(should_fail_verify_throw_with_unexpected_c_string)
   {
-    VERIFY_THROW(throw "apa", std::exception);
+    VERIFY_THROW(throw "apa", std::exception&);
     INFO << "after";
   }
 
   TEST(should_fail_verify_throw_with_translated_invalid_argument)
   {
-    VERIFY_THROW(throw std::invalid_argument("apa"), std::domain_error);
+    VERIFY_THROW(throw std::invalid_argument("apa"), std::domain_error&);
     INFO << "after";
   }
   TEST(should_succeed_verify_no_throw)
@@ -121,20 +121,20 @@ TESTSUITE(verify)
   TEST(should_succeed_verify_throw_with_exact_string_match,
        WITH_TEST_TAG(exception_content_match))
   {
-    VERIFY_THROW(throw std::range_error("apa"), std::exception, "apa");
+    VERIFY_THROW(throw std::range_error("apa"), std::exception&, "apa");
   }
 
   TEST(should_fail_verify_throw_with_mismatching_string,
        WITH_TEST_TAG(exception_content_match))
   {
-    VERIFY_THROW(throw std::range_error("apa"), std::exception, "katt");
+    VERIFY_THROW(throw std::range_error("apa"), std::exception&, "katt");
   }
 
   TEST(should_succeed_verify_throw_with_regexp_match,
        WITH_TEST_TAG(exception_content_match))
   {
     VERIFY_THROW(throw std::range_error("en liten apa"),
-                 std::exception,
+                 std::exception&,
                  crpcut::match<crpcut::regex>("liten"));
   }
 
@@ -142,7 +142,7 @@ TESTSUITE(verify)
        WITH_TEST_TAG(exception_content_match))
   {
     VERIFY_THROW(throw std::range_error("en liten apa"),
-                 std::exception,
+                 std::exception&,
                  crpcut::match<crpcut::regex>(".*x.*"));
   }
   class int_matcher
