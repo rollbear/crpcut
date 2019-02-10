@@ -249,13 +249,13 @@ namespace crpcut {
         case comm::fail:
         case comm::exit_fail:
           s->explicit_fail = true;
-                                           /* no break */
+          CRPCUT_FALLTHROUGH;
         case comm::exit_ok:
           s->success &= t == comm::exit_ok;
-                                           /* no break */
+          CRPCUT_FALLTHROUGH;
         case comm::info:
           with_location = t != comm::exit_ok;
-                                           /* no break */
+          CRPCUT_FALLTHROUGH;
         case comm::stdout:
         case comm::stderr:
           {

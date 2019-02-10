@@ -66,6 +66,12 @@ extern "C"
 #define CRPCUT_STRINGIZE_(...) CRPCUT_STRINGIZE(__VA_ARGS__)
 #define CRPCUT_HERE __FILE__ ":" CRPCUT_STRINGIZE_(__LINE__)
 
+#if __cplusplus >= 201703L
+#  define CRPCUT_FALLTHROUGH [[fallthrough]]
+#else
+#  define CRPCUT_FALLTHROUGH [[gnu::fallthrough]]
+#endif
+
 namespace crpcut {
 
   template <typename...>

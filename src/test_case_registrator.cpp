@@ -494,7 +494,7 @@ namespace crpcut {
                 t = comm::exit_fail;
                 break;
               }
-            // no break - fall through
+            CRPCUT_FALLTHROUGH;
           case CLD_KILLED:
             if (check_signal_status(info.si_status, cputime_us, out))
               {
