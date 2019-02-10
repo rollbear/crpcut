@@ -82,7 +82,7 @@ TESTSUITE(comm)
        std::ostringstream os;
        {
          crpcut::comm::reporter r(os);
-         const crpcut::crpcut_test_monitor *no_monitor = 0;
+         const crpcut::crpcut_test_monitor *no_monitor = nullptr;
          r(crpcut::comm::info, "apa", location, no_monitor);
        }
        ASSERT_TRUE(os.str() == "\napa.cpp:32\napa\n");
@@ -94,7 +94,7 @@ TESTSUITE(comm)
     {
       std::ostringstream os;
       crpcut::comm::reporter r(os);
-      const crpcut::crpcut_test_monitor *no_monitor = 0;
+      const crpcut::crpcut_test_monitor *no_monitor = nullptr;
       r(crpcut::comm::exit_fail, "apa", location, no_monitor);
     }
 

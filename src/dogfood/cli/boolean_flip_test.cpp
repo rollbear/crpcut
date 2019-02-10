@@ -58,7 +58,7 @@ TESTSUITE(cli)
 
      TEST(short_form_without_value_flips_without_consuming, fix)
      {
-       static const char *cli[] = { "-x", 0 };
+       static const char *cli[] = { "-x", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 1);
        ASSERT_FALSE(param.get_value(true));
@@ -71,7 +71,7 @@ TESTSUITE(cli)
 
      TEST(long_form_without_value_flips, fix)
      {
-       static const char *cli[] = { "--xml", 0 };
+       static const char *cli[] = { "--xml", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 1);
        ASSERT_FALSE(param.get_value(true));
@@ -84,7 +84,7 @@ TESTSUITE(cli)
 
      TEST(long_form_with_truth_value_sets_fixed_true, fix)
      {
-       static const char *cli[] = { "--xml=Yes", 0 };
+       static const char *cli[] = { "--xml=Yes", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 1);
        ASSERT_TRUE(param.get_value(true));
@@ -93,7 +93,7 @@ TESTSUITE(cli)
 
      TEST(long_form_with_false_value_sets_fixed_false, fix)
      {
-       static const char *cli[] = { "--xml=off", 0 };
+       static const char *cli[] = { "--xml=off", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 1);
        ASSERT_FALSE(param.get_value(true));
@@ -102,14 +102,14 @@ TESTSUITE(cli)
 
      TEST(long_form_with_illegal_value_throws, fix)
      {
-       static const char *cli[] = { "--xml=active", 0 };
+       static const char *cli[] = { "--xml=active", nullptr };
        ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                     ID " - can't interpret \"active\" as boolean value");
      }
 
      TEST(long_form_without_value_after_fixed_true_throws, fix)
      {
-       static const char *cli[] = { "--xml=On", "--xml", 0 };
+       static const char *cli[] = { "--xml=On", "--xml", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                     ID " is already set");
@@ -117,7 +117,7 @@ TESTSUITE(cli)
 
      TEST(long_form_without_value_after_fixed_false_throws, fix)
      {
-       static const char *cli[] = { "--xml=False", "--xml", 0 };
+       static const char *cli[] = { "--xml=False", "--xml", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                     ID " is already set");
@@ -125,7 +125,7 @@ TESTSUITE(cli)
 
      TEST(long_form_with_true_value_overrides_flip, fix)
      {
-       static const char *cli[] = { "--xml", "--xml=true", 0 };
+       static const char *cli[] = { "--xml", "--xml=true", nullptr };
        const char * const *p = param.match(cli);
        p = param.match(p);
        ASSERT_TRUE(p == cli + 2);
@@ -135,7 +135,7 @@ TESTSUITE(cli)
 
      TEST(short_form_without_value_flips, fix)
      {
-       static const char *cli[] = { "-x", 0 };
+       static const char *cli[] = { "-x", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 1);
        ASSERT_FALSE(param.get_value(true));
@@ -148,7 +148,7 @@ TESTSUITE(cli)
 
      TEST(short_form_with_illegal_value_flips_without_consuming, fix)
      {
-       static const char *cli[] = { "-x", "-y", 0 };
+       static const char *cli[] = { "-x", "-y", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 1);
        ASSERT_FALSE(param.get_value(true));
@@ -161,7 +161,7 @@ TESTSUITE(cli)
 
      TEST(short_form_with_true_value_sets_fixed_true, fix)
      {
-       static const char *cli[] = { "-x", "yes", 0 };
+       static const char *cli[] = { "-x", "yes", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 2);
        ASSERT_TRUE(param.get_value(true));
@@ -170,7 +170,7 @@ TESTSUITE(cli)
 
      TEST(short_form_with_false_value_sets_fixed_false, fix)
      {
-       static const char *cli[] = { "-x", "OFF", 0 };
+       static const char *cli[] = { "-x", "OFF", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 2);
        ASSERT_FALSE(param.get_value(true));
@@ -179,7 +179,7 @@ TESTSUITE(cli)
 
      TEST(short_form_with_false_value_overrides_flip, fix)
      {
-       static const char *cli[] = { "-x", "-x", "false", 0 };
+       static const char *cli[] = { "-x", "-x", "false", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 1);
        p = param.match(p);
@@ -190,7 +190,7 @@ TESTSUITE(cli)
 
      TEST(short_form_with_true_value_overrides_flip, fix)
      {
-       static const char *cli[] = { "-x", "-x", "YES", 0 };
+       static const char *cli[] = { "-x", "-x", "YES", nullptr };
        const char *const *p = param.match(cli);
        ASSERT_TRUE(p == cli + 1);
        p = param.match(p);

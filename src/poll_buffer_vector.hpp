@@ -55,13 +55,9 @@ namespace crpcut {
       private:
         int fd_;
       };
-      fdinfo(int fd_ = 0, int mode_ = 0, void *ptr_ = 0)
-        : fd(fd_), mode(mode_), ptr(ptr_)
-      {
-      }
-      int   fd;
-      int   mode;
-      void *ptr;
+      int   fd = 0;
+      int   mode = 0;
+      void *ptr = nullptr;
     };
     buffer_vector<fdinfo> access;
     size_t pending_fds;
@@ -107,7 +103,7 @@ namespace crpcut {
   poll_buffer_vector<T>
   ::do_add_fd(int fd, T* data, int flags)
   {
-    access.push_back(fdinfo(fd, flags, data));
+    access.push_back(fdinfo{fd, flags, data});
   }
 
   template <typename T>
@@ -116,13 +112,13 @@ namespace crpcut {
   poll_buffer_vector<T>
   ::do_del_fd(int fd)
   {
-    fdinfo *i = 0;
+    fdinfo *i = nullptr;
     for (size_t idx = 0; idx < access.size(); ++idx)
       {
         fdinfo &info = access.at(idx);
         if (info.fd == fd) { i = &info; break; }
       }
-    assert(i != 0 && "fd not found");
+    assert(i && "fd not found");
     *i = access.back();
     access.pop_back();
     if (   FD_ISSET(fd, &this->xset)
@@ -160,10 +156,10 @@ namespace crpcut {
                                      &rset,
                                      &wset,
                                      &xset,
-                                     timeout_ms == -1 ? 0 : &tv);
+                                     timeout_ms == -1 ? nullptr : &tv);
             if (rv == -1 && errno == EINTR) continue;
             if (rv < 0) throw posix_error(errno, "select");
-            if (rv == 0) return descriptor(0,0); // timeout
+            if (rv == 0) return descriptor(nullptr, 0); // timeout
             this->pending_fds = size_t(rv);
             break;
           }
@@ -193,8 +189,8 @@ namespace crpcut {
             return descriptor(static_cast<T*>(access.at(j).ptr), mode);
           }
       }
-    assert("no matching fd" == 0);
-    return descriptor(0, 0);
+    assert("no matching fd" == nullptr);
+    return descriptor(nullptr, 0);
   }
 
   template <typename T>

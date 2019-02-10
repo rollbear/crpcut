@@ -49,8 +49,7 @@ TESTSUITE(posix_error)
     {
       const posix_error p(EPERM, "shame shame shame");
       pp = new posix_error(p);
-      const char *nullstr = 0;
-      ASSERT_TRUE(p.what() == nullstr);
+      ASSERT_TRUE(p.what() == nullptr);
     }
     ASSERT_PRED(crpcut::match<crpcut::regex>(re), pp->what());
     delete pp;

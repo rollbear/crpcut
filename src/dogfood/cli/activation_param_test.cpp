@@ -52,7 +52,7 @@ TESTSUITE(cli)
 
     TEST(mismatched_parameter_is_false, fix)
     {
-      static const char *cli[] = { "--debug", 0 };
+      static const char *cli[] = { "--debug", nullptr };
       const char * const *p = param.match(cli);
       ASSERT_FALSE(p);
       ASSERT_FALSE(param);
@@ -60,7 +60,7 @@ TESTSUITE(cli)
 
     TEST(matched_parameter_is_true, fix)
     {
-      static const char *cli[] = { "--verbose", 0 };
+      static const char *cli[] = { "--verbose", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
       ASSERT_TRUE(param);
@@ -68,7 +68,7 @@ TESTSUITE(cli)
 
     TEST(double_matched_paratemer_throws, fix)
     {
-      static const char *cli[] = { "--verbose", "-v", 0 };
+      static const char *cli[] = { "--verbose", "-v", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                    "-v / --verbose can only be used once");
@@ -76,14 +76,14 @@ TESTSUITE(cli)
 
     TEST(long_form_param_with_value_throws, fix)
     {
-      static const char *cli[] = { "--verbose=0", 0 };
+      static const char *cli[] = { "--verbose=0", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    "-v / --verbose does not accept any value");
     }
 
     TEST(short_form_param_with_value_returns_value_pos, fix)
     {
-      static const char *cli[] = { "-v", "0", 0 };
+      static const char *cli[] = { "-v", "0", nullptr };
       ASSERT_TRUE(param.match(cli) == cli + 1);
     }
 

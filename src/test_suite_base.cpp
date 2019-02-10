@@ -30,7 +30,7 @@ namespace crpcut {
 
   test_suite_base
   ::test_suite_base()
-    : list(0)
+    : list(nullptr)
   {
   }
 

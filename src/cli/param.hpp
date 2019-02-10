@@ -51,7 +51,7 @@ namespace crpcut {
             value_requirement  req,
             const char        *param_description,
             param_list &root);
-      virtual ~param();
+      virtual ~param() = default;
       const char *const *match(const char *const *);
       friend std::ostream &operator<<(std::ostream &os, const param &p)
       {
@@ -75,7 +75,6 @@ namespace crpcut {
     {
     public:
       exception(std::string s) : s_(s) {}
-      ~exception() throw () {}
       const char *what() const throw () { return s_.c_str(); }
     private:
       std::string s_;
@@ -95,7 +94,7 @@ namespace crpcut {
       : long_form_(long_form),
         long_form_len_(N - 1),
         short_form_(short_form),
-        value_description_(0),
+        value_description_(nullptr),
         param_description_(param_description),
         req_(optional)
     {

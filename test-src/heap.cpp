@@ -62,7 +62,7 @@ TESTSUITE(heap)
     };
     ASSERT_SCOPE_HEAP_LEAK_FREE
     {
-      elem *root = 0;
+      elem *root = nullptr;
       for (int i = 0; i < 20; ++i)
       {
         root = new elem(root);
@@ -109,7 +109,7 @@ TESTSUITE(heap)
     };
     VERIFY_SCOPE_HEAP_LEAK_FREE
     {
-      elem *root = 0;
+      elem *root = nullptr;
       for (int i = 0; i < 20; ++i)
       {
         root = new elem(root);
@@ -180,7 +180,7 @@ TESTSUITE(heap)
   {
     crpcut::heap::set_limit(crpcut::heap::allocated_bytes() + 100);
     void *p = malloc(101);
-    ASSERT_EQ(p, 0);
+    ASSERT_EQ(p, nullptr);
   }
 
   struct an_array
@@ -209,14 +209,14 @@ TESTSUITE(heap)
       char str[101];
     };
     apa *p = new(std::nothrow) apa;
-    ASSERT_EQ((void*)p, 0);
+    ASSERT_EQ((void*)p, nullptr);
   }
 
   TEST(should_succeed_new_array_nothrow_blast_limit)
   {
     crpcut::heap::set_limit(crpcut::heap::allocated_bytes() + 100);
     char *p = new(std::nothrow) char[101];
-    ASSERT_EQ(p, 0);
+    ASSERT_EQ(p, nullptr);
   }
 
   TEST(should_succeed_blast_limit_with_string,
@@ -278,7 +278,7 @@ TESTSUITE(heap)
   {
     if (!ballast) throw std::bad_alloc();
     delete[] ballast;
-    ballast = 0;
+    ballast = nullptr;
   }
 
   TEST(should_succeed_new_handler)
@@ -289,7 +289,7 @@ TESTSUITE(heap)
     ballast = new char[100];
     char *p = new char[50];
     ASSERT_EQ(crpcut::heap::allocated_bytes(), bytes + 50);
-    ASSERT_EQ(ballast, 0);
+    ASSERT_EQ(ballast, nullptr);
     delete[] p;
     ASSERT_EQ(crpcut::heap::allocated_bytes(), bytes);
   }
@@ -309,8 +309,8 @@ TESTSUITE(heap)
     ballast = new char[100];
     char *p = new (std::nothrow) char[50];
     ASSERT_EQ(crpcut::heap::allocated_bytes(), bytes + 50);
-    ASSERT_EQ(ballast, 0);
-    ASSERT_NE(p, 0);
+    ASSERT_EQ(ballast, nullptr);
+    ASSERT_NE(p, nullptr);
     delete[] p;
     ASSERT_EQ(crpcut::heap::allocated_bytes(), bytes);
   }
@@ -320,7 +320,7 @@ TESTSUITE(heap)
     crpcut::heap::set_limit(crpcut::heap::allocated_bytes() + 99);
     std::set_new_handler(stupid_new_handler);
     void *p = new (std::nothrow) char[100];
-    ASSERT_EQ(p, 0);
+    ASSERT_EQ(p, nullptr);
   }
 }
 

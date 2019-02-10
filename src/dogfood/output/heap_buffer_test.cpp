@@ -58,7 +58,7 @@ TESTSUITE(output)
       heap_buffer b;
       ASSERT_TRUE(b.is_empty());
       std::pair<const char*, std::size_t> r = b.get_buffer();
-      static const char *const zerostr = 0;
+      static const char *const zerostr = nullptr;
       ASSERT_TRUE(r.first == zerostr);
       ASSERT_TRUE(r.second == 0U);
       b.advance();

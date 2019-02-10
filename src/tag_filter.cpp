@@ -85,12 +85,8 @@ namespace crpcut {
 
   tag_filter
   ::tag_filter(const char * p)
-    : begin_select(0),
-      end_select(0),
-      begin_noncritical(0),
-      end_noncritical(0)
   {
-    if (p == 0) return;
+    if (p == nullptr) return;
 
     subtract_select = *p == '-';
     if (subtract_select) ++p;
@@ -99,7 +95,7 @@ namespace crpcut {
     end_select = p;
     if (*p++ == 0)
       {
-        begin_noncritical = 0;
+        begin_noncritical = nullptr;
         return;
       }
     subtract_noncritical = *p == '-';

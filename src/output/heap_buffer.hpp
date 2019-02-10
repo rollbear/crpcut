@@ -34,7 +34,7 @@ namespace crpcut {
     class heap_buffer : public buffer
     {
     public:
-      heap_buffer();
+      heap_buffer() = default;
       ~heap_buffer();
       virtual std::pair<const char*, std::size_t> get_buffer() const;
       virtual void advance();
@@ -47,8 +47,8 @@ namespace crpcut {
       struct block;
 
 
-      block  *head_;
-      block **current_;
+      block  *head_ = nullptr;
+      block **current_ = &head_;
     };
 
 

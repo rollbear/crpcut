@@ -116,16 +116,14 @@ namespace crpcut {
     }
 
     reporter::reporter(std::ostream &default_out)
-      : writer_(0),
-        reader_(0),
-        default_out_(default_out)
+      : default_out_(default_out)
     {
     }
 
     void
     reporter::set_writer(data_writer *w)
     {
-      assert(writer_ == 0);
+      assert(writer_ == nullptr);
       writer_ = w;
     }
 

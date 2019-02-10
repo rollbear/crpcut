@@ -71,14 +71,6 @@ namespace crpcut {
         other->crpcut_inc();
       }
 
-      crpcut_base
-      ::crpcut_base()
-        : crpcut_state(crpcut_not_run),
-          crpcut_num(0),
-          crpcut_dependants(0)
-      {
-      }
-
       void
       crpcut_base
       ::crpcut_add(basic_enforcer *other)
@@ -116,11 +108,6 @@ namespace crpcut {
         return crpcut_state == crpcut_success;
       }
 
-      basic_enforcer
-      ::basic_enforcer()
-        : next(0)
-      {
-      }
     }
   }
 }

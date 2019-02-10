@@ -35,7 +35,7 @@ namespace crpcut {
       static const char * const name[] = {
         "libm.so",
         "libm.so.6",
-        0
+        nullptr
       };
       return name;
     }

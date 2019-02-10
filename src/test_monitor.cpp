@@ -27,7 +27,7 @@
 #include <crpcut.hpp>
 
 namespace {
-  crpcut::crpcut_test_monitor *current = 0;
+  crpcut::crpcut_test_monitor *current = nullptr;
 }
 namespace crpcut {
   crpcut_test_monitor *

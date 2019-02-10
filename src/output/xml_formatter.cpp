@@ -71,7 +71,7 @@ namespace crpcut {
       int rv = wrapped::gethostname(machine_string, sizeof(machine_string));
       assert(rv == 0);
       (void)rv; // silense warning if built with NDEBUG
-      time_t now = wrapped::time(0);
+      time_t now = wrapped::time(nullptr);
       assert(now != time_t(-1));
 
       struct tm *tmdata = wrapped::gmtime(&now);
@@ -131,7 +131,7 @@ namespace crpcut {
     {
       const char *illegal = xml_replacement(get_illegal_char_representation());
       const std::size_t ill_len = wrapped::strlen(illegal);
-      datatypes::fixed_string esc = { 0, 0 };
+      datatypes::fixed_string esc = { nullptr, 0 };
       switch (c)
         {
         case '\t' : break;

@@ -176,8 +176,8 @@ TESTSUITE(test_runner)
       reporter(default_out),
       process_control(),
       fsops(),
-      top_namespace(0,0),
-      current_namespace("apa", &top_namespace),
+      top_namespace{nullptr,nullptr},
+      current_namespace{"apa", &top_namespace},
       reg("test", current_namespace, cpulimit * 1000,
           &reporter, &process_control, &fsops, &runner)
     {

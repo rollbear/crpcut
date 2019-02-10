@@ -194,7 +194,7 @@ TESTSUITE(output)
 {
   TESTSUITE(xml_formatter)
   {
-    static const char *vec[] = { "apa", "katt", "orm", 0 };
+    static const char *vec[] = { "apa", "katt", "orm", nullptr };
 
     TEST(construction_and_immediate_destruction_yields_header_only,
         fix)

@@ -52,35 +52,35 @@ TESTSUITE(cli)
 
     TEST(long_form_without_value_throws, fix<int>)
     {
-      static const char * cli[] = { "--identity", 0 };
+      static const char * cli[] = { "--identity", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                     ID " expects a value");
     }
 
     TEST(long_form_with_naked_assign_throws, fix<int>)
     {
-      static const char *cli[] = { "--identity=", 0 };
+      static const char *cli[] = { "--identity=", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " expects a value");
     }
 
     TEST(long_form_with_wrong_value_type_throws, fix<int>)
     {
-      static const char *cli[] = { "--identity=apa", 0 };
+      static const char *cli[] = { "--identity=apa", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"apa\"");
     }
 
     TEST(long_form_with_tail_after_value_throws, fix<int>)
     {
-      static const char *cli[] = { "--identity=3z", 0 };
+      static const char *cli[] = { "--identity=3z", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"3z\"");
     }
 
     TEST(unmatched_parameter_is_inactive, fix<int>)
     {
-      static const char *cli[] = { "--xpr", 0 };
+      static const char *cli[] = { "--xpr", nullptr };
       const char *const * p = param.match(cli);
       ASSERT_FALSE(p);
       ASSERT_FALSE(param);
@@ -88,7 +88,7 @@ TESTSUITE(cli)
 
     TEST(unmatched_string_parameter_is_inactive, fix<const char *>)
     {
-      static const char *cli[] = { "--xpr", 0 };
+      static const char *cli[] = { "--xpr", nullptr };
       const char *const * p = param.match(cli);
       ASSERT_FALSE(p);
       ASSERT_FALSE(param);
@@ -96,7 +96,7 @@ TESTSUITE(cli)
 
     TEST(matched_long_form_parameter_is_active, fix<int>)
     {
-      static const char *cli[] = { "--identity=385", 0 };
+      static const char *cli[] = { "--identity=385", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
       ASSERT_TRUE(param);
@@ -105,7 +105,7 @@ TESTSUITE(cli)
 
     TEST(matched_long_form_string_parameter_keeps_pointer, fix<const char*>)
     {
-      static const char *cli[] = { "--identity=\"en liten katt\"", 0 };
+      static const char *cli[] = { "--identity=\"en liten katt\"", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
       ASSERT_TRUE(param);
@@ -116,7 +116,7 @@ TESTSUITE(cli)
          DEPENDS_ON(matched_long_form_parameter_is_active))
     {
       static const char *cli[] = { "--identity=\"apa\"",
-                                   "--identity=\"katt\"", 0 };
+                                   "--identity=\"katt\"", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                    ID " can only be used once");
@@ -124,28 +124,28 @@ TESTSUITE(cli)
 
     TEST(short_form_without_value_throws, fix<int>)
     {
-      static const char * cli[] = { "-i", 0 };
+      static const char * cli[] = { "-i", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                     ID " expects a value");
     }
 
     TEST(short_form_with_following_param_assign_throws, fix<int>)
     {
-      static const char *cli[] = { "-i", "-p", 0 };
+      static const char *cli[] = { "-i", "-p", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"-p\"");
     }
 
     TEST(short_form_with_wrong_value_type_throws, fix<int>)
     {
-      static const char *cli[] = { "-i", "apa", 0 };
+      static const char *cli[] = { "-i", "apa", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"apa\"");
     }
 
     TEST(short_form_with_tail_after_value_throws, fix<int>)
     {
-      static const char *cli[] = { "-i", "3z", 0 };
+      static const char *cli[] = { "-i", "3z", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    ID " - can't interpret \"3z\"");
     }
@@ -153,7 +153,7 @@ TESTSUITE(cli)
 
     TEST(matched_short_form_parameter_is_active, fix<int>)
     {
-      static const char *cli[] = { "-i", "385", 0 };
+      static const char *cli[] = { "-i", "385", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 2);
       ASSERT_TRUE(param);
@@ -162,7 +162,7 @@ TESTSUITE(cli)
 
     TEST(matched_short_form_string_parameter_keeps_pointer, fix<const char*>)
     {
-      static const char *cli[] = { "-i", "\"en liten katt\"", 0 };
+      static const char *cli[] = { "-i", "\"en liten katt\"", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 2);
       ASSERT_TRUE(param);
@@ -173,7 +173,7 @@ TESTSUITE(cli)
          DEPENDS_ON(matched_short_form_parameter_is_active))
     {
       static const char *cli[] = { "-i", "\"apa\"",
-                                   "-i", "\"katt\"", 0 };
+                                   "-i", "\"katt\"", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_THROW(param.match(p), crpcut::cli::param::exception&,
                    ID " can only be used once");

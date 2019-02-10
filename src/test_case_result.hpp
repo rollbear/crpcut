@@ -34,19 +34,21 @@ namespace crpcut {
   struct test_case_result : public datatypes::list_elem<test_case_result>
   {
     test_case_result(pid_t pid);
+    test_case_result(const test_case_result& r) = delete;
     ~test_case_result();
-    pid_t                         id;
-    bool                          explicit_fail;
-    bool                          success;
-    bool                          nonempty_dir;
 
-    crpcut_test_case_registrator *test;
-    datatypes::fixed_string       termination;
-    datatypes::fixed_string       location;
+    test_case_result& operator=(const test_case_result&r) = delete;
+
+    pid_t                         id;
+    bool                          explicit_fail = false;
+    bool                          success = false;
+    bool                          nonempty_dir = false;
+
+    crpcut_test_case_registrator *test = nullptr;
+    datatypes::fixed_string       termination = datatypes::fixed_string::make("");
+    datatypes::fixed_string       location = datatypes::fixed_string::make("");
     datatypes::list_elem<event>   history;
   private:
-    test_case_result(const test_case_result& r);
-    test_case_result& operator=(const test_case_result&r);
   };
 }
 

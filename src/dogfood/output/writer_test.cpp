@@ -62,7 +62,7 @@ TESTSUITE(output)
       using writer::write;
       virtual crpcut::datatypes::fixed_string escape(char c) const
       {
-        static const crpcut::datatypes::fixed_string none = { 0, 0 };
+        static const crpcut::datatypes::fixed_string none = { nullptr, 0 };
         if (!escape_ || c < 0 || c >= ' ')
           {
             return none;

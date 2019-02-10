@@ -305,13 +305,13 @@ TESTSUITE(verify)
   }
   TEST(should_succeed_pointer_eq_0)
   {
-    int *pi = 0;
+    int *pi = nullptr;
     VERIFY_EQ(pi, 0);
     INFO << "after";
   }
   TEST(should_succeed_0_eq_pointer)
   {
-    int *pi = 0;
+    int *pi = nullptr;
     VERIFY_EQ(0, pi);
     INFO << "after";
   }
@@ -353,7 +353,7 @@ TESTSUITE(verify)
   {
     int i;
     int *pi = &i;
-    void *pv = 0;
+    void *pv = nullptr;
     VERIFY_EQ(pv, pi);
     INFO << "after";
   }
@@ -362,7 +362,7 @@ TESTSUITE(verify)
   {
     int i;
     int *pi = &i;
-    void *pv = 0;
+    void *pv = nullptr;
     VERIFY_EQ(pi, pv);
     INFO << "after";
   }
@@ -415,7 +415,7 @@ TESTSUITE(verify)
 
   TEST(should_succeed_0_eq_pointer_to_member)
   {
-    int local::*p = 0;
+    int local::*p = nullptr;
     VERIFY_EQ(0, p);
     INFO << "after";
   }

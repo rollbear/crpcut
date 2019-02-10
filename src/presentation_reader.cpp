@@ -105,7 +105,7 @@ namespace crpcut {
             return i;
           }
       }
-    return 0;
+    return nullptr;
   }
 
   void
@@ -233,7 +233,7 @@ namespace crpcut {
       assert(test_case_id || t == comm::dir);
       int mask = t & comm::kill_me;
       t = static_cast<comm::type>(t & ~mask);
-      datatypes::fixed_string location = { 0, 0 };
+      datatypes::fixed_string location = { nullptr, 0 };
       bool with_location = false;
       switch (t)
         {
@@ -259,7 +259,7 @@ namespace crpcut {
         case comm::stdout:
         case comm::stderr:
           {
-            datatypes::fixed_string msg = { 0, 0 };
+            datatypes::fixed_string msg = { nullptr, 0 };
             fd_.read_loop(&msg.len, sizeof(msg.len));
             assert(!with_location || msg.len);
             if (with_location)
@@ -279,8 +279,7 @@ namespace crpcut {
           }
           break;
         default:
-          assert("unreachable code reached" == 0);
-          /* no break */
+          assert("unreachable code reached" == nullptr);
         }
     }
     catch (posix_error &)
@@ -294,7 +293,7 @@ namespace crpcut {
   presentation_reader
   ::write()
   {
-    assert("Shan't ever write back" == 0);
+    assert("Shan't ever write back" == nullptr);
     return true;
   }
 

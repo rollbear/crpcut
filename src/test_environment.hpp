@@ -40,7 +40,7 @@ namespace crpcut {
   class test_environment
   {
   protected:
-    test_environment() : cli_(0), charset_(0) {} // for test use
+    test_environment() : cli_(nullptr), charset_(nullptr) {} // for test use
   public:
     test_environment(cli::interpreter *cli);
     virtual ~test_environment();

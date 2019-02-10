@@ -48,7 +48,7 @@ TESTSUITE(cli)
 
     TEST(empty_list_does_not_match, check)
     {
-      static const char *cli[] = { 0 };
+      static const char *cli[] = { nullptr };
       const char *const *p = param.match(cli);
       ASSERT_FALSE(p);
     }
@@ -62,84 +62,84 @@ TESTSUITE(cli)
 
     TEST(short_form_without_trailing_params_matches, check)
     {
-      static const char *cli[] = { "-c", 0 };
+      static const char *cli[] = { "-c", nullptr };
       const char * const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
     }
 
     TEST(long_form_without_trailing_param_matches, check)
     {
-      static const char *cli[] = { "--check", 0 };
+      static const char *cli[] = { "--check", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
     }
 
     TEST(short_form_with_extra_char_does_not_match, check)
     {
-      static const char *cli[] = { "-cc", 0 };
+      static const char *cli[] = { "-cc", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_FALSE(p);
     }
 
     TEST(lone_dash_does_not_match, check)
     {
-      static const char *cli[] = { "-", 0 };
+      static const char *cli[] = { "-", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_FALSE(p);
     }
 
     TEST(lone_double_dash_does_not_match, check)
     {
-      static const char *cli[] = { "--", 0 };
+      static const char *cli[] = { "--", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_FALSE(p);
     }
 
     TEST(long_form_but_one_does_not_match, check)
     {
-      static const char *cli[] = { "--chec", 0 };
+      static const char *cli[] = { "--chec", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_FALSE(p);
     }
 
     TEST(long_form_plus_one_does_not_match, check)
     {
-      static const char *cli[] = { "--checkq", 0 };
+      static const char *cli[] = { "--checkq", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_FALSE(p);
     }
 
     TEST(short_form_with_trailing_param_matches_without_consumption, check)
     {
-      static const char *cli[] = { "-c", "-q", 0 };
+      static const char *cli[] = { "-c", "-q", nullptr };
       const char * const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
     }
 
     TEST(long_form_with_trailing_param_matches_without_consumption, check)
     {
-      static const char *cli[] = { "--check", "--quiet", 0 };
+      static const char *cli[] = { "--check", "--quiet", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
     }
 
     TEST(short_form_with_trailing_data_matches_without_consumption, check)
     {
-      static const char *cli[] = { "-c", "0", 0 };
+      static const char *cli[] = { "-c", "0", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
     }
 
     TEST(long_form_with_naked_assign_throws, check)
     {
-      static const char *cli[] = { "--check=", 0 };
+      static const char *cli[] = { "--check=", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    "-c / --check does not accept any value");
     }
 
     TEST(long_form_with_value_throws, check)
     {
-      static const char *cli[] = { "--check=3", 0 };
+      static const char *cli[] = { "--check=3", nullptr };
       ASSERT_THROW(param.match(cli), crpcut::cli::param::exception&,
                    "-c / --check does not accept any value");
     }
@@ -181,7 +181,7 @@ TESTSUITE(cli)
       using P = crpcut::cli::param;
       P param(0, "long", "a toy value just to test the idea",
               list);
-      static const char *cli[] = { "--long", 0 };
+      static const char *cli[] = { "--long", nullptr };
       static char const * const *p = param.match(cli);
       ASSERT_TRUE(p == cli + 1);
     }
@@ -192,7 +192,7 @@ TESTSUITE(cli)
       using P = crpcut::cli::param;
       P param(0, "long", "a toy value just to test the idea",
               list);
-      static const char *cli[] = { "-", 0 };
+      static const char *cli[] = { "-", nullptr };
       const char *const *p = param.match(cli);
       ASSERT_FALSE(p);
     }

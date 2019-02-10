@@ -99,8 +99,7 @@ namespace crpcut {
     writer
     ::escape(char) const
     {
-      static datatypes::fixed_string no_escape = { 0, 0 };
-      return no_escape;
+      return datatypes::fixed_string{ nullptr, 0 };
     }
 
 

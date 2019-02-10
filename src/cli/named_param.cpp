@@ -64,7 +64,7 @@ namespace crpcut {
          {
            return end + 1;
          }
-       return 0;
+       return nullptr;
     }
 
     const char *
@@ -87,7 +87,7 @@ namespace crpcut {
             }
           ++p;
         }
-      return 0;
+      return nullptr;
     }
   }
 }

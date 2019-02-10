@@ -34,7 +34,7 @@ namespace crpcut {
     int i = wrapped::regcomp(&r_, s, flags | REG_NOSUB);
     if (i != 0)
       {
-        size_t n = wrapped::regerror(i, &r_, 0, 0);
+        size_t n = wrapped::regerror(i, &r_, nullptr, 0);
         errmsg_ = new char[n];
         wrapped::regerror(i, &r_, errmsg_, n);
       }
@@ -43,7 +43,7 @@ namespace crpcut {
   bool regex::type::match(const char *s)
   {
     if (errmsg_) return false;
-    int i = wrapped::regexec(&r_, s, 0, 0, 0);
+    int i = wrapped::regexec(&r_, s, 0, nullptr, 0);
     return i == 0;
   }
 

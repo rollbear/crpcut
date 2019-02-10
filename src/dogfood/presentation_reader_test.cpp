@@ -209,14 +209,14 @@ TESTSUITE(presentation_reader)
   {
     using R = crpcut::crpcut_test_case_registrator;
   public:
-    registrator_mock(const char *name) : R(name, &top), top(0,0) {}
+    registrator_mock(const char *name) : R(name, &top) {}
     MAKE_MOCK4(setup, void(crpcut::poll<crpcut::fdreader>&,
                            int, int, int));
     MAKE_MOCK0(run_test_case, void());
     MAKE_CONST_MOCK0(crpcut_tag, crpcut::tag &());
     MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
 
-    crpcut::namespace_info top;
+    crpcut::namespace_info top{nullptr,nullptr};
   };
   class tag_list : public crpcut::tag_list_root
   {

@@ -93,18 +93,18 @@ namespace {
   struct fix
   {
     fix()
-    : unnamed_namespace(0,0),
-      reptil_namespace("reptil", &unnamed_namespace),
-      insekt_namespace("insekt", &unnamed_namespace),
-      apa("apa", &unnamed_namespace),
-      katt("katt", &unnamed_namespace),
-      ko("ko", &unnamed_namespace),
-      lemur("lemur", &unnamed_namespace),
-      reptil_orm("orm", &reptil_namespace),
-      reptil_krokodil("krokodil", &reptil_namespace),
-      insekt_mygga("mygga", &insekt_namespace),
-      insekt_bi("bi", &insekt_namespace),
-      trilobit("trilobit", &unnamed_namespace),
+    : unnamed_namespace{nullptr,nullptr},
+      reptil_namespace{"reptil", &unnamed_namespace},
+      insekt_namespace{"insekt", &unnamed_namespace},
+      apa{"apa", &unnamed_namespace},
+      katt{"katt", &unnamed_namespace},
+      ko{"ko", &unnamed_namespace},
+      lemur{"lemur", &unnamed_namespace},
+      reptil_orm{"orm", &reptil_namespace},
+      reptil_krokodil{"krokodil", &reptil_namespace},
+      insekt_mygga{"mygga", &insekt_namespace},
+      insekt_bi{"bi", &insekt_namespace},
+      trilobit{"trilobit", &unnamed_namespace},
       unnamed_tag(),
       tamdjur("tam", &unnamed_tag),
       giftiga("giftiga", &unnamed_tag),
@@ -233,7 +233,7 @@ TESTSUITE(registrator_list)
     TEST(empty_name_list_filters_out_ignored_only, fix)
     {
       std::ostringstream os;
-      const char * const p = 0;
+      const char * const p = nullptr;
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(&p, os, 1);
       ASSERT_TRUE(rv.first == 9U);
@@ -252,7 +252,7 @@ TESTSUITE(registrator_list)
     TEST(single_suite_name_picks_only_tests_in_that_suite, fix)
     {
       std::ostringstream os;
-      const char *p[] = { "insekt", 0 };
+      const char *p[] = { "insekt", nullptr };
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(p, os, 1);
       ASSERT_TRUE(rv.first == 2U);
@@ -266,7 +266,7 @@ TESTSUITE(registrator_list)
     TEST(suite_and_test_picks_all_in_suite_plus_singled_out, fix)
     {
       std::ostringstream os;
-      const char *p[] = { "insekt", "reptil::orm", 0 };
+      const char *p[] = { "insekt", "reptil::orm", nullptr };
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(p, os, 1);
       ASSERT_TRUE(rv.first == 3U);
@@ -281,14 +281,14 @@ TESTSUITE(registrator_list)
     TEST(lookup_disabled_ignored_throws, fix)
     {
       std::ostringstream os;
-      const char *p[] = { "trilobit", 0 };
+      const char *p[] = { "trilobit", nullptr };
       ASSERT_THROW(the_list.filter_out_or_throw(p, os, 1), int);
     }
 
     TEST(multiple_names_excludes_non_matching_disabled, fix)
     {
       std::ostringstream os;
-      const char *p[] = { "insekt", "lemur", "reptil::orm", 0 };
+      const char *p[] = { "insekt", "lemur", "reptil::orm", nullptr };
       std::pair<unsigned, unsigned> rv =
           the_list.filter_out_or_throw(p, os, 1);
       ASSERT_TRUE(rv.first == 4U);
@@ -304,7 +304,7 @@ TESTSUITE(registrator_list)
     TEST(unmatched_name_throws_with_singularis_msg_form, fix)
     {
       std::ostringstream os;
-      const char *p[] = { "insekt", "tupp", 0 };
+      const char *p[] = { "insekt", "tupp", nullptr };
       ASSERT_THROW(the_list.filter_out_or_throw(p, os, 1), int);
       ASSERT_TRUE(os.str() == "tupp does not match any test names\n");
     }
@@ -312,7 +312,7 @@ TESTSUITE(registrator_list)
     TEST(unmatched_names_throws_with_pluralis_msg_form, fix)
     {
       std::ostringstream os;
-      const char *p[] = { "reptil", "insekt", "tupp", "daggmask", 0 };
+      const char *p[] = { "reptil", "insekt", "tupp", "daggmask", nullptr };
       ASSERT_THROW(the_list.filter_out_or_throw(p, os, 1), int);
       ASSERT_TRUE(os.str() == "tupp, daggmask do not match any test names\n");
     }

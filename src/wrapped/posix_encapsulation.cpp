@@ -82,7 +82,7 @@ namespace crpcut {
       static const char * const name[] = {
         "libc.so",
         "libc.so.6",
-        0
+        nullptr
       };
       return name;
     }
@@ -91,13 +91,13 @@ namespace crpcut {
       static const char * const name[] = {
         "librt.so",
         "librt.so.1",
-        0
+        nullptr
       };
       return name;
     }
     const char *const * rtld_next()
     {
-      return 0;
+      return nullptr;
     }
   }
 
@@ -109,7 +109,7 @@ namespace crpcut {
         RTLD_NOW | RTLD_NOLOAD,
         RTLD_NOW
       };
-      void *libp = 0;
+      void *libp = nullptr;
       global_heap_disabler disabler_obj;
       for (const int *pf = begin(flags); pf != end(flags); ++pf)
         {
@@ -119,13 +119,13 @@ namespace crpcut {
               if (libp) return libp;
             }
         }
-      return 0;
+      return nullptr;
     }
 
     void *dlloader::symbol(void *libp, const char *name)
     {
       global_heap_disabler disabler_obj;
-      return libp ? ::dlsym(libp, name) : 0;
+      return libp ? ::dlsym(libp, name) : nullptr;
     }
 
     void dlloader::unload(void *libp)

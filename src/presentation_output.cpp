@@ -79,7 +79,7 @@ namespace crpcut {
   presentation_output
   ::read()
   {
-    assert("Shan't ever read output" == 0);
+    assert("Shan't ever read output" == nullptr);
     return true;
   }
 

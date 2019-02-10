@@ -51,7 +51,7 @@ TESTSUITE(output)
 
     TEST(nullstring_does_nothing)
     {
-      text_modifier obj(0);
+      text_modifier obj(nullptr);
       std::ostringstream os;
       obj.write_to(os, text_modifier::NORMAL);
       ASSERT_TRUE(os.str() == "");

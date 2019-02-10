@@ -28,12 +28,6 @@
 
 namespace crpcut {
 
-  namespace_info
-  ::namespace_info(const char *n, namespace_info *p)
-    : name(n),
-      parent(p)
-  {
-  }
 
   const char *
   namespace_info
@@ -44,8 +38,8 @@ namespace crpcut {
     const char *match = parent->match_name(n);
     if (!match) return match;
     if (!*match) return match; // actually a perfect match
-    if (match != n && *match++ != ':') return 0;
-    if (match != n && *match++ != ':') return 0;
+    if (match != n && *match++ != ':') return nullptr;
+    if (match != n && *match++ != ':') return nullptr;
 
     const char *p = name;
     while (*p && *match && *p == *match)
@@ -53,7 +47,7 @@ namespace crpcut {
         ++p;
         ++match;
       }
-    return *p ? 0 : match;
+    return *p ? nullptr : match;
   }
 
   std::size_t
@@ -76,4 +70,4 @@ namespace crpcut {
 
 }
 
-crpcut::namespace_info crpcut_current_namespace(0,0);
+crpcut::namespace_info crpcut_current_namespace{nullptr,nullptr};

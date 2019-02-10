@@ -249,28 +249,28 @@ namespace crpcut {
     interpreter
     ::output_charset() const
     {
-      return charset_ ? charset_.get_value() : 0;
+      return charset_ ? charset_.get_value() : nullptr;
     }
 
     const char *
     interpreter
     ::working_dir() const
     {
-      return working_dir_ ? working_dir_.get_value() : 0;
+      return working_dir_ ? working_dir_.get_value() : nullptr;
     }
 
     const char *
     interpreter
     ::identity_string() const
     {
-      return id_string_ ? id_string_.get_value() : 0;
+      return id_string_ ? id_string_.get_value() : nullptr;
     }
 
     const char *
     interpreter
     ::illegal_representation() const
     {
-      return illegal_rep_ ? illegal_rep_.get_value() : 0;
+      return illegal_rep_ ? illegal_rep_.get_value() : nullptr;
     }
 
     bool
@@ -298,7 +298,7 @@ namespace crpcut {
     interpreter
     ::report_file() const
     {
-      return output_ ? output_.get_value() : 0;
+      return output_ ? output_.get_value() : nullptr;
     }
 
     const char *
@@ -340,7 +340,7 @@ namespace crpcut {
     interpreter
     ::tag_specification() const
     {
-      return tags_ ? tags_.get_value() : 0;
+      return tags_ ? tags_.get_value() : nullptr;
     }
 
     bool

@@ -29,7 +29,7 @@
 
 namespace {
   template <typename T>
-  void check_result(const T& t, const char *msg = 0)
+  void check_result(const T& t, const char *msg = nullptr)
   {
     bool r = t;
     ASSERT_TRUE(r != bool(msg));

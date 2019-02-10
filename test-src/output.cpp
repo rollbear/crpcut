@@ -78,14 +78,14 @@ TESTSUITE(output)
 
   TEST(should_fail_with_death_due_to_assert_on_stderr, NO_CORE_FILE)
   {
-    assert("apa" == 0);
+    assert("apa" == nullptr);
   }
 
   TEST(should_fail_with_death_and_left_behind_core_dump,
        EXPECT_SIGNAL_DEATH(SIGABRT),
        WITH_TEST_TAG(filesystem))
   {
-    assert("apa" == 0);
+    assert("apa" == nullptr);
   }
 
   TEST(should_succeed_with_info)

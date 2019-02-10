@@ -56,7 +56,7 @@ namespace crpcut {
             }
         }
       }
-    if (*names == 0)
+    if (*names == nullptr)
       {
         return std::make_pair(num_registered_tests, num_registered_tests);
       }

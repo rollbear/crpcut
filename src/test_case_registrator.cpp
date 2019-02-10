@@ -175,30 +175,14 @@ namespace crpcut {
   {
     for (;;)
       {
-        wrapped::select(0,0,0,0,0);
+        wrapped::select(0,nullptr,nullptr,nullptr,nullptr);
       }
   }
 
   crpcut_test_case_registrator
   ::crpcut_test_case_registrator(const char *name, namespace_info *ns)
     : name_(name),
-      location_(),
-      ns_info_(ns),
-      suite_list_(0),
-      active_readers_(0),
-      killed_(false),
-      death_note_(false),
-      pid_(0),
-      real_time_at_start_(),
-      cpu_time_at_start_(),
-      dirnum_(~0U),
-      phase_(creating),
-      cputime_limit_us_(0),
-      runner_(0),
-      env_(0),
-      reporter_(0),
-      process_(0),
-      filesystem_(0)
+      ns_info_(ns)
   {
   }
 
@@ -214,18 +198,8 @@ namespace crpcut {
     : name_(name),
       location_(location),
       ns_info_(&ns),
-      suite_list_(0),
-      active_readers_(0),
-      killed_(false),
-      death_note_(false),
-      pid_(0),
-      real_time_at_start_(),
-      cpu_time_at_start_(),
-      dirnum_(~0U),
-      phase_(creating),
       cputime_limit_us_(cputime_timeout_us),
       runner_(runner),
-      env_(0),
       reporter_(reporter),
       process_(process),
       filesystem_(filesystem)
@@ -377,7 +351,7 @@ namespace crpcut {
     if (filesystem_->chdir(name.begin()) != 0)
       {
         (*reporter_)(comm::exit_fail, "Couldn't chdir working dir", get_location());
-        assert("unreachable code reached" == 0);
+        assert("unreachable code reached" == nullptr);
       }
   }
 
@@ -443,7 +417,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::set_test_environment(test_environment *env)
   {
-    assert(env_ == 0);
+    assert(env_ == nullptr);
     env_ = env;
   }
 
@@ -456,7 +430,7 @@ namespace crpcut {
     if (!crpcut_failed()) phase_ = post_mortem;
     stream::toastream<1024> tcname;
     tcname << *this << '\0';
-    send_to_presentation(comm::dir, 0, 0);
+    send_to_presentation(comm::dir, 0, nullptr);
     filesystem_->rename(dirname, tcname.begin());
     crpcut_register_success(false);
     return true;

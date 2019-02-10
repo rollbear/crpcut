@@ -35,14 +35,14 @@ namespace crpcut {
   {
   public:
     class spec_error;
-    tag_filter(const char * p = 0);
+    tag_filter(const char * p = nullptr);
     void assert_names(tag_list_root& l) const;
     tag::importance lookup(datatypes::fixed_string name) const;
   private:
-    const char *begin_select;
-    const char *end_select;
-    const char *begin_noncritical;
-    const char *end_noncritical;
+    const char *begin_select = nullptr;
+    const char *end_select = nullptr;
+    const char *begin_noncritical = nullptr;
+    const char *end_noncritical = nullptr;
     bool subtract_select;
     bool subtract_noncritical;
   };

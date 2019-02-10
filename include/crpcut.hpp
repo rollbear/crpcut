@@ -183,7 +183,7 @@ namespace crpcut {
     {
       static void *& libptr()
       {
-        static void *p = 0;
+        static void *p = nullptr;
         return p;
       }
       loader()  {
@@ -407,14 +407,14 @@ namespace crpcut {
       virtual ~list_elem();
       void link_after(list_elem& r);
       void link_before(list_elem &r);
-      T *first() { return is_empty() ? 0 : static_cast<T*>(next_); }
-      T *last() { return is_empty() ? 0 : static_cast<T*>(prev_); }
-      const T *first() const { return is_empty() ? 0 : static_cast<const T*>(next_); }
-      const T *last() const { return is_empty() ? 0 : static_cast<const T*>(prev_); }
-      T* next_after(T* p) const { return p == last() ? 0 : static_cast<T*>(p->next_); }
-      T* prev_before(T* p) const { return p == first() ? 0 : static_cast<T*>(p->prev_); }
-      const T* next_after(const T* p) const { return p == last() ? 0 : static_cast<T*>(p->next_); }
-      const T* prev_before(const T* p) const { return p == first() ? 0 : static_cast<T*>(p->prev_); }
+      T *first() { return is_empty() ? nullptr : static_cast<T*>(next_); }
+      T *last() { return is_empty() ? nullptr : static_cast<T*>(prev_); }
+      const T *first() const { return is_empty() ? nullptr : static_cast<const T*>(next_); }
+      const T *last() const { return is_empty() ? nullptr : static_cast<const T*>(prev_); }
+      T* next_after(T* p) const { return p == last() ? nullptr : static_cast<T*>(p->next_); }
+      T* prev_before(T* p) const { return p == first() ? nullptr : static_cast<T*>(p->prev_); }
+      const T* next_after(const T* p) const { return p == last() ? nullptr : static_cast<T*>(p->next_); }
+      const T* prev_before(const T* p) const { return p == first() ? nullptr : static_cast<T*>(p->prev_); }
       bool is_empty() const;
       //      bool is_this(const T *p) const;
     protected:
@@ -556,7 +556,7 @@ namespace crpcut {
     tag();
   protected:
     tag(size_t len, tag_list_root *list);
-    virtual ~tag(); // make eclipse happy
+    ~tag() override; // make eclipse happy
   public:
     enum importance { CRPCUT_TEST_IMPORTANCE(CRPCUT_VERBATIM_FIRST) };
     virtual void fail();
@@ -598,9 +598,9 @@ namespace crpcut {
     using iterator = iterator_t<tag>;
     using const_iterator = iterator_t<const tag>;
     const_iterator begin() const { return const_iterator(list_.first(), list_); }
-    const_iterator end() const { return const_iterator(0, list_); }
+    const_iterator end() const { return const_iterator(nullptr, list_); }
     iterator begin() { return iterator(list_.first(), list_); }
-    iterator end() { return iterator(0, list_); }
+    iterator end() { return iterator(nullptr, list_); }
     void print_to(std::ostream &) const;
     void configure_importance(const char *specification);
   private:
@@ -846,15 +846,15 @@ namespace crpcut {
 
     class reporter
     {
-      data_writer  *writer_;
-      data_reader  *reader_;
+      data_writer  *writer_ = nullptr;
+      data_reader  *reader_ = nullptr;
       std::ostream &default_out_;
 
       using tm =  crpcut_test_monitor;
     public:
       static constexpr datatypes::fixed_string no_location()
       {
-        return datatypes::fixed_string{ 0, 0 };
+        return datatypes::fixed_string{ nullptr, 0 };
       }
       virtual ~reporter();
       explicit reporter(std::ostream &default_out = std::cout);
@@ -1200,11 +1200,10 @@ namespace crpcut {
       class basic_enforcer;
       class crpcut_base
       {
-      protected:
       public:
         void crpcut_inc();
         virtual ~crpcut_base();
-        crpcut_base();
+        crpcut_base() = default;
         void crpcut_add(basic_enforcer * other);
         bool crpcut_can_run() const;
         bool crpcut_failed() const;
@@ -1214,17 +1213,17 @@ namespace crpcut {
       private:
         virtual void crpcut_add_action(basic_enforcer *other);
         virtual void crpcut_dec_action() {}
-        enum { crpcut_success, crpcut_fail, crpcut_not_run } crpcut_state;
-        int crpcut_num;
-        basic_enforcer *crpcut_dependants;
+        enum { crpcut_success, crpcut_fail, crpcut_not_run } crpcut_state = crpcut_not_run;
+        int crpcut_num = 0;
+        basic_enforcer *crpcut_dependants = nullptr;
       };
 
       class basic_enforcer : public virtual crpcut_base
       {
         friend class crpcut_base;
-        basic_enforcer *next;
+        basic_enforcer *next = nullptr;
       protected:
-        basic_enforcer();
+        basic_enforcer() = default;
       };
 
 
@@ -1413,7 +1412,7 @@ namespace crpcut {
         current_root = this;
         next = this;
         prev = this;
-        stack = 0;
+        stack = nullptr;
         type = 0;
       }
 
@@ -1430,16 +1429,15 @@ namespace crpcut {
   struct namespace_info
   {
   public:
-    namespace_info(const char *n, namespace_info *p);
     const char* match_name(const char *n) const;
     // returns 0 on mismatch, otherwise a pointer into n where namespace name
     // ended.
 
     std::size_t full_name_len() const;
     friend std::ostream &operator<<(std::ostream &, const namespace_info &);
-  private:
-    const char *name;
-    namespace_info *parent;
+
+    const char * const name;
+    const namespace_info * const parent;
   };
 
   class fdreader : public comm::rfile_descriptor
@@ -1456,7 +1454,7 @@ namespace crpcut {
     crpcut_test_monitor *const mon_;
   private:
     virtual bool do_read_data() = 0;
-    poll<fdreader> *poller_;
+    poll<fdreader> *poller_ = nullptr;
   };
 
   template <comm::type t>
@@ -1565,7 +1563,7 @@ namespace crpcut {
     void send_to_presentation(comm::type t, size_t len, const char *buff) const;
     void set_pid(pid_t pid);
   protected:
-    crpcut_test_case_registrator(const char *name = 0, namespace_info *ns = 0);
+    crpcut_test_case_registrator(const char *name = nullptr, namespace_info *ns = nullptr);
     void manage_test_case_execution(crpcut_test_case_base*);
     void prepare_destruction(unsigned long us);
     void prepare_construction(unsigned long us);
@@ -1578,24 +1576,24 @@ namespace crpcut {
     bool cputime_timeout(unsigned long us) const;
     std::ostream &print_name(std::ostream &) const ;
 
-    const char                   *name_;
-    const datatypes::fixed_string location_;
-    const namespace_info         *ns_info_;
-    crpcut_test_case_registrator *suite_list_;
-    unsigned                      active_readers_;
-    bool                          killed_;
-    bool                          death_note_;
-    pid_t                         pid_;
+    const char                   *name_ = nullptr;
+    const datatypes::fixed_string location_ = datatypes::fixed_string::make("");
+    const namespace_info         *ns_info_ = nullptr;
+    crpcut_test_case_registrator *suite_list_ = nullptr;
+    unsigned                      active_readers_ = 0;
+    bool                          killed_ = false;
+    bool                          death_note_ = false;
+    pid_t                         pid_ = 0;
     unsigned long                 real_time_at_start_;
     struct timeval                cpu_time_at_start_;
-    unsigned                      dirnum_;
-    test_phase                    phase_;
-    const unsigned long           cputime_limit_us_;
-    test_runner                  *runner_;
-    test_environment             *env_;
-    comm::reporter               *reporter_;
-    process_control              *process_;
-    filesystem_operations        *filesystem_;
+    unsigned                      dirnum_ = ~0U;
+    test_phase                    phase_ = creating;
+    const unsigned long           cputime_limit_us_ = 0U;
+    test_runner                  *runner_ = nullptr;
+    test_environment             *env_ = nullptr;
+    comm::reporter               *reporter_ = nullptr;
+    process_control              *process_ = nullptr;
+    filesystem_operations        *filesystem_ = nullptr;
   };
 
   namespace cli {
@@ -1895,12 +1893,12 @@ namespace crpcut {
     template <typename T1>
     void EQ(T1 v1, const char *n1, type2 v2, const char *n2) const
     {
-      verify<action, T1, type2>(0 == v2, v1, n1, v2, n2);
+      verify<action, T1, type2>(nullptr == v2, v1, n1, v2, n2);
     }
     template <typename T1>
     void NE(T1 v1, const char *n1, type2 v2, const char *n2) const
     {
-      verify<action, T1, type2>(0 != v2, v1, n1, v2, n2);
+      verify<action, T1, type2>(nullptr != v2, v1, n1, v2, n2);
     }
     template <typename T1>
     void GT(T1 v1, const char *n1, type2 v2, const char *n2) const
@@ -2155,7 +2153,7 @@ namespace crpcut {
     collate_result operator<(const char *r) const
     {
       collate_result rv(compare(r) < 0
-                        ? 0
+                        ? nullptr
                         : r,
                         ref,
                         locale);
@@ -2169,7 +2167,7 @@ namespace crpcut {
     collate_result operator<=(const char *r) const
     {
       collate_result rv(compare(r) <= 0
-                        ? 0
+                        ? nullptr
                         : r,
                         ref,
                         locale);
@@ -2183,7 +2181,7 @@ namespace crpcut {
     collate_result operator>(const char *r) const
     {
       collate_result rv(compare(r) > 0
-                        ? 0
+                        ? nullptr
                         : r,
                         ref,
                         locale);
@@ -2198,7 +2196,7 @@ namespace crpcut {
     collate_result operator>=(const char *r) const
     {
       collate_result rv(compare(r) >= 0
-                        ? 0
+                        ? nullptr
                         : r,
                         ref,
                         locale);
@@ -2213,7 +2211,7 @@ namespace crpcut {
     collate_result operator==(const char *r) const
     {
       collate_result rv(compare(r) == 0
-                        ? 0
+                        ? nullptr
                         : r,
                         ref,
                         locale);
@@ -2228,7 +2226,7 @@ namespace crpcut {
     collate_result operator!=(const char *r) const
     {
       collate_result rv(compare(r) != 0
-                        ? 0
+                        ? nullptr
                         : r,
                         ref,
                         locale);
@@ -2334,7 +2332,7 @@ namespace crpcut {
 
   template <typename T>
   regex::type::type(T t, int flags)
-    : errmsg_(0),
+    : errmsg_(nullptr),
       re_str_(datatypes::string_traits::get_c_str(t))
   {
     init(re_str_, flags);
@@ -2806,7 +2804,7 @@ namespace crpcut {
     public:
       type(T v) : t(v) {}
       template <typename U>
-      bool operator()(U lh, U rh, T* = static_cast<U*>(0))
+      bool operator()(U lh, U rh, T* = static_cast<U*>(nullptr))
       {
         diff = lh-rh;
         if (diff < U()) diff = -diff;
@@ -2843,7 +2841,7 @@ namespace crpcut {
     public:
       type(T v) : t(v) {}
       template <typename U>
-      bool operator()(U lh, U rh, T* = static_cast<U*>(0))
+      bool operator()(U lh, U rh, T* = static_cast<U*>(nullptr))
       {
         U ldiff = lh - rh;
         if (ldiff < U()) ldiff = -ldiff;
@@ -3887,7 +3885,7 @@ class crpcut_testsuite_dep
     }                                                                   \
     class crpcut_testsuite_id;                                          \
     static crpcut::namespace_info                                       \
-    crpcut_current_namespace(#name, parent_namespace);                  \
+    crpcut_current_namespace{#name, parent_namespace};                  \
   }                                                                     \
   namespace name
 

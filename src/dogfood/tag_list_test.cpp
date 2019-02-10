@@ -120,7 +120,7 @@ TESTSUITE(tag_list)
   {
     TEST(null_specification_makes_all_tags_critical, fix)
     {
-      list.configure_importance(0);
+      list.configure_importance(nullptr);
       tag_result r[] =
       {
        { &apa, crpcut::tag::critical },

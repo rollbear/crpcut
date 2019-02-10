@@ -30,7 +30,7 @@ TESTSUITE(namespace_info)
 {
   TEST(named_namespace_without_root_matches_anything)
   {
-    crpcut::namespace_info info("apa", 0);
+    crpcut::namespace_info info{"apa", nullptr};
     static const char name[] = "orm";
     const char *match = info.match_name(name);
     ASSERT_TRUE(match == name);
@@ -38,8 +38,8 @@ TESTSUITE(namespace_info)
 
   TEST(named_namespace_with_empty_parent_matches_beginning)
   {
-    crpcut::namespace_info root(0, 0);
-    crpcut::namespace_info apa("apa", &root);
+    crpcut::namespace_info root{nullptr, nullptr};
+    crpcut::namespace_info apa{"apa", &root};
     static const char name[] = "apa::katt";
     const char *match = apa.match_name(name);
     ASSERT_TRUE(match == name + 3);
@@ -48,8 +48,8 @@ TESTSUITE(namespace_info)
 
   TEST(named_namespace_with_empty_parent_returns_null_on_mismatch)
   {
-    crpcut::namespace_info root(0, 0);
-    crpcut::namespace_info apa("apa", &root);
+    crpcut::namespace_info root{nullptr, nullptr};
+    crpcut::namespace_info apa{"apa", &root};
     static const char name[] = "katt";
     const char *match = apa.match_name(name);
     ASSERT_FALSE(match);
@@ -60,9 +60,9 @@ TESTSUITE(namespace_info)
 
   TEST(nested_namespace_matches_beginning_of_name)
   {
-    crpcut::namespace_info root(0, 0);
-    crpcut::namespace_info apa("apa", &root);
-    crpcut::namespace_info katt("katt", &apa);
+    crpcut::namespace_info root{nullptr, nullptr};
+    crpcut::namespace_info apa{"apa", &root};
+    crpcut::namespace_info katt{"katt", &apa};
     ASSERT_TRUE(katt.full_name_len() == 11U);
     const char name[] = "apa";
     const char *match = katt.match_name(name);
@@ -74,9 +74,9 @@ TESTSUITE(namespace_info)
 
   TEST(nested_namespace_returns_null_on_mismatch_in_upper_part)
   {
-    crpcut::namespace_info root(0, 0);
-    crpcut::namespace_info apa("apa", &root);
-    crpcut::namespace_info katt("katt", &apa);
+    crpcut::namespace_info root{nullptr, nullptr};
+    crpcut::namespace_info apa{"apa", &root};
+    crpcut::namespace_info katt{"katt", &apa};
     ASSERT_FALSE(katt.match_name("apa::orm"));
   }
 }

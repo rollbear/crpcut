@@ -28,7 +28,7 @@
 
 #define CHECK(name, expr, r)                                            \
   do {                                                                  \
-    crpcut::bool_tester<crpcut::comm::fail>tester_obj("location", r, 0);\
+    crpcut::bool_tester<crpcut::comm::fail>tester_obj("location", r, nullptr);\
     tester_obj.name((expr), #expr);                                     \
   } while (0)
 
@@ -59,7 +59,7 @@ TESTSUITE(bool_tester)
   {
     TEST(null_ptr_is_false, fix)
     {
-      char *p = 0;
+      char *p = nullptr;
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_TRUE(p)\n"
@@ -119,7 +119,7 @@ TESTSUITE(bool_tester)
   {
     TEST(null_ptr_is_false, fix)
     {
-      const char *p = 0;
+      const char *p = nullptr;
       CHECK(check_false, p, reporter);
       ASSERT_TRUE(os.str() == "");
     }

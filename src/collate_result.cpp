@@ -55,7 +55,7 @@ namespace crpcut {
   collate_result
   ::operator()() const
   {
-    return reinterpret_cast<const comparator*>(r ? 0 : this);
+    return reinterpret_cast<const comparator*>(r ? nullptr : this);
   }
 
   collate_result&

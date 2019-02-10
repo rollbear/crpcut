@@ -53,14 +53,13 @@ namespace crpcut {
   fdreader
   ::fdreader(crpcut_test_monitor *r, int fd)
     : rfile_descriptor(fd),
-      mon_(r),
-      poller_(0)
+      mon_(r)
   {
   }
 
   void fdreader::set_fd(int fd, poll<fdreader> *poller)
   {
-    assert(mon_ != 0);
+    assert(mon_);
     assert(!poller_);
     assert(poller);
     rfile_descriptor(fd).swap(*this);
@@ -72,10 +71,10 @@ namespace crpcut {
   void fdreader::unregister()
   {
     assert(poller_);
-    assert(mon_ != 0);
+    assert(mon_);
     mon_->deactivate_reader();
     poller_->del_fd(this);
     rfile_descriptor().swap(*this);;
-    poller_ = 0;
+    poller_ = nullptr;
   }
 }

@@ -44,7 +44,7 @@ namespace crpcut {
   tag_list_root
   ::configure_importance(const char *specification)
   {
-    if (specification == 0) return;
+    if (!specification) return;
     tag_filter filter(specification);
     filter.assert_names(*this);
     for (tag_list::iterator ti = begin();

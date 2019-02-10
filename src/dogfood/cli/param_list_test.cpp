@@ -58,7 +58,7 @@ TESTSUITE(cli)
 
     TEST(empty_argv_matches_nothing, fix)
     {
-      static const char *argv[] = { 0 };
+      static const char *argv[] = { nullptr };
       const char *const *p = list.match_all(argv);
       ASSERT_TRUE(p == argv);
       ASSERT_FALSE(verbose);
@@ -71,7 +71,7 @@ TESTSUITE(cli)
 
     TEST(argv_without_parameters_matches_nothing, fix)
     {
-      static const char *argv[] = { "apa", "katt", "ko", 0 };
+      static const char *argv[] = { "apa", "katt", "ko", nullptr };
       const char *const *p = list.match_all(argv);
       ASSERT_TRUE(p == argv);
       ASSERT_FALSE(verbose);
@@ -87,7 +87,7 @@ TESTSUITE(cli)
       static const char *argv[] = { "-x", "true", "--verbose", "-s",
                                     "--param=apa=katt", "--children=8",
                                     "-d", "/tmp",
-                                    "apa", "katt", "ko", 0 };
+                                    "apa", "katt", "ko", nullptr };
       const char *const *p = list.match_all(argv);
       ASSERT_TRUE(p == argv + 8);
       ASSERT_TRUE(xml.get_value(true));

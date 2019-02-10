@@ -79,7 +79,7 @@ TESTSUITE(comm)
 
     TEST(read_loop_throws_when_fd_closes)
     {
-      const char *nullstr = 0;
+      const char *nullstr = nullptr;
       test_reader d;
 
       REQUIRE_CALL(d, read(ne<char*>(nullptr), 26U))

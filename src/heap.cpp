@@ -77,7 +77,7 @@ namespace {
   template <typename T, size_t N>
   T subscript(const T (&array)[N], size_t n)
   {
-    return n >= N ? 0 : array[n];
+    return n >= N ? nullptr : array[n];
   }
   const char* alloc_name(size_t t)
   {
@@ -130,7 +130,7 @@ namespace crpcut
     class new_handler_caller
     {
     public:
-      new_handler_caller() noexcept : handler(std::set_new_handler(0)) {}
+      new_handler_caller() noexcept : handler(std::set_new_handler(nullptr)) {}
       ~new_handler_caller()  { std::set_new_handler(handler); }
       void operator()() const { handler(); }
       explicit operator bool () const { return handler; }
@@ -138,7 +138,7 @@ namespace crpcut
       std::new_handler handler;
     };
 
-    mem_list_element global_root = { &global_root, &global_root, 0, 0, 0, 0 };
+    mem_list_element global_root = { &global_root, &global_root, nullptr, 0, 0, 0 };
 
     mem_list_element *local_root::current_root = &global_root;
 
@@ -188,7 +188,7 @@ namespace crpcut
 #ifdef USE_BACKTRACE
         if (!backtrace_enabled) return;
         msg << header;
-        void *stack_addr = 0;
+        void *stack_addr = nullptr;
         if (stack) stack_addr = stack + 1;
         if (size == 0)
           {
@@ -241,7 +241,7 @@ namespace crpcut
                 if (mem_list_element *sr = raw_alloc_mem(ebytes))
                   {
                     sr->mem = ebytes;
-                    sr->prev = sr->next = 0;
+                    sr->prev = sr->next = nullptr;
                     sr->type = raw;
                     void *addr = sr+1;
                     void **stack = static_cast<void**>(addr);
@@ -357,7 +357,7 @@ namespace crpcut
             {
               std::ostringstream msg;
               show_stack(msg, "\nAlloc stack:", p->stack, p->stack_size);
-              show_stack(msg, "\nNow at:", 0, 0);
+              show_stack(msg, "\nNow at:", nullptr, 0);
               comm::direct_reporter<crpcut::comm::exit_fail>(crpcut_test_monitor::current_test()->get_location())
                 << "DEALLOC FAIL\n"
                 << free_name(type) << " " << addr << " was allocated using "
@@ -377,11 +377,11 @@ namespace crpcut
     {
     public:
       recurse_counter(int &count) : counter(count) { ++counter; }
+      recurse_counter(const recurse_counter&) = delete;
       ~recurse_counter() { --counter; }
-      operator const void*() const { return counter ? this : 0; }
+      recurse_counter &operator=(const recurse_counter&) = delete;
+      operator const void*() const { return counter ? this : nullptr; }
     private:
-      recurse_counter(const recurse_counter&);
-      recurse_counter &operator=(const recurse_counter&);
       int &counter;
     };
 
@@ -435,20 +435,20 @@ namespace crpcut
           const size_t current_limit = limit;
           if (bytes + s > current_limit)
             {
-              return 0;
+              return nullptr;
             }
         }
 
       mem_list_element *p = raw_alloc_mem(s);
-      if (p  != 0)
+      if (p  != nullptr)
         {
           valgrind_make_mem_undefined(p, sizeof(mem_list_element));
           p->mem = s;
-          p->stack = 0;
+          p->stack = nullptr;
           p->type = type;
           if (is_recursive)
             {
-              p->next = p->prev = 0;
+              p->next = p->prev = nullptr;
             }
           else
             {
@@ -502,7 +502,7 @@ namespace crpcut
 
     void *alloc_new_mem(size_t s, alloc_type type)
     {
-      void *p = 0;
+      void *p = nullptr;
       for (;;)
         {
           new_handler_caller handler;
@@ -569,11 +569,11 @@ extern "C"
 
   void *realloc(void *addr, size_t s) noexcept
   {
-    if (addr == 0) return malloc(s);
+    if (!addr) return malloc(s);
     if (s == 0)
       {
         free(addr);
-        return 0;
+        return nullptr;
       }
     crpcut::heap::mem_list_element *p = static_cast<crpcut::heap::mem_list_element*>(addr);
     valgrind_make_mem_defined(p - 1, sizeof(crpcut::heap::mem_list_element));
@@ -605,7 +605,7 @@ void *operator new(size_t s, const std::nothrow_t&) noexcept
   }
   catch (std::bad_alloc&)  {
   }
-  return 0;
+  return nullptr;
 }
 
 void *operator new[](size_t s)
@@ -620,7 +620,7 @@ void *operator new[](size_t s, const std::nothrow_t&) noexcept
   }
   catch (std::bad_alloc&)  {
   }
-  return 0;
+  return nullptr;
 }
 
 void operator delete[](void *p) noexcept

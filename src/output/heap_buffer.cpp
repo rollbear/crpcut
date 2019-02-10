@@ -32,20 +32,12 @@ namespace crpcut {
 
     struct heap_buffer::block
     {
-      block() :next_(0), len_(0) {}
       static const std::size_t size = 128;
 
-      block       *next_;
+      block       *next_ = nullptr;
       char         mem_[size];
-      std::size_t  len_;
+      std::size_t  len_ = 0;
     };
-
-    heap_buffer
-    ::heap_buffer()
-      : head_(0),
-        current_(&head_)
-    {
-    }
 
     ssize_t
     heap_buffer
@@ -80,7 +72,7 @@ namespace crpcut {
     heap_buffer
     ::get_buffer() const
     {
-      static const char *null = 0;
+      static const char *null = nullptr;
       static const std::size_t zero = 0;
 
       if (!head_) return std::make_pair(null, zero);

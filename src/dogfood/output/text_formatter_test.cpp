@@ -48,7 +48,7 @@ namespace {
     "NCFAILED_SUM=<NFS>|"
     "BLOCKED_SUM=<BS>|";
   crpcut::output::text_modifier test_modifier(rules);
-  crpcut::output::text_modifier empty_modifier(0);
+  crpcut::output::text_modifier empty_modifier(nullptr);
 
 
   struct stream_buffer : public crpcut::output::buffer
@@ -118,7 +118,7 @@ namespace {
     std::unique_ptr<trompeloeil::expectation> longest_x;
   };
 
-  const char *const no_char_conversion = 0;
+  const char *const no_char_conversion = nullptr;
 }
 
 #define _ "[[:space:]]*"
@@ -130,7 +130,7 @@ TESTSUITE(output)
 
   TESTSUITE(text_formatter)
   {
-    static const char* vec[] = { "apa", "katt", "orm", 0 };
+    static const char* vec[] = { "apa", "katt", "orm", nullptr };
 
     TEST(construction_and_immediate_destruction_has_no_effect, fix)
     {

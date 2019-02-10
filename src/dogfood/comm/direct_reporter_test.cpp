@@ -41,7 +41,7 @@ TESTSUITE(comm)
     TEST(trivial_output_is_copied_in_verbatim, fix)
     {
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,0);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,nullptr);
         d << "apa" << ' ' << 32;
         ASSERT_TRUE(os.size() == 0U);
       }
@@ -51,7 +51,7 @@ TESTSUITE(comm)
     TEST(output_stream_manipulators_are_forwarded, fix)
     {
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,0);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,nullptr);
         d << std::hex << std::noshowbase << 32 << std::endl
           << std::setw(5) << std::left << 1;
       }
@@ -62,7 +62,7 @@ TESTSUITE(comm)
     {
       {
         crpcut::heap::set_limit(crpcut::heap::allocated_bytes());
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,0);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d("apa.cpp:32", actual_reporter,nullptr);
         d << "apa\nkatt";
       }
       crpcut::heap::set_limit(crpcut::heap::system);
@@ -74,7 +74,7 @@ TESTSUITE(comm)
       using crpcut::datatypes::fixed_string;
       static fixed_string loc = fixed_string::make("apa.cpp:32");
       {
-        crpcut::comm::direct_reporter<crpcut::comm::fail> d(loc, actual_reporter,0);
+        crpcut::comm::direct_reporter<crpcut::comm::fail> d(loc, actual_reporter,nullptr);
         int c = 3;
         const unsigned u = 8;
         d << c << " " << u;

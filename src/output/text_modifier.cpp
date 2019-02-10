@@ -50,7 +50,7 @@ namespace {
   {
     while (b != e)
       {
-        b->str = 0;
+        b->str = nullptr;
         b->len = 0;
         ++b;
       }

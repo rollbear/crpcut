@@ -31,13 +31,7 @@ namespace crpcut {
 
   test_case_result
   ::test_case_result(pid_t pid)
-    :id(pid),
-     explicit_fail(false),
-     success(false),
-     nonempty_dir(false),
-     test(0),
-     termination(datatypes::fixed_string::make("")),
-     location(datatypes::fixed_string::make(""))
+    :id(pid)
   {
   }
 

@@ -70,7 +70,7 @@ TESTSUITE(comm)
 
     TEST(write_loop_throws_when_fd_closes)
     {
-      const char *nullstr = 0;
+      const char *nullstr = nullptr;
       test_writer d;
       REQUIRE_CALL(d, write(ne<const char*>(nullptr), 26U))
         .WITH(std::string(_1,_2) == alphabet)

@@ -109,12 +109,12 @@ namespace {
 namespace crpcut {
   test_runner
   ::test_runner()
-    : env_(0),
-      cli_(0),
+    : env_(nullptr),
+      cli_(nullptr),
       num_pending_children_(0),
       presenter_pipe_(-1),
-      deadlines_(0),
-      working_dirs_(0)
+      deadlines_(nullptr),
+      working_dirs_(nullptr)
   {
     lib::strcpy(dirbase_, "/tmp/crpcutXXXXXX");
   }
@@ -349,7 +349,7 @@ namespace crpcut {
           .write_loop(&len)
           .write_loop(dirbase, len);
       }
-    else if (working_dir == 0)
+    else if (!working_dir)
       {
         if (wrapped::chdir("..") < 0)
           {

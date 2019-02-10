@@ -147,7 +147,7 @@ TESTSUITE(buffer_vector)
        EXPECT_SIGNAL_DEATH(SIGABRT),
        NO_CORE_FILE)
   {
-    crpcut::buffer_vector<counted> b(0, 1U);
+    crpcut::buffer_vector<counted> b(nullptr, 1U);
   }
 
   TEST(construction_with_null_capacity_aborts,

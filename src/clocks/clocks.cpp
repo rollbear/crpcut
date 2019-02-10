@@ -82,7 +82,7 @@ namespace crpcut {
   namespace clocks {
     inline monotonic::timestamp_func monotonic::try_mach_high_res_timer()
     {
-      return 0;
+      return nullptr;
     }
   }
 #endif
@@ -104,7 +104,7 @@ namespace crpcut {
     {
       struct timespec ts;
       int rv = crpcut::wrapped::clock_gettime(CLOCK_MONOTONIC, &ts);
-      return rv == 0 ? &get_clock_gettime_monotonic_timestamp : 0;
+      return rv == 0 ? &get_clock_gettime_monotonic_timestamp : nullptr;
     }
   }
 #else
@@ -133,7 +133,7 @@ namespace crpcut {
     {
       struct timespec ts;
       int rv = crpcut::wrapped::clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
-      return rv == 0 ? &get_clock_gettime_cputime_timestamp : 0;
+      return rv == 0 ? &get_clock_gettime_cputime_timestamp : nullptr;
     }
   }
 #else
@@ -160,7 +160,7 @@ namespace crpcut {
       if (initialized != pid)
         {
           struct itimerval v = { { 0, 0 }, { 99999, 0 } };
-          int rv = crpcut::wrapped::setitimer(ITIMER_REAL, &v, 0);
+          int rv = crpcut::wrapped::setitimer(ITIMER_REAL, &v, nullptr);
           assert(rv == 0);
           initialized = pid;
         }
@@ -177,7 +177,7 @@ namespace crpcut {
     {
       struct itimerval v;
       int rv = crpcut::wrapped::getitimer(ITIMER_REAL, &v);
-      return rv == 0 ? &get_itimer_real_timestamp : 0;
+      return rv == 0 ? &get_itimer_real_timestamp : nullptr;
     }
   }
 #else
@@ -198,7 +198,7 @@ namespace crpcut {
       if (!initialized)
         {
           struct itimerval v = { { 0, 0 }, { 99999, 0 } };
-          int rv = crpcut::wrapped::setitimer(ITIMER_VIRTUAL, &v, 0);
+          int rv = crpcut::wrapped::setitimer(ITIMER_VIRTUAL, &v, nullptr);
           assert(rv == 0);
           initialized = true;
         }
@@ -215,7 +215,7 @@ namespace crpcut {
     {
       struct itimerval v;
       int rv = crpcut::wrapped::getitimer(ITIMER_VIRTUAL, &v);
-      return rv == 0 ? &get_itimer_virtual_timestamp : 0;
+      return rv == 0 ? &get_itimer_virtual_timestamp : nullptr;
     }
   }
 #else
@@ -235,7 +235,7 @@ namespace crpcut {
       if (!initialized)
         {
           struct itimerval v = { { 0, 0 }, { 99999, 0 } };
-          int rv = crpcut::wrapped::setitimer(ITIMER_PROF, &v, 0);
+          int rv = crpcut::wrapped::setitimer(ITIMER_PROF, &v, nullptr);
           assert(rv == 0);
           initialized = true;
         }
@@ -252,7 +252,7 @@ namespace crpcut {
     {
       struct itimerval v;
       int rv = crpcut::wrapped::getitimer(ITIMER_PROF, &v);
-      return rv == 0 ? &get_itimer_prof_timestamp : 0;
+      return rv == 0 ? &get_itimer_prof_timestamp : nullptr;
     }
   }
 #else
@@ -275,7 +275,7 @@ namespace crpcut {
     unsigned long get_gettimeofday_timestamp()
     {
       struct timeval tv;
-      int rv = crpcut::wrapped::gettimeofday(&tv, 0);
+      int rv = crpcut::wrapped::gettimeofday(&tv, nullptr);
       assert(rv == 0);
       return (unsigned long)(tv.tv_sec)*1000000UL
            + (unsigned long)(tv.tv_usec);
@@ -286,8 +286,8 @@ namespace crpcut {
     inline monotonic::timestamp_func monotonic::try_gettimeofday()
     {
       struct timeval tv;
-      int rv = crpcut::wrapped::gettimeofday(&tv, 0);
-      return rv == 0 ? &get_gettimeofday_timestamp : 0;
+      int rv = crpcut::wrapped::gettimeofday(&tv, nullptr);
+      return rv == 0 ? &get_gettimeofday_timestamp : nullptr;
     }
   }
 #else
@@ -323,25 +323,25 @@ namespace crpcut {
 
     monotonic::initializer::initializer()
     {
-      if ((func = try_mach_high_res_timer()) != 0)
+      if ((func = try_mach_high_res_timer()))
         {
           name = "mach high res timer";
         }
-      else if ((func = try_clock_gettime_monotonic()) != 0)
+      else if ((func = try_clock_gettime_monotonic()))
         {
           name = "monotonic posix clock";
         }
-      else if ((func = try_getitimer_real()) != 0)
+      else if ((func = try_getitimer_real()))
         {
           name = "getitimer realtime";
         }
-      else if ((func = try_gettimeofday()) != 0)
+      else if ((func = try_gettimeofday()))
         {
           name = "gettimeofday";
         }
       else
         {
-          assert("Don't you have monotonic or realtime clocks on this system?" == 0);
+          assert("Don't you have monotonic or realtime clocks on this system?" == nullptr);
         }
     }
 
@@ -352,21 +352,21 @@ namespace crpcut {
 
     cputime::initializer::initializer()
     {
-      if ((func = try_clock_gettime_cputime()) != 0)
+      if ((func = try_clock_gettime_cputime()))
         {
           name = "process cputime posix clock";
         }
-      else if ((func = try_getitimer_prof()) != 0)
+      else if ((func = try_getitimer_prof()))
         {
           name = "getitimer prof";
         }
-      else if ((func = try_getitimer_virtual()) != 0)
+      else if ((func = try_getitimer_virtual()))
         {
           name = "getitimer virtual";
         }
       else
         {
-          assert("Don't you have *any* cpu-time clocks on this system?" == 0);
+          assert("Don't you have *any* cpu-time clocks on this system?" == nullptr);
         }
     }
   }

@@ -42,7 +42,7 @@ TESTSUITE(output)
     {
       ASSERT_SCOPE_HEAP_LEAK_FREE
       {
-        static const char* vec[] = { "apa", "katt", "orm", 0 };
+        static const char* vec[] = { "apa", "katt", "orm", nullptr };
         mock::tag_list tags;
         mock::stream_buffer buffer;
         {

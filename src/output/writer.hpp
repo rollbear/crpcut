@@ -77,7 +77,7 @@ namespace crpcut {
       std::size_t write(const char *str, std::size_t len, type t = verbatim) const;
       template <typename T>
       std::size_t write(T val,
-                        typename enable_if<std::numeric_limits<T>::is_integer>::type * = 0)
+                        typename enable_if<std::numeric_limits<T>::is_integer>::type * = nullptr)
       {
         stream::toastream<std::numeric_limits<T>::digits10 + 2> o;
         o << val;
