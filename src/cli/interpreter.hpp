@@ -64,7 +64,7 @@ namespace crpcut {
       const char *const *argv() const;
       const char *       program_name() const;
     private:
-      void usage() const;
+      [[noreturn]] void usage() const;
       const char*const *match_argv();
 
       param_list               list_;

@@ -429,7 +429,6 @@ namespace crpcut {
                         dirbase_,
                         presenter_pipe_);
     wrapped::exit(0);
-    return 0;
   }
 
   int

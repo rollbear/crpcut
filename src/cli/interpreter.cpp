@@ -118,6 +118,7 @@ namespace crpcut {
       end_ = match_argv();
     }
 
+    [[noreturn]]
     void
     interpreter
     ::usage() const
