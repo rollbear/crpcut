@@ -130,8 +130,8 @@ namespace crpcut
     class new_handler_caller
     {
     public:
-      new_handler_caller() throw () : handler(std::set_new_handler(0)) {}
-      ~new_handler_caller() throw () { std::set_new_handler(handler); }
+      new_handler_caller() noexcept : handler(std::set_new_handler(0)) {}
+      ~new_handler_caller()  { std::set_new_handler(handler); }
       void operator()() const { handler(); }
       explicit operator bool () const { return handler; }
     private:
@@ -142,7 +142,7 @@ namespace crpcut
 
     mem_list_element *local_root::current_root = &global_root;
 
-    static mem_list_element *raw_alloc_mem(size_t s) throw ();
+    static mem_list_element *raw_alloc_mem(size_t s) noexcept;
 
     namespace {
       const size_t num_elems = 50000;
@@ -347,7 +347,7 @@ namespace crpcut
 #endif
       enabled = true;
     }
-    static void alloc_type_check(mem_list_element *p, alloc_type type) throw ()
+    static void alloc_type_check(mem_list_element *p, alloc_type type) noexcept
     {
       size_t current_type = p->type;
       if (current_type != size_t(type))
@@ -385,7 +385,7 @@ namespace crpcut
       int &counter;
     };
 
-    static mem_list_element *raw_alloc_mem(size_t s) throw ()
+    static mem_list_element *raw_alloc_mem(size_t s) noexcept
     {
       const size_t blocks = (s + sizeof(mem_list_element) - 1)/sizeof(mem_list_element) + 1;
       static bool has_malloc_sym = false;
@@ -427,7 +427,7 @@ namespace crpcut
     int recursive_check::count = -1;
 
 
-    static void *alloc_mem(size_t s, alloc_type type) throw ()
+    static void *alloc_mem(size_t s, alloc_type type) noexcept
     {
       recursive_check is_recursive;
       if (!is_recursive)
@@ -476,7 +476,7 @@ namespace crpcut
       crpcut::wrapped::free(p);
     }
 
-    static void free_mem(void *addr, alloc_type expected) throw ()
+    static void free_mem(void *addr, alloc_type expected) noexcept
     {
       if (!addr) return;
 
@@ -552,22 +552,22 @@ namespace crpcut
 extern "C"
 {
 
-  void *malloc(size_t s) throw ()
+  void *malloc(size_t s) noexcept
   {
     return crpcut::heap::alloc_mem(s, by_malloc);
   }
 
-  void free(void *addr) throw ()
+  void free(void *addr) noexcept
   {
     crpcut::heap::free_mem(addr, by_malloc);
   }
 
-  void *calloc(size_t n, size_t s) throw ()
+  void *calloc(size_t n, size_t s) noexcept
   {
     return zeromem(malloc(n*s), n*s);
   }
 
-  void *realloc(void *addr, size_t s) throw ()
+  void *realloc(void *addr, size_t s) noexcept
   {
     if (addr == 0) return malloc(s);
     if (s == 0)
@@ -593,19 +593,12 @@ extern "C"
 
 }
 
-#if __cplusplus >= 201103L
-#define THROW(...)
-#define NOTHROW noexcept
-#else
-#define THROW(...) throw (__VA_ARGS__)
-#define NOTHROW throw ()
-#endif
-void *operator new(size_t s) THROW (std::bad_alloc)
+void *operator new(size_t s)
 {
   return crpcut::heap::alloc_new_mem(s, by_new_elem);
 }
 
-void *operator new(size_t s, const std::nothrow_t&) NOTHROW
+void *operator new(size_t s, const std::nothrow_t&) noexcept
 {
   try {
     return crpcut::heap::alloc_new_mem(s, by_new_elem);
@@ -615,12 +608,12 @@ void *operator new(size_t s, const std::nothrow_t&) NOTHROW
   return 0;
 }
 
-void *operator new[](size_t s) THROW (std::bad_alloc)
+void *operator new[](size_t s)
 {
   return crpcut::heap::alloc_new_mem(s, by_new_array);
 }
 
-void *operator new[](size_t s, const std::nothrow_t&) NOTHROW
+void *operator new[](size_t s, const std::nothrow_t&) noexcept
 {
   try {
     return crpcut::heap::alloc_new_mem(s, by_new_array);
@@ -630,22 +623,31 @@ void *operator new[](size_t s, const std::nothrow_t&) NOTHROW
   return 0;
 }
 
-void operator delete[](void *p) NOTHROW
+void operator delete[](void *p) noexcept
+{
+  crpcut::heap::free_mem(p, by_new_array);
+}
+void operator delete[](void *p, std::size_t) noexcept
 {
   crpcut::heap::free_mem(p, by_new_array);
 }
 
-void operator delete[](void *p, const std::nothrow_t&) NOTHROW
+void operator delete[](void *p, const std::nothrow_t&) noexcept
 {
   crpcut::heap::free_mem(p, by_new_array);
 }
 
-void operator delete(void *p) NOTHROW
+void operator delete(void *p) noexcept
 {
   crpcut::heap::free_mem(p, by_new_elem);
 }
 
-void operator delete(void *p, const std::nothrow_t&) NOTHROW
+void operator delete(void *p, std::size_t) noexcept
+{
+  crpcut::heap::free_mem(p, by_new_elem);
+}
+
+void operator delete(void *p, const std::nothrow_t&) noexcept
 {
   crpcut::heap::free_mem(p, by_new_elem);
 }
