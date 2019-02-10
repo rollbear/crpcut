@@ -2987,9 +2987,8 @@ namespace crpcut {
     }
   };
 
-
   template <typename T>
-  static void get_parameter(const char *name, T& t)
+  inline void get_parameter(const char *name, T& t)
   {
     const char *v = get_parameter(name);
     if (v)
@@ -3013,7 +3012,6 @@ namespace crpcut {
     msg << " cannot be interpreted as desired type";
     comm::report(comm::exit_fail, msg, crpcut_test_monitor::current_test()->get_location());
   }
-
 
   template <typename T>
   inline
