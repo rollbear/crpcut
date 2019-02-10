@@ -63,7 +63,7 @@ namespace crpcut {
 
 TESTSUITE(predicates)
 {
-  bool is_positive(int n)
+  static bool is_positive(int n)
   {
     return n >= 0;
   }

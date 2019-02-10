@@ -301,10 +301,11 @@ namespace crpcut {
       }
   }
 
-  void setup_dirbase(const char   *program_name,
-                     const char   *working_dir,
-                     char         *dirbase,
-                     std::ostream &err_os)
+  static void
+  setup_dirbase(const char   *program_name,
+                const char   *working_dir,
+                char         *dirbase,
+                std::ostream &err_os)
   {
     if (!working_dir && !wrapped::mkdtemp(dirbase))
       {
@@ -322,6 +323,7 @@ namespace crpcut {
   }
 
 
+  static
   void cleanup_directories(std::size_t        num_parallel,
                            const char        *working_dir,
                            const char        *dirbase,

@@ -271,10 +271,10 @@ TESTSUITE(heap)
     delete p;
   }
 
-  char *ballast;
+  static char *ballast;
 
 
-  void stupid_new_handler()
+  static void stupid_new_handler()
   {
     if (!ballast) throw std::bad_alloc();
     delete[] ballast;

@@ -25,7 +25,7 @@
  */
 
 #include <crpcut.hpp>
-#include <memory>
+#include <new>
 #include "heap.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #ifdef HAVE_VALGRIND
@@ -138,7 +138,7 @@ namespace crpcut
       std::new_handler handler;
     };
 
-    mem_list_element global_root = { &global_root, &global_root, nullptr, 0, 0, 0 };
+    static mem_list_element global_root = { &global_root, &global_root, nullptr, 0, 0, 0 };
 
     mem_list_element *local_root::current_root = &global_root;
 
@@ -498,7 +498,7 @@ namespace crpcut
       free_mem_raw(p);
     }
 
-    void *alloc_new_mem(size_t s, alloc_type type)
+    static void *alloc_new_mem(size_t s, alloc_type type)
     {
       void *p = nullptr;
       for (;;)
@@ -625,11 +625,12 @@ void operator delete[](void *p) noexcept
 {
   crpcut::heap::free_mem(p, by_new_array);
 }
+#if __cplusplus >= 201703L
 void operator delete[](void *p, std::size_t) noexcept
 {
   crpcut::heap::free_mem(p, by_new_array);
 }
-
+#endif
 void operator delete[](void *p, const std::nothrow_t&) noexcept
 {
   crpcut::heap::free_mem(p, by_new_array);
@@ -639,12 +640,12 @@ void operator delete(void *p) noexcept
 {
   crpcut::heap::free_mem(p, by_new_elem);
 }
-
+#if __cplusplus >= 201703L
 void operator delete(void *p, std::size_t) noexcept
 {
   crpcut::heap::free_mem(p, by_new_elem);
 }
-
+#endif
 void operator delete(void *p, const std::nothrow_t&) noexcept
 {
   crpcut::heap::free_mem(p, by_new_elem);

@@ -3872,11 +3872,11 @@ class crpcut_testsuite_dep
           public virtual crpcut::policies::dependencies::nested<__VA_ARGS__>::type \
       {                                                                 \
       };                                                                \
-      static crpcut::namespace_info *parent_namespace                   \
+      static const crpcut::namespace_info *const parent_namespace                   \
       = &crpcut_current_namespace;                                      \
     }                                                                   \
     class crpcut_testsuite_id;                                          \
-    static crpcut::namespace_info                                       \
+    static const crpcut::namespace_info                                       \
     crpcut_current_namespace{#name, parent_namespace};                  \
   }                                                                     \
   namespace name
