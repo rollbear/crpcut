@@ -104,7 +104,7 @@ namespace {
 "\n";
 }
 
-#define ARGV(...) static const char *argv[] = { "testprog", __VA_ARGS__, 0 }
+#define ARGV(...) static const char *argv[] = { "testprog", __VA_ARGS__, nullptr }
 TESTSUITE(cli)
 {
   TESTSUITE(interpreter)
