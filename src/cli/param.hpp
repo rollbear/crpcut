@@ -75,7 +75,7 @@ namespace crpcut {
     {
     public:
       exception(std::string s) : s_(s) {}
-      const char *what() const throw () { return s_.c_str(); }
+      const char *what() const noexcept { return s_.c_str(); }
     private:
       std::string s_;
     };

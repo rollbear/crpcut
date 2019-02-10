@@ -84,8 +84,8 @@ namespace {
   class cli_exception : public std::exception
   {
   public:
-    cli_exception(int i = -1) : code_(i) {}
-    const char *what() const throw () { return ""; }
+    explicit cli_exception(int i = -1) : code_(i) {}
+    const char *what() const noexcept { return ""; }
     int return_code() const { return code_; }
   private:
     int code_;

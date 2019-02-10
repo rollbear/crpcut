@@ -56,18 +56,18 @@ namespace crpcut {
     msg_(e.msg_),
     e_(e.e_)
   {
-    e.msg_ = 0;
+    e.msg_ = nullptr;
   }
 
   const char *
   posix_error
-  ::what() const throw ()
+  ::what() const noexcept
   {
     return msg_;
   }
 
   posix_error
-  ::~posix_error() throw ()
+  ::~posix_error() noexcept
   {
     wrapped::free(msg_);
   }

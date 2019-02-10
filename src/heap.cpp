@@ -25,8 +25,8 @@
  */
 
 #include <crpcut.hpp>
+#include <memory>
 #include "heap.hpp"
-
 #include "wrapped/posix_encapsulation.hpp"
 #ifdef HAVE_VALGRIND
 #include <valgrind/valgrind.h>
@@ -467,7 +467,7 @@ namespace crpcut
       return p;
     }
 
-    static void free_mem_raw(mem_list_element *p) throw()
+    static void free_mem_raw(mem_list_element *p) noexcept
     {
       if (p >= vector && p < &vector[num_elems])
         {
@@ -498,8 +498,6 @@ namespace crpcut
       free_mem_raw(p);
     }
 
-    std::bad_alloc bad_alloc_exc;
-
     void *alloc_new_mem(size_t s, alloc_type type)
     {
       void *p = nullptr;
@@ -508,7 +506,7 @@ namespace crpcut
           new_handler_caller handler;
           p = crpcut::heap::alloc_mem(s, type);
           if (p) break;
-          if (!handler) throw bad_alloc_exc;
+          if (!handler) throw std::bad_alloc{};
           handler();
         }
       return p;

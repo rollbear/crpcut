@@ -45,7 +45,7 @@ TESTSUITE(datatypes)
     class test_exception : public std::exception
     {
     public:
-      const char *what() const throw () { return "apa"; }
+      const char *what() const noexcept { return "apa"; }
     };
     TEST(get_c_str_from_exception_gives_what_str)
     {
