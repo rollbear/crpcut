@@ -547,7 +547,7 @@ namespace crpcut {
     }
     return -1;
   }
-
+#define UL(x) static_cast<unsigned long>(x)
   unsigned long
   test_runner::calc_cputime(const struct timeval& t)
   {
@@ -560,8 +560,8 @@ namespace crpcut {
     timersub(&accumulated_cputime_, &prev, &child_time);
     struct timeval child_test_time;
     timersub(&child_time, &t, &child_test_time);
-    return (unsigned long)(((child_test_time.tv_sec))) * 1000000UL
-           + (unsigned long)(((child_test_time.tv_usec)));
+    return UL(child_test_time.tv_sec) * 1000000UL
+           + UL(child_test_time.tv_usec);
   }
 
 

@@ -209,7 +209,7 @@ TESTSUITE(heap)
       char str[101];
     };
     apa *p = new(std::nothrow) apa;
-    ASSERT_EQ((void*)p, nullptr);
+    ASSERT_EQ(p, nullptr);
   }
 
   TEST(should_succeed_new_array_nothrow_blast_limit)

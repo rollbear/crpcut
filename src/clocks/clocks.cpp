@@ -86,6 +86,7 @@ namespace crpcut {
     }
   }
 #endif
+#define UL(x) static_cast<unsigned long>(x)
 
 #if defined(HAVE_CLOCK_GETTIME)&& defined(CLOCK_MONOTONIC)
   namespace {
@@ -95,7 +96,7 @@ namespace crpcut {
       struct timespec ts;
       int rv = crpcut::wrapped::clock_gettime(CLOCK_MONOTONIC, &ts);
       assert(rv == 0);
-      return (unsigned long)(ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
+      return UL(ts.tv_sec) * 1000000UL + UL(ts.tv_nsec) / 1000UL;
     }
   }
 
@@ -124,7 +125,7 @@ namespace crpcut {
       struct timespec ts;
       int rv = crpcut::wrapped::clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
       assert(rv == 0);
-      return (unsigned long)(ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
+      return UL(ts.tv_sec) * 1000000UL + UL(ts.tv_nsec) / 1000UL;
     }
   }
 
@@ -167,8 +168,8 @@ namespace crpcut {
       struct itimerval v;
       int rv = crpcut::wrapped::getitimer(ITIMER_REAL, &v);
       assert(rv == 0);
-      return (99999UL - (unsigned long)(v.it_value.tv_sec))*1000UL
-             + 1000UL - (unsigned long)(v.it_value.tv_usec)/1000UL;
+      return (99999UL - UL(v.it_value.tv_sec))*1000UL
+             + 1000UL - UL(v.it_value.tv_usec)/1000UL;
     }
   }
 
@@ -205,8 +206,8 @@ namespace crpcut {
       struct itimerval v;
       int rv = crpcut::wrapped::getitimer(ITIMER_VIRTUAL, &v);
       assert(rv == 0);
-      return (99999UL - (unsigned long)(v.it_value.tv_sec))*1000UL
-             + 1000UL - (unsigned long)(v.it_value.tv_usec)/1000UL;
+      return (99999UL - UL(v.it_value.tv_sec))*1000UL
+             + 1000UL - UL(v.it_value.tv_usec)/1000UL;
     }
   }
 
@@ -242,8 +243,8 @@ namespace crpcut {
       struct itimerval v;
       int rv = crpcut::wrapped::getitimer(ITIMER_PROF, &v);
       assert(rv == 0);
-      return (99999 - (unsigned long)(v.it_value.tv_sec))*1000UL +
-             1000UL - (unsigned long)(v.it_value.tv_usec)/1000UL;
+      return (99999 - UL(v.it_value.tv_sec))*1000UL +
+             1000UL - UL(v.it_value.tv_usec)/1000UL;
     }
   }
 
@@ -277,8 +278,8 @@ namespace crpcut {
       struct timeval tv;
       int rv = crpcut::wrapped::gettimeofday(&tv, nullptr);
       assert(rv == 0);
-      return (unsigned long)(tv.tv_sec)*1000000UL
-           + (unsigned long)(tv.tv_usec);
+      return UL(tv.tv_sec)*1000000UL
+           + UL(tv.tv_usec);
     }
   }
 
