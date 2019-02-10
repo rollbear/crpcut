@@ -50,16 +50,15 @@ namespace crpcut {
                 msg);
     msg_ = str;
   }
-#if 0
   posix_error
-  ::posix_error(const posix_error &e) :
+  ::posix_error(posix_error &&e) :
     std::exception(*this),
     msg_(e.msg_),
     e_(e.e_)
   {
-    e.msg_ = 0; // move
+    e.msg_ = 0;
   }
-#endif
+
   const char *
   posix_error
   ::what() const throw ()

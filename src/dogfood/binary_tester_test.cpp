@@ -92,14 +92,14 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_EQ(p, 0)\n"
         "  where p = apa\n";
-      CHECK(EQ, p, nullptr, reporter);
+      CHECK(EQ, p, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
     TEST(null_c_str_with_zero_literal_is_true, fix)
     {
       const char *p = nullptr;
-      CHECK(EQ, p, nullptr, reporter);
+      CHECK(EQ, p, 0, reporter);
       ASSERT_TRUE(os.str() == "");
     }
 
@@ -125,7 +125,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_EQ(0, p)\n"
         "  where p = apa\n";
-      CHECK(EQ, nullptr, p, reporter);
+      CHECK(EQ, 0, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -201,7 +201,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_NE(p, 0)\n"
         "  where p = \n";
-      CHECK(NE, p, nullptr, reporter);
+      CHECK(NE, p, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -225,7 +225,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_NE(0, p)\n"
         "  where p = \n";
-      CHECK(NE, nullptr, p, reporter);
+      CHECK(NE, 0, p, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -254,7 +254,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GT(0, n)\n"
         "  where n = 3\n";
-      CHECK(GT, nullptr, n, reporter);
+      CHECK(GT, 0, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -265,7 +265,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GT(n, 0)\n"
         "  where n = -3\n";
-      CHECK(GT, n, nullptr, reporter);
+      CHECK(GT, n, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -331,7 +331,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GE(0, n)\n"
         "  where n = 3\n";
-      CHECK(GE, nullptr, n, reporter);
+      CHECK(GE, 0, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -342,7 +342,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_GE(n, 0)\n"
         "  where n = -3\n";
-      CHECK(GE, n, nullptr, reporter);
+      CHECK(GE, n, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -398,7 +398,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_LT(0, n)\n"
         "  where n = -3\n";
-      CHECK(LT, nullptr, n, reporter);
+      CHECK(LT, 0, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -409,7 +409,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_LT(n, 0)\n"
         "  where n = 3\n";
-      CHECK(LT, n, nullptr, reporter);
+      CHECK(LT, n, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -465,7 +465,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_LE(0, n)\n"
         "  where n = -3\n";
-      CHECK(LE, nullptr, n, reporter);
+      CHECK(LE, 0, n, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 
@@ -476,7 +476,7 @@ TESTSUITE(binary_tester)
         "\nlocation\n"
         "VERIFY_LE(n, 0)\n"
         "  where n = 3\n";
-      CHECK(LE, n, nullptr, reporter);
+      CHECK(LE, n, 0, reporter);
       ASSERT_TRUE(os.str() == violation_report);
     }
 

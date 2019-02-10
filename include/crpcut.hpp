@@ -1706,20 +1706,13 @@ namespace crpcut {
 
 
 
-  constexpr std::true_type is_nullptr(std::nullptr_t) { return {};}
-  inline std::false_type is_nullptr(...) { return {};}
-
-#if 0
   class null_cmp
   {
     class secret;
   public:
-    static char func(secret*);
-    static char (&func(...))[2];
-    template <typename T>
-    static char (&func(T*))[2];
+    static std::true_type check(secret*);
+    static std::false_type check(...);
   };
-#endif
   template <typename T>
   struct is_struct {
     static constexpr bool value = std::is_class<T>::value || std::is_union<T>::value;
@@ -3619,7 +3612,7 @@ namespace crpcut {
   }
 
 
-#define CRPCUT_IS_ZERO_LIT(x) decltype(crpcut::is_nullptr(x))::value
+#define CRPCUT_IS_ZERO_LIT(x) decltype(crpcut::null_cmp::check(x))::value
 
 #define CRPCUT_BINARY_CHECK(action, name, lh, rh)                       \
   do {                                                                  \
