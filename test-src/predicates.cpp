@@ -34,8 +34,7 @@ public:
   class type
   {
   public:
-    type(T* refp) : rp(refp), cp(0) {}
-    type(const type<T>& t) : rp(t.rp), cp(t.cp) {}
+    type(T* refp) : rp(refp) {}
     bool operator()(T* compp)
     {
       cp = compp; // store values for use by output stream operator
@@ -49,7 +48,7 @@ public:
     }
   private:
     T* rp;
-    T* cp;
+    T* cp = nullptr;
   };
 };
 
