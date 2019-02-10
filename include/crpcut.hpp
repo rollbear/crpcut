@@ -584,7 +584,7 @@ namespace crpcut {
     class iterator_t
     {
     public:
-      iterator_t(T *p, const tag_list_type& list) : p_(p), list_(list) {};
+      constexpr iterator_t(T *p, const tag_list_type& list) : p_(p), list_(list) {}
       iterator_t& operator++() { p_ = list_.next_after(p_); return *this; }
       iterator_t operator++(int) { iterator_t rv(*this); ++(*this); return rv;}
       T *operator->() { return p_; }
@@ -3274,11 +3274,12 @@ namespace crpcut {
         static const char *name();
         static unsigned long now();
       };
-      ~time_base() {};
       explicit operator bool() const { return false; }
       void silence_warning() const {}
     protected:
-      time_base(unsigned long deadline, datatypes::fixed_string location);
+      constexpr time_base(unsigned long deadline, datatypes::fixed_string loc)
+      : deadline_{deadline}, location_{loc}
+      {}
       unsigned long const deadline_;
       const datatypes::fixed_string location_;
     };
@@ -3290,8 +3291,8 @@ namespace crpcut {
       time(unsigned long us, const char (&location)[N],
            comm::reporter &reporter = comm::report,
            const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
-        : time_base(clock::now() + us * crpcut::timeout_multiplier(),
-                    datatypes::fixed_string::make(location)),
+        : time_base{clock::now() + us * crpcut::timeout_multiplier(),
+                    datatypes::fixed_string::make(location)},
           limit_us_(us),
           reporter_(reporter),
           mon_(mon)

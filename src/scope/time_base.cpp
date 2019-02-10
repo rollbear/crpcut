@@ -29,12 +29,6 @@
 
 namespace crpcut {
   namespace scope {
-    time_base::time_base(unsigned long  deadline,
-                         datatypes::fixed_string location)
-        : deadline_(deadline),
-          location_(location)
-    {
-    }
 
     const char *time_base::min::name()
     {

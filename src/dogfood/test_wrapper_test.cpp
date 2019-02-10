@@ -58,7 +58,7 @@ TESTSUITE(test_wrapper)
   {
   public:
     ~mock_registrator();
-    void setup(crpcut::poll<crpcut::fdreader>&,int,int,int) {};
+    void setup(crpcut::poll<crpcut::fdreader>&,int,int,int) {}
     MAKE_CONST_MOCK0(get_location, crpcut::datatypes::fixed_string());
     MAKE_CONST_MOCK0(crpcut_tag, crpcut::tag&());
     MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());

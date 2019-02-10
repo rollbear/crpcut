@@ -376,7 +376,7 @@ namespace crpcut
     class recurse_counter
     {
     public:
-      recurse_counter(int &count) : counter(count) { ++counter; }
+      constexpr recurse_counter(int &count) : counter(count) { ++counter; }
       recurse_counter(const recurse_counter&) = delete;
       ~recurse_counter() { --counter; }
       recurse_counter &operator=(const recurse_counter&) = delete;
@@ -418,7 +418,7 @@ namespace crpcut
     class recursive_check : recurse_counter
     {
     public:
-      recursive_check() : recurse_counter(count) {};
+      constexpr recursive_check() : recurse_counter(count) {}
       using recurse_counter::operator const void*;
     private:
       static int count;

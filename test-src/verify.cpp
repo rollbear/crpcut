@@ -273,10 +273,8 @@ TESTSUITE(verify)
   {
   public:
     unstreamable(T t) : data(t) {}
-    unstreamable& operator=(const T& t) { data = t; return *this; }
     operator T&() { return data; }
     operator const T&() const { return data; }
-    unstreamable(const unstreamable& t) : data(t.data) {};
   private:
     T data;
   };
