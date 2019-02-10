@@ -69,7 +69,13 @@ extern "C"
 #if __cplusplus >= 201703L
 #  define CRPCUT_FALLTHROUGH [[fallthrough]]
 #else
-#  define CRPCUT_FALLTHROUGH [[gnu::fallthrough]]
+#  if defined(__clang__)
+#    define CRPCUT_FALLTHROUGH [[clang::fallthrough]]
+#  else
+#    if defined(__GNUC__)
+#      define CRPCUT_FALLTHROUGH [[gnu::fallthrough]]
+#    endif
+#  endif
 #endif
 
 namespace crpcut {
