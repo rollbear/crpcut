@@ -33,11 +33,11 @@ namespace crpcut {
     public:
       static const monotonic &obj();
       virtual ~monotonic();
-      typedef unsigned long timestamp;
+      using timestamp = unsigned long;
       virtual timestamp now() const;
       static timestamp timestamp_absolute() { return func(); }
       static const char *get_name() { return name; }
-      typedef timestamp (*timestamp_func)();
+      using timestamp_func = timestamp (*)();
     private:
       static timestamp_func func;
       static const char    *name;
@@ -58,10 +58,10 @@ namespace crpcut {
     class cputime
     {
     public:
-      typedef unsigned long timestamp;
+      using timestamp = unsigned long;
       static timestamp timestamp_absolute() { return func(); }
       static const char *get_name() { return name; }
-      typedef timestamp (*timestamp_func)();
+      using timestamp_func = timestamp (*)();
     private:
       static timestamp_func func;
       static const char    *name;

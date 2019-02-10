@@ -207,7 +207,7 @@ TESTSUITE(presentation_reader)
 
   class registrator_mock : public crpcut::crpcut_test_case_registrator
   {
-    typedef crpcut::crpcut_test_case_registrator R;
+    using R = crpcut::crpcut_test_case_registrator;
   public:
     registrator_mock(const char *name) : R(name, &top), top(0,0) {}
     MAKE_MOCK4(setup, void(crpcut::poll<crpcut::fdreader>&,

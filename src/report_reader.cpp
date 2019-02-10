@@ -56,7 +56,7 @@ namespace crpcut {
   report_reader
   ::set_timeout(void *buff, size_t len)
   {
-    typedef clocks::monotonic::timestamp timestamp;
+    using timestamp = clocks::monotonic::timestamp;
     assert(len == sizeof(timestamp));
     timestamp *ts_us = static_cast<timestamp*>(buff);
 

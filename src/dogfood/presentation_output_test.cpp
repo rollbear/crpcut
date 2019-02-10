@@ -58,7 +58,7 @@ namespace {
   class test_buffer : public crpcut::output::buffer
   {
   public:
-    typedef std::pair<const char*, std::size_t> buff;
+    using buff = std::pair<const char*, std::size_t>;
     MAKE_CONST_MOCK0(get_buffer, buff());
     MAKE_MOCK0(advance, void());
     MAKE_MOCK2(write, ssize_t(const char *, std::size_t));

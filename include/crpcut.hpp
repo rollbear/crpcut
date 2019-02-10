@@ -86,15 +86,15 @@ namespace crpcut {
     template <typename T>
     struct undecorated
     {
-      typedef typename std::remove_reference<T>::type noref_type;
-      typedef typename std::remove_cv<noref_type>::type type;
+      using noref_type = std::remove_reference_t<T>;
+      using type = std::remove_cv_t<noref_type>;
     };
   }
 
   template <typename T>
   struct eval_t
   {
-    typedef const typename datatypes::undecorated<T>::type &type;
+    using type = const typename datatypes::undecorated<T>::type&;
     static type func(type t) { return t; }
   };
 
@@ -108,7 +108,7 @@ namespace crpcut {
 
   class test_runner;
 
-  typedef enum { verbatim, uppercase, lowercase } case_convert_type;
+  enum case_convert_type { verbatim, uppercase, lowercase };
   template <case_convert_type>
   class collate_t;
 
@@ -263,15 +263,15 @@ namespace crpcut {
                   public T2
     {
     public:
-      typedef T1 head;
-      typedef T2 tail;
+      using head = T1;
+      using tail = T2;
     };
 
     template <typename T>
     class tlist<crpcut_none, T>
     {
-      typedef crpcut_none head;
-      typedef crpcut_none tail;
+      using head = crpcut_none;
+      using tail = crpcut_none;
     };
 
     template <char ...t>
@@ -286,7 +286,7 @@ namespace crpcut {
       template <char c>
       struct append
       {
-        typedef typename append_t<c, string_type>::type type;
+        using type = typename append_t<c, string_type>::type;
       };
       static const size_t size = sizeof...(t);
       static const char c_str[size + 1];
@@ -298,13 +298,13 @@ namespace crpcut {
     template <char c, char ...t>
     struct append_t<c, string_type<t...> >
     {
-      typedef string_type<t..., c> type;
+      using type = string_type<t..., c>;
     };
 
     template <char ...t>
     struct append_t<'\0', string_type<t...> >
     {
-      typedef string_type<t...> type;
+      using type = string_type<t...>;
     };
 
     template <typename... Ts>
@@ -314,13 +314,13 @@ namespace crpcut {
     template <typename T>
     struct tlist_maker<T>
     {
-      typedef tlist<T, tlist<> >    type;
+      using type = tlist<T, tlist<> >;
     };
 
     template <typename T, typename ... Tail>
     struct tlist_maker<T, Tail...>
     {
-      typedef tlist<T, typename tlist_maker<Tail...>::type> type;
+      using type = tlist<T, typename tlist_maker<Tail...>::type>;
     };
 
     struct fixed_string
@@ -369,16 +369,15 @@ namespace crpcut {
     class wrap
     {
     public:
-      typedef datatypes::tlist<envelope<typename T::head>,
-                               typename wrap<envelope,
-                                             typename T::tail>::type> type;
+      using type = datatypes::tlist<envelope<typename T::head>,
+        typename wrap<envelope, typename T::tail>::type>;
     };
 
     template <template <typename> class envelope, typename T>
     class wrap<envelope, datatypes::tlist<crpcut_none, T> >
     {
     public:
-      typedef datatypes::tlist<> type;
+      using type = datatypes::tlist<>;
     };
 
 
@@ -495,11 +494,11 @@ namespace crpcut {
     };
   public:
     friend std::ostream& operator<<(std::ostream &os, const type &obj);
-    typedef enum {
+    enum regflag {
       e = REG_EXTENDED,
       i = REG_ICASE,
       m = REG_NEWLINE
-    } regflag;
+    };
     template <typename T>
     explicit regex(T t,
           regflag f1 = regflag(),
@@ -519,10 +518,10 @@ namespace crpcut {
   };
 
 
-  template <typename D, typename ...T>
+  template <typename D, typename ...>
   struct match_traits
   {
-    typedef D type;
+    using type = D;
   };
 
 #define CRPCUT_TEST_PHASES(translator)     \
@@ -532,7 +531,7 @@ namespace crpcut {
               translator(post_mortem),     \
               translator(child)
 
-  typedef enum { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) } test_phase;
+  enum test_phase { CRPCUT_TEST_PHASES(CRPCUT_VERBATIM) };
 
 #define CRPCUT_TEST_IMPORTANCE(translator) \
   translator(ignored, ' '),                \
@@ -551,7 +550,7 @@ namespace crpcut {
     tag(size_t len, tag_list_root *list);
     virtual ~tag(); // make eclipse happy
   public:
-    typedef enum { CRPCUT_TEST_IMPORTANCE(CRPCUT_VERBATIM_FIRST) } importance;
+    enum importance { CRPCUT_TEST_IMPORTANCE(CRPCUT_VERBATIM_FIRST) };
     virtual void fail();
     virtual void pass();
     virtual size_t num_failed() const;
@@ -568,7 +567,7 @@ namespace crpcut {
   std::ostream &operator<<(std::ostream &os, crpcut::tag::importance i);
   class tag_list_root : public tag
   {
-    typedef datatypes::list_elem<tag> tag_list_type;
+    using tag_list_type = datatypes::list_elem<tag>;
   public:
     tag_list_root() : longest_tag_name_(0), list_() { link_after(list_);}
     virtual size_t longest_tag_name() const { return longest_tag_name_; }
@@ -588,8 +587,8 @@ namespace crpcut {
       T                   *p_;
       const tag_list_type &list_;
     };
-    typedef iterator_t<tag> iterator;
-    typedef iterator_t<const tag> const_iterator;
+    using iterator = iterator_t<tag>;
+    using const_iterator = iterator_t<const tag>;
     const_iterator begin() const { return const_iterator(list_.first(), list_); }
     const_iterator end() const { return const_iterator(0, list_); }
     iterator begin() { return iterator(list_.first(), list_); }
@@ -613,7 +612,7 @@ namespace crpcut {
     static tag_list_root& obj();
   };
 
-  typedef crpcut_tag_info<crpcut_none> tag_list;
+  using tag_list = crpcut_tag_info<crpcut_none>;
   template <typename T>
   class crpcut_tag_info : public tag
   {
@@ -636,7 +635,7 @@ namespace crpcut {
   template <char ...t>
   class crpcut_tag_info<datatypes::string_type<t...> > : public tag
   {
-    typedef datatypes::string_type<t...> rep;
+    using rep = datatypes::string_type<t...>;
   public:
     static crpcut_tag_info &obj()
     {
@@ -663,7 +662,7 @@ namespace crpcut {
     template <typename charT, typename traits = std::char_traits<charT> >
     class oabuf : public std::basic_streambuf<charT, traits>
     {
-      typedef std::basic_streambuf<charT, traits> parent;
+      using parent =  std::basic_streambuf<charT, traits>;
     public:
       oabuf(charT *begin_, charT *end_);
       const charT *begin() const { return parent::pbase(); }
@@ -715,8 +714,8 @@ namespace crpcut {
       charT buffer[N];
     };
 
-    typedef basic_oastream<char> oastream;
-    typedef basic_iastream<char> iastream;
+    using oastream = basic_oastream<char>;
+    using iastream = basic_iastream<char>;
 
   } // stream
 
@@ -738,10 +737,10 @@ namespace crpcut {
       translator(begin_test),     /*  9 */       \
       translator(end_test)        /* 10 */
 
-    typedef enum {
+    enum type {
       CRPCUT_COMM_MSGS(CRPCUT_VERBATIM),
       kill_me = 0x100
-    } type;
+    };
   }
 
   class crpcut_test_monitor
@@ -843,7 +842,7 @@ namespace crpcut {
       data_reader  *reader_;
       std::ostream &default_out_;
 
-      typedef crpcut_test_monitor tm;
+      using tm =  crpcut_test_monitor;
     public:
       static datatypes::fixed_string no_location()
       {
@@ -999,7 +998,7 @@ namespace crpcut {
     }
 
     namespace timeout {
-      typedef enum { realtime, cputime } type;
+      enum type { realtime, cputime };
 
       template <type t, unsigned long us>
       class enforcer;
@@ -1020,21 +1019,19 @@ namespace crpcut {
     class crpcut_default_policy
     {
     protected:
-      typedef crpcut_none crpcut_test_tag;
-      typedef void crpcut_run_wrapper;
+      using crpcut_test_tag = crpcut_none;
+      using crpcut_run_wrapper = void;
 
-      typedef core_dumps::crpcut_default_handler crpcut_core_dump_handler;
-      typedef deaths::crpcut_none crpcut_expected_death_cause;
+      using crpcut_core_dump_handler = core_dumps::crpcut_default_handler;
+      using  crpcut_expected_death_cause = deaths::crpcut_none;
 
-      typedef dependencies::crpcut_none crpcut_dependency;
+      using crpcut_dependency = dependencies::crpcut_none;
 
-      typedef timeout::enforcer<timeout::realtime,2000000U> crpcut_realtime_enforcer;
-      typedef timeout::enforcer<timeout::cputime, 0> crpcut_cputime_enforcer;
+      using  crpcut_realtime_enforcer = timeout::enforcer<timeout::realtime,2000000U>;
+      using  crpcut_cputime_enforcer = timeout::enforcer<timeout::cputime, 0>;
 
-      typedef timeout::constructor_enforcer<1000000U>
-      crpcut_constructor_timeout_enforcer;
-      typedef timeout::destructor_enforcer<1000000U>
-      crpcut_destructor_timeout_enforcer;
+      using crpcut_constructor_timeout_enforcer = timeout::constructor_enforcer<1000000U>;
+      using crpcut_destructor_timeout_enforcer = timeout::destructor_enforcer<1000000U>;
     };
 
     namespace core_dumps {
@@ -1123,25 +1120,25 @@ namespace crpcut {
     class signal_death : protected virtual crpcut_default_policy
     {
     public:
-      typedef deaths::wrapper crpcut_run_wrapper;
-      typedef deaths::signal<N, action> crpcut_expected_death_cause;
+      using crpcut_run_wrapper = deaths::wrapper;
+      using crpcut_expected_death_cause = deaths::signal<N, action>;
     };
 
     template <int N, typename action = deaths::no_action>
     class exit_death : protected virtual crpcut_default_policy
     {
     public:
-      typedef deaths::wrapper  crpcut_run_wrapper;
-      typedef deaths::exit<N, action>  crpcut_expected_death_cause;
+      using crpcut_run_wrapper = deaths::wrapper;
+      using crpcut_expected_death_cause = deaths::exit<N, action>;
     };
 
     template <unsigned long US>
     class realtime_timeout_death : protected virtual crpcut_default_policy
     {
     public:
-      typedef deaths::timeout_wrapper crpcut_run_wrapper;
-      typedef deaths::timeout<US>      crpcut_expected_death_cause;
-      typedef timeout::enforcer<timeout::realtime, US> crpcut_realtime_enforcer;
+      using crpcut_run_wrapper = deaths::timeout_wrapper;
+      using crpcut_expected_death_cause = deaths::timeout<US>;
+      using crpcut_realtime_enforcer = timeout::enforcer<timeout::realtime, US>;
     };
 
     class any_exception_wrapper;
@@ -1156,7 +1153,7 @@ namespace crpcut {
     class exception_specifier<void (T)> : protected virtual crpcut_default_policy
     {
     public:
-      typedef exception_wrapper<T> crpcut_run_wrapper;
+      using crpcut_run_wrapper = exception_wrapper<T>;
       template <comm::type action, size_t N>
       static void check_match(const char (&)[N], const char *,crpcut_none) { }
 
@@ -1177,7 +1174,7 @@ namespace crpcut {
     class exception_specifier<void (...)> : protected virtual crpcut_default_policy
     {
     public:
-      typedef any_exception_wrapper crpcut_run_wrapper;
+      using crpcut_run_wrapper = any_exception_wrapper;
       template <comm::type>
       static void check_match(...) {}
     };
@@ -1185,7 +1182,7 @@ namespace crpcut {
     class no_core_file : protected virtual crpcut_default_policy
     {
     protected:
-      typedef core_dumps::crpcut_ignore crpcut_core_dump_handler;
+      using crpcut_core_dump_handler = core_dumps::crpcut_ignore;
       no_core_file();
     };
 
@@ -1232,13 +1229,13 @@ namespace crpcut {
       template <typename T, typename U = crpcut::crpcut_none>
       struct nested
       {
-        typedef typename T::crpcut_dependency type;
+        using type = typename T::crpcut_dependency;
       };
 
       template <>
       struct nested<crpcut::crpcut_none, crpcut::crpcut_none>
       {
-        typedef crpcut::crpcut_none type;
+        using type = crpcut::crpcut_none;
       };
 
     } // namespace dependencies
@@ -1247,8 +1244,8 @@ namespace crpcut {
     class dependency_policy : protected virtual crpcut_default_policy
     {
     public:
-      typedef typename datatypes::wrap<dependencies::enforcer,
-                                       T>::type  crpcut_dependency;
+      using crpcut_dependency = typename datatypes::wrap<dependencies::enforcer,
+                                       T>::type;
     };
 
     namespace timeout {
@@ -1308,8 +1305,7 @@ namespace crpcut {
       : protected virtual crpcut_default_policy
     {
     public:
-      typedef timeout::enforcer<timeout::realtime, timeout_us>
-      crpcut_realtime_enforcer;
+      using crpcut_realtime_enforcer = timeout::enforcer<timeout::realtime, timeout_us>;
     };
 
     template <unsigned long timeout_us>
@@ -1317,29 +1313,26 @@ namespace crpcut {
       : protected virtual crpcut_default_policy
     {
     public:
-      typedef timeout::enforcer<timeout::cputime, timeout_us>
-      crpcut_cputime_enforcer;
+      using crpcut_cputime_enforcer = timeout::enforcer<timeout::cputime, timeout_us>;
     };
 
 
     template <unsigned long us>
     struct constructor_timeout_policy : public virtual crpcut_default_policy
     {
-      typedef timeout::constructor_enforcer<us>
-      crpcut_constructor_timeout_enforcer;
+      using crpcut_constructor_timeout_enforcer = timeout::constructor_enforcer<us>;
     };
 
     template <unsigned long us>
     struct destructor_timeout_policy : public virtual crpcut_default_policy
     {
-      typedef timeout::destructor_enforcer<us>
-      crpcut_destructor_timeout_enforcer;
+      using crpcut_destructor_timeout_enforcer = timeout::destructor_enforcer<us>;
     };
 
     template <typename T>
     struct tag_policy : public virtual policies::crpcut_default_policy
     {
-      typedef T crpcut_test_tag;
+      using crpcut_test_tag = T;
     };
   } // namespace policies
 
@@ -1384,7 +1377,7 @@ namespace crpcut {
     class local_root : public mem_list_element
     {
     public:
-      typedef const local_root *bool_test;
+      using bool_test = const local_root *;
       template <size_t N>
       local_root(comm::type type, const char (&location)[N]);
       local_root(const local_root&);
@@ -1728,59 +1721,10 @@ namespace crpcut {
   public:
     static const bool value = (sizeof(check_member<T>(0)) == 1);
   };
-
   template <typename T>
   struct param_traits
   {
-    typedef typename std::conditional<is_struct<T>::value, const  T&, T>::type type;
-  };
-
-  template <typename T>
-  struct param_traits<const T>
-  {
-    typedef typename param_traits<T>::type type;
-  };
-
-  template <typename T>
-  struct param_traits<volatile T>
-  {
-    typedef typename param_traits<T>::type type;
-  };
-
-  template <typename T>
-  struct param_traits<const volatile T>
-  {
-    typedef typename param_traits<T>::type type;
-  };
-
-  template <typename T, size_t N>
-  struct param_traits<T[N]>
-  {
-    typedef T *type;
-  };
-
-  template <typename T, size_t N>
-  struct param_traits<const T[N]>
-  {
-    typedef const T *type;
-  };
-
-  template <typename T, size_t N>
-  struct param_traits<volatile T[N]>
-  {
-    typedef volatile T *type;
-  };
-
-  template <typename T, size_t N>
-  struct param_traits<const volatile T[N]>
-  {
-    typedef volatile const T *type;
-  };
-
-  template <typename T>
-  struct param_traits<T&>
-  {
-    typedef typename param_traits<T>::type type;
+    using type = std::conditional_t<is_struct<std::decay_t<T>>::value, const T&, T>;
   };
 
   template <typename T>
@@ -1848,8 +1792,8 @@ namespace crpcut {
   template <comm::type action, typename T1, typename T2>
   class tester_t : tester_base
   {
-    typedef typename param_traits<T1>::type type1;
-    typedef typename param_traits<T2>::type type2;
+    using type1 = typename param_traits<T1>::type;
+    using type2 = typename param_traits<T2>::type;
   public:
     template <size_t N>
     tester_t(const char               (&loc)[N],
@@ -1888,7 +1832,7 @@ namespace crpcut {
   template <comm::type action, typename T1>
   class tester_t<action, T1, void> : tester_base
   {
-    typedef typename param_traits<T1>::type type1;
+    using type1 = typename param_traits<T1>::type;
   public:
     template <size_t N>
     tester_t(const char               (&loc)[N],
@@ -1933,7 +1877,7 @@ namespace crpcut {
   template <comm::type action, typename T2>
   class tester_t<action, void, T2> : tester_base
   {
-    typedef typename param_traits<T2>::type type2;
+    using type2 =typename param_traits<T2>::type;
   public:
     template <size_t N>
     tester_t(const char               (&loc)[N],
@@ -2293,7 +2237,7 @@ namespace crpcut {
       convert_traits<converter>::do_convert(begin,
                                             end,
                                             locale);
-      typedef std::collate<char> coll;
+      using coll = std::collate<char>;
       const coll &fac = std::use_facet<coll>(locale);
       return fac.compare(ref.c_str(), ref.c_str() + ref.length(),
                          begin, end);
@@ -2346,14 +2290,14 @@ namespace crpcut {
   template <typename T>
   struct parameter_stream_traits
   {
-    typedef T type;
+    using type = T;
     static T make_value(const char *n, crpcut_test_monitor *current_test);
   };
 
   template <>
   struct parameter_stream_traits<std::istream>
   {
-    typedef istream_wrapper type;
+    using type = istream_wrapper;
     static type make_value(const char *n, crpcut_test_monitor *current_test);
   };
 
@@ -2363,7 +2307,7 @@ namespace crpcut {
   template <>
   struct parameter_stream_traits<relaxed<std::istream> >
   {
-    typedef stream::iastream type;
+    using type = stream::iastream;
     static type make_value(const char *n, crpcut_test_monitor *current_test);
   };
 
@@ -2412,7 +2356,7 @@ namespace crpcut {
     template <>                                 \
     struct fp_rep<sizeof(x)>                    \
     {                                           \
-      typedef x type;                           \
+      using type = x;                           \
     }
 
     CRPCUT_MAKE_FP_REP(uint32_t);
@@ -2882,7 +2826,7 @@ namespace crpcut {
   template <typename T>
   struct match_traits<abs_diff, T>
   {
-    typedef typename abs_diff::template type<T> type;
+    using type = typename abs_diff::template type<T>;
   };
 
   class relative_diff
@@ -2935,7 +2879,7 @@ namespace crpcut {
 
 
 
-  typedef enum { exclude_inf, include_inf } inf_in_ulps_diff;
+  enum inf_in_ulps_diff { exclude_inf, include_inf };
 
   class ulps_diff
   {
@@ -2989,7 +2933,7 @@ namespace crpcut {
   template <typename T>
   struct match_traits<relative_diff, T>
   {
-    typedef typename relative_diff::template type<T> type;
+    using type = typename relative_diff::template type<T>;
   };
 
 
@@ -3073,7 +3017,7 @@ namespace crpcut {
   typename parameter_stream_traits<T>::type
   get_parameter(const char *name)
   {
-    typedef parameter_stream_traits<T> rt;
+    using rt = parameter_stream_traits<T>;
     return rt::make_value(name, crpcut_test_monitor::current_test());
   }
 
@@ -3091,7 +3035,7 @@ namespace crpcut {
     class predicate_proxy
     {
     public:
-      typedef T &type;
+      using type = T&;
       predicate_proxy(type p) : p_(p) {}
       type get_predicate() const { return const_cast<type>(p_); }
     private:
@@ -3101,12 +3045,11 @@ namespace crpcut {
     template <typename T>
     struct is_predicate_proxy
     {
-      typedef char no;
-      struct yes { char v[2]; };
-      static no func(...);
       template <typename U>
-      static yes func(predicate_proxy<U>*);
-      static const bool value = sizeof(func((T*)0)) == sizeof(yes);
+      static std::true_type func(predicate_proxy<U>*);
+      template <typename>
+      static std::false_type func(...);
+      static constexpr bool value = decltype(func<T>(nullptr))::value;
     };
 
     template <typename L, typename R>
@@ -3153,7 +3096,7 @@ namespace crpcut {
                                 predicate_match<name, typename V::type>>\
       operator=(const V& v)                                             \
       {                                                                 \
-        typedef typename V::type predicate;                             \
+        using predicate = typename V::type;                             \
         return predicate_match<name, predicate>(*this, v.get_predicate());  \
       }                                                                 \
     private:                                                            \
@@ -3180,11 +3123,11 @@ namespace crpcut {
   template <typename T, typename U>                                     \
   struct eval_t<expr::name<T, U> >                                      \
   {                                                                     \
-    typedef typename eval_t<T>::type ttype;                             \
-    typedef typename eval_t<U>::type utype;                             \
-    typedef typename datatypes::undecorated<ttype>::type trtype;       \
-    typedef typename datatypes::undecorated<utype>::type urtype;       \
-    typedef decltype(::crpcut::expr::gen<trtype>() opexpr ::crpcut::expr::gen<urtype>()) type; \
+    using ttype = typename eval_t<T>::type;                             \
+    using utype = typename eval_t<U>::type;                             \
+    using trtype = typename datatypes::undecorated<ttype>::type;        \
+    using urtype = typename datatypes::undecorated<utype>::type;        \
+    using type = decltype(::crpcut::expr::gen<trtype>() opexpr ::crpcut::expr::gen<urtype>()); \
     static type func(const expr::name<T, U>& n)                         \
     {                                                                   \
       return ::crpcut::eval(n.t_) opexpr ::crpcut::eval(n.u_);          \
@@ -3259,8 +3202,8 @@ namespace crpcut {
   template <typename T>
   struct eval_t<expr::atom<T> >
   {
-    typedef typename datatypes::undecorated<T>::type naked_type;
-    typedef typename std::conditional<is_struct<naked_type>::value, const naked_type&, naked_type>::type type;
+    using naked_type = typename datatypes::undecorated<T>::type;
+    using type = typename std::conditional<is_struct<naked_type>::value, const naked_type&, naked_type>::type;
     static type func(const expr::atom<T> &n) { return n.t_; }
   };
 
@@ -3272,7 +3215,7 @@ namespace crpcut {
   {
     static typename datatypes::undecorated<U>::type & u_;
     static typename datatypes::undecorated<T>::type & t_;
-    typedef decltype(u_(crpcut::eval(t_))) type;
+    using type = decltype(u_(crpcut::eval(t_)));
     static type func(const expr::predicate_match<T, U> &n)
     {
       return n.r_(crpcut::eval(n.l_));
@@ -3402,7 +3345,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
     friend struct crpcut::test_wrapper<crpcut_run_wrapper>;              \
     friend class crpcut::policies::dependencies::enforcer<test_case_name>; \
     friend class crpcut::crpcut_test_case_registrator;                  \
-    typedef test_case_name crpcut_test_class;                           \
+    using crpcut_test_class = test_case_name;                           \
     test_case_name() {}                                                 \
     virtual void crpcut_run_test()                                      \
     {                                                                   \
@@ -3434,8 +3377,8 @@ extern crpcut::namespace_info crpcut_current_namespace;
       crpcut::reader<crpcut::comm::stdout> stdout_reader_;              \
       crpcut::reader<crpcut::comm::stderr> stderr_reader_;              \
                                                                         \
-      typedef crpcut::crpcut_test_case_registrator                      \
-        crpcut_registrator_base;                                        \
+      using crpcut_registrator_base =                                   \
+          crpcut::crpcut_test_case_registrator;                         \
       static const unsigned long crpcut_cputime_timeout_us              \
         =test_case_name::crpcut_cputime_enforcer::crpcut_cputime_timeout_us; \
       void setup(crpcut::poll<crpcut::fdreader> &poller,                \
@@ -3656,7 +3599,7 @@ namespace crpcut {
   crpcut::policies::timeout_policy<crpcut::policies::timeout::realtime, time*1000UL>
 
 #define CRPCUT_WRAP_FUNC(lib, name, rv, param_list, param)              \
-  extern "C" typedef rv (*f_ ## name ## _t) param_list;                 \
+  extern "C" using f_ ## name ## _t = rv (*) param_list;                \
   rv name param_list                                                    \
   {                                                                     \
     static f_ ## name ## _t f_ ## name                                  \
@@ -3666,7 +3609,7 @@ namespace crpcut {
 
 
 #define CRPCUT_WRAP_V_FUNC(lib, name, rv, param_list, param)            \
-  extern "C" typedef rv (*f_ ## name ## _t) param_list;                 \
+  extern "C" using f_ ## name ## _t = rv (*) param_list;                \
   rv name param_list                                                    \
   {                                                                     \
     static f_ ## name ## _t f_ ## name                                  \
@@ -3928,7 +3871,7 @@ class crpcut_testsuite_dep
 
 #define TESTSUITE_DEF(name, ...)                                        \
   namespace name {                                                      \
-    typedef crpcut_testsuite_dep crpcut_parent_testsuite_dep;           \
+    using crpcut_parent_testsuite_dep = crpcut_testsuite_dep;           \
     namespace {                                                         \
       class crpcut_testsuite_dep                                        \
         : public virtual crpcut_parent_testsuite_dep,                   \

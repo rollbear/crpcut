@@ -40,7 +40,7 @@ namespace crpcut {
     int get_errno() const { return e_; }
   private:
     posix_error();
-    typedef const char *cstr;
+    using cstr = const char *;
     mutable cstr msg_;
     int e_;
   };

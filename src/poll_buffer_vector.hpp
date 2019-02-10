@@ -75,8 +75,8 @@ namespace crpcut {
                              private polldata
   {
   public:
-    typedef typename poll<T>::descriptor descriptor;
-    typedef typename poll<T>::polltype   polltype;
+    using descriptor = typename poll<T>::descriptor;
+    using polltype = typename poll<T>::polltype;
     static std::size_t space_for(std::size_t capacity)
     {
       return buffer_vector<fdinfo>::space_for(capacity);

@@ -34,7 +34,7 @@ class sorted_names
 {
   class comparator
   {
-    typedef std::collate<char> coll_t;
+    using coll_t = std::collate<char>;
   public:
     comparator() : loc(locname) {}
     bool operator()(const std::string &lh, const std::string &rh) const
@@ -45,9 +45,9 @@ class sorted_names
     }
     std::locale loc;
   };
-  typedef std::multiset<std::string, comparator> collection;
+  using collection = std::multiset<std::string, comparator>;
 public:
-  typedef typename collection::const_iterator iterator;
+  using iterator = typename collection::const_iterator;
   void push(std::string name)
   {
     names.insert(name);

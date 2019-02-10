@@ -50,7 +50,7 @@ TESTSUITE(output)
       void tag_summary(crpcut::datatypes::fixed_string,
                        std::size_t, std::size_t, bool) {}
     public:
-      typedef enum { no_escape, with_escape } escape_type;
+      enum escape_type { no_escape, with_escape };
       empty_writer(crpcut::output::buffer &buff,
                    const char *to,
                    const char *subst,

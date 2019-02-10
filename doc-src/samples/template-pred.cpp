@@ -60,18 +60,18 @@ namespace crpcut {
   template <typename T>
   struct match_traits<is_substring, const T*>
   {
-    typedef is_substring::template implementation<const T*> type;
+    using type = is_substring::template implementation<const T*>;
   };
   template <typename T>
   struct match_traits<is_substring, T*>
   {
-    typedef is_substring::template implementation<const T*> type;
+    using type = is_substring::template implementation<const T*>;
   };
 
   template <typename T>
   struct match_traits<is_substring, std::basic_string<T> >
   {
-    typedef is_substring::template implementation<std::basic_string<T> > type;
+    using type = is_substring::template implementation<std::basic_string<T> >;
   };
 }
 

@@ -51,7 +51,7 @@ namespace {
     return p ? p : ".";
   }
 
-  typedef crpcut::output::text_modifier tm;
+  using tm = crpcut::output::text_modifier;
   static const tm::decorator violation_mods[2][2] =
     {
       { tm::NCFAILED, tm::FAILED },

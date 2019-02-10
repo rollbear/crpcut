@@ -35,13 +35,12 @@ namespace crpcut {
   namespace cli {
     class activation_param : public param
     {
-      typedef bool (activation_param::*bool_type)(const char *, bool);
     public:
       template <size_t N>
       activation_param(char short_form, const char (&long_form)[N],
                        const char *param_description,
                        param_list &root);
-      operator bool_type() const;
+      explicit operator bool() const { return active_; }
     protected:
       virtual bool match_value(const char *, bool is_short);
     private:

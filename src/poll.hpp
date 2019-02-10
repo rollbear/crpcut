@@ -35,7 +35,7 @@ namespace crpcut {
   public:
     struct polltype
     {
-      typedef enum { r = 1, w = 2, rw = 3 } type;
+      enum type { r = 1, w = 2, rw = 3 };
     };
     class descriptor;
     poll();

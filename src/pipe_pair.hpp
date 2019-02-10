@@ -31,7 +31,7 @@ namespace crpcut {
   class pipe_pair
   {
   public:
-    typedef enum { release_ownership, keep_ownership } purpose;
+    enum purpose { release_ownership, keep_ownership };
     pipe_pair(const char *purpose_msg);
     ~pipe_pair();
     void close();

@@ -160,7 +160,7 @@ TESTSUITE(cli)
     TEST(description_of_a_parameter_with_value_has_correct_format)
     {
       crpcut::cli::param_list list;
-      typedef crpcut::cli::param P;
+      using P = crpcut::cli::param;
       P param('v', "verbose",
               "level", crpcut::cli::param::mandatory,
               "Another toy parameter intended to show how values are added to the"
@@ -178,7 +178,7 @@ TESTSUITE(cli)
     TEST(parameter_with_0_short_form_matches_long_form)
     {
       crpcut::cli::param_list list;
-      typedef crpcut::cli::param P;
+      using P = crpcut::cli::param;
       P param(0, "long", "a toy value just to test the idea",
               list);
       static const char *cli[] = { "--long", 0 };
@@ -189,7 +189,7 @@ TESTSUITE(cli)
     TEST(parameter_with_0_short_form_does_not_match_single_dash)
     {
       crpcut::cli::param_list list;
-      typedef crpcut::cli::param P;
+      using P = crpcut::cli::param;
       P param(0, "long", "a toy value just to test the idea",
               list);
       static const char *cli[] = { "-", 0 };
@@ -200,7 +200,7 @@ TESTSUITE(cli)
     TEST(parameter_with_0_short_form_describes_only_long_form)
     {
       crpcut::cli::param_list list;
-      typedef crpcut::cli::param P;
+      using P = crpcut::cli::param;
       P param(0, "long", "a toy value just to test the idea",
               list);
       std::ostringstream os;

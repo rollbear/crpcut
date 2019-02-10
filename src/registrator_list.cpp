@@ -35,7 +35,7 @@ namespace crpcut {
                       std::ostream &err_os)
   {
     unsigned num_registered_tests = 0U;
-    typedef crpcut_test_case_registrator reg;
+    using reg = crpcut_test_case_registrator;
 
     {
       for (reg *i = first(); i; )

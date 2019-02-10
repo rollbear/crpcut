@@ -105,7 +105,7 @@ TESTSUITE(test_wrapper)
   {
     REQUIRE_CALL(test_case, test())
       .THROW(my_error{});
-    typedef crpcut::test_wrapper<void> wrapper;
+    using wrapper = crpcut::test_wrapper<void>;
     ASSERT_THROW(wrapper::run(&test_case, reporter), my_error);
   }
 
@@ -125,7 +125,7 @@ TESTSUITE(test_wrapper)
     REQUIRE_CALL(reporter, report(crpcut::comm::exit_fail, _, _, "apa:3", &registrator))
       .WITH(std::string(_2,_3) == "Unexpectedly survived\nExpected signal 9");
 
-    typedef crpcut::test_wrapper<crpcut::policies::deaths::wrapper> wrapper;
+    using wrapper = crpcut::test_wrapper<crpcut::policies::deaths::wrapper>;
     wrapper::run(&test_case, reporter);
   }
 
@@ -134,7 +134,7 @@ TESTSUITE(test_wrapper)
     REQUIRE_CALL(test_case, test())
       .THROW(my_error{});
 
-    typedef crpcut::test_wrapper<crpcut::policies::deaths::wrapper> wrapper;
+    using wrapper = crpcut::test_wrapper<crpcut::policies::deaths::wrapper>;
 
     ASSERT_THROW(wrapper::run(&test_case, reporter), my_error);
   }
@@ -148,7 +148,7 @@ TESTSUITE(test_wrapper)
       .RETURN(loc);
     REQUIRE_CALL(reporter, report(crpcut::comm::exit_fail, _, _, "apa:3", &registrator))
       .WITH(std::string(_2,_3) == "Unexpectedly did not throw");
-    typedef crpcut::test_wrapper<crpcut::policies::any_exception_wrapper> w;
+    using w = crpcut::test_wrapper<crpcut::policies::any_exception_wrapper>;
     w::run(&test_case, reporter);
   }
 
@@ -157,7 +157,7 @@ TESTSUITE(test_wrapper)
     REQUIRE_CALL(test_case, test())
       .THROW(my_error{});
 
-    typedef crpcut::test_wrapper<crpcut::policies::any_exception_wrapper> w;
+    using w =  crpcut::test_wrapper<crpcut::policies::any_exception_wrapper>;
     w::run(&test_case, reporter);
   }
 
@@ -166,8 +166,8 @@ TESTSUITE(test_wrapper)
     REQUIRE_CALL(test_case, test())
       .THROW(std::bad_alloc{});
 
-    typedef crpcut::policies::exception_wrapper<std::exception> policy;
-    typedef crpcut::test_wrapper<policy > w;
+    using policy = crpcut::policies::exception_wrapper<std::exception>;
+    using w = crpcut::test_wrapper<policy >;
     w::run(&test_case, reporter);
   }
 
@@ -181,8 +181,8 @@ TESTSUITE(test_wrapper)
     REQUIRE_CALL(reporter, report(crpcut::comm::exit_fail,_,_, "apa:3", &registrator))
       .WITH(std::string(_2,_3) == "Unexpectedly did not throw");
 
-    typedef crpcut::policies::exception_wrapper<std::exception> policy;
-    typedef crpcut::test_wrapper<policy > w;
+    using policy = crpcut::policies::exception_wrapper<std::exception>;
+    using w = crpcut::test_wrapper<policy >;
     w::run(&test_case, reporter);
   }
 
@@ -196,8 +196,8 @@ TESTSUITE(test_wrapper)
     REQUIRE_CALL(reporter, report(crpcut::comm::exit_fail,_,_,"apa:3", &registrator))
       .WITH(std::string(_2,_3) == "Unexpectedly did not throw");
 
-    typedef crpcut::policies::exception_wrapper<my_error> policy;
-    typedef crpcut::test_wrapper<policy> w;
+    using policy = crpcut::policies::exception_wrapper<my_error> ;
+    using w = crpcut::test_wrapper<policy>;
     w::run(&test_case, reporter);
   }
 
@@ -206,8 +206,8 @@ TESTSUITE(test_wrapper)
     REQUIRE_CALL(test_case, test())
       .THROW(my_error{});
 
-    typedef crpcut::policies::exception_wrapper<my_error> policy;
-    typedef crpcut::test_wrapper<policy> w;
+    using policy = crpcut::policies::exception_wrapper<my_error>;
+    using w =  crpcut::test_wrapper<policy>;
     w::run(&test_case, reporter);
 
   }

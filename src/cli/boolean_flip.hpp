@@ -35,14 +35,13 @@ namespace crpcut {
   namespace cli {
     class boolean_flip : public param
     {
-      typedef bool (boolean_flip::*bool_type)(const char *, bool);
     public:
       template <size_t N>
       boolean_flip(char short_form, const char (&long_form)[N],
                    const char *param_description,
                    param_list &root);
       bool get_value(bool b) const;
-      operator bool_type() const;
+      explicit operator bool() const { return seen_; }
     protected:
       virtual bool match_value(const char *, bool);
     private:

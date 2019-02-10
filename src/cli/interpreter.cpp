@@ -235,7 +235,7 @@ namespace crpcut {
     interpreter
     ::backtrace_enabled() const
     {
-      return backtrace_;
+      return bool(backtrace_);
     }
 #endif
 
@@ -277,14 +277,14 @@ namespace crpcut {
     interpreter
     ::list_tests() const
     {
-      return list_tests_;
+      return bool(list_tests_);
     }
 
     bool
     interpreter
     ::list_tags() const
     {
-      return list_tags_;
+      return bool(list_tags_);
     }
 
     bool
@@ -312,14 +312,14 @@ namespace crpcut {
     interpreter
     ::quiet() const
     {
-      return quiet_;
+      return bool(quiet_);
     }
 
     bool
     interpreter
     ::single_shot_mode() const
     {
-      return single_shot_;
+      return bool(single_shot_);
     }
 
     unsigned
@@ -347,14 +347,14 @@ namespace crpcut {
     interpreter
     ::verbose_mode() const
     {
-      return verbose_;
+      return bool(verbose_);
     }
 
     bool
     interpreter
     ::xml_output() const
     {
-      return xml_.get_value(output_);
+      return xml_.get_value(bool(output_));
     }
 
     const char *const *

@@ -95,7 +95,7 @@ namespace crpcut {
       if (!rules) return;
       const char separator = *rules++;
 
-      typedef illegal_decoration_format err;
+      using err = illegal_decoration_format;
       if (*rules)
         {
           decorators[NORMAL]

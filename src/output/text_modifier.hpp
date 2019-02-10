@@ -52,7 +52,7 @@ namespace crpcut {
     class text_modifier {
     public:
       class illegal_decoration_format ;
-      typedef enum { DECORATORS(VERBATIM), END_OF_LIST } decorator;
+      enum decorator { DECORATORS(VERBATIM), END_OF_LIST };
       text_modifier(const char *rules =
                     wrapped::getenv("CRPCUT_TEXT_DECORATION"));
       void write_to(writer& output, decorator m) const;

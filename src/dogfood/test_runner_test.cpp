@@ -169,7 +169,7 @@ TESTSUITE(test_runner)
             class dump_policy = crpcut::policies::core_dumps::crpcut_default_handler>
   struct fix
   {
-    typedef crpcut::datatypes::fixed_string fixed_string;
+    using fixed_string = crpcut::datatypes::fixed_string;
     fix()
     : default_out(),
       runner(),

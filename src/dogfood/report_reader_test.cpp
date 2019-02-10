@@ -94,7 +94,7 @@ namespace {
 
   struct fix
   {
-    typedef crpcut::clocks::monotonic::timestamp ts;
+    using ts = crpcut::clocks::monotonic::timestamp;
     fix() : loc(crpcut::datatypes::fixed_string::make("apa:3")),
             reader(&monitor) {}
     crpcut::datatypes::fixed_string loc;

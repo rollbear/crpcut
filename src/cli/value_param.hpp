@@ -38,14 +38,13 @@ namespace crpcut {
     template <typename T>
     class value_param : public param
     {
-      typedef bool (value_param::*bool_type)(const char *, bool);
     public:
       template <size_t N>
       value_param(char short_form, const char (&long_form)[N],
                   const char *value_description,
                   const char *param_description,
                   param_list &root);
-      operator bool_type() const;
+      explicit operator bool() const { return active_; }
       const T& get_value() const;
     protected:
       virtual bool match_value(const char *, bool);
@@ -69,11 +68,6 @@ namespace crpcut {
     {
     }
 
-    template <typename T>
-    value_param<T>::operator typename value_param<T>::bool_type() const
-    {
-      return active_ ? &value_param::match_value : 0;
-    }
 
     template <typename T>
     bool

@@ -65,11 +65,6 @@ namespace crpcut {
       return b == (value_ == uninitialized);
     }
 
-    boolean_flip
-    ::operator boolean_flip::bool_type() const
-    {
-      return seen_ ? &boolean_flip::match_value : 0;
-    }
     bool
     boolean_flip::match_value(const char *p, bool short_form)
     {
@@ -81,7 +76,7 @@ namespace crpcut {
         }
       if (p && *p != 0)
         {
-          typedef char const * (*array)[2];
+          using array = char const * (*)[2];
           for (array t = begin(truth_values); t != end(truth_values); ++t)
             {
               for (int i = 0; i < 2; ++i)

@@ -43,11 +43,11 @@ namespace {
     MAKE_CONST_MOCK0(do_num_fds, std::size_t());
   };
 
-  typedef crpcut::crpcut_test_case_registrator reg;
+  using reg = crpcut::crpcut_test_case_registrator;
   class mock_test_reg : public reg
   {
   public:
-    typedef crpcut::tag::importance importance;
+    using importance = crpcut::tag::importance;
     mock_test_reg(const char *name, crpcut::namespace_info *ns)
     : reg(name, ns) {}
     MAKE_MOCK4(setup, void(crpcut::poll<crpcut::fdreader>&,
@@ -88,7 +88,7 @@ namespace {
   };
 
 
-  typedef crpcut::registrator_list list;
+  using list = crpcut::registrator_list;
 
   struct fix
   {

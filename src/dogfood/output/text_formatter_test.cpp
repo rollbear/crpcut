@@ -54,7 +54,7 @@ namespace {
   struct stream_buffer : public crpcut::output::buffer
   {
   public:
-    typedef std::pair<const char*, std::size_t> buff;
+    using buff = std::pair<const char*, std::size_t>;
     MAKE_CONST_MOCK0(get_buffer, buff());
     MAKE_MOCK0(advance, void());
     virtual ssize_t write(const char *data, std::size_t len)

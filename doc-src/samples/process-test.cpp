@@ -104,7 +104,7 @@ struct wait_data
 
 std::list<wait_data> wait_actions;
 
-typedef enum { unknown, is_pipe, is_closed } fdstatus;
+enum fdstatus { unknown, is_pipe, is_closed }; 
 std::map<int, fdstatus> file_descriptors;
 
 

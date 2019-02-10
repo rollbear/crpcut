@@ -50,7 +50,7 @@ namespace crpcut {
       ::~monotonic_enforcer()
       {
         if (!timeouts_are_enabled()) return;
-        typedef clocks::monotonic mono;
+        using mono =  clocks::monotonic;
         mono::timestamp now  = mono::timestamp_absolute();
         unsigned long diff = now - start_timestamp_us_;
         if (diff <= duration_us_)

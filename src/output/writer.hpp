@@ -41,7 +41,7 @@ namespace crpcut {
     template <>
     struct enable_if<true>
     {
-      typedef void type;
+      using type = void;
     };
 
     class buffer;
@@ -49,7 +49,7 @@ namespace crpcut {
     class writer
     {
     public:
-      typedef enum { translated, verbatim } type;
+      enum type { translated, verbatim };
       writer(buffer& buff, const char *to_charset, const char *subst);
       virtual ~writer();
       std::size_t write(std::string s, type t = verbatim) const

@@ -180,7 +180,7 @@ namespace crpcut {
         wrapped::setpgid(0, 0);
         heap::control::enable();
         try {
-          typedef comm::wfile_descriptor wfd;
+          using wfd = comm::wfile_descriptor;
           wfd report_fd(c2p.for_writing(pipe_pair::release_ownership));
           comm::report.set_writer(&report_fd);
           crpcut_test_monitor::make_current(i);
@@ -366,7 +366,7 @@ namespace crpcut {
     for (;;)
       {
         bool progress = false;
-        typedef crpcut_test_case_registrator reg;
+        using reg = crpcut_test_case_registrator;
         for (reg *i = reg_.first(); i;)
           {
             reg *reg_obj = i;
@@ -408,7 +408,7 @@ namespace crpcut {
     comm::wfile_descriptor(p.for_writing()).swap(presenter_pipe_);
 
     const std::size_t num_parallel = cli_->num_parallel_tests();
-    typedef poll_buffer_vector<fdreader> poll_reader;
+    using poll_reader = poll_buffer_vector<fdreader>;
     void *poll_memory = alloca(poll_reader::space_for(num_parallel*3U));
     poll_reader poller(poll_memory, num_parallel*3U);
 
@@ -490,9 +490,9 @@ namespace crpcut {
         int output_fd = open_report_file(cli_->report_file(), err_os);
 
         using output::formatter;
-        typedef output::text_formatter tf;
-        typedef output::xml_formatter  xf;
-        typedef output::nil_formatter  nf;
+        using tf = output::text_formatter;
+        using xf = output::xml_formatter;
+        using nf = output::nil_formatter;
 
         output::heap_buffer buffer;
         formatter &fmt =

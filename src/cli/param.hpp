@@ -39,7 +39,7 @@ namespace crpcut {
     class param : public datatypes::list_elem<param>
     {
     public:
-      typedef enum { mandatory, optional } value_requirement;
+      enum value_requirement { mandatory, optional };
       class exception;
       template <size_t N>
       param(char short_form, const char (&long_form)[N],

@@ -54,7 +54,7 @@ TESTSUITE(scope)
       {
         using crpcut::comm::fail;
         using crpcut::scope::time;
-        typedef crpcut::scope::time_base::max max;
+        using max = crpcut::scope::time_base::max;
         time<fail, max, test_clock> t(0, "apa:3", r, 0);
       }
       ASSERT_TRUE(os.str() == "");
@@ -66,7 +66,7 @@ TESTSUITE(scope)
       {
         using crpcut::comm::fail;
         using crpcut::scope::time;
-        typedef crpcut::scope::time_base::min min;
+        using min = crpcut::scope::time_base::min;
         time<fail, min, test_clock> t(0, "apa:3", r, 0);
       }
       ASSERT_TRUE(os.str() == "");
@@ -78,7 +78,7 @@ TESTSUITE(scope)
       {
         using crpcut::comm::fail;
         using crpcut::scope::time;
-        typedef crpcut::scope::time_base::max max;
+        using max = crpcut::scope::time_base::max;
         time<fail, max, test_clock> t(0, "apa:3", r, 0);
         test_clock::set_timestamp_us(1000UL);
       }
@@ -95,7 +95,7 @@ TESTSUITE(scope)
       {
         using crpcut::comm::fail;
         using crpcut::scope::time;
-        typedef crpcut::scope::time_base::min min;
+        using min = crpcut::scope::time_base::min;
         time<fail, min, test_clock> t(0, "apa:3", r, 0);
         test_clock::set_timestamp_us(1000UL);
       }
@@ -108,7 +108,7 @@ TESTSUITE(scope)
       {
         using crpcut::comm::fail;
         using crpcut::scope::time;
-        typedef crpcut::scope::time_base::min min;
+        using min = crpcut::scope::time_base::min;
         time<fail, min, test_clock> t(1000, "apa:3", r, 0);
       }
       static const char report[] =
@@ -124,7 +124,7 @@ TESTSUITE(scope)
       {
         using crpcut::comm::fail;
         using crpcut::scope::time;
-        typedef crpcut::scope::time_base::max max;
+        using max = crpcut::scope::time_base::max;
         time<fail, max, test_clock> t(0, "apa:3", r, 0);
         test_clock::set_timestamp_us(1000UL);
         crpcut::scope::time<fail, max, test_clock> t2(t);

@@ -28,7 +28,7 @@
 #include <crpcut.hpp>
 
 namespace {
-  typedef crpcut::datatypes::fixed_string fs;
+  using fs = crpcut::datatypes::fixed_string;
   static const fs location = fs::make("apa.cpp:32");
 }
 TESTSUITE(comm)

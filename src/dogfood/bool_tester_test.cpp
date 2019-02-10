@@ -43,10 +43,8 @@ namespace {
   template <bool v>
   struct truth
   {
-    void secret_func() const {};
   public:
-    typedef void (truth::*bool_type)() const;
-    operator bool_type() const { return v ? &truth::secret_func : 0; }
+    constexpr explicit operator bool() const { return v; }
     friend
     std::ostream &operator<<(std::ostream &os, const truth&)
     {

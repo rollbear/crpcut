@@ -73,7 +73,7 @@ namespace {
 #endif
 
 namespace {
-  typedef enum { raw, by_malloc, by_new_elem, by_new_array } alloc_type;
+  enum alloc_type { raw, by_malloc, by_new_elem, by_new_array };
   template <typename T, size_t N>
   T subscript(const T (&array)[N], size_t n)
   {
@@ -129,12 +129,11 @@ namespace crpcut
 
     class new_handler_caller
     {
-      typedef void (*bool_type)();
     public:
       new_handler_caller() throw () : handler(std::set_new_handler(0)) {}
       ~new_handler_caller() throw () { std::set_new_handler(handler); }
       void operator()() const { handler(); }
-      operator bool_type () const throw () { return handler; }
+      explicit operator bool () const { return handler; }
     private:
       std::new_handler handler;
     };
@@ -402,7 +401,7 @@ namespace crpcut
       static bool has_malloc_sym = false;
       static int recursive = -1;
       recurse_counter recurse_checker(recursive);
-      typedef libwrapper::loader<libs::rtld_next> loader;
+      using loader = libwrapper::loader<libs::rtld_next>;
 
       if (!use_local_heap)
         {

@@ -43,9 +43,5 @@ namespace crpcut {
       return rv;
     }
 
-    activation_param::operator activation_param::bool_type() const
-    {
-      return active_ ? &activation_param::match_value : 0;
-    }
   }
 }
