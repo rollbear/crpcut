@@ -693,7 +693,7 @@ namespace crpcut {
     {
     public:
       iabuf(const charT *begin, const charT *end);
-      iabuf(const iabuf& b);
+      iabuf(const iabuf& b) : iabuf(b.eback(), b.egptr()) {}
     };
 
 
@@ -2414,18 +2414,6 @@ namespace crpcut {
       std::basic_streambuf<charT, traits>::setg(const_cast<charT *>(begin),
                                                 const_cast<charT *>(begin),
                                                 const_cast<charT *>(end));
-    }
-
-    template <typename charT, typename traits>
-    iabuf<charT, traits>::iabuf(const iabuf& b)
-      : std::basic_streambuf<charT, traits>()
-    {
-      const charT *begin = b.eback();
-      const charT *end = b.egptr();
-      this->setbuf(const_cast<charT*>(begin), end - begin);
-      this->setg(const_cast<charT*>(begin),
-                 const_cast<charT*>(begin),
-                 const_cast<charT*>(end));
     }
 
     template <typename charT, typename traits>
