@@ -2919,11 +2919,11 @@ namespace crpcut {
   class test_suite_base : public policies::dependencies::basic_enforcer
   {
   protected:
-    test_suite_base();
+    test_suite_base() = default;
   public:
     void add_case(crpcut_test_case_registrator* r);
   private:
-    crpcut_test_case_registrator *list;
+    crpcut_test_case_registrator *list = nullptr;
   };
 
   template <typename T>

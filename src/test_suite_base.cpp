@@ -28,12 +28,6 @@
 
 namespace crpcut {
 
-  test_suite_base
-  ::test_suite_base()
-    : list(nullptr)
-  {
-  }
-
   void
   test_suite_base
   ::add_case(crpcut_test_case_registrator* r)
