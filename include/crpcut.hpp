@@ -3249,7 +3249,7 @@ namespace crpcut {
     {
     public:
       template <size_t N>
-      time(unsigned long us, const char (&location)[N],
+      explicit time(unsigned long us, const char (&location)[N],
            comm::reporter &reporter = comm::report,
            const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
         : time_base{clock::now() + us * crpcut::timeout_multiplier(),
