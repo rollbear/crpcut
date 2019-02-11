@@ -66,9 +66,9 @@ namespace crpcut {
       const char *const       long_form_;
       const size_t            long_form_len_;
       const char              short_form_;
-      const char *const       value_description_;
+      const char *const       value_description_ = nullptr;
       const char *const       param_description_;
-      const value_requirement req_;
+      const value_requirement req_ = optional;
     };
 
     class param::exception : public std::exception
@@ -93,9 +93,7 @@ namespace crpcut {
       : long_form_(long_form),
         long_form_len_(N - 1),
         short_form_(short_form),
-        value_description_(nullptr),
-        param_description_(param_description),
-        req_(optional)
+        param_description_(param_description)
     {
       link_before(root);
     }
