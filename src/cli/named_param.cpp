@@ -56,15 +56,14 @@ namespace crpcut {
     named_param
     ::match_param_name(const char *param, const char *name)
     {
-       const size_t name_len = wrapped::strlen(name);
-       const char *end = match_or_end(param, '=');
-       size_t param_len = size_t(end - param);
-       if (param_len == name_len
-           && wrapped::strncmp(name, param, name_len) == 0)
-         {
-           return end + 1;
-         }
-       return nullptr;
+      const size_t name_len = wrapped::strlen(name);
+      const char *end = match_or_end(param, '=');
+      if (size_t(end - param) == name_len
+          && wrapped::strncmp(name, param, name_len) == 0)
+        {
+          return end + 1;
+        }
+      return nullptr;
     }
 
     const char *
