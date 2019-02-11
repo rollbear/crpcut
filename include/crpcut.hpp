@@ -910,10 +910,13 @@ namespace crpcut {
     class direct_reporter
     {
     public:
+
       template <size_t N>
       explicit direct_reporter(const char               (&location)[N],
                                reporter                  &r = report,
-                               const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
+                               const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
+        : direct_reporter(datatypes::fixed_string{location}, r, mon)
+      {}
       explicit direct_reporter(datatypes::fixed_string  location,
                                reporter                &r = report,
                                const crpcut_test_monitor *mon = crpcut_test_monitor::current_test());
@@ -2643,18 +2646,6 @@ namespace crpcut {
     {
       assert(reader_);
       reader_->read_loop(std::addressof(t), sizeof(T));
-    }
-
-    template <comm::type type> template <size_t N>
-    direct_reporter<type>
-    ::direct_reporter(const char              (&location)[N],
-                      reporter                  &r,
-                      const crpcut_test_monitor *mon)
-      : heap_limit(heap::set_limit(heap::system)),
-        location_{location},
-        report_(r),
-        mon_(mon)
-    {
     }
 
     template <comm::type type>
