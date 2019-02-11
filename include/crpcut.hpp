@@ -2885,13 +2885,9 @@ namespace crpcut {
     template <typename T>
     static T signbit2bias(T t)
     {
-      static const T one = T() + 1;
-      static const T neg_bit = one << (std::numeric_limits<T>::digits - 1);
-      if (t & neg_bit)
-        {
-            return ~t + 1;
-        }
-      return t | neg_bit;
+      constexpr T one = T() + 1;
+      constexpr T neg_bit = one << (std::numeric_limits<T>::digits - 1);
+      return (t & neg_bit) ? ~t + 1 : t | neg_bit;
     }
 
     uint64_t         max_diff;
