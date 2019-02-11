@@ -2670,11 +2670,8 @@ namespace crpcut {
     template <comm::type type>
     direct_reporter<type>::~direct_reporter()
     {
-      using std::ostringstream;
-      std::string s;
-      os.str().swap(s);
-      os.~ostringstream();
-      new (&os) ostringstream(); // Just how ugly is this?
+      std::string s = os.str();
+      std::ostringstream{}.swap(os);
       size_t len = s.length();
       char *p = static_cast<char*>(alloca(len));
       s.copy(p, len);
