@@ -128,10 +128,6 @@ namespace crpcut {
       return p;
     }
 
-    param_list::param_list()
-    {
-    }
-
     const char *const *
     param_list
     ::match_all(const char *const *cli_arg)

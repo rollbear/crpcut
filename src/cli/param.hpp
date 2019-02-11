@@ -83,7 +83,6 @@ namespace crpcut {
     class param_list : public datatypes::list_elem<param>
     {
     public:
-      param_list();
       const char *const *match_all(const char *const *p);
     };
 
