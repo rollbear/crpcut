@@ -1533,9 +1533,9 @@ namespace crpcut {
     {
       return t.print_name(os);
     }
-    bool deadline_is_set() const { return timeboxed::deadline_is_set(); }
-    void crpcut_register_success(bool v) { crpcut_base::crpcut_register_success(v); }
-    bool crpcut_failed() const { return crpcut_base::crpcut_failed(); }
+    bool deadline_is_set() const override { return timeboxed::deadline_is_set(); }
+    void crpcut_register_success(bool v) override { crpcut_base::crpcut_register_success(v); }
+    bool crpcut_failed() const override { return crpcut_base::crpcut_failed(); }
     std::size_t full_name_len() const;
     bool match_name(const char *name) const;
     virtual void setup(poll<fdreader> &poller,
@@ -1543,31 +1543,31 @@ namespace crpcut {
                        int             stdout_fd,
                        int             stderr_fd) = 0;
     void set_test_environment(test_environment *env);
-    datatypes::fixed_string get_location() const;
-    void manage_death();
+    datatypes::fixed_string get_location() const override;
+    void manage_death() override;
     using datatypes::list_elem<crpcut_test_case_registrator>::unlink;
-    void kill();
-    void clear_deadline();
+    void kill() override;
+    void clear_deadline() override;
     void unregister_fds();
     void set_wd(unsigned n);
     void goto_wd() const;
     pid_t get_pid() const;
-    bool is_naughty_child() const;
-    void freeze() const;
+    bool is_naughty_child() const override;
+    void freeze() const override;
     test_phase get_phase() const;
-    void set_phase(test_phase p);
-    bool has_active_readers() const;
-    void deactivate_reader();
-    void activate_reader();
-    void set_timeout(unsigned long);
-    unsigned long duration_us() const;
+    void set_phase(test_phase p) override;
+    bool has_active_readers() const override;
+    void deactivate_reader() override;
+    void activate_reader() override;
+    void set_timeout(unsigned long) override;
+    unsigned long duration_us() const override;
     virtual void run_test_case() = 0;
     virtual tag& crpcut_tag() const = 0;
     virtual tag::importance get_importance() const = 0;
-    void set_cputime_at_start(const struct timeval &t);
+    void set_cputime_at_start(const timeval &t) override;
     bool has_death_note() const;
-    void set_death_note();
-    void send_to_presentation(comm::type t, size_t len, const char *buff) const;
+    void set_death_note() override;
+    void send_to_presentation(comm::type t, size_t len, const char *buff) const override;
     void set_pid(pid_t pid);
   protected:
     crpcut_test_case_registrator(const char *name = nullptr, namespace_info *ns = nullptr);
