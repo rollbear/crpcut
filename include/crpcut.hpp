@@ -2017,7 +2017,7 @@ namespace crpcut {
     enum { left, right } side;
     collate_result(const char *refstr, std::string comp, const std::locale& l);
   public:
-    collate_result(const collate_result& o);
+    collate_result(const collate_result&) = default;
     operator const comparator*() const;
     const comparator* operator()() const;
     collate_result& set_lh();

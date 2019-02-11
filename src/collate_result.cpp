@@ -37,15 +37,6 @@ namespace crpcut {
   }
 
   collate_result
-  ::collate_result(const collate_result& o)
-    : r(o.r),
-      intl(o.intl),
-      locale(o.locale),
-      side(o.side)
-  {
-  }
-
-  collate_result
   ::operator const collate_result::comparator*() const
   {
     return operator()();
