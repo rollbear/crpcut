@@ -2243,14 +2243,7 @@ namespace crpcut {
       return fac.compare(ref.c_str(), ref.c_str() + ref.length(),
                          begin, end);
     }
-    int compare(const char *p) const
-    {
-      return compare(std::string(p));
-    }
-    int compare(const char *p, size_t len) const
-    {
-      return compare(std::string(p, len));
-    }
+
     std::string locale_name() const { return locale.name(); }
     const char *reference_string() const { return ref.c_str(); }
   private:
