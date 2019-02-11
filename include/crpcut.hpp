@@ -1210,8 +1210,10 @@ namespace crpcut {
       {
       public:
         void crpcut_inc();
-        virtual ~crpcut_base();
+
         crpcut_base() = default;
+        crpcut_base(const crpcut_base&) = delete;
+        virtual ~crpcut_base();
         void crpcut_add(basic_enforcer * other);
         bool crpcut_can_run() const;
         bool crpcut_failed() const;
