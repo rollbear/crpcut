@@ -47,7 +47,7 @@ namespace crpcut {
       explicit operator bool() const { return active_; }
       const T& get_value() const;
     protected:
-      virtual bool match_value(const char *, bool);
+      bool match_value(const char *, bool) override;
     private:
       void read_value(const char *p);
       T    value_{};
