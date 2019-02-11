@@ -1766,22 +1766,21 @@ namespace crpcut {
       if (!b)
         {
           heap::set_limit(heap::system);
-          using std::ostringstream;
-          ostringstream os;
-          os << crpcut_check_name<action>::string()
-             << "_" << op_ << "(" << n1 << ", " << n2 << ")";
+          auto getstr = [&]() {
+            std::ostringstream os;
+            os << crpcut_check_name<action>::string()
+               << "_" << op_ << "(" << n1 << ", " << n2 << ")";
 
-          static const char *prefix[] = { "\n  where ", "\n        " };
-          bool prev = stream_param(os, prefix[0], n1, v1);
-          stream_param(os, prefix[prev], n2, v2);
-          std::string s(os.str());
-          os.str(std::string());
+            static const char *prefix[] = {"\n  where ", "\n        "};
+            bool prev = stream_param(os, prefix[0], n1, v1);
+            stream_param(os, prefix[prev], n2, v2);
+            return os.str();
+          };
+          std::string s(getstr());
           size_t len = s.length();
           char *p = static_cast<char *>(alloca(len));
           s.copy(p, len);
           std::string().swap(s);
-          os.~ostringstream();
-          new (&os) ostringstream();
           this->report_(action, p, len, location_, mon_);
         }
       }
