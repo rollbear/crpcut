@@ -44,7 +44,7 @@ namespace crpcut {
       const char *value_for(const char*const *arg_list, const char *name);
     protected:
       // here this is only a sanity check to see if the form is correct
-      virtual bool match_value(const char *, bool is_short);
+      bool match_value(const char *, bool is_short) override;
     private:
       static const char *match_param_name(const char *param, const char *name);
     };
