@@ -50,8 +50,8 @@ namespace crpcut {
       virtual bool match_value(const char *, bool);
     private:
       void read_value(const char *p);
-      T    value_;
-      bool active_;
+      T    value_{};
+      bool active_ = false;
     };
 
     template <typename T> template <size_t N>
@@ -62,9 +62,7 @@ namespace crpcut {
       : param(short_form, long_form,
               value_description, param::mandatory,
               param_description,
-              root),
-        value_(),
-        active_(false)
+              root)
     {
     }
 
