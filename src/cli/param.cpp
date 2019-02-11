@@ -52,7 +52,7 @@ namespace crpcut {
       if (parameter_name[1] != '-') return nullptr;
       parameter_name+= 2;
       const char *value = match_or_end(parameter_name, '=');
-      size_t len = size_t(value - parameter_name);
+      const auto len = size_t(value - parameter_name);
       if (len != long_form_len_
           || wrapped::strncmp(long_form_, parameter_name, len) != 0)
         {
@@ -109,9 +109,7 @@ namespace crpcut {
       const char *begin = param_description_;
       while (*begin)
         {
-          const char *p;
-          for (p = begin; *p && *p != '\n'; ++p)
-            ;
+          auto p = match_or_end(begin, '\n');
           os << "\n        ";
           os.write(begin, p - begin);
           begin = p + (*p == '\n');
