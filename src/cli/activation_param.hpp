@@ -42,7 +42,7 @@ namespace crpcut {
                        param_list &root);
       explicit operator bool() const { return active_; }
     protected:
-      virtual bool match_value(const char *, bool is_short);
+      bool match_value(const char *, bool is_short) override;
     private:
       bool active_;
     };
