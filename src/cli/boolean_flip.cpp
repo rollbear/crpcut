@@ -28,6 +28,8 @@
 #include "../wrapped/posix_encapsulation.hpp"
 #include <sstream>
 #include <typeinfo>
+#include <iterator>
+#include <algorithm>
 namespace {
   const char *truth_values[][2] = {
                                   { "N",     "Y"    },
@@ -43,17 +45,6 @@ namespace {
                                   { "Off",   "On"   }
   };
 
-  template <typename T, size_t N>
-  T* begin(T (&array)[N])
-  {
-    return array;
-  }
-
-  template <typename T, size_t N>
-  T *end(T (&array)[N])
-  {
-    return array + N;
-  }
 }
 namespace crpcut {
   namespace cli {
@@ -76,19 +67,13 @@ namespace crpcut {
         }
       if (p && *p != 0)
         {
-          using array = char const * (*)[2];
-          for (array t = begin(truth_values); t != end(truth_values); ++t)
-            {
-              for (int i = 0; i < 2; ++i)
-                {
-                  if (wrapped::strcmp((*t)[i], p) == 0)
-                    {
-                      value_ = i ? set_true : set_false;
-                      seen_ = true;
-                      return true;
-                    }
-                }
-            }
+          auto i = std::find_if(std::begin(truth_values), std::end(truth_values),
+            [p](const auto& v) { return strcmp(v[0], p) == 0 || strcmp(v[1], p) == 0; });
+          if (i != std::end(truth_values)) {
+            seen_ = true;
+            value_ = strcmp((*i)[1], p) == 0 ? set_true : set_false;
+            return true;
+          }
           if (!short_form)
             {
               std::ostringstream os;
