@@ -2932,8 +2932,6 @@ namespace crpcut {
   class test_suite : public test_suite_base
   {
   public:
-    test_suite() {}
-    virtual ~test_suite() {}
     static test_suite& crpcut_reg()
     {
       static test_suite object;
