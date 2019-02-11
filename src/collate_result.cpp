@@ -36,14 +36,6 @@ namespace crpcut {
   {
   }
 
-  collate_result&
-  collate_result
-  ::set_lh()
-  {
-    side = left;
-    return *this;
-  }
-
   std::ostream &operator<<(std::ostream& os, const collate_result &obj)
   {
     static const char rs[] = "\"\n"

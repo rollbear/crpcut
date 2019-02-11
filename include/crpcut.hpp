@@ -2018,7 +2018,7 @@ namespace crpcut {
   public:
     collate_result(const collate_result&) = default;
     explicit operator bool () const { return !r;}
-    collate_result& set_lh();
+    collate_result& set_lh() { side = left; return *this;}
     friend
     std::ostream &operator<<(std::ostream& os, const collate_result &obj);
 
