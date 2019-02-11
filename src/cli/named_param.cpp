@@ -71,21 +71,18 @@ namespace crpcut {
     named_param
     ::value_for(const char *const *arg_list, const char *name)
     {
-      const char *const *p = arg_list;
-      while (*p)
+      for (auto p = arg_list; *p; ++p)
         {
-          const char *const *n = match(p);
-          if (n)
+          if (match(p))
             {
               const char *str = *p + 1;
               const char *param_name = str[0] == '-'
                                      ? match_or_end(str + 1, '=') + 1
                                      : *(++p);
               assert(*param_name);
-              const char *rv = match_param_name(param_name, name);
-              if (rv) return rv;
+              if (auto rv = match_param_name(param_name, name))
+                return rv;
             }
-          ++p;
         }
       return nullptr;
     }
