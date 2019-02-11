@@ -810,7 +810,7 @@ namespace crpcut {
     {
     public:
       explicit rfile_descriptor(int fd = -1) : file_descriptor(fd) {}
-      virtual ssize_t read(void *buff, size_t len) const;
+      ssize_t read(void *buff, size_t len) const override;
     };
 
     class data_writer
@@ -832,7 +832,7 @@ namespace crpcut {
     {
     public:
       explicit wfile_descriptor(int fd = -1) : file_descriptor(fd) {}
-      virtual ssize_t write(const void *buff, size_t len) const;
+      ssize_t write(const void *buff, size_t len) const override;
     };
 
 
