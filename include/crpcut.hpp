@@ -1452,7 +1452,7 @@ namespace crpcut {
   public:
     bool read_data();
     crpcut_test_monitor *get_monitor() const;
-    virtual void close();
+    void close() override;
     void unregister();
     virtual ~fdreader() { }
   protected:
