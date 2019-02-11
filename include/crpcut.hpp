@@ -982,6 +982,7 @@ namespace crpcut {
                                 const char              *check_name,
                                 const char              *check_type,
                                 const char              *params);
+
     template <size_t N>
     void
     report_unexpected_exception(comm::type   action,
@@ -1065,8 +1066,8 @@ namespace crpcut {
       class crpcut_none
       {
       public:
-        crpcut_none() {}
-        virtual ~crpcut_none() {}
+        constexpr crpcut_none() = default;
+        virtual ~crpcut_none() = default;
         virtual bool crpcut_is_expected_exit(int) const;
         virtual bool crpcut_is_expected_signal(int) const;
         virtual void crpcut_expected_death(std::ostream &os) const;
