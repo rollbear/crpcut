@@ -850,7 +850,9 @@ namespace crpcut {
       {
         return datatypes::fixed_string{ nullptr, 0 };
       }
-      explicit reporter(std::ostream &default_out = std::cout);
+      explicit reporter(std::ostream &default_out = std::cout)
+      : default_out_{default_out}
+      {}
       reporter(const reporter&) = delete;
       virtual ~reporter();
       void set_writer(data_writer *w);
