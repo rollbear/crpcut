@@ -1570,7 +1570,7 @@ namespace crpcut {
     void send_to_presentation(comm::type t, size_t len, const char *buff) const override;
     void set_pid(pid_t pid);
   protected:
-    crpcut_test_case_registrator(const char *name = nullptr, namespace_info *ns = nullptr);
+    explicit crpcut_test_case_registrator(const char *name = nullptr, namespace_info *ns = nullptr);
     void manage_test_case_execution(crpcut_test_case_base*);
     void prepare_destruction(unsigned long us);
     void prepare_construction(unsigned long us);
