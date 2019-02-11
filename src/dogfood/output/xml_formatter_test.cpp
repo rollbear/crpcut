@@ -54,7 +54,7 @@ namespace {
   };
 }
 
-#define s(...) crpcut::datatypes::fixed_string::make(#__VA_ARGS__)
+#define s(...) crpcut::datatypes::fixed_string{#__VA_ARGS__}
 
 #define _ "[[:space:]]*"
 #define S "[[:space:]]+"
@@ -392,9 +392,9 @@ TESTSUITE(output)
         obj.begin_case("lemur", false, true, 100);
         obj.print(s(stderr), s(ehepp), s());
         obj.terminate(crpcut::running,
-                      fixed_string::make("Died on signal 6\n"
-                                         "Expected normal exit"),
-                      fixed_string::make("apa.cpp"),
+                      fixed_string{"Died on signal 6\n"
+                                   "Expected normal exit"},
+                      fixed_string{"apa.cpp"},
                       "");
         obj.end_case();
         obj.blocked_test(crpcut::tag::critical, "apa");
@@ -444,8 +444,8 @@ TESTSUITE(output)
                                   "{|}~";
         obj.begin_case("tupp", true, true, 100);
         obj.print(s(info),
-                  crpcut::datatypes::fixed_string::make(msg, sizeof(msg) - 1),
-                  crpcut::datatypes::fixed_string::make("apa.cpp"));
+                  crpcut::datatypes::fixed_string{msg},
+                  crpcut::datatypes::fixed_string{"apa.cpp"});
         obj.end_case();
         obj.statistics(0,0);
       }
@@ -488,8 +488,8 @@ TESTSUITE(output)
           }
         obj.begin_case("tupp", true, true, 100);
         obj.print(s(info),
-                  crpcut::datatypes::fixed_string::make(msg),
-                  crpcut::datatypes::fixed_string::make("apa.cpp"));
+                  crpcut::datatypes::fixed_string{msg},
+                  crpcut::datatypes::fixed_string{"apa.cpp"});
         obj.end_case();
         obj.statistics(0,0);
       }

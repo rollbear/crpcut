@@ -85,7 +85,7 @@ namespace {
     template <size_t N>
     test_tag(const char (&f)[N], tag_list *root)
       : crpcut::tag(N, root),
-        name_(crpcut::datatypes::fixed_string::make(f)),
+        name_{f},
         name_x(NAMED_REQUIRE_CALL(*this, get_name())
                .RETURN(std::ref(name_)))
     {
@@ -122,7 +122,7 @@ namespace {
 }
 
 #define _ "[[:space:]]*"
-#define s crpcut::datatypes::fixed_string::make
+#define s(x) crpcut::datatypes::fixed_string{x}
 
 
 TESTSUITE(output)
@@ -805,8 +805,8 @@ TESTSUITE(output)
           }
 
         obj.print(s("info"),
-                  crpcut::datatypes::fixed_string::make(buff, 255),
-                  crpcut::datatypes::fixed_string::make(""));
+                  crpcut::datatypes::fixed_string{buff, 255},
+                  crpcut::datatypes::fixed_string{});
         obj.terminate(crpcut::creating, s("katt"), s("apa.cpp"), "");
         obj.end_case();
         const char pattern[] =
@@ -873,8 +873,8 @@ TESTSUITE(output)
           }
 
         obj.print(s("info"),
-                  crpcut::datatypes::fixed_string::make(buff, 255),
-                  crpcut::datatypes::fixed_string::make(""));
+                  crpcut::datatypes::fixed_string{buff, 255},
+                  crpcut::datatypes::fixed_string{});
         obj.terminate(crpcut::creating, s("katt"), s("apa.cpp"), "");
         obj.end_case();
         const char pattern[] =

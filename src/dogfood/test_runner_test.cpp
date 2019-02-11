@@ -127,7 +127,7 @@ TESTSUITE(test_runner)
                      crpcut::filesystem_operations *fsops,
                      crpcut::test_runner     *factory)
     : crpcut_test_case_registrator(name,
-                                   crpcut::datatypes::fixed_string::make(""),
+                                   crpcut::datatypes::fixed_string{},
                                    ns,
                                    cpulimit,
                                    reporter,
@@ -337,7 +337,7 @@ TESTSUITE(test_runner)
         .RETURN(-1);
 
       REQUIRE_CALL(reg, get_location())
-        .RETURN(fixed_string::make(loc_str));
+        .RETURN(fixed_string{loc_str});
       REQUIRE_CALL(reporter, report(crpcut::comm::exit_fail,
                                     _,
                                     _,
@@ -360,7 +360,7 @@ TESTSUITE(test_runner)
         .SIDE_EFFECT(errno = EACCES)
         .RETURN(-1);
       REQUIRE_CALL(reg, get_location())
-        .RETURN(fixed_string::make(loc_str));
+        .RETURN(fixed_string{loc_str});
       REQUIRE_CALL(reporter, report(crpcut::comm::exit_fail,
                                     _,
                                     _,
@@ -499,7 +499,7 @@ TESTSUITE(test_runner)
     public:
       crpcut::datatypes::fixed_string get_name() const
       {
-        return crpcut::datatypes::fixed_string::make("");
+        return crpcut::datatypes::fixed_string{};
       }
     };
     static test_tag_root tag_root;
@@ -511,7 +511,7 @@ TESTSUITE(test_runner)
         : crpcut::tag(sizeof(#name) - 1, r) {}                 \
       virtual crpcut::datatypes::fixed_string get_name() const \
       {                                                        \
-        return crpcut::datatypes::fixed_string::make(#name);   \
+        return crpcut::datatypes::fixed_string{#name};         \
       }                                                        \
     };                                                         \
     static name ## _tag name(&tag_root)
@@ -583,7 +583,7 @@ TESTSUITE(test_runner)
           .IN_SEQUENCE(s);
 
         ALLOW_CALL(reg, get_location())
-          .RETURN(fixed_string::make(loc_str));
+          .RETURN(fixed_string{loc_str});
         REQUIRE_CALL(fsops, rename(_,_))
           .WITH(_1 == std::string("99"))
           .WITH(_2 == std::string("apa::test"))
@@ -645,7 +645,7 @@ TESTSUITE(test_runner)
         .SIDE_EFFECT(set_expected_exit_msg<0>(_1));
 
       REQUIRE_CALL(reg, get_location())
-        .RETURN(fixed_string::make(loc_str));
+        .RETURN(fixed_string{loc_str});
 
       const char msg[] = "Exited with code 3\nExpected exit 0";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
@@ -685,7 +685,7 @@ TESTSUITE(test_runner)
         .RETURN(false);
 
       REQUIRE_CALL(reg, get_location())
-        .RETURN(fixed_string::make(loc_str));
+        .RETURN(fixed_string{loc_str});
       REQUIRE_CALL(reg, crpcut_expected_death(_))
         .IN_SEQUENCE(s)
         .SIDE_EFFECT(set_expected_exit_msg<0>(_1));
@@ -734,7 +734,7 @@ TESTSUITE(test_runner)
         .RETURN(false);
 
       REQUIRE_CALL(reg, get_location())
-        .RETURN(fixed_string::make(loc_str));
+        .RETURN(fixed_string{loc_str});
 
       REQUIRE_CALL(reg, crpcut_expected_death(_))
         .IN_SEQUENCE(s)
@@ -782,7 +782,7 @@ TESTSUITE(test_runner)
         .RETURN(true);
 
       REQUIRE_CALL(reg, get_location())
-        .RETURN(fixed_string::make(loc_str));
+        .RETURN(fixed_string{loc_str});
       REQUIRE_CALL(env, timeouts_enabled())
         .RETURN(true);
 
@@ -901,7 +901,7 @@ TESTSUITE(test_runner)
         .RETURN(1000000U);
 
       REQUIRE_CALL(reg, get_location())
-        .RETURN(fixed_string::make(loc_str));
+        .RETURN(fixed_string{loc_str});
 
       const char msg[] = "Died with core dump";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];
@@ -940,7 +940,7 @@ TESTSUITE(test_runner)
         .RETURN(1000000U);
 
       REQUIRE_CALL(reg, get_location())
-        .RETURN(fixed_string::make(loc_str));
+        .RETURN(fixed_string{loc_str});
 
       const char msg[] = "Died for unknown reason, code=-1";
       char buffer[sizeof(msg) - 1 + loc_len  + sizeof(size_t)];

@@ -78,7 +78,7 @@ TESTSUITE(test_wrapper)
 
   struct fix
   {
-    fix() : loc(crpcut::datatypes::fixed_string::make("apa:3")),
+    fix() : loc{"apa:3"},
             get_x(NAMED_ALLOW_CALL(test_case, crpcut_get_reg())
                   .RETURN(std::ref(registrator))),
             child_x(NAMED_ALLOW_CALL(registrator, is_naughty_child())

@@ -30,7 +30,7 @@
 #include "tag_mocks.hpp"
 
 #define _ "[[:space:]]*"
-#define s crpcut::datatypes::fixed_string::make
+#define s(x) crpcut::datatypes::fixed_string{x}
 
 
 TESTSUITE(output)

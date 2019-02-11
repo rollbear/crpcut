@@ -95,7 +95,7 @@ namespace {
   struct fix
   {
     using ts = crpcut::clocks::monotonic::timestamp;
-    fix() : loc(crpcut::datatypes::fixed_string::make("apa:3")),
+    fix() : loc{"apa:3"},
             reader(&monitor) {}
     crpcut::datatypes::fixed_string loc;
     mock_monitor                    monitor;
@@ -218,7 +218,7 @@ TESTSUITE(report_reader)
       .IN_SEQUENCE(s)
       .RETURN(true);
     REQUIRE_CALL(monitor, get_location())
-      .RETURN(crpcut::datatypes::fixed_string::make("apa:3"));
+      .RETURN(crpcut::datatypes::fixed_string{"apa:3"});
 
     const char payload[] = "apa:3Earlier VERIFY failed";
     char buffer[sizeof(size_t) + sizeof(payload) - 1];

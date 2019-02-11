@@ -339,16 +339,12 @@ namespace crpcut {
     {
       const char  *str;
       std::size_t  len;
-    public:
-      static constexpr fixed_string make(const char * p, size_t len)
-      {
-        return fixed_string{ p, len };
-      }
-      template <size_t N>
-      static constexpr fixed_string make(const char (&f)[N])
-      {
-        return fixed_string{ f, N - 1 };
-      }
+      constexpr fixed_string() : str{nullptr}, len{0U} {}
+      constexpr fixed_string(const char* s, std::size_t l) : str{s}, len{l} {}
+      template <std::size_t N>
+      constexpr explicit fixed_string(const char (&f)[N]) : str{f}, len{N-1} {}
+      template <char ... c>
+      constexpr explicit fixed_string(string_type<c...> s) : fixed_string{s.c_str} {}
       constexpr explicit operator bool () const
       {
         return len > 0U;
@@ -659,7 +655,7 @@ namespace crpcut {
     size_t get_name_len() const { return rep::size; }
     virtual datatypes::fixed_string get_name() const
     {
-      return datatypes::fixed_string::make(rep::c_str);
+      return datatypes::fixed_string{rep{}};
     }
   };
 
@@ -988,7 +984,7 @@ namespace crpcut {
                                 const char  *params)
     {
       report_unexpected_exception(action,
-                                  datatypes::fixed_string::make(location),
+                                  datatypes::fixed_string{location},
                                   check_name,
                                   check_type,
                                   params);
@@ -1405,7 +1401,7 @@ namespace crpcut {
 
     template <size_t N>
     local_root::local_root(comm::type t, const char (&location)[N])
-      : location_(datatypes::fixed_string::make(location)),
+      : location_{location},
         old_root_(current()),
         check_type_(t)
       {
@@ -1577,7 +1573,7 @@ namespace crpcut {
     std::ostream &print_name(std::ostream &) const ;
 
     const char                   *name_ = nullptr;
-    const datatypes::fixed_string location_ = datatypes::fixed_string::make("");
+    const datatypes::fixed_string location_{};
     const namespace_info         *ns_info_ = nullptr;
     crpcut_test_case_registrator *suite_list_ = nullptr;
     unsigned                      active_readers_ = 0;
@@ -1747,7 +1743,7 @@ namespace crpcut {
                 const char *ops,
                 comm::reporter &report,
                 const crpcut_test_monitor *mon)
-      : location_(datatypes::fixed_string::make(loc)),
+      : location_{loc},
         op_(ops),
         report_(report),
         mon_(mon)
@@ -1947,7 +1943,7 @@ namespace crpcut {
     bool_tester(const char               (&loc)[N],
                 comm::reporter            &reporter = comm::report,
                 const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
-      : loc_(datatypes::fixed_string::make(loc)),
+      : loc_{loc},
         report_(reporter),
         mon_(mon)
     {
@@ -2666,7 +2662,7 @@ namespace crpcut {
                       reporter                  &r,
                       const crpcut_test_monitor *mon)
       : heap_limit(heap::set_limit(heap::system)),
-        location_(datatypes::fixed_string::make(location)),
+        location_{location},
         report_(r),
         mon_(mon)
     {
@@ -3285,7 +3281,7 @@ namespace crpcut {
            comm::reporter &reporter = comm::report,
            const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
         : time_base{clock::now() + us * crpcut::timeout_multiplier(),
-                    datatypes::fixed_string::make(location)},
+                    datatypes::fixed_string{location}},
           limit_us_(us),
           reporter_(reporter),
           mon_(mon)
@@ -3387,7 +3383,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
     public:                                                             \
        crpcut_registrator()                                             \
          : crpcut_registrator_base(#test_case_name,                     \
-                                   crpcut::datatypes::fixed_string::make(CRPCUT_HERE), \
+                                   crpcut::datatypes::fixed_string{CRPCUT_HERE}, \
                                    crpcut_current_namespace,            \
                                    crpcut_cputime_timeout_us),          \
            report_reader_(this),                                        \

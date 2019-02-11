@@ -29,7 +29,7 @@
 
 namespace {
   using fs = crpcut::datatypes::fixed_string;
-  static const fs location = fs::make("apa.cpp:32");
+  static const fs location{"apa.cpp:32"};
 }
 TESTSUITE(comm)
 {

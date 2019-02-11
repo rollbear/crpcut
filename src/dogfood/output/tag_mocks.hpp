@@ -53,7 +53,7 @@ namespace mock
     template <size_t N>
     test_tag(const char (&f)[N], tag_list *root)
       : crpcut::tag(N, root),
-        name_(crpcut::datatypes::fixed_string::make(f)),
+        name_{f},
         x(NAMED_REQUIRE_CALL(*this, get_name())
           .RETURN(std::ref(name_)))
     {
@@ -65,7 +65,7 @@ namespace mock
     MAKE_CONST_MOCK0(get_name, crpcut::datatypes::fixed_string());
     MAKE_MOCK1(set_importance, void(crpcut::tag::importance));
     MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
-    crpcut::datatypes::fixed_string name_;
+    crpcut::datatypes::fixed_string name_{};
   private:
     std::unique_ptr<trompeloeil::expectation> x;
   };

@@ -72,7 +72,7 @@ TESTSUITE(comm)
     TEST(variables_are_forwarded, fix)
     {
       using crpcut::datatypes::fixed_string;
-      static fixed_string loc = fixed_string::make("apa.cpp:32");
+      static fixed_string loc = fixed_string{"apa.cpp:32"};
       {
         crpcut::comm::direct_reporter<crpcut::comm::fail> d(loc, actual_reporter,nullptr);
         int c = 3;

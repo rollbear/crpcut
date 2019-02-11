@@ -29,7 +29,7 @@
 #include "../tag_filter.hpp"
 #include <sstream>
 
-#define S(x) crpcut::datatypes::fixed_string::make(x)
+#define S(x) crpcut::datatypes::fixed_string{x}
 
 namespace {
   class test_list : public crpcut::tag_list_root

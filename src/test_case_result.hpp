@@ -45,8 +45,8 @@ namespace crpcut {
     bool                          nonempty_dir = false;
 
     crpcut_test_case_registrator *test = nullptr;
-    datatypes::fixed_string       termination = datatypes::fixed_string::make("");
-    datatypes::fixed_string       location = datatypes::fixed_string::make("");
+    datatypes::fixed_string       termination{};
+    datatypes::fixed_string       location{};
     datatypes::list_elem<event>   history;
   private:
   };
