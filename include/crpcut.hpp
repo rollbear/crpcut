@@ -1358,6 +1358,7 @@ namespace crpcut {
     virtual void crpcut_run_test() = 0;
   protected:
     crpcut_test_case_base();
+    crpcut_test_case_base(const crpcut_test_case_base&) = delete;
     virtual ~crpcut_test_case_base();
   public:
     virtual crpcut_test_case_registrator& crpcut_get_reg() const = 0;
