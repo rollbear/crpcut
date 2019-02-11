@@ -760,7 +760,7 @@ namespace crpcut {
     virtual void set_phase(test_phase) = 0;
     virtual void kill() = 0;
     virtual bool crpcut_failed() const = 0;
-    virtual void set_cputime_at_start(const struct timeval&) = 0;
+    virtual void set_cputime_at_start(const timeval&) = 0;
     virtual void send_to_presentation(comm::type, size_t len, const char*) const = 0;
     virtual void set_death_note() = 0;
     virtual void activate_reader() = 0;
