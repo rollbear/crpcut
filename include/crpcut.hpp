@@ -809,8 +809,7 @@ namespace crpcut {
                              public data_reader
     {
     public:
-      rfile_descriptor();
-      explicit rfile_descriptor(int fd);
+      explicit rfile_descriptor(int fd = -1) : file_descriptor(fd) {}
       virtual ssize_t read(void *buff, size_t len) const;
     };
 

@@ -44,18 +44,6 @@ namespace crpcut {
       fd_ = -1;
     }
 
-    rfile_descriptor
-    ::rfile_descriptor(int fd)
-      : file_descriptor(fd)
-    {
-    }
-
-    rfile_descriptor
-    ::rfile_descriptor()
-      : file_descriptor()
-    {
-    }
-
     ssize_t
     rfile_descriptor
     ::read(void *buff, size_t len) const
