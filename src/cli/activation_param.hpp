@@ -44,7 +44,7 @@ namespace crpcut {
     protected:
       bool match_value(const char *, bool is_short) override;
     private:
-      bool active_;
+      bool active_ = false;
     };
 
     template <size_t N>
@@ -52,8 +52,7 @@ namespace crpcut {
     ::activation_param(char short_form, const char (&long_form)[N],
                        const char *param_description,
                        param_list &root)
-      : param(short_form, long_form, param_description, root),
-        active_(false)
+      : param(short_form, long_form, param_description, root)
     {
     }
   }
