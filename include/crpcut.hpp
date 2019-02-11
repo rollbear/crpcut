@@ -685,7 +685,7 @@ namespace crpcut {
       using oabuf<charT, traits>::begin;
       using oabuf<charT, traits>::end;
       std::size_t size() const { return size_t(end() - begin()); }
-      operator datatypes::fixed_string() const;
+      explicit operator datatypes::fixed_string() const;
     };
 
     template <typename charT, class traits = std::char_traits<charT> >
