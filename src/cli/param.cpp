@@ -131,20 +131,22 @@ namespace crpcut {
     ::match_all(const char *const *cli_arg)
     {
       assert(cli_arg);
+      auto match_arg = [this](auto* to_match) {
+        constexpr const char *const *end = nullptr;
+        for (auto* p = first(); p; p = next_after(p))
+        {
+          if (auto arg = p->match(to_match))
+          {
+            return arg;
+          }
+        }
+        return end;
+      };
       while (*cli_arg)
         {
-          param *p = first();
-          while (p)
-            {
-              const char *const *arg = p->match(cli_arg);
-              if (arg)
-                {
-                  cli_arg = arg;
-                  break;
-                }
-              p = next_after(p);
-            }
-          if (!p) break;
+          auto next = match_arg(cli_arg);
+          if (!next) break;
+          cli_arg = next;
         }
       return cli_arg;
     }
