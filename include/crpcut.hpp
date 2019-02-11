@@ -1454,7 +1454,6 @@ namespace crpcut {
     crpcut_test_monitor *get_monitor() const;
     void close() override;
     void unregister();
-    virtual ~fdreader() { }
   protected:
     explicit fdreader(crpcut_test_monitor *r, int fd = -1);
     void set_fd(int fd, poll<fdreader> *poller);
