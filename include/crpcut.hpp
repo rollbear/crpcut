@@ -1471,7 +1471,7 @@ namespace crpcut {
     explicit reader(crpcut_test_monitor *r, int fd = -1);
     using fdreader::set_fd;
   private:
-    virtual bool do_read_data();
+    bool do_read_data() override;
   };
 
   class report_reader : public fdreader
@@ -1482,7 +1482,7 @@ namespace crpcut {
   private:
     void set_timeout(void *buff, size_t len);
     void cancel_timeout();
-    virtual bool do_read_data();
+    bool do_read_data() override;
   };
 
   class timeboxed
