@@ -669,6 +669,7 @@ namespace crpcut {
       using parent =  std::basic_streambuf<charT, traits>;
     public:
       oabuf(charT *begin_, charT *end_);
+      oabuf(const oabuf&) = delete;
       const charT *begin() const { return parent::pbase(); }
       const charT *end() const { return parent::pptr(); }
     };
