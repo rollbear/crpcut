@@ -74,7 +74,7 @@ namespace crpcut {
     class param::exception : public std::exception
     {
     public:
-      exception(std::string s) : s_(s) {}
+      exception(std::string s) : s_(std::move(s)) {}
       const char *what() const noexcept { return s_.c_str(); }
     private:
       std::string s_;
