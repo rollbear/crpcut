@@ -1305,7 +1305,7 @@ namespace crpcut {
       class enforcer<realtime, timeout_us> : public monotonic_enforcer
       {
       public:
-        enforcer(const crpcut_test_monitor*);
+        explicit enforcer(const crpcut_test_monitor*);
       };
 
     } // namespace timeout
