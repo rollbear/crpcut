@@ -791,8 +791,7 @@ namespace crpcut {
       }
     protected:
       int get_fd() const { return fd_; }
-      file_descriptor();
-      explicit file_descriptor(int fd);
+      explicit file_descriptor(int fd = -1);
       virtual ~file_descriptor();
       int fd_;
     };

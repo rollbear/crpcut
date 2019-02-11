@@ -30,11 +30,6 @@
 namespace crpcut {
   namespace comm {
 
-    file_descriptor::file_descriptor()
-    : fd_(-1)
-    {
-    }
-
     file_descriptor::file_descriptor(int fd)
     : fd_(fd)
     {
