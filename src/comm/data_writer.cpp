@@ -29,10 +29,7 @@
 
 namespace crpcut {
   namespace comm {
-    data_writer
-    ::~data_writer()
-    {
-    }
+    data_writer::~data_writer() = default;
 
     const data_writer &
     data_writer
