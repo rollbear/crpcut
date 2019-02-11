@@ -3308,7 +3308,7 @@ extern crpcut::namespace_info crpcut_current_namespace;
     friend class crpcut::policies::dependencies::enforcer<test_case_name>; \
     friend class crpcut::crpcut_test_case_registrator;                  \
     using crpcut_test_class = test_case_name;                           \
-    test_case_name() {}                                                 \
+    test_case_name() = default;                                         \
     virtual void crpcut_run_test()                                      \
     {                                                                   \
       crpcut_realtime_enforcer rt(&crpcut_get_reg());                   \
