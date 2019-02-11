@@ -789,6 +789,7 @@ namespace crpcut {
       {
         std::swap(fd_, f.fd_);
       }
+      file_descriptor(const file_descriptor&) = delete;
     protected:
       int get_fd() const { return fd_; }
       explicit file_descriptor(int fd = -1) : fd_{fd} {}
