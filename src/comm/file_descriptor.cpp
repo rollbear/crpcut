@@ -51,19 +51,6 @@ namespace crpcut {
       return wrapped::read(fd_, buff, len);
     }
 
-
-    wfile_descriptor
-    ::wfile_descriptor(int fd)
-    : file_descriptor(fd)
-    {
-    }
-
-    wfile_descriptor
-    ::wfile_descriptor()
-    : file_descriptor()
-    {
-    }
-
     ssize_t
     wfile_descriptor
     ::write(const void *buff, size_t len) const

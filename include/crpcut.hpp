@@ -831,8 +831,7 @@ namespace crpcut {
                              public data_writer
     {
     public:
-      wfile_descriptor();
-      explicit wfile_descriptor(int fd);
+      explicit wfile_descriptor(int fd = -1) : file_descriptor(fd) {}
       virtual ssize_t write(const void *buff, size_t len) const;
     };
 
