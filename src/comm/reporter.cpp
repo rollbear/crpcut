@@ -34,9 +34,7 @@ namespace crpcut {
   namespace comm {
     reporter report;
 
-    reporter::~reporter()
-    {
-    }
+    reporter::~reporter() = default;
 
     void reporter::send_message(type t, const char *msg, size_t len, datatypes::fixed_string location) const
     {
