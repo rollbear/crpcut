@@ -2853,10 +2853,9 @@ namespace crpcut {
   class ulps_diff
   {
   public:
-    ulps_diff(unsigned max, inf_in_ulps_diff inf_val= exclude_inf)
+    explicit ulps_diff(unsigned max, inf_in_ulps_diff inf_val= exclude_inf)
       : max_diff(max),
-        inf(inf_val),
-        diff()
+        inf(inf_val)
     {
     }
     template <typename T>
@@ -2897,7 +2896,7 @@ namespace crpcut {
 
     uint64_t         max_diff;
     inf_in_ulps_diff inf;
-    uint64_t         diff;
+    uint64_t         diff = 0;
   };
   template <typename T>
   struct match_traits<relative_diff, T>
