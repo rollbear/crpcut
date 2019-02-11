@@ -32,11 +32,6 @@ namespace crpcut {
   {
   }
 
-  timeboxed::timeboxed()
-    : crpcut_absolute_deadline_us_(0U),
-      crpcut_deadline_set_(false)
-  {
-  }
 
   void timeboxed::set_deadline(unsigned long absolute_us)
   {
@@ -49,11 +44,6 @@ namespace crpcut {
   {
     assert(crpcut_deadline_set_);
     crpcut_deadline_set_ = false;
-  }
-
-  bool timeboxed::deadline_is_set() const
-  {
-    return crpcut_deadline_set_;
   }
 
   unsigned long timeboxed::absolute_deadline() const

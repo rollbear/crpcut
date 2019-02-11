@@ -1491,15 +1491,15 @@ namespace crpcut {
     virtual ~timeboxed();
     void set_deadline(unsigned long absolute_us);
     void clear_deadline();
-    bool deadline_is_set() const;
+    bool deadline_is_set() const { return crpcut_deadline_set_;}
     virtual void kill() = 0;
     unsigned long absolute_deadline() const;
     static bool compare(const timeboxed *lh, const timeboxed *rh);
   protected:
-    timeboxed();
+    constexpr timeboxed() = default;
   private:
-    unsigned long crpcut_absolute_deadline_us_;
-    bool          crpcut_deadline_set_;
+    unsigned long crpcut_absolute_deadline_us_ = 0UL;
+    bool          crpcut_deadline_set_ = false;
   };
 
   class process_control;
