@@ -2642,8 +2642,7 @@ namespace crpcut {
     reporter::read(T& t) const
     {
       assert(reader_);
-      void *p = static_cast<void*>(&t);
-      reader_->read_loop(p, sizeof(T));
+      reader_->read_loop(std::addressof(t), sizeof(T));
     }
 
     template <comm::type type> template <size_t N>
