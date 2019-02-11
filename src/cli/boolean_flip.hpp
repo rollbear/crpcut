@@ -45,8 +45,8 @@ namespace crpcut {
     protected:
       bool match_value(const char *, bool) override;
     private:
-      enum { uninitialized, flipped, set_false, set_true  } value_;
-      bool seen_;
+      enum { uninitialized, flipped, set_false, set_true  } value_ = uninitialized;
+      bool seen_ = false;
     };
 
     template <size_t N>
@@ -56,9 +56,7 @@ namespace crpcut {
     : param(short_form, long_form,
             "boolean value", param::optional,
             param_description,
-            root),
-      value_(uninitialized),
-      seen_(false)
+            root)
     {
     }
 
