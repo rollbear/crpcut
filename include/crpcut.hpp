@@ -1270,6 +1270,7 @@ namespace crpcut {
       public:
         cputime_enforcer(unsigned long              timeout_us,
                          const crpcut_test_monitor *current_test);
+        cputime_enforcer(const cputime_enforcer&) = delete;
         ~cputime_enforcer();
       private:
 
@@ -1283,6 +1284,7 @@ namespace crpcut {
       protected:
         monotonic_enforcer(unsigned long              timeout_us,
                            const crpcut_test_monitor *current_test);
+        monotonic_enforcer(const monotonic_enforcer&) = delete;
         ~monotonic_enforcer();
       private:
 
