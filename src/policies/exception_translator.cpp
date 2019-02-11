@@ -46,23 +46,6 @@ namespace crpcut {
 
     }
 
-    crpcut_exception_translator
-    ::crpcut_exception_translator(int)
-    {
-    }
-
-    crpcut_exception_translator
-    ::crpcut_exception_translator(crpcut_exception_translator &r)
-      : datatypes::list_elem<crpcut_exception_translator>()
-    {
-      link_before(r);
-    }
-
-    crpcut_exception_translator
-    ::~crpcut_exception_translator()
-    {
-    }
-
     std::string
     crpcut_exception_translator
     ::do_try_all()

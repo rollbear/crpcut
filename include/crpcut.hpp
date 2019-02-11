@@ -958,12 +958,18 @@ namespace crpcut {
     public:
       static std::string try_all();
     protected:
-      explicit crpcut_exception_translator(crpcut_exception_translator &
-                                  r  = root_object());
+      explicit crpcut_exception_translator(int) {}
+      explicit
+      crpcut_exception_translator(crpcut_exception_translator &
+                                  r  = root_object())
+      {
+        link_before(r);
+      }
       crpcut_exception_translator(const crpcut_exception_translator&) = delete;
       crpcut_exception_translator& operator=(const crpcut_exception_translator&) = delete;
-      ~crpcut_exception_translator();
-      explicit crpcut_exception_translator(int);
+
+      ~crpcut_exception_translator() = default;
+
       std::string do_try_all();
       static crpcut_exception_translator& root_object();
     private:
