@@ -43,7 +43,7 @@ namespace crpcut {
       bool get_value(bool b) const;
       explicit operator bool() const { return seen_; }
     protected:
-      virtual bool match_value(const char *, bool);
+      bool match_value(const char *, bool) override;
     private:
       enum { uninitialized, flipped, set_false, set_true  } value_;
       bool seen_;
