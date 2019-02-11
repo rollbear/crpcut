@@ -1950,6 +1950,7 @@ namespace crpcut {
   {
   public:
     template <size_t N>
+    explicit
     bool_tester(const char               (&loc)[N],
                 comm::reporter            &reporter = comm::report,
                 const crpcut_test_monitor *mon = crpcut_test_monitor::current_test())
