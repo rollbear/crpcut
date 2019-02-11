@@ -31,10 +31,9 @@ namespace {
   template <typename T>
   void check_result(const T& t, const char *msg = nullptr)
   {
-    bool r = t;
-    ASSERT_TRUE(r != bool(msg));
-    std::ostringstream os;
+    ASSERT_TRUE(bool{t} != bool{msg});
     if (msg) {
+      std::ostringstream os;
       os << t;
       ASSERT_TRUE(os.str() == msg);
     }

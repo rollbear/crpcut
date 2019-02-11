@@ -2010,7 +2010,6 @@ namespace crpcut {
 
   class collate_result
   {
-    class comparator;
     const char *r;
     const std::string intl;
     std::locale locale;
@@ -2018,8 +2017,7 @@ namespace crpcut {
     collate_result(const char *refstr, std::string comp, const std::locale& l);
   public:
     collate_result(const collate_result&) = default;
-    operator const comparator*() const;
-    const comparator* operator()() const;
+    explicit operator bool () const { return !r;}
     collate_result& set_lh();
     friend
     std::ostream &operator<<(std::ostream& os, const collate_result &obj);

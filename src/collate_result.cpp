@@ -36,19 +36,6 @@ namespace crpcut {
   {
   }
 
-  collate_result
-  ::operator const collate_result::comparator*() const
-  {
-    return operator()();
-  }
-
-  const collate_result::comparator*
-  collate_result
-  ::operator()() const
-  {
-    return reinterpret_cast<const comparator*>(r ? nullptr : this);
-  }
-
   collate_result&
   collate_result
   ::set_lh()
