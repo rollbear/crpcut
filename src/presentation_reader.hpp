@@ -48,10 +48,10 @@ namespace crpcut {
                         bool                    verbose,
                         const char             *working_dir,
                         registrator_list       &reg);
-    virtual ~presentation_reader();
-    virtual bool read();
-    virtual bool write();
-    virtual void exception();
+    ~presentation_reader() override;
+    bool read() override;
+    bool write() override;
+    void exception() override;
     unsigned num_failed() const;
   private:
     test_case_result *find_result_for(pid_t);
