@@ -63,7 +63,7 @@ namespace crpcut {
       void blocked_test(tag::importance i, std::string name) override;
     private:
       void tag_summary(const tag& t);
-      virtual datatypes::fixed_string escape(char c) const;
+      datatypes::fixed_string escape(char c) const override;
       void make_closed();
 
       std::size_t          non_critical_fail_sum_ = 0U;
