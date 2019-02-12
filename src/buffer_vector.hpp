@@ -61,7 +61,7 @@ namespace crpcut {
     void *address(size_t idx) const;
     void *storage_;
     std::size_t capacity_;
-    std::size_t size_;
+    std::size_t size_ = 0;
   };
 
   template <typename T>
@@ -73,8 +73,7 @@ namespace crpcut {
   template <typename T>
   buffer_vector<T>::buffer_vector(void *storage, std::size_t capacity)
   : storage_(storage),
-    capacity_(capacity),
-    size_(0)
+    capacity_(capacity)
   {
     assert(storage);
     assert(capacity);
