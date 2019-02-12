@@ -65,7 +65,6 @@ namespace crpcut {
       void nonempty_dir(const char *s) override;
       void blocked_test(tag::importance i, std::string name) override;
     private:
-      void tag_summary(const tag& t) const;
       static const text_modifier& default_text_modifier();
       void display_tag_list_header();
 
