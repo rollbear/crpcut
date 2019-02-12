@@ -42,24 +42,23 @@ namespace crpcut {
                     std::size_t,
                     std::size_t);
 
-      ~nil_formatter();
-      virtual void begin_case(std::string   name,
-                              bool          result,
-                              bool          critical,
-                              unsigned long duration_us);
-      virtual void end_case();
-      virtual void terminate(test_phase              phase,
-                             datatypes::fixed_string msg,
-                             datatypes::fixed_string location,
-                             std::string             dirname);
-      virtual void print(datatypes::fixed_string label,
-                         datatypes::fixed_string data,
-                         datatypes::fixed_string location);
-      virtual void statistics(unsigned num_run,
-                              unsigned num_failed);
-      virtual void nonempty_dir(const char *s);
-      virtual void blocked_test(tag::importance i, std::string name);
-    private:
+      ~nil_formatter() override;
+      void begin_case(std::string   name,
+                      bool          result,
+                      bool          critical,
+                      unsigned long duration_us) override;
+      void end_case() override;
+      void terminate(test_phase              phase,
+                     datatypes::fixed_string msg,
+                     datatypes::fixed_string location,
+                     std::string             dirname) override;
+      void print(datatypes::fixed_string label,
+                 datatypes::fixed_string data,
+                 datatypes::fixed_string location) override;
+      void statistics(unsigned num_run,
+                      unsigned num_failed) override;
+      void nonempty_dir(const char *s) override;
+      void blocked_test(tag::importance i, std::string name) override;
     };
   }
 }

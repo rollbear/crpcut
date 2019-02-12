@@ -26,7 +26,6 @@
 
 #include "nil_formatter.hpp"
 
-
 namespace crpcut {
   namespace output {
     using datatypes::fixed_string;
