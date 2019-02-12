@@ -54,7 +54,6 @@ namespace crpcut {
     T* end();
     const T* end() const;
   private:
-    buffer_vector();
     buffer_vector(const buffer_vector &);
     buffer_vector& operator=(const buffer_vector&);
     void *address(size_t idx) const;
