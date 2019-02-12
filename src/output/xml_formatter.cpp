@@ -60,10 +60,6 @@ namespace crpcut {
       : writer(buffer,
                "UTF-8",
                xml_replacement(get_illegal_char_representation())),
-        non_critical_fail_sum_(0),
-        last_closed_(false),
-        blocked_tests_(false),
-        tag_summary_(false),
         tags_(tags),
         num_registered_(num_registered),
         num_selected_(num_selected)
@@ -120,11 +116,6 @@ namespace crpcut {
       write("\">\n");
     }
 
-
-    xml_formatter
-    ::~xml_formatter()
-    {
-    }
 
     datatypes::fixed_string
     xml_formatter

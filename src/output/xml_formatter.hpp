@@ -44,7 +44,7 @@ namespace crpcut {
                     const tag_list_root &tags,
                     std::size_t          num_registered,
                     std::size_t          num_selected);
-      ~xml_formatter() override;
+      ~xml_formatter() override = default;
       void begin_case(std::string   name,
                       bool          result,
                       bool          critical,
@@ -66,10 +66,10 @@ namespace crpcut {
       virtual datatypes::fixed_string escape(char c) const;
       void make_closed();
 
-      std::size_t          non_critical_fail_sum_;
-      bool                 last_closed_;
-      bool                 blocked_tests_;
-      bool                 tag_summary_;
+      std::size_t          non_critical_fail_sum_ = 0U;
+      bool                 last_closed_ = false;
+      bool                 blocked_tests_ = false;
+      bool                 tag_summary_ = false;
       const tag_list_root &tags_;
       std::size_t          num_registered_;
       std::size_t          num_selected_;
