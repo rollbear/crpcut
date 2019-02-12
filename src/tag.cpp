@@ -27,24 +27,11 @@
 
 #include <crpcut.hpp>
 namespace crpcut {
-  tag::tag()
-    : failed_(0),
-      passed_(0),
-      importance_(critical)
-  {
-  }
 
   tag::tag(size_t len, tag_list_root *list)
-    : failed_(0),
-      passed_(0),
-      importance_(critical)
   {
     link_before(*list);
     list->store_name_length(len);
-  }
-
-  tag::~tag()
-  {
   }
 
   void tag::fail()

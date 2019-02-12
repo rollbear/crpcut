@@ -549,10 +549,9 @@ namespace crpcut {
   class tag : public datatypes::list_elem<tag>
   {
     friend class tag_list_root;
-    tag();
+    tag() = default;
   protected:
     tag(size_t len, tag_list_root *list);
-    ~tag() override; // make eclipse happy
   public:
     enum importance { CRPCUT_TEST_IMPORTANCE(CRPCUT_VERBATIM_FIRST) };
     virtual void fail();
@@ -563,9 +562,9 @@ namespace crpcut {
     virtual void set_importance(importance i);
     virtual importance get_importance() const;
   private:
-    size_t failed_;
-    size_t passed_;
-    importance importance_;
+    size_t failed_ = 0;
+    size_t passed_ = 0;
+    importance importance_ = critical;
   };
 
   std::ostream &operator<<(std::ostream &os, crpcut::tag::importance i);
