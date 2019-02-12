@@ -50,7 +50,7 @@ namespace crpcut {
     {
       struct has_fd
       {
-        has_fd(int num) : fd_(num) {}
+        explicit has_fd(int num) : fd_(num) {}
         bool operator()(const fdinfo& i) const { return fd_ == i.fd; }
       private:
         int fd_;
