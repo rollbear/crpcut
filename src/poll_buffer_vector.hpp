@@ -33,6 +33,8 @@
 #include "poll.hpp"
 #include "buffer_vector.hpp"
 
+#include <algorithm>
+
 extern "C"
 {
 #  include <errno.h>
@@ -112,13 +114,9 @@ namespace crpcut {
   poll_buffer_vector<T>
   ::do_del_fd(int fd)
   {
-    fdinfo *i = nullptr;
-    for (size_t idx = 0; idx < access.size(); ++idx)
-      {
-        fdinfo &info = access.at(idx);
-        if (info.fd == fd) { i = &info; break; }
-      }
-    assert(i && "fd not found");
+    auto i = std::find_if(access.begin(), access.end(),
+      [fd](const fdinfo& info) { return info.fd == fd;});
+    assert(i != access.end() && "fd not found");
     *i = access.back();
     access.pop_back();
     if (   FD_ISSET(fd, &this->xset)
