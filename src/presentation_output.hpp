@@ -46,15 +46,15 @@ namespace crpcut {
                         int             fd,
                         posix_write    &w = default_write());
     presentation_output(const presentation_output&) = delete;
-    virtual ~presentation_output();
+    ~presentation_output() override;
 
     presentation_output& operator=(const presentation_output&) = delete;
 
-    virtual bool read();
-    virtual bool write();
-    virtual void exception() { enable(false); }
-    virtual void enable(bool val);
-    bool         enabled() const;
+    bool read() override;
+    bool write() override;
+    void exception() override { enable(false); }
+    void enable(bool val);
+    bool enabled() const;
   private:
     static posix_write& default_write();
     output::buffer &buffer_;
