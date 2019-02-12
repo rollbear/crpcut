@@ -47,12 +47,10 @@ namespace crpcut {
     if (!specification) return;
     tag_filter filter(specification);
     filter.assert_names(*this);
-    for (tag_list::iterator ti = begin();
-         ti != end();
-         ++ti)
+    for (auto& t : *this)
       {
-        tag::importance i = filter.lookup(ti->get_name());
-        ti->set_importance(i);
+        tag::importance i = filter.lookup(t.get_name());
+        t.set_importance(i);
       }
   }
 }
