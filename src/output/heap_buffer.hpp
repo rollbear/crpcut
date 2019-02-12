@@ -35,17 +35,17 @@ namespace crpcut {
     {
     public:
       heap_buffer() = default;
+      heap_buffer(const buffer&) = delete;
       ~heap_buffer() override;
+      heap_buffer& operator=(const heap_buffer&) = delete;
+
       std::pair<const char*, std::size_t> get_buffer() const override;
       void advance() override;
       ssize_t write(const char *buff, std::size_t len) override;
       bool is_empty() const override;
     private:
-      heap_buffer(const buffer&);
-      heap_buffer& operator=(const heap_buffer&);
 
       struct block;
-
 
       block  *head_ = nullptr;
       block **current_ = &head_;
