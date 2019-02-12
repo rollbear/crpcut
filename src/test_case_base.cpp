@@ -28,13 +28,6 @@
 
 namespace crpcut {
 
-  crpcut_test_case_base
-  ::crpcut_test_case_base()
-    :
-    crpcut_finished(false)
-  {
-  }
-
   void
   crpcut_test_case_base
   ::crpcut_test_finished()

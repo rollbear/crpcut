@@ -1361,7 +1361,7 @@ namespace crpcut {
   {
     virtual void crpcut_run_test() = 0;
   protected:
-    crpcut_test_case_base();
+    crpcut_test_case_base() = default;
     crpcut_test_case_base(const crpcut_test_case_base&) = delete;
     virtual ~crpcut_test_case_base();
   public:
@@ -1371,7 +1371,7 @@ namespace crpcut {
     void crpcut_test_finished();
   private:
 
-    bool crpcut_finished;
+    bool crpcut_finished = false;
   };
 
 
