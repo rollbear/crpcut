@@ -65,14 +65,13 @@ namespace {
       assert(!crpcut::use_local_heap);
       ++crpcut::use_local_heap;
     }
+    global_heap_disabler(const global_heap_disabler&) = delete;
     ~global_heap_disabler()
     {
       assert(crpcut::use_local_heap);
       --crpcut::use_local_heap;
     }
-  private:
-    global_heap_disabler(const global_heap_disabler&);
-    global_heap_disabler& operator=(const global_heap_disabler);
+    global_heap_disabler& operator=(const global_heap_disabler) = delete;
   };
 }
 namespace crpcut {
