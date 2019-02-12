@@ -196,12 +196,8 @@ namespace crpcut {
       const std::size_t ws_len = 1 + 8 + 8 + 8 + 1 + 2;
       const std::size_t buff_len = tag_space + dec_space + ws_len;
       char *buffer = static_cast<char*>(alloca(buff_len));
-      tag_list_root::const_iterator const end = tags_.end();
-      for (tag_list_root::const_iterator i = tags_.begin();
-           i != end;
-           ++i)
+      for (auto const& t : tags_)
       {
-        const tag &t = *i;
         const bool critical = t.get_importance() == tag::critical;
 
         sum_passed[critical] += t.num_passed();
