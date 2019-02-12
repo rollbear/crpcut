@@ -2021,7 +2021,6 @@ namespace crpcut {
     enum { left, right } side = right;
     collate_result(const char *refstr, std::string comp, const std::locale& l);
   public:
-    collate_result(const collate_result&) = default;
     explicit operator bool () const { return !r;}
     collate_result& set_lh() { side = left; return *this;}
     friend
