@@ -37,12 +37,10 @@ namespace crpcut {
   public:
     using buffer_vector<unsigned>::space_for;
     working_dir_allocator(void *storage, std::size_t capacity);
+
     unsigned allocate();
     void free(unsigned);
   private:
-    working_dir_allocator();
-    working_dir_allocator(const working_dir_allocator&);
-    working_dir_allocator& operator=(const working_dir_allocator&);
 
     unsigned first_free_;
   };
