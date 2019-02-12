@@ -38,7 +38,7 @@ namespace crpcut {
       enum type { r = 1, w = 2, rw = 3 };
     };
     class descriptor;
-    poll();
+    poll() = default;
     virtual ~poll();
     template <typename U>
     void add_fd(comm::file_descriptor &fd, U *data, int flags = polltype::r)
@@ -96,11 +96,6 @@ namespace crpcut {
     int mode_;
   };
 
-  template <typename T>
-  poll<T>
-  ::poll()
-  {
-  }
 
   template <typename T>
   poll<T>
