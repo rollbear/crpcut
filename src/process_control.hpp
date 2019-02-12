@@ -40,7 +40,11 @@ namespace crpcut {
   class process_control
   {
   public:
+    process_control() = default;
+    process_control(const process_control&) = delete;
     virtual ~process_control();
+    process_control& operator=(const process_control&) = delete;
+
     virtual int getrusage(int, struct rusage *);
     virtual int killpg(int pid, int signo);
     virtual int waitid(idtype_t t, id_t i, siginfo_t *si, int o);
