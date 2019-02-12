@@ -72,8 +72,8 @@ namespace crpcut {
     heap_buffer
     ::get_buffer() const
     {
-      static const char *null = nullptr;
-      static const std::size_t zero = 0;
+      constexpr const char *null = nullptr;
+      constexpr const std::size_t zero = 0;
 
       if (!head_) return std::make_pair(null, zero);
 
