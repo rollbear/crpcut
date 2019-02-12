@@ -39,8 +39,6 @@ namespace crpcut {
     : buffer_(buffer),
       poller_(poller),
       fd_(fd),
-      pos_(0),
-      is_enabled_(false),
       write_(w)
   {
   }

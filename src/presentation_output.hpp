@@ -56,8 +56,8 @@ namespace crpcut {
     output::buffer &buffer_;
     poll<io>       &poller_;
     int             fd_;
-    std::size_t     pos_;
-    bool            is_enabled_;
+    std::size_t     pos_ = 0U;
+    bool            is_enabled_ = false;
     posix_write    &write_;
   };
 
