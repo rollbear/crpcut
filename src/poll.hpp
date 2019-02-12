@@ -39,7 +39,11 @@ namespace crpcut {
     };
     class descriptor;
     poll() = default;
+    poll(const poll&) = delete;
     virtual ~poll();
+
+    poll& operator=(const poll&) = delete;
+
     template <typename U>
     void add_fd(comm::file_descriptor &fd, U *data, int flags = polltype::r)
     {
