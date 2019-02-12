@@ -141,12 +141,12 @@ namespace crpcut {
     if (this->pending_fds == 0)
       {
         int maxfd = 0;
-        for (size_t i = 0; i < access.size(); ++i)
+        for (auto& d : access)
           {
-            int fd = this->access.at(i).fd;
+            int fd = d.fd;
             if (fd > maxfd) maxfd = fd;
-            if (access.at(i).mode & polltype::r) FD_SET(fd, &rset);
-            if (access.at(i).mode & polltype::w) FD_SET(fd, &wset);
+            if (d.mode & polltype::r) FD_SET(fd, &rset);
+            if (d.mode & polltype::w) FD_SET(fd, &wset);
             FD_SET(fd, &xset);
           }
         struct timeval tv = { timeout_ms / 1000, (timeout_ms % 1000) * 1000 };
