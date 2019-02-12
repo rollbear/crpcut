@@ -57,8 +57,6 @@ namespace crpcut {
       summary_fmt_(summary_fmt),
       working_dir_(working_dir),
       verbose_(verbose),
-      num_run_(0),
-      num_failed_(0),
       reg_(reg)
   {
     poller_.add_fd(fd_, this);

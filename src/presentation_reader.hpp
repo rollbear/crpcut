@@ -68,8 +68,8 @@ namespace crpcut {
     output::formatter                      &summary_fmt_;
     const char                             *working_dir_;
     bool                                    verbose_;
-    unsigned                                num_run_;
-    unsigned                                num_failed_;
+    unsigned                                num_run_ = 0U;
+    unsigned                                num_failed_ = 0U;
     registrator_list                       &reg_;
   };
 }
