@@ -609,7 +609,6 @@ namespace crpcut {
   template <>
   class crpcut_tag_info<crpcut_none> : public tag_list_root
   {
-    crpcut_tag_info();
     virtual datatypes::fixed_string get_name() const;
   public:
     static tag_list_root& obj();

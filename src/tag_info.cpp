@@ -27,10 +27,6 @@
 #include <crpcut.hpp>
 
 namespace crpcut {
-  crpcut_tag_info<crpcut::crpcut_none>
-  ::crpcut_tag_info()
-  {
-  }
 
   datatypes::fixed_string
   crpcut_tag_info<crpcut_none>
