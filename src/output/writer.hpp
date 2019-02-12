@@ -34,15 +34,10 @@ extern "C"
 #  include <iconv.h>
 }
 #include <crpcut.hpp>
+#include <utility>
+
 namespace crpcut {
   namespace output {
-    template <bool b>
-    struct enable_if;
-    template <>
-    struct enable_if<true>
-    {
-      using type = void;
-    };
 
     class buffer;
 
@@ -77,7 +72,7 @@ namespace crpcut {
       std::size_t write(const char *str, std::size_t len, type t = verbatim) const;
       template <typename T>
       std::size_t write(T val,
-                        typename enable_if<std::numeric_limits<T>::is_integer>::type * = nullptr)
+                        std::enable_if_t<std::numeric_limits<T>::is_integer>* = nullptr)
       {
         stream::toastream<std::numeric_limits<T>::digits10 + 2> o;
         o << val;
