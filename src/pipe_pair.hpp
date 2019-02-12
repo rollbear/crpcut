@@ -33,13 +33,13 @@ namespace crpcut {
   public:
     enum purpose { release_ownership, keep_ownership };
     pipe_pair(const char *purpose_msg);
+    pipe_pair(const pipe_pair&) = delete;
     ~pipe_pair();
+    pipe_pair& operator=(const pipe_pair&) = delete;
     void close();
     int for_reading(purpose p = keep_ownership);
     int for_writing(purpose p = keep_ownership);
   private:
-    pipe_pair(const pipe_pair&);
-    pipe_pair& operator=(const pipe_pair&);
     int fds[2];
   };
 }
