@@ -3217,22 +3217,30 @@ namespace crpcut {
     public:
       struct min
       {
-        static const char *name();
-        static bool busted(unsigned long now, unsigned long deadline);
+        static const char *name() { return "MIN"; }
+        static bool busted(unsigned long now, unsigned long deadline)
+        {
+          return now < deadline;
+        }
       };
       struct max
       {
-        static const char *name();
-        static bool busted(unsigned long now, unsigned long deadline);
+        static const char *name() { return "MAX"; }
+        static bool busted(unsigned long now, unsigned long deadline)
+        {
+          return now > deadline;
+        }
+
       };
       struct realtime
       {
-        static const char *name();
+        static const char *name() { return "REALTIME"; }
         static unsigned long now();
       };
       struct cputime
       {
-        static const char *name();
+        static const char *name() { return "CPUTIME"; }
+
         static unsigned long now();
       };
       explicit operator bool() const { return false; }

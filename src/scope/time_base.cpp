@@ -30,40 +30,12 @@
 namespace crpcut {
   namespace scope {
 
-    const char *time_base::min::name()
-    {
-      return "MIN";
-    }
-
-    bool time_base::min::busted(unsigned long now, unsigned long deadline)
-    {
-      return now < deadline;
-    }
-
-    const char *time_base::max::name()
-    {
-      return "MAX";
-    }
-
-    bool time_base::max::busted(unsigned long now, unsigned long deadline)
-    {
-      return now > deadline;
-    }
-
-    const char *time_base::realtime::name()
-    {
-      return "REALTIME";
-    }
 
     unsigned long time_base::realtime::now()
     {
       return clocks::monotonic::timestamp_absolute();
     }
 
-    const char *time_base::cputime::name()
-    {
-      return "CPUTIME";
-    }
     unsigned long time_base::cputime::now()
     {
       return clocks::cputime::timestamp_absolute();
