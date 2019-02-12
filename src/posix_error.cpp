@@ -67,7 +67,7 @@ namespace crpcut {
   }
 
   posix_error
-  ::~posix_error() noexcept
+  ::~posix_error()
   {
     wrapped::free(msg_);
   }

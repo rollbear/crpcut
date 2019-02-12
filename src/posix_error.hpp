@@ -35,7 +35,7 @@ namespace crpcut {
   public:
     posix_error(int e, const char *msg);
     posix_error(posix_error &&e);
-    ~posix_error() noexcept;
+    ~posix_error();
     virtual const char *what() const noexcept;
     int get_errno() const { return e_; }
   private:
