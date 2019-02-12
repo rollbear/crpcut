@@ -164,9 +164,9 @@ namespace crpcut {
             break;
           }
       }
-    for (size_t j = 0; j < access.size(); ++j)
+    for (auto& d : access)
       {
-        int fd = access.at(j).fd;
+        int fd = d.fd;
         int mode = 0;
         if (FD_ISSET(fd, &rset))
           {
@@ -186,7 +186,7 @@ namespace crpcut {
         if (mode)
           {
             --this->pending_fds;
-            return descriptor(static_cast<T*>(access.at(j).ptr), mode);
+            return descriptor(static_cast<T*>(d.ptr), mode);
           }
       }
     assert("no matching fd" == nullptr);
