@@ -80,12 +80,12 @@ namespace crpcut {
       return buffer_vector<fdinfo>::space_for(capacity);
     }
     poll_buffer_vector(void *p, std::size_t capacity);
-    virtual ~poll_buffer_vector();
+    ~poll_buffer_vector() override;
   private:
-    virtual void do_add_fd(int fd, T* data, int flags = polltype::r);
-    virtual void do_del_fd(int fd);
-    virtual descriptor do_wait(int timeout_ms);
-    virtual size_t do_num_fds() const;
+    void do_add_fd(int fd, T* data, int flags = polltype::r) override;
+    void do_del_fd(int fd) override;
+    descriptor do_wait(int timeout_ms) override;
+    size_t do_num_fds() const override;
   };
 
   template <typename T>
