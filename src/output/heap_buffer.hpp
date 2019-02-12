@@ -35,11 +35,11 @@ namespace crpcut {
     {
     public:
       heap_buffer() = default;
-      ~heap_buffer();
-      virtual std::pair<const char*, std::size_t> get_buffer() const;
-      virtual void advance();
-      virtual ssize_t write(const char *buff, std::size_t len);
-      virtual bool is_empty() const;
+      ~heap_buffer() override;
+      std::pair<const char*, std::size_t> get_buffer() const override;
+      void advance() override;
+      ssize_t write(const char *buff, std::size_t len) override;
+      bool is_empty() const override;
     private:
       heap_buffer(const buffer&);
       heap_buffer& operator=(const heap_buffer&);
