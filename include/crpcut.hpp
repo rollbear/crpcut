@@ -572,7 +572,7 @@ namespace crpcut {
   {
     using tag_list_type = datatypes::list_elem<tag>;
   public:
-    tag_list_root() : longest_tag_name_(0), list_() { link_after(list_);}
+    tag_list_root() { link_after(list_);}
     virtual size_t longest_tag_name() const { return longest_tag_name_; }
     void store_name_length(size_t n) { longest_tag_name_ = n; }
     template <typename T>
@@ -599,7 +599,7 @@ namespace crpcut {
     void print_to(std::ostream &) const;
     void configure_importance(const char *specification);
   private:
-    size_t        longest_tag_name_;
+    size_t        longest_tag_name_ = 0;
     tag_list_type list_;
   };
 
