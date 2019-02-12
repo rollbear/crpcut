@@ -35,10 +35,9 @@ namespace crpcut {
   ::working_dir_allocator(void *storage, std::size_t capacity)
   : buffer_vector<unsigned>(storage, capacity)
   {
-    unsigned num = 0U;
-    for (std::size_t i = 0; i < capacity - 1U; ++i)
+    for (unsigned i = 1; i < capacity; ++i)
       {
-        push_back(++num);
+        push_back(i);
       }
     push_back(~0U);
   }
