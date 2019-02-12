@@ -80,9 +80,9 @@ namespace crpcut {
   class poll<T>::descriptor
   {
   public:
-    static const int readbit  = 1;
-    static const int writebit = 2;
-    static const int hupbit   = 4;
+    static constexpr int readbit  = 1;
+    static constexpr int writebit = 2;
+    static constexpr int hupbit   = 4;
     descriptor(T* t, int m) : data_(t), mode_(m) {}
     T* operator->() const { return data_; }
     T* get() const { return data_; }
