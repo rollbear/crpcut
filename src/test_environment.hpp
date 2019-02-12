@@ -43,7 +43,10 @@ namespace crpcut {
     test_environment() = default; // for test use
   public:
     test_environment(cli::interpreter *cli);
+    test_environment(const test_environment&) = delete;
     virtual ~test_environment();
+
+    test_environment& operator=(const test_environment&) = delete;
 
     virtual void set_charset(const char *set_name);
     virtual const char *get_charset() const;
