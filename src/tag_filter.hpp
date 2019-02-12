@@ -50,8 +50,7 @@ namespace crpcut {
   class tag_filter::spec_error : public std::runtime_error
   {
   public:
-    template <typename T>
-    spec_error(T t) : std::runtime_error(t) {}
+    using std::runtime_error::runtime_error;
   };
 
 }
