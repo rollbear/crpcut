@@ -61,7 +61,6 @@ namespace crpcut {
                      test_case_result        *result,
                      datatypes::fixed_string  msg,
                      datatypes::fixed_string  location);
-    void blocked_test();
     datatypes::list_elem<test_case_result>  messages_;
     poll<io>                               &poller_;
     comm::rfile_descriptor                 &fd_;
