@@ -60,7 +60,7 @@ namespace crpcut {
       void *ptr = nullptr;
     };
     buffer_vector<fdinfo> access;
-    size_t pending_fds;
+    size_t pending_fds = 0U;
     fd_set rset;
     fd_set wset;
     fd_set xset;
@@ -203,8 +203,7 @@ namespace crpcut {
   }
 
   inline polldata::polldata(void *p, std::size_t capacity)
-    : access(p, capacity),
-      pending_fds(0U)
+    : access(p, capacity)
   {
     FD_ZERO(&rset);
     FD_ZERO(&wset);
