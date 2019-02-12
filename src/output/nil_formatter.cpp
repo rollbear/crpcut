@@ -29,20 +29,6 @@
 namespace crpcut {
   namespace output {
     using datatypes::fixed_string;
-    nil_formatter
-    ::nil_formatter(buffer              &,
-                     const char          *,
-                     const char   *const *,
-                     const tag_list_root &,
-                     std::size_t,
-                     std::size_t)
-    {
-    }
-
-    nil_formatter
-    ::~nil_formatter()
-    {
-    }
 
     void
     nil_formatter

@@ -40,9 +40,9 @@ namespace crpcut {
                     const char*const*,
                     const tag_list_root &,
                     std::size_t,
-                    std::size_t);
+                    std::size_t) {}
 
-      ~nil_formatter() override;
+      ~nil_formatter() override = default;
       void begin_case(std::string   name,
                       bool          result,
                       bool          critical,
