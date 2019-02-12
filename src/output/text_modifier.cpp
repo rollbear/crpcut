@@ -27,6 +27,7 @@
 #include "text_modifier.hpp"
 #include "writer.hpp"
 #include <stdexcept>
+#include <algorithm>
 
 #define MK_F_STR(x) { #x, sizeof(#x) - 1 }
 namespace {
@@ -44,17 +45,6 @@ namespace {
 
   const crpcut::datatypes::fixed_string decorator_names[] =
     { DECORATORS(MK_F_STR) };
-
-  void zero_decorators(crpcut::datatypes::fixed_string *b,
-                       crpcut::datatypes::fixed_string *e)
-  {
-    while (b != e)
-      {
-        b->str = nullptr;
-        b->len = 0;
-        ++b;
-      }
-  }
 
   template <typename err>
   crpcut::datatypes::fixed_string get_substr(const char *&p, char separator,
@@ -74,12 +64,11 @@ namespace {
   int get_decorator(crpcut::datatypes::fixed_string s,
                     const crpcut::datatypes::fixed_string (&array)[N])
   {
-    for (const crpcut::datatypes::fixed_string *i = begin(array);
-         i != end(array);
-         ++i)
-      {
-        if (*i == s) return int(i - begin(array));
-      }
+    auto i = std::find(begin(array), end(array), s);
+    if (i != end(array))
+    {
+      return static_cast<int>(i - begin(array));
+    }
     throw err(std::string(s.str, s.len) + " is not a decorator");
   }
 }
@@ -91,7 +80,8 @@ namespace crpcut {
     ::text_modifier(const char *rules)
       : longest_decorator_len_(0)
     {
-      zero_decorators(begin(decorators), end(decorators));
+      std::fill(begin(decorators), end(decorators),
+        datatypes::fixed_string{});
       if (!rules) return;
       const char separator = *rules++;
 
