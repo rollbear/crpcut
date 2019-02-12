@@ -43,11 +43,6 @@ namespace crpcut {
   {
   }
 
-  presentation_output
-  ::~presentation_output()
-  {
-  }
-
   void
   presentation_output
   ::enable(bool val)

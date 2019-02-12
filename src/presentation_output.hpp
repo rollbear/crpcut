@@ -45,10 +45,6 @@ namespace crpcut {
                         poll<io>       &poller,
                         int             fd,
                         posix_write    &w = default_write());
-    presentation_output(const presentation_output&) = delete;
-    ~presentation_output() override;
-
-    presentation_output& operator=(const presentation_output&) = delete;
 
     bool read() override;
     bool write() override;
