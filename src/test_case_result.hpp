@@ -34,10 +34,7 @@ namespace crpcut {
   struct test_case_result : public datatypes::list_elem<test_case_result>
   {
     test_case_result(pid_t pid);
-    test_case_result(const test_case_result& r) = delete;
     ~test_case_result();
-
-    test_case_result& operator=(const test_case_result&r) = delete;
 
     pid_t                         id;
     bool                          explicit_fail = false;
@@ -48,7 +45,6 @@ namespace crpcut {
     datatypes::fixed_string       termination{};
     datatypes::fixed_string       location{};
     datatypes::list_elem<event>   history;
-  private:
   };
 }
 
