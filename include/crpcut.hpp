@@ -1491,7 +1491,11 @@ namespace crpcut {
   class timeboxed
   {
   public:
+    timeboxed(const timeboxed&) = delete;
     virtual ~timeboxed();
+
+    timeboxed& operator=(const timeboxed&) = delete;
+
     void set_deadline(unsigned long absolute_us);
     void clear_deadline();
     bool deadline_is_set() const { return crpcut_deadline_set_;}
