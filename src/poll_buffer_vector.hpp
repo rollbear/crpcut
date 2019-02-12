@@ -80,7 +80,6 @@ namespace crpcut {
       return buffer_vector<fdinfo>::space_for(capacity);
     }
     poll_buffer_vector(void *p, std::size_t capacity);
-    ~poll_buffer_vector() override;
   private:
     void do_add_fd(int fd, T* data, int flags = polltype::r) override;
     void do_del_fd(int fd) override;
@@ -94,10 +93,6 @@ namespace crpcut {
   {
   }
 
-  template <typename T>
-  inline poll_buffer_vector<T>::~poll_buffer_vector()
-  {
-  }
 
   template <typename T>
   inline
