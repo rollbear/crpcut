@@ -37,10 +37,10 @@ namespace crpcut {
   {
   public:
     sigignore(int signum);
+    sigignore(const sigignore&) = delete;
     ~sigignore();
+    sigignore& operator=(const sigignore&) = delete;
   private:
-    sigignore(const sigignore&);
-    sigignore& operator=(const sigignore&);
 
     int sig;
     sighandler_t old_handler;
