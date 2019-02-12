@@ -37,8 +37,12 @@ namespace crpcut {
   {
   public:
     static size_t space_for(size_t num_elements);
+
     buffer_vector(void *storage, std::size_t capacity);
+    buffer_vector(const buffer_vector &) = delete;
     ~buffer_vector();
+    buffer_vector& operator=(const buffer_vector&) = delete;
+
     T& at(std::size_t idx);
     const T& at(std::size_t idx) const;
     T& push_back(const T&);
@@ -54,8 +58,6 @@ namespace crpcut {
     T* end();
     const T* end() const;
   private:
-    buffer_vector(const buffer_vector &);
-    buffer_vector& operator=(const buffer_vector&);
     void *address(size_t idx) const;
     void *storage_;
     std::size_t capacity_;
