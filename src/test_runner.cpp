@@ -107,17 +107,7 @@ namespace {
 }
 
 namespace crpcut {
-  test_runner
-  ::test_runner()
-    : env_(nullptr),
-      cli_(nullptr),
-      num_pending_children_(0),
-      presenter_pipe_(-1),
-      deadlines_(nullptr),
-      working_dirs_(nullptr)
-  {
-    lib::strcpy(dirbase_, "/tmp/crpcutXXXXXX");
-  }
+
 
   test_runner
   ::~test_runner()

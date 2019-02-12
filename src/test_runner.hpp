@@ -41,7 +41,7 @@ namespace crpcut {
   class test_runner
   {
   protected:
-    test_runner();
+    test_runner() = default;
   public:
     static test_runner& obj();
     virtual ~test_runner();
@@ -68,15 +68,15 @@ namespace crpcut {
 
     friend class crpcut_test_case_registrator;
 
-    test_environment        *env_;
-    cli::interpreter        *cli_;
+    test_environment        *env_ = nullptr;
+    cli::interpreter        *cli_ = nullptr;
     struct timeval           accumulated_cputime_;
     registrator_list         reg_;
-    unsigned                 num_pending_children_;
-    comm::wfile_descriptor   presenter_pipe_;
-    deadline_monitor        *deadlines_;
-    working_dir_allocator   *working_dirs_;
-    char                     dirbase_[PATH_MAX];
+    unsigned                 num_pending_children_ = 0;
+    comm::wfile_descriptor   presenter_pipe_{-1};
+    deadline_monitor        *deadlines_= nullptr;
+    working_dir_allocator   *working_dirs_ = nullptr;
+    char                     dirbase_[PATH_MAX] = "/tmp/crpcutXXXXXX";
   };
 
 
