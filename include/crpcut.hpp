@@ -2018,7 +2018,7 @@ namespace crpcut {
     const char *r;
     const std::string intl;
     std::locale locale;
-    enum { left, right } side;
+    enum { left, right } side = right;
     collate_result(const char *refstr, std::string comp, const std::locale& l);
   public:
     collate_result(const collate_result&) = default;

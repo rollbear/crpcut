@@ -31,8 +31,7 @@ namespace crpcut {
   ::collate_result(const char *refstr, std::string comp, const std::locale& l)
     : r(refstr),
       intl(std::move(comp)),
-      locale(l),
-      side(right)
+      locale(l)
   {
   }
 
