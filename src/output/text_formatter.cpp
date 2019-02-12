@@ -74,17 +74,10 @@ namespace crpcut {
       : writer(buff,
                output_charset(os),
                illegal_replacement(get_illegal_char_representation())),
-        did_output_(false),
-        blocked_tests_(false),
         conversion_type_(os ? translated : verbatim),
         tags_(tags),
         modifier_(mod),
         num_selected_(num_selected)
-    {
-    }
-
-    text_formatter
-    ::~text_formatter()
     {
     }
 

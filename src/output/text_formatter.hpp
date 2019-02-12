@@ -47,7 +47,7 @@ namespace crpcut {
                      std::size_t          num_selected,
                      const text_modifier &mod = default_text_modifier(),
                      const char          *os = get_output_charset());
-      ~text_formatter() override;
+      ~text_formatter() override = default;
       void begin_case(std::string   name,
                       bool          result,
                       bool          critical,
@@ -69,8 +69,8 @@ namespace crpcut {
       static const text_modifier& default_text_modifier();
       void display_tag_list_header();
 
-      bool                 did_output_;
-      bool                 blocked_tests_;
+      bool                 did_output_ = false;
+      bool                 blocked_tests_ = false;
       writer::type         conversion_type_;
       const tag_list_root &tags_;
       const text_modifier &modifier_;
