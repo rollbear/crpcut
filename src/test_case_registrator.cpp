@@ -276,8 +276,7 @@ namespace crpcut {
   crpcut_test_case_registrator
   ::print_name(std::ostream &os) const
   {
-    os << *ns_info_;
-    return os << name_;
+    return os << *ns_info_ << name_;
   }
 
   void
