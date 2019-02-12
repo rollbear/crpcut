@@ -40,7 +40,7 @@ namespace crpcut {
   class test_environment
   {
   protected:
-    test_environment() : cli_(nullptr), charset_(nullptr) {} // for test use
+    test_environment() = default; // for test use
   public:
     test_environment(cli::interpreter *cli);
     virtual ~test_environment();
@@ -57,8 +57,8 @@ namespace crpcut {
     static void set_default_charset(const char *charset);
   private:
 
-    cli::interpreter       *cli_;
-    const char             *charset_;
+    cli::interpreter       *cli_ = nullptr;
+    const char             *charset_ = nullptr;
     char                    homedir_[PATH_MAX];
     static const char      *default_charset;
   };
