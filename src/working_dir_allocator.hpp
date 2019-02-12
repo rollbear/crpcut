@@ -42,7 +42,7 @@ namespace crpcut {
     void free(unsigned);
   private:
 
-    unsigned first_free_;
+    unsigned first_free_ = 0U;
   };
 }
 
