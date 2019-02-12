@@ -30,7 +30,12 @@
 namespace crpcut {
   struct io
   {
+    io() = default;
+    io(const io&) = delete;
     virtual ~io() {}
+
+    io& operator=(const io&) = delete;
+
     virtual bool read()      = 0;
     virtual bool write()     = 0;
     virtual void exception() = 0;
