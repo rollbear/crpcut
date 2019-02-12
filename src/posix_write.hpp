@@ -36,7 +36,12 @@ namespace crpcut {
   class posix_write
   {
   public:
+    posix_write() = default;
+    posix_write(const posix_write&) = delete;
     virtual ~posix_write();
+
+    posix_write& operator=(const posix_write&) = delete;
+
     ssize_t operator()(int fd, const void *p, std::size_t n)
     {
       return do_write(fd, p, n);
