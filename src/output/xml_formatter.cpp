@@ -248,13 +248,10 @@ namespace crpcut {
     ::statistics(unsigned num_run,
                  unsigned num_failed)
     {
-      tag_list_root::const_iterator const end = tags_.end();
-      for (tag_list_root::const_iterator i = tags_.begin();
-           i != end;
-           ++i)
-        {
-          tag_summary(*i);
-        }
+      for (const auto& tag : tags_) {
+        tag_summary(tag);
+      }
+
       if (tag_summary_)
         {
           write("  </tag_summary>\n");
