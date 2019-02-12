@@ -45,17 +45,6 @@ namespace crpcut {
   unsigned use_local_heap = 0;
 }
 namespace {
-  template <typename T, std::size_t N>
-  inline T* begin(T (&array)[N])
-  {
-    return array;
-  }
-
-  template <typename T, std::size_t N>
-  inline T* end(T (&array)[N])
-  {
-    return array + N;
-  }
 
   class global_heap_disabler
   {
@@ -110,11 +99,11 @@ namespace crpcut {
       };
       void *libp = nullptr;
       global_heap_disabler disabler_obj;
-      for (const int *pf = begin(flags); pf != end(flags); ++pf)
+      for (auto flag : flags)
         {
           for (const char * const *name = lib; *name; ++name)
             {
-              libp = ::dlopen(*name, *pf);
+              libp = ::dlopen(*name, flag);
               if (libp) return libp;
             }
         }
