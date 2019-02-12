@@ -71,10 +71,7 @@ namespace crpcut {
       : public std::runtime_error
     {
     public:
-      illegal_decoration_format(const std::string &s)
-        : std::runtime_error(s)
-      {
-      }
+      using std::runtime_error::runtime_error;
     };
 
   }
