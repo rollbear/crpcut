@@ -48,7 +48,6 @@ namespace crpcut {
                         bool                    verbose,
                         const char             *working_dir,
                         registrator_list       &reg);
-    ~presentation_reader() override;
     bool read() override;
     bool write() override;
     void exception() override;
@@ -73,9 +72,6 @@ namespace crpcut {
     unsigned                                num_run_;
     unsigned                                num_failed_;
     registrator_list                       &reg_;
-    presentation_reader();
-    presentation_reader(const presentation_reader&);
-    presentation_reader& operator=(const presentation_reader&);
   };
 }
 

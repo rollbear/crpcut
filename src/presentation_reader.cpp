@@ -64,11 +64,6 @@ namespace crpcut {
     poller_.add_fd(fd_, this);
   }
 
-  presentation_reader
-  ::~presentation_reader()
-  {
-  }
-
   void
   presentation_reader
   ::exception()
