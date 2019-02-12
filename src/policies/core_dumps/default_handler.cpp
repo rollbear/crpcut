@@ -30,10 +30,7 @@ namespace crpcut {
   namespace policies {
     namespace core_dumps {
 
-      crpcut_default_handler
-      ::~crpcut_default_handler()
-      {
-      }
+      crpcut_default_handler::~crpcut_default_handler() = default;
 
       bool
       crpcut_default_handler
