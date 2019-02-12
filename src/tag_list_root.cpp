@@ -31,11 +31,11 @@ namespace crpcut {
   tag_list_root
   ::print_to(std::ostream &os) const
   {
-    for (crpcut::tag_list::const_iterator i = begin(); i != end(); ++i)
+    for (auto& tag : *this)
       {
-        if (i->get_name().len > 0U)
+        if (tag.get_name().len > 0U)
           {
-            os << i->get_name().str << "\n";
+            os << tag.get_name().str << "\n";
           }
       }
   }
