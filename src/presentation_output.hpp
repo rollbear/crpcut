@@ -45,7 +45,11 @@ namespace crpcut {
                         poll<io>       &poller,
                         int             fd,
                         posix_write    &w = default_write());
+    presentation_output(const presentation_output&) = delete;
     virtual ~presentation_output();
+
+    presentation_output& operator=(const presentation_output&) = delete;
+
     virtual bool read();
     virtual bool write();
     virtual void exception() { enable(false); }
