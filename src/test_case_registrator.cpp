@@ -510,8 +510,11 @@ namespace crpcut {
     } end_msg;
     end_msg.critical = crpcut_tag().get_importance() == tag::critical;
     end_msg.duration_us = duration_us();
+    
+    const void *addr = &end_msg;
     send_to_presentation(comm::end_test,
-                         sizeof(end_msg), (const char*)&end_msg);
+                         sizeof(end_msg),
+                         static_cast<const char*>(addr));
     assert(crpcut_succeeded() || crpcut_failed());
   }
 

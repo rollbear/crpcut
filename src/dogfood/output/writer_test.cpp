@@ -177,7 +177,7 @@ TESTSUITE(output)
 
 #define FIRST(x, ...) x
 #define ASSERT_INTEGER_WRITE(t, ...)                                  \
-    assert_integer_write((t)(CRPCUT_CONCAT(__VA_ARGS__)),             \
+    assert_integer_write(static_cast<t>(CRPCUT_CONCAT(__VA_ARGS__)),  \
                          CRPCUT_APPLY(CRPCUT_STRINGIZE,               \
                                       FIRST(__VA_ARGS__, dummy)))
 

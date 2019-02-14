@@ -124,7 +124,7 @@ namespace crpcut {
 
     void dlloader::assert_lib_is_loaded(void *libp)
     {
-      if (!libp) *(int*)libp = 0; // can't rely on abort() here
+      if (!libp) *static_cast<int*>(libp) = 0; // can't rely on abort() here
     }
   }
 }

@@ -834,7 +834,7 @@ TESTSUITE(output)
             if ((i & 15) == 0) { os << std::setw(3) << std::dec << i; }
             chars << (isprint(str[i]) ? str[i] : '.');
             os << ' ' << std::hex << std::setw(2) << std::setfill('0')
-               << unsigned((unsigned char)str[i]);
+               << unsigned(static_cast<unsigned char>(str[i]));
             if ((i & 15) == 15)
               {
                 os << "  " << chars.str() << '\n';
@@ -908,7 +908,7 @@ TESTSUITE(output)
             if ((i & 15) == 0) { os << std::setw(3) << std::dec << i; }
             chars << (isprint(str[i]) ? str[i] : '.');
             os << ' ' << std::hex << std::setw(2) << std::setfill('0')
-               << unsigned((unsigned char)str[i]);
+               << unsigned(static_cast<unsigned char>(str[i]));
             if ((i & 15) == 15)
               {
                 os << "  " << chars.str() << '\n';

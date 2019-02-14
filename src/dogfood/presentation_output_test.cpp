@@ -51,7 +51,7 @@ namespace {
     MAKE_MOCK3(do_write, ssize_t(int, const char*, std::size_t));
     ssize_t do_write(int i, const void* p, std::size_t s)
     {
-      return do_write(i, (const char*)p, s);
+      return do_write(i, static_cast<const char*>(p), s);
     }
   };
 
