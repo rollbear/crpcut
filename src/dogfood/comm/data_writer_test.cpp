@@ -30,26 +30,25 @@
 #include "posix_err_comp.hpp"
 
 namespace {
-  class test_writer : public crpcut::comm::data_writer
-  {
-  public:
-    test_writer() : data_writer() {}
-    MAKE_MOCK0(close, void());
-    ssize_t write(const void *p, size_t n) const
-    {
-      return write(static_cast<const char*>(p), n);
-    }
-    MAKE_CONST_MOCK2(write, ssize_t(const char *, size_t));
-  };
-
-  static const char alphabet[] = "abcdefghijklmnopqrstuvwxyz";
-
+  const char alphabet[] = "abcdefghijklmnopqrstuvwxyz";
 }
 
 TESTSUITE(comm)
 {
   TESTSUITE(data_writer)
   {
+    class test_writer : public crpcut::comm::data_writer
+    {
+    public:
+      test_writer() : data_writer() {}
+      MAKE_MOCK0(close, void());
+      ssize_t write(const void *p, size_t n) const
+      {
+        return write(static_cast<const char*>(p), n);
+      }
+      MAKE_CONST_MOCK2(write, ssize_t(const char *, size_t));
+    };
+
     using trompeloeil::_;
     using trompeloeil::ne;
 

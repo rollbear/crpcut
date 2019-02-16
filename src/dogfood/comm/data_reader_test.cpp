@@ -30,29 +30,28 @@
 #include "posix_err_comp.hpp"
 
 namespace {
-
-  class test_reader : public crpcut::comm::data_reader
-  {
-  public:
-    test_reader() : data_reader() {}
-    virtual ssize_t read(void *p, size_t t) const
-    {
-      return read(static_cast<char*>(p), t);
-    }
-    MAKE_MOCK0(close, void());
-    MAKE_CONST_MOCK2(read, ssize_t(char *, size_t));
-  };
-
-  static const char alphabet[] = "abcdefghijklmnopqrstuvwxyz";
+  const char alphabet[] = "abcdefghijklmnopqrstuvwxyz";
 }
 
 TESTSUITE(comm)
 {
   TESTSUITE(data_reader)
   {
+    class test_reader : public crpcut::comm::data_reader
+    {
+    public:
+      test_reader() : data_reader() {}
+      virtual ssize_t read(void *p, size_t t) const
+      {
+        return read(static_cast<char*>(p), t);
+      }
+      MAKE_MOCK0(close, void());
+      MAKE_CONST_MOCK2(read, ssize_t(char *, size_t));
+    };
+
     using trompeloeil::_;
     using trompeloeil::ne;
-    
+
     TEST(read_loop_constructs_in_chunks)
     {
       test_reader d;
