@@ -108,7 +108,7 @@ TESTSUITE(test_wrapper)
     ASSERT_THROW(wrapper::run(&test_case, reporter), my_error);
   }
 
-  void expected_death_report(std::ostream &os)
+  static void expected_death_report(std::ostream &os)
   {
     os << "signal 9";
   }

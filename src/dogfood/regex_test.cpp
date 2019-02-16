@@ -28,11 +28,12 @@
 
 TESTSUITE(regex)
 {
-  crpcut::regex move_regex(crpcut::regex r)
-  {
-    return r;
+  namespace {
+    crpcut::regex move_regex(crpcut::regex r)
+    {
+      return r;
+    }
   }
-
   TEST(default_flagged_from_c_string_can_match_std_string)
   {
     ASSERT_SCOPE_HEAP_LEAK_FREE
