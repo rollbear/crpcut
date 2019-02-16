@@ -55,8 +55,8 @@ TESTSUITE(output)
       "NCPASSED_SUM=<NPS>|"
       "NCFAILED_SUM=<NFS>|"
       "BLOCKED_SUM=<BS>|";
-    crpcut::output::text_modifier test_modifier(rules);
-    crpcut::output::text_modifier empty_modifier(nullptr);
+    static const crpcut::output::text_modifier test_modifier(rules);
+    static const crpcut::output::text_modifier empty_modifier(nullptr);
 
 
     struct stream_buffer : public crpcut::output::buffer
