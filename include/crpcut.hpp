@@ -1621,6 +1621,26 @@ namespace crpcut {
     static void run(crpcut_test_case_base *t, comm::reporter &report);
   };
 
+  template <>
+  void
+  test_wrapper<void>
+  ::run(crpcut_test_case_base*, comm::reporter&);
+
+  template <>
+  void
+  test_wrapper<policies::deaths::wrapper>
+  ::run(crpcut_test_case_base*, comm::reporter&);
+
+  template <>
+  void
+  test_wrapper<policies::any_exception_wrapper>
+  ::run(crpcut_test_case_base*, comm::reporter&);
+
+  template <>
+  void
+  test_wrapper<policies::deaths::timeout_wrapper>
+  ::run(crpcut_test_case_base*, comm::reporter&);
+
   template <typename exc>
   struct test_wrapper<policies::exception_wrapper<exc> >
   {
@@ -1646,6 +1666,7 @@ namespace crpcut {
                  &current_test);
     }
   };
+
   template <typename T,
             size_t size_limit = sizeof(T),
             bool b = stream_checker::is_output_streamable<T>::value>
