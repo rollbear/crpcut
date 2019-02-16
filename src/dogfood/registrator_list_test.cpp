@@ -34,6 +34,10 @@ using trompeloeil::_;
 
 namespace {
 
+}
+
+TESTSUITE(registrator_list)
+{
   class mock_poll : public crpcut::poll<crpcut::fdreader>
   {
   public:
@@ -217,10 +221,6 @@ namespace {
         FAIL << os.str() << " were not counted for";
       }
   }
-}
-
-TESTSUITE(registrator_list)
-{
 
   TEST(construction_does_nothing)
   {

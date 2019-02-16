@@ -33,94 +33,6 @@
 
 using trompeloeil::_;
 
-namespace {
-  static const char rules[] =
-    "|"
-    "<>|"
-    "PASSED=<P>|"
-    "FAILED=<F>|"
-    "NCFAILED=<NF>|"
-    "NCPASSED=<NP>|"
-    "BLOCKED=<B>|"
-    "PASSED_SUM=<PS>|"
-    "FAILED_SUM=<FS>|"
-    "NCPASSED_SUM=<NPS>|"
-    "NCFAILED_SUM=<NFS>|"
-    "BLOCKED_SUM=<BS>|";
-  crpcut::output::text_modifier test_modifier(rules);
-  crpcut::output::text_modifier empty_modifier(nullptr);
-
-
-  struct stream_buffer : public crpcut::output::buffer
-  {
-  public:
-    using buff = std::pair<const char*, std::size_t>;
-    MAKE_CONST_MOCK0(get_buffer, buff());
-    MAKE_MOCK0(advance, void());
-    virtual ssize_t write(const char *data, std::size_t len)
-    {
-      os.write(data, std::streamsize(len));
-      return ssize_t(len);
-    }
-    MAKE_CONST_MOCK0(is_empty, bool());
-    std::ostringstream os;
-  };
-
-  class tag_list : public crpcut::tag_list_root
-  {
-  public:
-    MAKE_MOCK0(fail, void());
-    MAKE_MOCK0(pass, void());
-    MAKE_CONST_MOCK0(num_failed, size_t());
-    MAKE_CONST_MOCK0(num_passed, size_t());
-    MAKE_CONST_MOCK0(get_name, crpcut::datatypes::fixed_string());
-    MAKE_CONST_MOCK0(longest_tag_name, size_t());
-    MAKE_MOCK1(set_importance, void(crpcut::tag::importance));
-    MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
-  };
-
-  class test_tag : public crpcut::tag
-  {
-  public:
-    template <size_t N>
-    test_tag(const char (&f)[N], tag_list *root)
-      : crpcut::tag(N, root),
-        name_{f},
-        name_x(NAMED_REQUIRE_CALL(*this, get_name())
-               .RETURN(std::ref(name_)))
-    {
-    }
-    MAKE_MOCK0(fail, void());
-    MAKE_MOCK0(pass, void());
-    MAKE_CONST_MOCK0(num_failed, size_t());
-    MAKE_CONST_MOCK0(num_passed, size_t());
-    MAKE_CONST_MOCK0(get_name, crpcut::datatypes::fixed_string());
-    MAKE_MOCK1(set_importance, void(crpcut::tag::importance));
-    MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
-    crpcut::datatypes::fixed_string name_;
-    std::unique_ptr<trompeloeil::expectation> name_x;
-  };
-  static crpcut::datatypes::fixed_string empty_string = { "", 0 };
-
-
-  class fix
-  {
-  protected:
-    fix()
-      : name_x(NAMED_ALLOW_CALL(tags, get_name())
-               .RETURN(empty_string)),
-        longest_x(NAMED_ALLOW_CALL(tags, longest_tag_name())
-                  .RETURN(0U))
-    {
-    }
-    mock::tag_list tags;
-    std::unique_ptr<trompeloeil::expectation> name_x;
-    std::unique_ptr<trompeloeil::expectation> longest_x;
-  };
-
-  const char *const no_char_conversion = nullptr;
-}
-
 #define _ "[[:space:]]*"
 #define s(x) crpcut::datatypes::fixed_string{x}
 
@@ -130,6 +42,92 @@ TESTSUITE(output)
 
   TESTSUITE(text_formatter)
   {
+    static const char rules[] =
+      "|"
+      "<>|"
+      "PASSED=<P>|"
+      "FAILED=<F>|"
+      "NCFAILED=<NF>|"
+      "NCPASSED=<NP>|"
+      "BLOCKED=<B>|"
+      "PASSED_SUM=<PS>|"
+      "FAILED_SUM=<FS>|"
+      "NCPASSED_SUM=<NPS>|"
+      "NCFAILED_SUM=<NFS>|"
+      "BLOCKED_SUM=<BS>|";
+    crpcut::output::text_modifier test_modifier(rules);
+    crpcut::output::text_modifier empty_modifier(nullptr);
+
+
+    struct stream_buffer : public crpcut::output::buffer
+    {
+    public:
+      using buff = std::pair<const char*, std::size_t>;
+      MAKE_CONST_MOCK0(get_buffer, buff());
+      MAKE_MOCK0(advance, void());
+      virtual ssize_t write(const char *data, std::size_t len)
+      {
+        os.write(data, std::streamsize(len));
+        return ssize_t(len);
+      }
+      MAKE_CONST_MOCK0(is_empty, bool());
+      std::ostringstream os;
+    };
+
+    class tag_list : public crpcut::tag_list_root
+    {
+    public:
+      MAKE_MOCK0(fail, void());
+      MAKE_MOCK0(pass, void());
+      MAKE_CONST_MOCK0(num_failed, size_t());
+      MAKE_CONST_MOCK0(num_passed, size_t());
+      MAKE_CONST_MOCK0(get_name, crpcut::datatypes::fixed_string());
+      MAKE_CONST_MOCK0(longest_tag_name, size_t());
+      MAKE_MOCK1(set_importance, void(crpcut::tag::importance));
+      MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
+    };
+
+    class test_tag : public crpcut::tag
+    {
+    public:
+      template <size_t N>
+      test_tag(const char (&f)[N], tag_list *root)
+        : crpcut::tag(N, root),
+          name_{f},
+          name_x(NAMED_REQUIRE_CALL(*this, get_name())
+                 .RETURN(std::ref(name_)))
+      {
+      }
+      MAKE_MOCK0(fail, void());
+      MAKE_MOCK0(pass, void());
+      MAKE_CONST_MOCK0(num_failed, size_t());
+      MAKE_CONST_MOCK0(num_passed, size_t());
+      MAKE_CONST_MOCK0(get_name, crpcut::datatypes::fixed_string());
+      MAKE_MOCK1(set_importance, void(crpcut::tag::importance));
+      MAKE_CONST_MOCK0(get_importance, crpcut::tag::importance());
+      crpcut::datatypes::fixed_string name_;
+      std::unique_ptr<trompeloeil::expectation> name_x;
+    };
+    static crpcut::datatypes::fixed_string empty_string = { "", 0 };
+
+
+    class fix
+    {
+    protected:
+      fix()
+        : name_x(NAMED_ALLOW_CALL(tags, get_name())
+                 .RETURN(empty_string)),
+          longest_x(NAMED_ALLOW_CALL(tags, longest_tag_name())
+                    .RETURN(0U))
+      {
+      }
+      mock::tag_list tags;
+      std::unique_ptr<trompeloeil::expectation> name_x;
+      std::unique_ptr<trompeloeil::expectation> longest_x;
+    };
+
+    const char *const no_char_conversion = nullptr;
+
     static const char* vec[] = { "apa", "katt", "orm", nullptr };
 
     TEST(construction_and_immediate_destruction_has_no_effect, fix)

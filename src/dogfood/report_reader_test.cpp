@@ -33,7 +33,8 @@
 
 using trompeloeil::_;
 
-namespace {
+TESTSUITE(report_reader)
+{
   class test_reader : public crpcut::report_reader
   {
   public:
@@ -112,9 +113,6 @@ namespace {
     }
 
   };
-}
-TESTSUITE(report_reader)
-{
   TEST(construction_and_immediate_destruction_does_nothing)
   {
     fix f;

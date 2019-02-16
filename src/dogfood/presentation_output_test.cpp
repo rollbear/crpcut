@@ -35,7 +35,8 @@
 using trompeloeil::_;
 using trompeloeil::ne;
 
-namespace {
+TESTSUITE(presentation_output)
+{
   class test_poller : public crpcut::poll<crpcut::io>
   {
   public:
@@ -72,9 +73,6 @@ namespace {
     test_poller poller;
     test_write  writer;
   };
-}
-TESTSUITE(presentation_output)
-{
   TEST(create_and_destroy, fix)
   {
     crpcut::presentation_output obj(buffer, poller, 10, writer);
