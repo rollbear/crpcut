@@ -1190,8 +1190,8 @@ namespace crpcut {
     {
     public:
       using crpcut_run_wrapper = any_exception_wrapper;
-      template <comm::type>
-      static void check_match(...) {}
+      template <comm::type, typename ... Ts>
+      static void check_match(const Ts& ...) {}
     };
 
     class no_core_file : protected virtual crpcut_default_policy
