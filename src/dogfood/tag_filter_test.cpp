@@ -27,13 +27,6 @@
 #include <crpcut.hpp>
 #include "../tag_filter.hpp"
 
-#define NAME_AS_STRING(x, y) #x
-std::ostream &operator<<(std::ostream &os, crpcut::tag::importance i)
-{
-  static const char *id[] = { CRPCUT_TEST_IMPORTANCE(NAME_AS_STRING) };
-  return os << id[i];
-}
-
 namespace {
   class test_tag_list_root : public crpcut::tag_list_root
   {
