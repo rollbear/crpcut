@@ -29,7 +29,6 @@
 #include "stream_buffer_mock.hpp"
 #include "tag_mocks.hpp"
 
-#define _ "[[:space:]]*"
 #define s(x) crpcut::datatypes::fixed_string{x}
 
 
