@@ -1750,7 +1750,7 @@ namespace crpcut {
   {
     class secret;
   public:
-    static std::true_type check(secret*);
+    static std::true_type check(int secret::*, unsigned long long);
     static std::false_type check(...);
   };
   template <typename T>
@@ -3614,7 +3614,7 @@ namespace crpcut {
   }
 
 
-#define CRPCUT_IS_ZERO_LIT(x) decltype(crpcut::null_cmp::check(x))::value
+#define CRPCUT_IS_ZERO_LIT(x) decltype(crpcut::null_cmp::check(x,x))::value
 
 #define CRPCUT_BINARY_CHECK(action, name, lh, rh)                       \
   do {                                                                  \
