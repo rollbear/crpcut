@@ -228,7 +228,7 @@ namespace crpcut {
       t = static_cast<comm::type>(t & ~mask);
       datatypes::fixed_string location = { nullptr, 0 };
       bool with_location = false;
-      switch (t)
+      switch (static_cast<int>(t))
         {
         case comm::begin_test:
           begin_test(s);
@@ -272,7 +272,7 @@ namespace crpcut {
           }
           break;
         default:
-          assert("unreachable code reached" == nullptr);
+          assert("protocol violation" == nullptr);
         }
     }
     catch (posix_error &)

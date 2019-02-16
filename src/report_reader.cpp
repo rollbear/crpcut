@@ -138,8 +138,15 @@ namespace crpcut {
             t = comm::exit_fail;
             break;
           }
-        default:
-          break; // silence warning
+        case comm::stdout:
+        case comm::stderr:
+        case comm::info:
+        case comm::exit_ok:
+        case comm::exit_fail:
+        case comm::fail:
+        case comm::dir:
+        case comm::kill_me:
+          break; // do nothing
         }
       mon_->send_to_presentation(t, len, buff);
       if (t == comm::exit_ok || t == comm::exit_fail)
