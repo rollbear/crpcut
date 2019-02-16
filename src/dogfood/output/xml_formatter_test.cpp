@@ -88,97 +88,18 @@ namespace {
 #define ARG_COUNT(...) GET_ARG_COUNT(__VA_ARGS__, 10,9,8,7,6,5,4,3,2,1,0)
 #define GET_ARG_COUNT(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,N,...) N
 
-#define XML_FIELD_TAG(name, tag, value) _ "<" #name S #tag _ "=" _ "\"" #value "\"" _ "/>"
-
 #define XML_FIELD_TAG_PAIR(name, t1, v1, t2, v2) _ "<"  #name \
                                                     S #t1 _ "=" _ "\"" #v1 "\""\
                                                     S #t2 _ "=" _ "\"" #v2 "\"" _ "/>"
-#define XML_REPEAT_TAG_0(name, tag) "<" #name "/>"
-#define XML_REPEAT_TAG_1(name, tag, _1) XML_FIELD_TAG(name, tag, _1)
-#define XML_REPEAT_TAG_2(name, tag, _1, _2)                    \
-  XML_FIELD_TAG(name, tag, _1)                                 \
-  XML_FIELD_TAG(name, tag, _2)
-#define XML_REPEAT_TAG_3(name, tag, _1, _2, _3)                  \
-  XML_FIELD_TAG(name, tag, _1)                                   \
-  XML_FIELD_TAG(name, tag, _2)                                   \
-  XML_FIELD_TAG(name, tag, _3)
-#define XML_REPEAT_TAG_4(name, tag, _1, _2, _3, _4)                \
-  XML_FIELD_TAG(name, tag, _1)                                     \
-  XML_FIELD_TAG(name, tag, _2)                                     \
-  XML_FIELD_TAG(name, tag, _3)                                     \
-  XML_FIELD_TAG(name, tag, _4)
-#define XML_REPEAT_TAG_5(name, tag, _1, _2, _3, _4, _5)            \
-  XML_FIELD_TAG(name, tag, _1)                                     \
-  XML_FIELD_TAG(name, tag, _2)                                     \
-  XML_FIELD_TAG(name, tag, _3)                                     \
-  XML_FIELD_TAG(name, tag, _4)                                     \
-  XML_FIELD_TAG(name, tag, _5)
-
-#define XML_REPEAT_TAG_6(name, tag, _1, _2, _3, _4, _5, _6)       \
-  XML_FIELD_TAG(name, tag, _1)                                    \
-  XML_FIELD_TAG(name, tag, _2)                                    \
-  XML_FIELD_TAG(name, tag, _3)                                    \
-  XML_FIELD_TAG(name, tag, _4)                                    \
-  XML_FIELD_TAG(name, tag, _5)                                    \
-  XML_FIELD_TAG(name, tag, _6)
-
-#define XML_REPEAT_TAG_7(name, tag, _1, _2, _3, _4, _5, _6, _7)      \
-  XML_FIELD_TAG(name, tag, _1)                                       \
-  XML_FIELD_TAG(name, tag, _2)                                       \
-  XML_FIELD_TAG(name, tag, _3)                                       \
-  XML_FIELD_TAG(name, tag, _4)                                       \
-  XML_FIELD_TAG(name, tag, _5)                                       \
-  XML_FIELD_TAG(name, tag, _6)                                       \
-  XML_FIELD_TAG(name, tag, _7)
-
-#define XML_REPEAT_TAG_8(name, tag, _1, _2, _3, _4, _5, _6, _7, _8)     \
-  XML_FIELD_TAG(name, tag, _1)                                           \
-  XML_FIELD_TAG(name, tag, _2)                                           \
-  XML_FIELD_TAG(name, tag, _3)                                           \
-  XML_FIELD_TAG(name, tag, _4)                                           \
-  XML_FIELD_TAG(name, tag, _5)                                           \
-  XML_FIELD_TAG(name, tag, _6)                                           \
-  XML_FIELD_TAG(name, tag, _7)                                           \
-  XML_FIELD_TAG(name, tag, _8)
-
-#define XML_REPEAT_TAG_9(name, tag, _1, _2, _3, _4, _5, _6, _7, _8, _9) \
-  XML_FIELD_TAG(name, tag, _1)                                          \
-  XML_FIELD_TAG(name, tag, _2)                                          \
-  XML_FIELD_TAG(name, tag, _3)                                          \
-  XML_FIELD_TAG(name, tag, _4)                                          \
-  XML_FIELD_TAG(name, tag, _5)                                          \
-  XML_FIELD_TAG(name, tag, _6)                                          \
-  XML_FIELD_TAG(name, tag, _7)                                          \
-  XML_FIELD_TAG(name, tag, _8)                                          \
-  XML_FIELD_TAG(name, tag, _9)
-
-#define XML_REPEAT_TAG_PAIR_2(name, t1, t2, _1, _2) \
-  XML_FIELD_TAG_PAIR(name, t1, _1, t2, _2)
-
-#define XML_REPEAT_TAG_PAIR_4(name, t1, t2, _1, _2, _3, _4) \
-  XML_FIELD_TAG_PAIR(name, t1, _1, t2, _2)                  \
-  XML_FIELD_TAG_PAIR(name, t1, _3, t2, _4)
 
 #define XML_REPEAT_TAG_PAIR_6(name, t1, t2, _1, _2, _3, _4, _5, _6) \
   XML_FIELD_TAG_PAIR(name, t1, _1, t2, _2)                          \
   XML_FIELD_TAG_PAIR(name, t1, _3, t2, _4)                          \
   XML_FIELD_TAG_PAIR(name, t1, _5, t2, _6)
 
-#define XML_REPEAT_TAG_PAIR_8(name, t1, t2, _1, _2, _3, _4, _5, _6, _7, _8) \
-  XML_FIELD_TAG_PAIR(name, t1, _1, t2, _2)                                  \
-  XML_FIELD_TAG_PAIR(name, t1, _3, t2, _4)                                  \
-  XML_FIELD_TAG_PAIR(name, t1, _5, t2, _6)                                  \
-  XML_FIELD_TAG_PAIR(name, t1, _7, t2, _8)
 
 #define CALL_CONCAT_(name, num, ...) name ## num (__VA_ARGS__)
 #define CALL_CONCAT(name, num, ...) CALL_CONCAT_(name, num, __VA_ARGS__)
-
-#define XML_REPEAT_TAG(name, tag, ...)           \
-  CALL_CONCAT(XML_REPEAT_TAG_,                  \
-              ARG_COUNT(__VA_ARGS__),           \
-              name,                             \
-              tag,                              \
-              __VA_ARGS__)
 
 #define XML_REPEAT_TAG_PAIR(name, t1, t2, ...) \
   CALL_CONCAT(XML_REPEAT_TAG_PAIR_,            \
@@ -548,8 +469,6 @@ TESTSUITE(output)
         obj.nonempty_dir("/tmp/crpcut02342");
         obj.statistics(0,0);
       }
-
-#define IL "&#xfffd;"
 
       static const char re[] =
         XML_HEADER
