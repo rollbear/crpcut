@@ -1435,6 +1435,11 @@ namespace crpcut {
     static const char *string();
   };
 
+  template <>
+  const char* crpcut_check_name<comm::exit_fail>::string();
+  template <>
+  const char* crpcut_check_name<comm::fail>::string();
+
 
 
   struct namespace_info
@@ -3509,7 +3514,6 @@ namespace crpcut {
   namespace datatypes {
     template <typename T>
     const volatile typename undecorated<T>::type &gettype();
-
   }
 }
 #define CRPCUT_REFTYPE(expr) \
