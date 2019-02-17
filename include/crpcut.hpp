@@ -1746,13 +1746,12 @@ namespace crpcut {
 
 
 
-  class null_cmp
+  template <std::size_t N>
+  constexpr bool is_zero_literal(const char (&f)[N])
   {
-    class secret;
-  public:
-    static std::true_type check(int secret::*, unsigned long long);
-    static std::false_type check(...);
-  };
+    return N == 2 && f[0] == '0' && f[1] == '\0';
+  }
+
   template <typename T>
   struct is_struct {
     static constexpr bool value = std::is_class<T>::value || std::is_union<T>::value;
@@ -3614,7 +3613,7 @@ namespace crpcut {
   }
 
 
-#define CRPCUT_IS_ZERO_LIT(x) decltype(crpcut::null_cmp::check(x,x))::value
+#define CRPCUT_IS_ZERO_LIT(x) crpcut::is_zero_literal(#x)
 
 #define CRPCUT_BINARY_CHECK(action, name, lh, rh)                       \
   do {                                                                  \
