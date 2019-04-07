@@ -23,21 +23,13 @@
 
 
 
-cmake_minimum_required(VERSION 2.6)
-if (COMMAND cmake_policy)
-  cmake_policy(SET CMP0002 NEW)
-  cmake_policy(SET CMP0003 NEW)
-  cmake_policy(SET CMP0005 NEW)
-endif(COMMAND cmake_policy)
+cmake_minimum_required(VERSION 3.13)
 project(crpcut)
 include(CheckFunctionExists)
 include(CheckLibraryExists)
 
-if (CMAKE_VERSION)
-  if ("${CMAKE_VERSION}" VERSION_GREATER "2.8.7")
-    set(HAS_OBJECT_LIBS "yep")
-  endif ("${CMAKE_VERSION}" VERSION_GREATER "2.8.7")
-endif (CMAKE_VERSION)
+set(CMAKE_CXX_STANDARD 17)
+
 set(CRPCUT_LIB_MAJOR_VERSION "1")
 set(CRPCUT_LIB_MINOR_VERSION "9")
 set(CRPCUT_LIB_PATCH_VERSION "5")
@@ -57,13 +49,13 @@ set(SHAREDIR "share/crpcut-${CRPCUT_LIB_VERSION}")
 if ("${BUILD_SHARED_LIBS}" STREQUAL "")
   set(BUILD_SHARED_LIBS ON)
 endif ("${BUILD_SHARED_LIBS}" STREQUAL "")
-file(GLOB LIBHEAP_SRCS
+set(LIBHEAP_SRCS
      src/heap.cpp
 )
-file(GLOB HEAP_FAKE_SRCS
+set(HEAP_FAKE_SRCS
      src/heap_fake.cpp
 )
-file(GLOB LIB_SRCS
+set(LIB_SRCS
      src/check_name.cpp
      src/cli/activation_param.cpp
      src/cli/boolean_flip.cpp
@@ -103,7 +95,6 @@ file(GLOB LIB_SRCS
      src/policies/dependencies/base.cpp
      src/policies/exception_translator.cpp
      src/policies/no_core_file.cpp
-     src/policies/policies.cpp
      src/policies/timeout/cputime_enforcer.cpp
      src/policies/timeout/monotonic_enforcer.cpp
      src/posix_error.cpp
@@ -129,13 +120,11 @@ file(GLOB LIB_SRCS
      src/test_runner.cpp
      src/test_suite_base.cpp
      src/test_wrapper.cpp
-     src/text_writer.cpp
      src/timeboxed.cpp
      src/working_dir_allocator.cpp
      src/wrapped/posix_encapsulation.cpp
 )
-include_directories(include)
-file(GLOB DOGFOOD_SRCS
+set(DOGFOOD_SRCS
      src/dogfood/binary_tester_test.cpp
      src/dogfood/bool_tester_test.cpp
      src/dogfood/buffer_vector_test.cpp
@@ -183,7 +172,6 @@ file(GLOB DOGFOOD_SRCS
      src/dogfood/show_value_test.cpp
      src/dogfood/tag_filter_test.cpp
      src/dogfood/tag_list_test.cpp
-     src/dogfood/test_case_registrator_test.cpp
      src/dogfood/test_runner_test.cpp
      src/dogfood/test_wrapper_test.cpp
      src/dogfood/working_dir_allocator_test.cpp
@@ -192,68 +180,12 @@ if (NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX /usr)
 endif (NOT CMAKE_INSTALL_PREFIX)
 
-# Check for variadic macros
-
-
-file(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/variadic_macro.cpp
-  "#define APA(...) main(__VA_ARGS__)\nint APA(int argc, char *argv[]) {}\n")
-try_compile(HAVE_VARIADIC_MACROS ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/CMakeTmp/variadic_macro.cpp)
-if (NOT HAVE_VARIADIC_MACROS)
-  message(FATAL_ERROR "${CMAKE_CXX_COMPILER} doesn't support variadic macros")
-endif(NOT HAVE_VARIADIC_MACROS)
-
-file(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/exit.cpp
-  "#include <cstdlib>\nint main() { std::_Exit(0); }\n")
-try_compile(HAVE__EXIT ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/CMakeTmp/exit.cpp)
-if (NOT HAVE__EXIT)
-  message(FATAL_ERROR "${CMAKE_CXX_COMPILER} doesn't support std::_Exit()")
-endif(NOT HAVE__EXIT)
-
-# Check for decltype and typeof
-
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag(-pthread HAVE_PTHREAD_SWITCH)
 if (DEFINED HAVE_PTHREAD_SWITCH)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif(DEFINED HAVE_PTHREAD_SWITCH)
-check_cxx_compiler_flag(-std=c++0x HAVE_CXX0X)
-check_cxx_compiler_flag(-std=c++11 HAVE_CXX11)
-check_cxx_compiler_flag(-std=c++14 HAVE_CXX14)
-file(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/typeof.cpp
-  "template <typename T> T* func(T);\n"
-  "typedef typeof(func(3.14)) apa;\n"
-  "int main() {}\n")
-try_compile(HAVE_TYPEOF ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/CMakeTmp/typeof.cpp)
-if (NOT HAVE_TYPEOF)
-  if (NOT HAVE_CXX0X)
-    mesage(FATAL_ERROR
-      "${CMAKE_CXX_COMPILER} supports neither decltype nor typeof")
-  endif (NOT HAVE_CXX0X)
-endif (NOT HAVE_TYPEOF)
-
-# check for TR1
-
-file(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/tr1.cpp
-  "#include <tr1/type_traits>\n"
-  "const bool v = std::tr1::is_reference<int>::type::value;\n"
-  "int main() { return v; }\n")
-try_compile(HAVE_TR1 ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/CMakeTmp/tr1.cpp)
-if(NOT HAVE_TR1)
-  file(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/boost_tr1.cpp
-    "#include <boost/tr1/type_traits.hpp>\n"
-    "const bool v = std::tr1::is_reference<int>::type::value;\n"
-    "int main() { return v; }\n")
-  try_compile(HAVE_BOOST_TR1 ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/CMakeTmp/boost_tr1.cpp)
-  if (NOT HAVE_BOOST_TR1)
-    message(FATAL_ERROR "${CMAKE_CXX_COMPILER} doesn't have std/tr1 nor boost/tr1")
-  endif (NOT HAVE_BOOST_TR1)
-endif(NOT HAVE_TR1)
 
 # check for valgrind
 
@@ -281,6 +213,8 @@ if (DEFINED EXTRA_LIBS)
 else(DEFINED EXTRA_LIBS)
   set(EXTRA_LIBS "-l${CMAKE_DL_LIBS}${PTHREAD}")
 endif(DEFINED EXTRA_LIBS)
+
+set(LIBRARY_OUTPUT_PATH "lib")
 
 # check for clock_gettime()
 
@@ -341,68 +275,19 @@ if (NOT MAY_HAVE_MONO)
 endif (NOT MAY_HAVE_MONO)
 
 
-# check google-mock
-if (WITH_GOOGLE_MOCK)
-  if (NOT GOOGLE_MOCK_DIR)
-    find_library(GOOGLE_MOCK_LIB "gmock")
-    if (NOT GOOGLE_MOCK_LIB)
-      message(FATAL_ERROR
-        "Can't find google mock, try to add -DGOOGLE_MOCK_DIR=<path> to the command line")
-    endif (NOT GOOGLE_MOCK_LIB)
-    set(GMOCK_LIBS "-lgmock -lgtest")
-  else (NOT GOOGLE_MOCK_DIR)
-    include_directories(AFTER ${GOOGLE_MOCK_DIR}/include)
-    set(GMOCK_LIBS "-Wl,-rpath,${CMAKE_BINARY_DIR}/lib:${GOOGLE_MOCK_DIR}/lib -L${GOOGLE_MOCK_DIR}/lib -lgmock -lgtest")
-  endif (NOT GOOGLE_MOCK_DIR)
-  file(GLOB GMOCK_LIB_SRCS src/gmock.cpp)
-  set(SELFTEST_PARAM ${SELFTEST_PARAM} gmock)
-
-  file(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/gmock.cpp
-    "#include <gmock/gmock.h>\nclass C : public ::testing::EmptyTestEventListener {};\nint main() {\n  C obj;\n  ::testing::UnitTest::GetInstance()->listeners().Append(&obj);\n}\n")
-  try_compile(HAVE_GMOCK ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/CMakeTmp/gmock.cpp
-    CMAKE_FLAGS -DINCLUDE_DIRECTORIES=${GOOGLE_MOCK_DIR}/include
-    -DLINK_DIRECTORIES=${GOOGLE_MOCK_DIR}/lib
-    -DLINK_LIBRARIES=gtest)
-  if (NOT HAVE_GMOCK)
-    set(GMOCK_PTHREAD_DIR "gtest -lpthread")
-    try_compile(HAVE_GMOCK ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/CMakeTmp/gmock.cpp
-    CMAKE_FLAGS -DINCLUDE_DIRECTORIES=${GOOGLE_MOCK_DIR}/include
-    -DLINK_DIRECTORIES=${GOOGLE_MOCK_DIR}/lib
-    -DLINK_LIBRARIES=${GMOCK_PTHREAD_DIR})
-    if (NOT HAVE_GMOCK)
-      message(FATAL_ERROR "Unknown version of Google Mock")
-    endif (NOT HAVE_GMOCK)
-    if (DEFINED GMOCK_LIBS)
-      set(GMOCK_LIBS "${GMOCK_LIBS} -lpthread")
-    else(DEFINED GMOCK_LIBS)
-      set(GMOCK_LIBS "-lpthread")
-    endif(DEFINED GMOCK_LIBS)
-  endif (NOT HAVE_GMOCK)
-endif (WITH_GOOGLE_MOCK)
-
-include_directories(include)
-
-if ("${LIBRARY_OUTPUT_PATH}" STREQUAL "")
-  if (NOT DEFINED LIB_SUFFIX)
-    if ("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-      set(LIB_SUFFIX 64)
-    endif ("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-  endif (NOT DEFINED LIB_SUFFIX)
-  set(LIBRARY_OUTPUT_PATH "lib${LIB_SUFFIX}")
-endif ("${LIBRARY_OUTPUT_PATH}" STREQUAL "")
-
 if (WITHOUT_HEAP)
   set(LIBHEAP "")
   set(CRPCUT_LIB "crpcut_basic")
 else (WITHOUT_HEAP)
   add_library(crpcut_heap ${LIBHEAP_SRCS})
+  target_include_directories(crpcut_heap PUBLIC
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+          $<INSTALL_INTERFACE:include>)
   set_target_properties(crpcut_heap PROPERTIES
     VERSION ${CRPCUT_LIB_VERSION}
     SOVERSION ${CRPCUT_LIB_SOVERSION})
   set(LIBHEAP "crpcut_heap")
-  file(GLOB HEAP_TEST_SRCS test-src/heap.cpp)
+  set(HEAP_TEST_SRCS test-src/heap.cpp)
   install(TARGETS crpcut_heap DESTINATION ${LIBRARY_OUTPUT_PATH})
   set(SELFTEST_PARAM ${SELFTEST_PARAM} heap)
   set(CRPCUT_LIB "crpcut")
@@ -422,6 +307,9 @@ set_target_properties(crpcut_basic PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
   SOVERSION ${CRPCUT_LIB_SOVERSION})
 add_library(crpcut ${COMMON} ${LIBHEAP_SRCS})
+target_include_directories(crpcut PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
 set_target_properties(crpcut PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
   SOVERSION ${CRPCUT_LIB_SOVERSION})
@@ -467,23 +355,21 @@ else (GMOCK_LIBS)
   target_link_libraries(testprog ${CRPCUT_LIB} ${EXTRA_LIBS})
 endif (GMOCK_LIBS)
 
-if (HAVE_CXX14)
-  include(ProcessorCount)
-  ProcessorCount(NUM_CPUS)
-  if (NUM_CPUS EQUAL 0)
-    set(NUM_CPUS 1)
-  endif (NUM_CPUS EQUAL 0)
-  if (NOT WITHOUT_HEAP)
-    add_custom_target(dogfood_test dogfood -c ${NUM_CPUS} DEPENDS dogfood VERBATIM)
-    if ("${CMAKE_BUILD_TYPE}" STREQUAL "maint")
-      add_executable(dogfood ${DOGFOOD_SRCS})
-    else ("${CMAKE_BUILD_TYPE}" STREQUAL "maint")
-      add_executable(dogfood EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
-    endif ("${CMAKE_BUILD_TYPE}" STREQUAL "maint")
-    target_link_libraries(dogfood ${CRPCUT_LIB} ${EXTRA_LIBS} )
-  endif(NOT WITHOUT_HEAP)
+include(ProcessorCount)
+ProcessorCount(NUM_CPUS)
+if (NUM_CPUS EQUAL 0)
+  set(NUM_CPUS 1)
+endif (NUM_CPUS EQUAL 0)
+if (NOT WITHOUT_HEAP)
+  add_custom_target(dogfood_test dogfood -c ${NUM_CPUS} DEPENDS dogfood VERBATIM)
+  if ("${CMAKE_BUILD_TYPE}" STREQUAL "maint")
+    add_executable(dogfood ${DOGFOOD_SRCS})
+  else ("${CMAKE_BUILD_TYPE}" STREQUAL "maint")
+    add_executable(dogfood EXCLUDE_FROM_ALL ${DOGFOOD_SRCS})
+  endif ("${CMAKE_BUILD_TYPE}" STREQUAL "maint")
+  target_link_libraries(dogfood ${CRPCUT_LIB} ${EXTRA_LIBS} )
+endif(NOT WITHOUT_HEAP)
 
-endif (HAVE_CXX14)
 find_program(AWK "awk")
 find_program(BASH "bash")
 find_program(XMLLINT "xmllint")
@@ -960,10 +846,6 @@ endif (AWK AND BASH AND XMLLINT)
 
 set(EXECUTABLE_OUTPUT_PATH test)
 
-if(NOT HAVE_CXX14 AND NOT HAVE_CXX11 AND HAVE_CXX0X AND NOT HAVE_TYPEOF)
-  message("*** IMPORTANT *** You must compile your tests using -std=c++0x")
-  add_definitions(-std=c++0x)
-endif(NOT HAVE_CXX14 AND NOT HAVE_CXX11 AND HAVE_CXX0X AND NOT HAVE_TYPEOF)
 if (HAVE_VALGRIND)
   message("*** compiling with support for valgrind")
   add_definitions(-DHAVE_VALGRIND)
