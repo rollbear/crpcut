@@ -44,7 +44,7 @@ namespace crpcut {
             if (--p->crpcut_num == 0)
               {
                 p->crpcut_dec_action();
-              };
+              }
           }
       }
 

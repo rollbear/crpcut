@@ -74,7 +74,7 @@ namespace crpcut {
     assert(mon_);
     mon_->deactivate_reader();
     poller_->del_fd(this);
-    rfile_descriptor().swap(*this);;
+    rfile_descriptor().swap(*this);
     poller_ = nullptr;
   }
 }
