@@ -964,6 +964,7 @@ namespace crpcut {
       explicit
       crpcut_exception_translator(crpcut_exception_translator &
                                   r  = root_object())
+        : datatypes::list_elem<crpcut_exception_translator>{}
       {
         link_before(r);
       }
