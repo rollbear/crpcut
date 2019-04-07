@@ -3878,7 +3878,7 @@ class crpcut_testsuite_dep
       = &crpcut_current_namespace;                                      \
     }                                                                   \
     class crpcut_testsuite_id;                                          \
-    static const crpcut::namespace_info                                       \
+    [[maybe_unused]] static const crpcut::namespace_info                \
     crpcut_current_namespace{#name, parent_namespace};                  \
   }                                                                     \
   namespace name
