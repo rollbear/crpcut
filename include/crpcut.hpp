@@ -3605,11 +3605,11 @@ namespace crpcut {
 
 
 #define CRPCUT_WRAP_V_FUNC(lib, name, rv, param_list, param)            \
-  extern "C" using f_ ## name ## _t = rv (*) param_list;                \
   rv name param_list                                                    \
   {                                                                     \
-    static f_ ## name ## _t f_ ## name                                  \
-      = ::crpcut::libwrapper::loader< ::crpcut::libs::lib>::obj().sym<f_ ## name ## _t>(#name); \
+    using loader = ::crpcut::libwrapper::loader< ::crpcut::libs::lib>;  \
+    static rv (*f_ ## name) param_list                                  \
+      = loader::obj().sym<decltype(f_ ## name)>(#name);                 \
     f_ ## name param;                                                   \
   }
 

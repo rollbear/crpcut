@@ -311,9 +311,9 @@ namespace crpcut {
                      ssize_t,
                      (int f, const void *p, size_t s),
                      (f, p, s))
-    CRPCUT_WRAP_V_FUNC(libc, _Exit, void, (int n), (n))
-    CRPCUT_WRAP_V_FUNC(libc, abort, void, (void),  ())
-    CRPCUT_WRAP_V_FUNC(libc, exit,  void, (int n), (n))
+    CRPCUT_WRAP_V_FUNC(libc, _Exit, __attribute__((__noreturn__)) void, (int n), (n))
+    CRPCUT_WRAP_V_FUNC(libc, abort, __attribute__((__noreturn__)) void, (void),  ())
+    CRPCUT_WRAP_V_FUNC(libc, exit,  __attribute__((__noreturn__)) void, (int n), (n))
   }
 
   ssize_t
