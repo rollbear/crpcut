@@ -358,21 +358,19 @@ namespace crpcut {
     for (;;)
       {
         bool progress = false;
-        using reg = crpcut_test_case_registrator;
-        for (reg *i = reg_.first(); i;)
+        for (auto i = reg_.begin(); i != reg_.end();)
           {
-            reg *reg_obj = i;
-            i = reg_.next_after(i);
-            if (   (cli_->honour_dependencies() && !reg_obj->crpcut_can_run())
-                || reg_obj->get_importance() == crpcut::tag::disabled)
+            auto& reg_obj = *i++;
+            if (   (cli_->honour_dependencies() && !reg_obj.crpcut_can_run())
+                || reg_obj.get_importance() == crpcut::tag::disabled)
               {
                 continue;
               }
             progress = true;
-            reg_obj->set_test_environment(env_);
-            start_test(reg_obj, poller);
+            reg_obj.set_test_environment(env_);
+            start_test(&reg_obj, poller);
             manage_children(num_parallel, poller);
-            reg_obj->unlink();
+            reg_obj.unlink();
           }
         if (!progress)
           {

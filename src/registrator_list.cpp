@@ -35,24 +35,22 @@ namespace crpcut {
                       std::ostream &err_os)
   {
     unsigned num_registered_tests = 0U;
-    using reg = crpcut_test_case_registrator;
 
     {
-      for (reg *i = first(); i; )
+      for (auto i = begin(); i != end();)
         {
-          reg *obj = i;
-          i = next_after(i);
+          auto& obj = *i++;
           ++num_registered_tests;
-          tag &t = obj->crpcut_tag();
+          tag &t = obj.crpcut_tag();
           if (t.get_importance() == tag::ignored)
             {
-              obj->unlink();
-              obj->crpcut_uninhibit_dependants();
+              obj.unlink();
+              obj.crpcut_uninhibit_dependants();
               continue;
             }
-          if (obj->get_importance() == tag::disabled)
+          if (obj.get_importance() == tag::disabled)
             {
-              obj->crpcut_uninhibit_dependants();
+              obj.crpcut_uninhibit_dependants();
             }
         }
       }
@@ -66,16 +64,15 @@ namespace crpcut {
     for (const char *const*name = names; *name; ++name)
       {
         unsigned matches = 0;
-        for (reg *i = first(); i;)
+        for (auto i = begin(); i != end();)
           {
-            reg *obj = i;
-            i = next_after(i);
-            if (obj->match_name(*name))
+            auto& obj = *i++;
+            if (obj.match_name(*name))
               {
                 ++matches;
                 ++num_selected_tests;
-                obj->unlink();
-                obj->link_before(result);
+                obj.unlink();
+                obj.link_before(result);
              }
           }
         if (matches == 0)
