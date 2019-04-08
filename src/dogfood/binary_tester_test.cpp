@@ -131,8 +131,8 @@ TESTSUITE(binary_tester)
 
     TEST(valid_c_str_with_other_c_str_to_same_string_is_false, fix)
     {
-      const char *p = "begapa" + 3;
-      const char *q = "rapa" + 1;
+      const char *p = std::next("begapa",3);
+      const char *q = std::next("rapa");
       const char violation_report[] =
         "\nlocation\n"
         "VERIFY_EQ(p, q)\n"
@@ -238,8 +238,8 @@ TESTSUITE(binary_tester)
 
     TEST(valid_c_str_with_other_c_str_to_same_string_is_true, fix)
     {
-      const char *p = "begapa" + 3;
-      const char *q = "rapa" + 1;
+      const char *p = std::next("begapa",3);
+      const char *q = std::next("rapa");
       CHECK(NE, p, q, reporter);
       ASSERT_TRUE(os.str() == "");
     }
