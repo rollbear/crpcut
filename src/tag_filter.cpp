@@ -48,7 +48,7 @@ namespace {
                 const char *n = name.str;
                 const char *name_end = n + name.len;
                 const char *t = begin;
-                while (t != p && *t == *n) { ++t; ++n; }
+                std::tie(t,n) = std::mismatch(t,p,n);
                 found = t == p && n == name_end;
               }
             if (!found)
