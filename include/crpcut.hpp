@@ -42,6 +42,8 @@
 #include <cstdlib>
 #include <limits>
 #include <memory>
+#include <string_view>
+
 extern "C"
 {
 #  include <dlfcn.h>
@@ -345,6 +347,7 @@ namespace crpcut {
       constexpr explicit fixed_string(const char (&f)[N]) : str{f}, len{N-1} {}
       template <char ... c>
       constexpr explicit fixed_string(string_type<c...> s) : fixed_string{s.c_str} {}
+      operator std::string_view()const { return {str,len};}
       constexpr explicit operator bool () const
       {
         return len > 0U;
@@ -3980,5 +3983,13 @@ class crpcut_testsuite_dep
                                                 CRPCUT_STRINGIZE(__VA_ARGS__)) >
 
 #  define DEFINE_TEST_TAG(...) class crpcut_DEFINE_TEST_TAG_is_deprecated
+
+namespace std {
+  template <typename T>
+  struct iterator_traits<crpcut::tag_list_root::iterator_t<T>>
+  {
+    using iterator_category = std::forward_iterator_tag;
+  };
+}
 
 #endif // CRPCUT_HPP

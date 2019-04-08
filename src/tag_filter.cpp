@@ -25,6 +25,7 @@
  */
 
 #include "tag_filter.hpp"
+#include <algorithm>
 
 namespace {
 
@@ -37,21 +38,11 @@ namespace {
       {
         if (*p == ',' || p == end)
           {
-            using crpcut::tag_list_root;
-            bool found = false;
-            const tag_list_root::iterator e = l.end();
-            for (tag_list_root::iterator i = l.begin();
-                 !found && i != e;
-                 ++i)
-              {
-                crpcut::datatypes::fixed_string name = i->get_name();
-                const char *n = name.str;
-                const char *name_end = n + name.len;
-                const char *t = begin;
-                std::tie(t,n) = std::mismatch(t,p,n);
-                found = t == p && n == name_end;
-              }
-            if (!found)
+            std::string_view needle{begin, std::size_t(p - begin)};
+            auto matches_name = [needle](auto& tag){
+              return needle == tag.get_name();
+            };
+            if (!std::any_of(l.begin(), l.end(), matches_name))
               {
                 std::string msg(begin,p);
                 msg+= " is not a tag";
