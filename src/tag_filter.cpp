@@ -55,18 +55,16 @@ namespace {
       }
   }
 
-  bool match_name(crpcut::datatypes::fixed_string name,
+  bool match_name(std::string_view name,
                   const char *begin, const char *end)
   {
     const char *i = begin;
-    const char *n = name.str;
     while (i != end)
       {
-        std::size_t idx = 0;
-        while (i + idx != end && i[idx] != ',' && i[idx] == n[idx]) ++idx;
-        if (idx == name.len && (i + idx == end || i[idx] == ',')) return true;
-        while (i != end && *i++ != ',')
-          ;
+        auto [ni,ii] = std::mismatch(name.begin(), name.end(), i, end);
+        if (ni == name.end() && (ii == end || *ii == ',')) return true;
+        i = std::find(ii,end, ',');
+        if (i != end) i = std::next(i);
       }
     return false;
   }
