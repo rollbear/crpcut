@@ -32,10 +32,6 @@
 #include <algorithm>
 using trompeloeil::_;
 
-namespace {
-
-}
-
 TESTSUITE(registrator_list)
 {
   class mock_poll : public crpcut::poll<crpcut::fdreader>
@@ -198,7 +194,7 @@ TESTSUITE(registrator_list)
   template <typename T, typename U>
   void match_and_remove(T& t, U u)
   {
-    typename T::iterator i = std::find(t.begin(), t.end(), u);
+    auto i = std::find(t.begin(), t.end(), u);
     if (i == t.end()) FAIL << "Couldn't find " << *u;
     std::swap(*i, t.back());
     t.pop_back();
@@ -214,9 +210,9 @@ TESTSUITE(registrator_list)
     if (t.size())
       {
         std::ostringstream os;
-        for (typename T::iterator i = t.begin(); i != t.end(); ++i)
+        for (const auto& tag : t)
           {
-            os << **i << " ";
+            os << *tag << " ";
           }
         FAIL << os.str() << " were not counted for";
       }

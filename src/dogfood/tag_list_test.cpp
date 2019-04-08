@@ -73,14 +73,14 @@ namespace {
   template <size_t N>
   void verify_tags(tag_result (&result)[N], crpcut::tag_list_root &list)
   {
-    crpcut::tag_list_root::iterator it = list.begin();
-    for (size_t i = 0; i < N; ++i)
-      {
-        INFO << "i=" << i;
-        ASSERT_TRUE(result[i].t == &*it);
-        ASSERT_TRUE(result[i].i == it->get_importance());
-        ++it;
-      }
+    size_t i = 0;
+    for (const auto& tag : list)
+    {
+      INFO << "i=" << i;
+      ASSERT_TRUE(result[i].t == &tag);
+      ASSERT_TRUE(result[i].i == tag.get_importance());
+      ++i;
+    }
   }
 }
 

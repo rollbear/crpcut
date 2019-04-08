@@ -55,7 +55,6 @@ namespace {
   class test_tag_list
   {
   protected:
-    using iterator = crpcut::tag_list::iterator;
     test_tag_list()
       : root(),
         apa("apa", &root),
