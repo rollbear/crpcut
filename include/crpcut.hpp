@@ -416,9 +416,7 @@ namespace crpcut {
       const T *first() const { return is_empty() ? nullptr : static_cast<const T*>(next_); }
       const T *last() const { return is_empty() ? nullptr : static_cast<const T*>(prev_); }
       T* next_after(T* p) const { return p == last() ? nullptr : static_cast<T*>(p->next_); }
-      T* prev_before(T* p) const { return p == first() ? nullptr : static_cast<T*>(p->prev_); }
       const T* next_after(const T* p) const { return p == last() ? nullptr : static_cast<T*>(p->next_); }
-      const T* prev_before(const T* p) const { return p == first() ? nullptr : static_cast<T*>(p->prev_); }
       bool is_empty() const;
       //      bool is_this(const T *p) const;
     protected:

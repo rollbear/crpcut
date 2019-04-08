@@ -61,7 +61,6 @@ TESTSUITE(list_elem)
     ASSERT_TRUE(root.first() == &el1);
     ASSERT_TRUE(root.last() == &el1);
     ASSERT_FALSE(root.next_after(&el1));
-    ASSERT_FALSE(root.prev_before(&el1));
 
     C el2;
     INFO << "&el2=" << &el2;
@@ -74,9 +73,7 @@ TESTSUITE(list_elem)
     ASSERT_FALSE(root.is_empty());
 
     ASSERT_TRUE(root.next_after(&el1) == &el2);
-    ASSERT_FALSE(root.prev_before(&el1));
     ASSERT_FALSE(root.next_after(&el2));
-    ASSERT_TRUE(root.prev_before(&el2) == &el1);
     ASSERT_TRUE(root.first() == &el1);
     ASSERT_TRUE(root.last() == &el2);
 
@@ -92,13 +89,10 @@ TESTSUITE(list_elem)
     ASSERT_FALSE(root.is_empty());
 
     ASSERT_TRUE(root.next_after(&el2) == &el3);
-    ASSERT_TRUE(root.prev_before(&el2) == &el1);
     ASSERT_FALSE(root.next_after(&el3));
-    ASSERT_TRUE(root.prev_before(&el3) == &el2);
     ASSERT_TRUE(root.first() == &el1);
     ASSERT_TRUE(root.last() == &el3);
     ASSERT_TRUE(root.next_after(&el1) == &el2);
-    ASSERT_FALSE(root.prev_before(&el1));
   }
 
   TEST(link_before_maintains_order)
@@ -119,7 +113,6 @@ TESTSUITE(list_elem)
     ASSERT_TRUE(root.last() == &el1);
     ASSERT_TRUE(root.first() == &el1);
     ASSERT_FALSE(root.next_after(&el1));
-    ASSERT_FALSE(root.prev_before(&el1));
 
     C el2;
     INFO << "&el2=" << &el2;
@@ -130,10 +123,7 @@ TESTSUITE(list_elem)
     ASSERT_FALSE(el2.is_empty());
     ASSERT_FALSE(el1.is_empty());
     ASSERT_FALSE(root.is_empty());
-
-    ASSERT_TRUE(root.prev_before(&el1) == &el2);
     ASSERT_FALSE(root.next_after(&el1));
-    ASSERT_FALSE(root.prev_before(&el2));
     ASSERT_TRUE(root.next_after(&el2) == &el1);
     ASSERT_TRUE(root.last() == &el1);
     ASSERT_TRUE(root.first() == &el2);
@@ -149,13 +139,10 @@ TESTSUITE(list_elem)
     ASSERT_FALSE(el1.is_empty());
     ASSERT_FALSE(root.is_empty());
 
-    ASSERT_TRUE(root.prev_before(&el2) == &el3);
     ASSERT_TRUE(root.next_after(&el2) == &el1);
-    ASSERT_FALSE(root.prev_before(&el3));
     ASSERT_TRUE(root.next_after(&el3) == &el2);
     ASSERT_TRUE(root.last() == &el1);
     ASSERT_TRUE(root.first() == &el3);
-    ASSERT_TRUE(root.prev_before(&el1) == &el2);
     ASSERT_FALSE(root.next_after(&el1));
   }
 
@@ -187,10 +174,6 @@ TESTSUITE(list_elem)
             ASSERT_TRUE(root.next_after(&el2) == &el3);
             ASSERT_FALSE(root.next_after(&el3));
             ASSERT_TRUE(root.last() == &el3);
-            ASSERT_TRUE(root.prev_before(&el3) == &el2);
-            ASSERT_TRUE(root.prev_before(&el2) == &el4);
-            ASSERT_TRUE(root.prev_before(&el4) == &el1);
-            ASSERT_FALSE(root.prev_before(&el1));
           }
           ASSERT_FALSE(root.is_empty());
           ASSERT_FALSE(el1.is_empty());
@@ -202,9 +185,6 @@ TESTSUITE(list_elem)
           ASSERT_TRUE(root.next_after(&el2) == &el3);
           ASSERT_FALSE(root.next_after(&el3));
           ASSERT_TRUE(root.last() == &el3);
-          ASSERT_TRUE(root.prev_before(&el3) == &el2);
-          ASSERT_TRUE(root.prev_before(&el2) == &el1);
-          ASSERT_FALSE(root.prev_before(&el1));
         }
         ASSERT_FALSE(root.is_empty());
         ASSERT_FALSE(el1.is_empty());
@@ -214,8 +194,6 @@ TESTSUITE(list_elem)
         ASSERT_TRUE(root.next_after(&el1) == &el2);
         ASSERT_FALSE(root.next_after(&el2));
         ASSERT_TRUE(root.last() == &el2);
-        ASSERT_TRUE(root.prev_before(&el2) == &el1);
-        ASSERT_FALSE(root.prev_before(&el1));
       }
       ASSERT_FALSE(root.is_empty());
       ASSERT_FALSE(el1.is_empty());
@@ -223,7 +201,6 @@ TESTSUITE(list_elem)
       ASSERT_TRUE(root.first() == &el1);
       ASSERT_FALSE(root.next_after(&el1));
       ASSERT_TRUE(root.last() == &el1);
-      ASSERT_FALSE(root.prev_before(&el1));
     }
     ASSERT_TRUE(root.is_empty());
 
@@ -256,12 +233,6 @@ TESTSUITE(list_elem)
     ASSERT_FALSE(list1.next_after(&l2e2));
 
     ASSERT_TRUE(list1.last() == &l2e2);
-    ASSERT_TRUE(list1.prev_before(&l2e2) == &l2e1);
-    ASSERT_TRUE(list1.prev_before(&l2e1) == &list2);
-    ASSERT_TRUE(list1.prev_before(&list2) == &l1e2);
-    ASSERT_TRUE(list1.prev_before(&l1e2) == &l1e1);
-    ASSERT_FALSE(list1.prev_before(&l1e1));
-
   }
 
   TEST(two_lists_can_be_joined_with_link_before)
@@ -282,12 +253,6 @@ TESTSUITE(list_elem)
     list2.link_before(l1e2);
 
     ASSERT_TRUE(list1.last() == &l1e1);
-    ASSERT_TRUE(list1.prev_before(&l1e1) == &l1e2);
-    ASSERT_TRUE(list1.prev_before(&l1e2) == &list2);
-    ASSERT_TRUE(list1.prev_before(&list2) == &l2e1);
-    ASSERT_TRUE(list1.prev_before(&l2e1) == &l2e2);
-    ASSERT_FALSE(list1.prev_before(&l2e2));
-
     ASSERT_TRUE(list1.first() == &l2e2);
     ASSERT_TRUE(list1.next_after(&l2e2) == &l2e1);
     ASSERT_TRUE(list1.next_after(&l2e1) == &list2);
