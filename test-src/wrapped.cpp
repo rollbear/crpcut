@@ -30,7 +30,7 @@
 
 namespace crpcut {
   namespace libs {
-    const char * const * libm()
+    static const char * const * libm()
     {
       static const char * const name[] = {
         "libm.so",
@@ -42,12 +42,13 @@ namespace crpcut {
   }
 }
 namespace testwrapped {
+  double asin(double); // silence missing prototype warning
   CRPCUT_WRAP_FUNC(libm, asin, double, (double d), (d))
 }
 
 extern "C"
 {
-  double asin(double d) noexcept
+  double asin(double d)
   {
     ASSERT_GE(d, -1.0);
     ASSERT_LT(d,  1.0);
