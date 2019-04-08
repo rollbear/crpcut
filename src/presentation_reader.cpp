@@ -33,6 +33,7 @@
 #include "registrator_list.hpp"
 #include "wrapped/posix_encapsulation.hpp"
 #include <crpcut.hpp>
+#include <algorithm>
 
 namespace {
 #define ESTR(s) { #s, sizeof(#s)-1 }
@@ -68,14 +69,12 @@ namespace crpcut {
   {
     poller_.del_fd(&fd_);
     comm::rfile_descriptor().swap(fd_);
-    for (crpcut_test_case_registrator *i = reg_.first();
-         i;
-         i = reg_.next_after(i))
+    for (auto& r : reg_)
       {
         std::ostringstream os;
-        os << *i;
+        os << r;
         std::string name(os.str());
-        tag::importance importance = i->get_importance();
+        tag::importance importance = r.get_importance();
         fmt_.blocked_test(importance, name);
         summary_fmt_.blocked_test(importance, name);
       }
@@ -89,16 +88,9 @@ namespace crpcut {
   {
     // a linear search isn't that great, but the
     // amount of data is small.
-    for (test_case_result *i = messages_.first();
-         i;
-         i = messages_.next_after(i))
-      {
-        if (i->id == id)
-          {
-            return i;
-          }
-      }
-    return nullptr;
+    auto i = std::find_if(messages_.begin(), messages_.end(),
+      [id](auto& msg){ return msg.id == id;});
+    return i == messages_.end() ? nullptr : &*i;
   }
 
   void
@@ -145,13 +137,10 @@ namespace crpcut {
         std::ostringstream name;
         name << *s->test;
         printer print(fmt_, name.str(), pass, info.critical, info.duration_us);
-
-        for (event *i = s->history.first();
-             i;
-             i = s->history.next_after(i))
-          {
-            fmt_.print(tag_info[i->tag_], i->msg_, i->location_);
-          }
+        for (auto& e : s->history)
+        {
+          fmt_.print(tag_info[e.tag_], e.msg_, e.location_);
+        }
         if (s->termination || s->nonempty_dir || s->explicit_fail)
           {
             if (s->nonempty_dir)

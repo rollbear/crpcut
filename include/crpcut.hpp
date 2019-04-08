@@ -393,13 +393,22 @@ namespace crpcut {
     };
 
     template <typename T>
+    struct list_iterator;
+
+    template <typename T>
     class list_elem
     {
+      friend struct list_iterator<T>;
+      friend struct list_iterator<const T>;
     public:
       list_elem();
       list_elem(const list_elem&) = delete;
       list_elem& operator=(const list_elem&) = delete;
       virtual ~list_elem();
+      list_iterator<T> begin();
+      list_iterator<const T> begin() const;
+      list_iterator<T> end();
+      list_iterator<const T> end() const;
       void link_after(list_elem& r);
       void link_before(list_elem &r);
       T *first() { return is_empty() ? nullptr : static_cast<T*>(next_); }
@@ -418,6 +427,50 @@ namespace crpcut {
       list_elem *next_;
       list_elem *prev_;
     };
+
+    template <typename T>
+    struct list_iterator
+    {
+      list_elem<std::remove_const_t<T>>* i;
+      bool operator==(const list_iterator& e) const
+      {
+        return i == e.i;
+      }
+      bool operator!=(const list_iterator& e) const
+      {
+        return !(*this == e);
+      }
+      T& operator*() { return *static_cast<T*>(i);}
+      const T& operator*() const { return *static_cast<const T*>(i);}
+      T* operator->() { return static_cast<T*>(i);}
+      const T* operator->() const { return static_cast<const T*>(i);}
+
+      list_iterator& operator++() { i = i->next_; return *this;}
+      list_iterator operator++(int) { auto copy = *this; ++*this; return copy;}
+    };
+
+    template <typename T>
+    list_iterator<T> list_elem<T>::begin()
+    {
+      return {next_};
+    }
+    template <typename T>
+    list_iterator<const T> list_elem<T>::begin() const
+    {
+      return {next_};
+    }
+
+    template <typename T>
+    list_iterator<T> list_elem<T>::end()
+    {
+      return {this};
+    }
+
+    template <typename T>
+    list_iterator<const T> list_elem<T>::end() const
+    {
+      return {next_->prev_};
+    }
 
     template <typename T>
     inline list_elem<T>::list_elem()
@@ -3983,6 +4036,11 @@ class crpcut_testsuite_dep
 namespace std {
   template <typename T>
   struct iterator_traits<crpcut::tag_list_root::iterator_t<T>>
+  {
+    using iterator_category = std::forward_iterator_tag;
+  };
+  template <typename T>
+  struct iterator_traits<crpcut::datatypes::list_iterator<T>>
   {
     using iterator_category = std::forward_iterator_tag;
   };
