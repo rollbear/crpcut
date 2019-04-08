@@ -50,12 +50,10 @@ namespace crpcut {
     crpcut_exception_translator
     ::do_try_all()
     {
-      for (crpcut_exception_translator *p = first();
-           p;
-           p = next_after(p))
+      for (auto& p : *this)
         {
           try {
-            return p->crpcut_translate();
+            return p.crpcut_translate();
           }
           catch (...)
             {

@@ -96,11 +96,11 @@ namespace crpcut {
 
     // Ensure that tests not selected for running, do not prevent
     // selected tests from running
-    for (reg *i = first(); i; i = next_after(i))
+    for (auto& r : *this)
       {
-         if (i->get_importance() != tag::disabled)
+         if (r.get_importance() != tag::disabled)
            {
-             i->crpcut_register_success(true);
+             r.crpcut_register_success(true);
            }
       }
 

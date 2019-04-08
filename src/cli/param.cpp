@@ -133,9 +133,9 @@ namespace crpcut {
       assert(cli_arg);
       auto match_arg = [this](auto* to_match) {
         constexpr const char *const *end = nullptr;
-        for (auto* p = first(); p; p = next_after(p))
+        for (auto& p : *this)
         {
-          if (auto arg = p->match(to_match))
+          if (auto arg = p.match(to_match))
           {
             return arg;
           }
