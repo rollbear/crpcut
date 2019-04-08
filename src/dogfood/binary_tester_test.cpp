@@ -30,7 +30,7 @@
   crpcut::tester<crpcut::comm::fail,                            \
                  CRPCUT_IS_ZERO_LIT(lh), decltype(lh),   \
                  CRPCUT_IS_ZERO_LIT(rh), decltype(rh)>   \
-  ("location", #name, r, nullptr).name(lh, #lh, rh, #rh);
+  ("location", #name, r, nullptr).name(lh, #lh, rh, #rh)
 namespace {
   struct fix
   {
