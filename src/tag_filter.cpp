@@ -25,6 +25,7 @@
  */
 
 #include "tag_filter.hpp"
+#include "algorithm/split_range.hpp"
 #include <algorithm>
 
 namespace {
@@ -32,40 +33,27 @@ namespace {
   void
   assert_name_list(const char *begin, const char*end, crpcut::tag_list_root &l)
   {
-    if (begin == end) return;
-    const char *p = begin;
-    while (p)
+    for (auto [b,e] : crpcut::split_range(begin,end,','))
+    {
+      std::string_view needle{b, std::size_t(e-b)};
+      auto matches_name = [needle](auto& tag){
+        return needle == tag.get_name();
+      };
+      if (!std::any_of(l.begin(), l.end(), matches_name))
       {
-        if (*p == ',' || p == end)
-          {
-            std::string_view needle{begin, std::size_t(p - begin)};
-            auto matches_name = [needle](auto& tag){
-              return needle == tag.get_name();
-            };
-            if (!std::any_of(l.begin(), l.end(), matches_name))
-              {
-                std::string msg(begin,p);
-                msg+= " is not a tag";
-                throw crpcut::tag_filter::spec_error(msg);
-              }
-            begin = p + 1;
-          }
-        if (p == end) break;
-        ++p;
+        auto msg = std::string(needle) + " is not a tag";
+        throw crpcut::tag_filter::spec_error(msg);
       }
+    }
   }
 
   bool match_name(std::string_view name,
                   const char *begin, const char *end)
   {
-    const char *i = begin;
-    while (i != end)
-      {
-        auto [ni,ii] = std::mismatch(name.begin(), name.end(), i, end);
-        if (ni == name.end() && (ii == end || *ii == ',')) return true;
-        i = std::find(ii,end, ',');
-        if (i != end) i = std::next(i);
-      }
+    for (auto [b,e] : crpcut::split_range(begin,end,','))
+    {
+      if (std::string_view(b, std::size_t(e - b)) == name) return true;
+    }
     return false;
   }
 }

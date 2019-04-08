@@ -54,7 +54,7 @@ set(LIBHEAP_SRCS
 )
 set(HEAP_FAKE_SRCS
      src/heap_fake.cpp
-)
+        src/algorithm/split_range.hpp)
 set(LIB_SRCS
      src/check_name.cpp
      src/cli/activation_param.cpp
