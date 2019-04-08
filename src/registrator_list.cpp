@@ -126,10 +126,9 @@ namespace crpcut {
            << "============\n"
            << std::setfill(' ');
       }
-    for (const crpcut_test_case_registrator *i = first();
-         i; i = next_after(i))
+    for (const auto& t : *this)
       {
-        tag::importance importance = i->get_importance();
+        tag::importance importance = t.get_importance();
 
         if (importance == tag::ignored) continue;
 
@@ -137,10 +136,10 @@ namespace crpcut {
         if (tag_margin)
           {
             os << std::setw(wmargin)
-               << i->crpcut_tag().get_name().str
+               << t.crpcut_tag().get_name().str
                << " : ";
           }
-        os << *i << '\n';
+        os << t << '\n';
       }
   }
 
