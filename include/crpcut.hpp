@@ -413,10 +413,8 @@ namespace crpcut {
       void link_before(list_elem &r);
       T *first() { return is_empty() ? nullptr : static_cast<T*>(next_); }
       T *last() { return is_empty() ? nullptr : static_cast<T*>(prev_); }
-      const T *first() const { return is_empty() ? nullptr : static_cast<const T*>(next_); }
       const T *last() const { return is_empty() ? nullptr : static_cast<const T*>(prev_); }
       T* next_after(T* p) const { return p == last() ? nullptr : static_cast<T*>(p->next_); }
-      const T* next_after(const T* p) const { return p == last() ? nullptr : static_cast<T*>(p->next_); }
       bool is_empty() const;
       //      bool is_this(const T *p) const;
     protected:
@@ -625,27 +623,14 @@ namespace crpcut {
     tag_list_root() { link_after(list_);}
     virtual size_t longest_tag_name() const { return longest_tag_name_; }
     void store_name_length(size_t n) { longest_tag_name_ = n; }
-    template <typename T>
-    class iterator_t
-    {
-    public:
-      constexpr iterator_t(T *p, const tag_list_type& list) : p_(p), list_(list) {}
-      iterator_t& operator++() { p_ = list_.next_after(p_); return *this; }
-      iterator_t operator++(int) { iterator_t rv(*this); ++(*this); return rv;}
-      T *operator->() { return p_; }
-      T& operator*() { return *p_; }
-      bool operator==(const iterator_t &i) const { return p_ == i.p_; }
-      bool operator!=(const iterator_t &i) const { return !(operator==(i)); }
-    private:
-      T                   *p_;
-      const tag_list_type &list_;
-    };
-    using iterator = iterator_t<tag>;
-    using const_iterator = iterator_t<const tag>;
-    const_iterator begin() const { return const_iterator(list_.first(), list_); }
-    const_iterator end() const { return const_iterator(nullptr, list_); }
-    iterator begin() { return iterator(list_.first(), list_); }
-    iterator end() { return iterator(nullptr, list_); }
+
+    using iterator = datatypes::list_iterator<tag>;
+    using const_iterator = datatypes::list_iterator<const tag>;
+
+    const_iterator begin() const { return {list_.begin()}; }
+    const_iterator end() const { return {list_.end() };}
+    iterator begin() { return {list_.begin()}; }
+    iterator end() { return {list_.end()}; }
     void print_to(std::ostream &) const;
     void configure_importance(const char *specification);
   private:
@@ -821,7 +806,7 @@ namespace crpcut {
     static crpcut_test_monitor *current_test();
   private:
     friend class test_runner;
-    static void make_current(crpcut_test_monitor *p);
+    static void make_current(crpcut_test_monitor &p);
   };
 
 
@@ -4032,11 +4017,6 @@ class crpcut_testsuite_dep
 #  define DEFINE_TEST_TAG(...) class crpcut_DEFINE_TEST_TAG_is_deprecated
 
 namespace std {
-  template <typename T>
-  struct iterator_traits<crpcut::tag_list_root::iterator_t<T>>
-  {
-    using iterator_category = std::forward_iterator_tag;
-  };
   template <typename T>
   struct iterator_traits<crpcut::datatypes::list_iterator<T>>
   {

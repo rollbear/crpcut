@@ -39,8 +39,8 @@ namespace crpcut {
 
   void
   crpcut_test_monitor
-  ::make_current(crpcut_test_monitor *p)
+  ::make_current(crpcut_test_monitor &p)
   {
-    current = p;
+    current = &p;
   }
 }

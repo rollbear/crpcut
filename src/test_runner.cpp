@@ -173,7 +173,7 @@ namespace crpcut {
           using wfd = comm::wfile_descriptor;
           wfd report_fd(c2p.for_writing(pipe_pair::release_ownership));
           comm::report.set_writer(&report_fd);
-          crpcut_test_monitor::make_current(i);
+          crpcut_test_monitor::make_current(*i);
           wrapped::dup2(stdout.for_writing(), 1);
           wrapped::dup2(stderr.for_writing(), 2);
           stdout.close();
@@ -464,9 +464,9 @@ namespace crpcut {
                 err_os << "Single shot requires exactly one test selected\n";
                 throw cli_exception(-1);
               }
-            crpcut_test_case_registrator *i = reg_.first();
+            auto i = reg_.begin();
             i->set_test_environment(env_);
-            crpcut_test_monitor::make_current(i);
+            crpcut_test_monitor::make_current(*i);
             std::cout << *i << " ";
             i->run_test_case();
             std::cout << "OK\n";
