@@ -356,11 +356,7 @@ namespace crpcut {
       {
         if (len != s.len) return false;
         if (str == s.str) return true;
-        for (std::size_t i = 0; i < len; ++i)
-          {
-            if (str[i] != s.str[i]) return false;
-          }
-        return true;
+        return std::equal(str, str + len, s.str);
       }
       bool operator!=(const fixed_string &s) const
       {
