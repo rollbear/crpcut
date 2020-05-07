@@ -29,6 +29,7 @@ include(CheckFunctionExists)
 include(CheckLibraryExists)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CRPCUT_LIB_MAJOR_VERSION "1")
 set(CRPCUT_LIB_MINOR_VERSION "9")
@@ -303,6 +304,9 @@ endif (HAS_OBJECT_LIBS)
 find_package(Threads REQUIRED)
 
 add_library(crpcut_basic ${COMMON} ${HEAP_FAKE_SRCS})
+target_include_directories(crpcut_basic PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
 set_target_properties(crpcut_basic PROPERTIES
   VERSION ${CRPCUT_LIB_VERSION}
   SOVERSION ${CRPCUT_LIB_SOVERSION})
